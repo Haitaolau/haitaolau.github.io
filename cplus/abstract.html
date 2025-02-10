@@ -1,0 +1,227 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Abstract Class &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Copy constructor" href="copyconstructor.html" />
+    <link rel="prev" title="Friend class and function" href="friend.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="abstract-class">
+<h1>Abstract Class<a class="headerlink" href="#abstract-class" title="Permalink to this heading">¶</a></h1>
+<section id="defination">
+<h2>Defination<a class="headerlink" href="#defination" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">abstractClass</span> <span class="p">{</span>
+<span class="n">public</span><span class="p">:</span>
+    <span class="n">virtual</span> <span class="n">void</span> <span class="n">func</span><span class="p">()</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>如果父类中有了纯虚函数，子类继承父类的时候，必须实现纯虚函数</p></li>
+<li><p>如果父类中有了纯虚函数，这个父类就无法实例话对象了，即抽象类无法实例化对象。</p></li>
+</ul>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+
+<span class="n">using</span><span class="w"> </span><span class="n">namespace</span><span class="w"> </span><span class="n">std</span><span class="p">;</span><span class="w"></span>
+
+<span class="n">class</span><span class="w"> </span><span class="n">Test</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">show</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="nf">getX</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">x</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">Test</span><span class="w"> </span><span class="n">t</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Output</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">3.cpp: In function ‘int main()’:</span>
+<span class="go">3.cpp:15:10: error: cannot declare variable ‘t’ to be of abstract type ‘Test’</span>
+<span class="go">   15 |     Test t;</span>
+<span class="go">      |          ^</span>
+<span class="go">3.cpp:5:7: note:   because the following virtual functions are pure within ‘Test’:</span>
+<span class="go">    5 | class Test</span>
+<span class="go">      |       ^~~~</span>
+<span class="go">3.cpp:9:18: note:       ‘virtual void Test::show()’</span>
+<span class="go">    9 |     virtual void show() = 0;</span>
+<span class="go">      |                  ^~~~</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>If we do not override the pure virtual function in derived class, then derived class also becomes abstract class</p></li>
+</ul>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+<span class="n">using</span><span class="w"> </span><span class="n">namespace</span><span class="w"> </span><span class="n">std</span><span class="p">;</span><span class="w"></span>
+<span class="n">class</span><span class="w"> </span><span class="n">Base</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="n">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">show</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+
+<span class="n">class</span><span class="w"> </span><span class="n">Derived</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">public</span><span class="w"> </span><span class="n">Base</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">};</span><span class="w"></span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="n">Derived</span><span class="w"> </span><span class="n">d</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>output</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Compiler Error: cannot declare variable &#39;d&#39; to be of abstract type</span>
+<span class="go">&#39;Derived&#39;  because the following virtual functions are pure within</span>
+<span class="go">&#39;Derived&#39;: virtual void Base::show()</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>如果类中有了纯虚函数，则这个类通常为抽象类</p></li>
+</ul>
+<p>在设计时，常常希望基类仅仅作为其派生类的一个接口。这就是</p>
+<p>说，仅想对基类进行向上类型转换，使用它的接口，而不希望用户实</p>
+<p>际地创建一个基类的对象。这个时候就会使用抽象类</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Cplus</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="libstdc%2B%2B_2_9_1/index.html">Libstd c++ 2.9.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Operator_overloading/index.html">C++ Operator overloading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="access_modifiers.html">Access Modifiers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="references.html">References (or Aliases)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="const.html">const</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functemplate.html">Function template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="passarguments.html">Pass arguments to function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="friend.html">Friend class and function</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Abstract Class</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#defination">Defination</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="copyconstructor.html">Copy constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rvalue.html">Cplus Rvalue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lvalue_and_rvalue.html">lvalue &amp;&amp; rvalue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="placement_new.html">Placement new operator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="template/index.html">Template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cast/index.html">C++ Cast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="decltype.html">Decltype</a></li>
+<li class="toctree-l2"><a class="reference internal" href="explicit_implicit.html">Explicit and Implicit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="constructor.html">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="typedef_typename.html">typedef typename</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Cplus</a><ul>
+      <li>Previous: <a href="friend.html" title="previous chapter">Friend class and function</a></li>
+      <li>Next: <a href="copyconstructor.html" title="next chapter">Copy constructor</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/cplus/abstract.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

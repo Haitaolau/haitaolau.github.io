@@ -1,0 +1,26 @@
+================
+Hwcomposer
+================
+
+
+1. What's HWC
+----------------
+
+
+HWC（hwcomposer）硬件组合抽象层，是Android中进行窗口（Layer）合成和显示的HAL层模块，其实现是特定于设备的，而且通常由显示设备制造商 (OEM)完成，为SurfaceFlinger服务提供硬件支持。
+
+SurfaceFlinger可以使用OpenGL ES合成Layer，这需要占用并消耗GPU资源。大多数GPU都没有针对图层合成进行优化，因此当SurfaceFlinger通过GPU合成图层时，应用程序无法使用GPU进行自己的渲染。而HWC通过硬件设备进行图层合成，可以减轻GPU的合成压力
+
+SurfaceFlinger calls HWComposer in two stages
+
+1. prepare()
+
+   Passes a list of layers
+
+   For each layer, HWComposer returns
+
+   * HWC_FRAMEBUFFER: SurfaceFlinger should write this layer (using OpenGL)
+
+   * HWC_OVERLAY: will be composed by HWComposer
+
+

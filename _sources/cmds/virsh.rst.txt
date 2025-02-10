@@ -1,0 +1,28 @@
+==========
+Virsh
+==========
+
+
+
+virsh autostart
+----------------------
+
+
+
+
+If you get the response:
+
+
+.. code-block:: console
+
+   virsh autostart domainname
+       "cannot set autostart for transient domain"
+
+then you should try to use the following commands
+
+.. code-block:: console 
+
+   virsh shutdown domainname
+   virsh define xmlfile
+   virsh start domainname
+   virsh autostart domainname

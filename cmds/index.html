@@ -1,0 +1,248 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Commands &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Git" href="git.html" />
+    <link rel="prev" title="Corporation" href="../corp.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="commands">
+<h1>Commands<a class="headerlink" href="#commands" title="Permalink to this heading">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="git.html">Git</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="git.html#git-log">Git Log</a></li>
+<li class="toctree-l2"><a class="reference internal" href="git.html#push-an-existing-repository">Push an existing repository</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">Docker</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="docker.html#setting-up-docker-hub-mirror">Setting up Docker Hub mirror</a></li>
+<li class="toctree-l2"><a class="reference internal" href="docker.html#docker-file">Docker file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="docker.html#create-docker-from-ala-lpdfs01">Create docker from ala-lpdfs01</a></li>
+<li class="toctree-l2"><a class="reference internal" href="docker.html#create-docker-ubuntu20-04">Create docker ubuntu20:04</a></li>
+<li class="toctree-l2"><a class="reference internal" href="docker.html#start-docker-ubuntu20-04">Start docker ubuntu20:04</a></li>
+<li class="toctree-l2"><a class="reference internal" href="docker.html#connect-docker-with-ssh">Connect docker with ssh</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ubuntu.html">Ubuntu</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ubuntu.html#how-to-find-the-package-that-provides-a-file">How to find the package that provides a file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ubuntu.html#how-to-check-timezone-in-linux">How to Check Timezone in Linux</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ubuntu.html#search-who-provide-the-boost">Search who provide the boost</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ubuntu.html#systemd-list-all-failed-services">Systemd list all failed services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ubuntu.html#switching-boot-target-to-text">Switching boot target to text</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ubuntu.html#switching-boot-target-to-graphical">Switching boot target to graphical</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ubuntu.html#update-and-upgrade-the-ubuntu">update and upgrade the ubuntu</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ubuntu.html#install-the-development-tools">install the development tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ubuntu.html#how-to-disable-sleep-on-ubuntu-server">How To: Disable Sleep on Ubuntu Server</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ubuntu.html#confirm-sleep-status-with-systemd">Confirm Sleep Status with systemd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ubuntu.html#disable-sleep-in-ubuntu-with-systemd">Disable Sleep in Ubuntu with systemd</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="kernel.html">Kernel</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="kernel.html#hugepage">HugePage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="kernel.html#allocate-a-number-of-1g-huge-pages">Allocate a number of 1G Huge pages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kernel.html#allocate-a-number-of-2m-huge-pages">Allocate a number of 2M Huge pages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kernel.html#mount-hugepages">Mount hugepages</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="kernel.html#test-kernel-with-ltp">test kernel with ltp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kernel.html#dump-kernel-config">dump kernel config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kernel.html#show-filesystem-supported-by-kernel">show filesystem supported by kernel</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="dhcp.html">Dhcp</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dhcp.html#create-the-bridge">1. create the bridge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dhcp.html#modify-the-dhcpd-configure-file">2. Modify the dhcpd configure file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dhcp.html#set-the-ip-address-for-br0">3. set the ip address for br0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dhcp.html#start-the-dhcp-server-for-br0">4. Start the DHCP server for br0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dhcp.html#generate-the-mac-address-for-qemu-client">5. Generate the Mac address for qemu client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dhcp.html#create-the-qemu-ifup-sh-for-qemue-client-to-initiate-the-interface">6. Create the qemu-ifup.sh for qemue client to initiate the interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dhcp.html#create-and-start-a-qemu-client">7. Create and start a qemu client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dhcp.html#access-the-vm-client-with-screen">8. access the VM client with screen</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dhcp.html#exit-the-current-pty-and-enter-other-s-pty">9. exit the current pty and enter other’s pty</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dhcp.html#resolv-conf">10. resolv.conf</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ovs.html">OpenVswitch</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ovs.html#show-port-status">Show port status</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ovs.html#openvswith-example">OpenVswith Example</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="lxc.html">Lxc container</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="lxc.html#the-configure-file">The configure file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lxc.html#start-lxc">Start Lxc</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ip.html">Ip command</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ip.html#set-vlan-interface">Set vlan interface</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="find.html">Find</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="find.html#find-executable-programes">find executable programes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="find.html#get-the-iommu-group">get the iommu_group</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tcpdump.html">Tcpdump</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tcpdump.html#how-to-capture-dhcp-network-traffic">How to capture DHCP network traffic ?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tcpdump.html#how-to-capture-ssh-traffic-with-tcpdump">How to capture SSH Traffic with Tcpdump?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sed_awk.html">Sed and awk</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sed_awk.html#print-specific-lines-from-a-file">print specific lines from a file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sed_awk.html#remove-empty-lines">Remove empty lines</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="gcc.html">gcc/g++</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="gcc.html#fverbose-asm-c">1. -fverbose-asm 自行注释对应的C代码</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="virsh.html">Virsh</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="virsh.html#virsh-autostart">virsh autostart</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="numa.html">Numactl</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="numa.html#show-inventory-of-available-nodes-on-the-system">1.Show inventory of available nodes on the system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="numa.html#show-numa-policy-settings-of-the-current-process">2.Show NUMA policy settings of the current process</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ps1.html">Linux Bash PS1 variable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tmux.html">Tmux</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tmux.html#configuration">Configuration</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../corp.html">Corporation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Commands</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="git.html">Git</a></li>
+<li class="toctree-l2"><a class="reference internal" href="docker.html">Docker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ubuntu.html">Ubuntu</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kernel.html">Kernel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dhcp.html">Dhcp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ovs.html">OpenVswitch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lxc.html">Lxc container</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ip.html">Ip command</a></li>
+<li class="toctree-l2"><a class="reference internal" href="find.html">Find</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tcpdump.html">Tcpdump</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sed_awk.html">Sed and awk</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gcc.html">gcc/g++</a></li>
+<li class="toctree-l2"><a class="reference internal" href="virsh.html">Virsh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="numa.html">Numactl</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ps1.html">Linux Bash PS1 variable</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tmux.html">Tmux</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cplus/index.html">Cplus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="../corp.html" title="previous chapter">Corporation</a></li>
+      <li>Next: <a href="git.html" title="next chapter">Git</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/cmds/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

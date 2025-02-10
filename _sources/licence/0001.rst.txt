@@ -1,0 +1,36 @@
+=================
+ Opensource & IP
+=================
+
+
+.. contents:: Table of contents
+
+.. image:: ../_static/image/1400px-Floss-license-slide-image.svg.png
+	      
+Types of Licenses
+=================
+
+
+**1. Proprietary licenses**
+
+
+*  Purpose: promote commercial win-win
+*  Typically, just between two parties
+
+**2. Open-Source Licenses:**
+
+
+   **Attribution: BSD, MIT, Apache**
+
+
+     * Purpose: Share code in exchange for attribution
+     * Available to everyone
+
+
+   **Copyleft: GPL, LGPL, AGPL, MPL, EPL**
+   
+     * Purpose: Share code in exchange for sharing future modifications
+
+     * Available to everyone
+
+  

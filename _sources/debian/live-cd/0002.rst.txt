@@ -1,0 +1,242 @@
+==========
+ lb_build
+==========
+
+
+.. contents:: The table of Contents
+
+
+
+
+Bootstrap a Debian system
+=========================
+
+**lb bootstrap**
+
+    executes the first build stage, creating (bootstraping) a basic Debian root filesystem
+
+
+Bootstrapping system
+--------------------
+
+
+
+
+bootstrap_cache
+~~~~~~~~~~~~~~~
+
+
+.. code-block:: bash
+
+   lb bootstrap_cache restore "${@}"
+   		
+		
+bootstrap debootstrap
+~~~~~~~~~~~~~~~~~~~~~
+
+Using the live-build's command or bootstrap_debootstrap script directly.
+
+.. code-block:: bash
+
+   lb bootstrap_debootstrap "${@}"
+
+
+.. code-block:: bash
+
+   /usr/lib/live/build/bootstrap_debootstrap  --force		
+   
+   
+**Running debootstrap (download-only)**
+   
+.. code-block:: bash
+
+   debootstrap --include=apt-transport-https,ca-certificates,openssl \
+               --arch=amd64 --force-check-gpg --download-only \
+	       bookworm chroot http://deb.debian.org/debian/
+
+
+or build with elxr mirror
+
+.. code-block:: bash
+
+
+   debootstrap --include=apt-transport-https,ca-certificates,openssl \
+               --arch=amd64 --force-check-gpg --download-only \
+	       aria chroot \
+	       https://mirror.elxr.dev/elxr
+
+
+**Removing old cache**
+
+.. code-block:: bash
+
+   rm -f cache/packages.bootstrap/*.deb
+
+**Saving new cache**
+
+.. code-block:: bash
+
+   mkdir -p cache/packages.bootstrap
+
+   cp chroot/var/cache/apt/archives/*.deb cache/packages.bootstrap
+
+**Running debootstrap**   
+   
+
+.. code-block:: bash 
+   
+   debootstrap --include=apt-transport-https,ca-certificates,openssl \
+               --arch=amd64 --force-check-gpg \
+	       bookworm chroot http://deb.debian.org/debian/
+
+**The directory hierarchy:**
+
+::
+
+   root@a59889bb1f5a:/usr/src/tmp# tree -L 2
+   .
+   |-- cache
+   |   `-- packages.bootstrap
+   `-- chroot
+       |-- bin -> usr/bin
+       |-- boot
+       |-- dev
+       |-- etc
+       |-- home
+       |-- lib -> usr/lib
+       |-- lib64 -> usr/lib64
+       |-- media
+       |-- mnt
+       |-- opt
+       |-- proc
+       |-- root
+       |-- run
+       |-- sbin -> usr/sbin
+       |-- srv
+       |-- sys
+       |-- tmp
+       |-- usr
+       `-- var
+   
+   23 directories, 0 files
+   
+
+
+   
+bootstrap_cache
+~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+   lb bootstrap_cache save "${@}"
+
+It just simply copy conents from chroot to cache/bootstrap
+
+.. code-block:: bash
+
+   Echo_message "Saving bootstrap stage to cache..."
+  
+   # Checking stage file
+   Check_stagefile "${STAGE_FILE}"
+
+   # Acquire lock file
+   Acquire_lockfile
+
+   rm -rf cache/bootstrap
+
+   mkdir -p cache
+
+   cp -a chroot cache/bootstrap
+
+   # Creating stage file
+   Create_stagefile "${STAGE_FILE}"
+		
+
+   
+   
+
+Configuring chroot
+------------------
+
+**Step1: chroot_prep**
+
+.. code-block:: bash
+
+   lb chroot_prep install all-except-archives
+
+**Step1.1: chroot_devpts**
+
+.. code-block:: bash
+
+    lb chroot_devpts install
+
+Please see the scripts/build/chroot_devpts
+
+.. code-block:: bash
+
+     case "${_ACTION}" in
+         install)
+             Echo_message "Begin mounting /dev/pts..."
+                                                                                                                                                                                         # Checking stage file
+             Check_stagefile
+    
+             # Acquire lock file
+             Acquire_lockfile
+    
+             # Creating mountpoint
+             mkdir -p chroot/dev/pts
+    
+             # Mounting /dev/pts
+             mount -t devpts -o gid=5,mode=620,x-gvfs-hide devpts-live chroot/dev/pts || true
+    
+             # Creating stage file
+             Create_stagefile
+             ;;
+    		
+     	 	
+**Step1.2 chroot_proc**
+
+.. code-block:: bash
+
+   lb chroot_proc install
+
+
+scripts/build/chroot_proc
+
+.. code-block:: bash
+
+   install)
+       Echo_message "Begin mounting /proc..."
+
+       # Checking stage file
+       Check_stagefile
+
+       # Acquire lock file
+       Acquire_lockfile
+
+       # Creating mountpoint
+       mkdir -p chroot/proc
+
+       # Mounting /proc
+       mount -t proc -o x-gvfs-hide proc-live chroot/proc
+
+       # Creating stage file
+       Create_stagefile
+       ;;		
+
+
+bootstrap_archives
+~~~~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+   lb chroot_prep install all-except-archives "${@}"
+
+   lb bootstrap_archives "${@}"
+
+Deconfiguring chroot
+--------------------
+
+.. code-block:: bash
+
+   lb chroot_prep remove all-except-archives "${@}"		

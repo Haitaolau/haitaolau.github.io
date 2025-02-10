@@ -1,0 +1,77 @@
+========
+erase
+========
+
+
+iterator erase(iterator)
+=================================
+
+.. code-block:: cpp
+   
+  //清楚pos所指向的元素
+  iterator erase(iterator __pos) {
+    iterator __next = __pos;
+    ++__next;
+    size_type __index = __pos - _M_start; //计算索引
+    if (__index < (size() >> 1)) { 
+       //判断清除点在哪里，如果清除点之前的元素比较少，就是在前半段区间中
+      copy_backward(_M_start, __pos, __next);  //移动清除点之前元素
+      //移动完成后，第一个元素是冗余的（跟第二个元素一样），所以清除掉
+      pop_front();
+    }
+    else {
+    // 清除点之后的元素比较少，也就是在后半段区间中
+      copy(__next, _M_finish, __pos); //移动清除点之后元素
+      //移动完成后，最后一个元素是冗余的（跟倒数第二个元素是一样的)所以需要清除掉
+      pop_back();
+    }
+    return _M_start + __index;
+  }
+  
+.. image:: ../../../_static/image/deque_erase.jpg
+  
+iterator erase(iterator, iterator) 
+==================================================
+
+清除区间[_first,_last)的元素
+
+.. code-block:: cpp
+
+	template <class _Tp, class _Alloc>
+	typename deque<_Tp,_Alloc>::iterator 
+	deque<_Tp,_Alloc>::erase(iterator __first, iterator __last)
+	{
+	  if (__first == _M_start && __last == _M_finish) {
+	    clear(); //如果清除的空间是整个deque，直接调用clear即可
+	    return _M_finish;
+	  }
+	  else {
+	    //获取清除区间的长度
+	    difference_type __n = __last - __first;
+	    //清除区间前面的元素个数即[_M_start, __first)
+	    difference_type __elems_before = __first - _M_start;
+	    
+	    //如果前方的元素较少
+	    if (static_cast<size_type>(__elems_before) < (size() - __n) / 2) {
+	      //向后移动前方的元素，覆盖清除区间
+	      copy_backward(_M_start, __first, __last);
+	      iterator __new_start = _M_start + __n;
+	      //析构掉【_M_start， _M_start+n)区间的元素，这些都是冗余的元素
+	      destroy(_M_start, __new_start);
+	      //释放掉前面冗余的元素的node节点
+	      _M_destroy_nodes(__new_start._M_node, _M_start._M_node);
+	      _M_start = __new_start;
+	    }
+	    else {//如果清除区后方的元素较少
+	      //向前移动元素[_last, M_finish)覆盖清除空间的元素
+	      copy(__last, _M_finish, __first);
+	      iterator __new_finish = _M_finish - __n;
+	      //析构掉[_M_finish - __n, _M_finish)直接的元素
+	      destroy(__new_finish, _M_finish);
+	      //释放掉这些冗余的缓冲区
+	      _M_destroy_nodes(__new_finish._M_node + 1, _M_finish._M_node + 1);
+	      _M_finish = __new_finish;
+	    }
+	    return _M_start + __elems_before;
+	  }
+	}

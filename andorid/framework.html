@@ -1,0 +1,151 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Android Framework &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Android Graphics" href="graphics/index.html" />
+    <link rel="prev" title="Andorid" href="index.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="android-framework">
+<h1>Android Framework<a class="headerlink" href="#android-framework" title="Permalink to this heading">¶</a></h1>
+<section id="android">
+<h2>Android架构组件<a class="headerlink" href="#android" title="Permalink to this heading">¶</a></h2>
+<img alt="../_images/android-framework.png" src="../_images/android-framework.png" />
+<ul class="simple">
+<li><p>应用框架：应用框架最常被应用开发者使用。作为硬件开发者，需了解开发者API，因为很多此类API都可以直接映射到底层HAL接口，并可提供与实现驱动程序相关的实用信息</p></li>
+<li><p>Binder IPC：Binder 进程间通信 (IPC) 机制允许应用框架跨越进程边界并调用Android系统服务代码，这使得高级框架API能与Android系统服务进行交互。在应用框架级别，开发者无法看到此类通信的过程，但一切似乎都在“按部就班地运行”</p></li>
+<li><p>系统服务。：统服务是专注于特定功能的模块化组件，例如窗口管理器、搜索服务或通知管理器。应用框架API所提供的功能可与系统服务通信，以访问底层硬件。Android 包含两组服务：“系统”（诸如窗口管理器和通知管理器之类的服务）和“媒体”（与播放和录制媒体相关的服务）。</p></li>
+<li><p>硬件抽象层 (HAL)：HAL 可定义一个标准接口以供硬件供应商实现，这可让Android忽略较低级别的驱动程序实现。借助HAL，可以顺利实现相关功能，而不会影响或更改更高级别的系统。HAL实现会被封装成模块，并会由Android系统适时地加载</p></li>
+<li><p>Linux 内核：开发设备驱动程序与开发典型的Linux设备驱动程序类似。Android使用的Linux内核版本包含一些特殊的补充功能，例如低内存终止守护进程（一个内存管理系统，可更主动地保留内存）、唤醒锁定（一种 PowerManager 系统服务）、Binder IPC 驱动程序，以及对移动嵌入式平台来说非常重要的其他功能。这些补充功能主要用于增强系统功能，不会影响驱动程序开发</p></li>
+</ul>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cplus/index.html">Cplus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../els/index.html">ESL</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Andorid</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Android Framework</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#android">Android架构组件</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="graphics/index.html">Android Graphics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linux_graphics.html">Linux Graphics stack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bootup.html">Boot Up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="SurfaceFlinger.html">SurfaceFlinger</a></li>
+<li class="toctree-l2"><a class="reference internal" href="drm.html">Direct Rendering Manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gralloc.html">Gralloc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wayland.html">Wayland</a></li>
+<li class="toctree-l2"><a class="reference internal" href="waydroid.html">Waydroid</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Andorid</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Andorid</a></li>
+      <li>Next: <a href="graphics/index.html" title="next chapter">Android Graphics</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/andorid/framework.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

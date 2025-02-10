@@ -1,0 +1,64 @@
+===========================================
+ lint-python3: 1 file would be reformatted
+===========================================
+
+"1 file would be reformatted" after running Black, it means that the specified file doesn't conform to Black's formatting standards and would be changed if you ran Black without the --check flag.
+
+
+.. code-block:: bash
+		
+
+   $ isort . --check-only --profile black --skip venv
+   Skipped 1 files
+   $ black --check . --exclude=venv
+   would reformat /builds/elxr/tools/tiler/tiler/iso.py
+   Oh no! 💥 💔 💥
+   1 file would be reformatted, 24 files would be left unchanged.
+   Cleaning up project directory and file based variables 00:00
+   ERROR: Job failed: exit code 1
+
+   
+
+
+Here's what this means:
+
+    Black found formatting issues:
+    Black analyzed your code and identified areas that don't match its style guide.
+    No changes were made:
+    The --check flag tells Black to only report potential formatting changes without actually modifying the file.
+    To reformat:
+    If you want Black to automatically reformat the file, run it again without the --check flag:
+
+
+.. code-block:: bash
+
+   root@e9c62ac0960e:/usr/src/tiler2# black --check . 
+   would reformat /usr/src/tiler2/tiler/iso.py
+   
+   Oh no! 💥 💔 💥
+   1 file would be reformatted, 24 files would be left unchanged.
+   root@e9c62ac0960e:/usr/src/tiler2# black /usr/src/tiler2/tiler/iso.py
+   reformatted /usr/src/tiler2/tiler/iso.py
+   
+   All done! ✨ 🍰 ✨
+   1 file reformatted.
+   root@e9c62ac0960e:/usr/src/tiler2# black --check . 
+   All done! ✨ 🍰 ✨
+   25 files would be left unchanged.
+   		
+     
+.. code-block:: bash
+
+   hliu4@pek-lpd-susbld:tiler2$git diff tiler/iso.py                                                                                                                                      
+   diff --git a/tiler/iso.py b/tiler/iso.py                                                                                                                                               
+   index 08a7d22..f3b5d5b 100644                                                                                                                                                          
+   --- a/tiler/iso.py                                                                                                                                                                     
+   +++ b/tiler/iso.py                                                                                                                                                                     
+   @@ -134,5 +134,5 @@ class ISO(object):                                                                                                                                                 
+            if ret != 0:                                                                                                                                                                  
+                raise exceptions.CommandError(f"Failed to run live-build build: {output}")                                                                                                
+                                                                                                                                                                                          
+   -        for iso in self.workspace.glob('*.iso'):                                                                                                                                      
+   +        for iso in self.workspace.glob("*.iso"):
+                LOG.info(f"Your ISO can be found at: {iso}")
+   		

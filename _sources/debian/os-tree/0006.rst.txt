@@ -1,0 +1,93 @@
+======================
+ ostree admin os-init
+======================
+
+
+.. contents:: Table of contents
+
+
+NAME
+====
+
+::
+
+   ostree-admin-os-init - Initialize empty state for a given operating system
+
+SYNOPSIS
+========
+
+::
+
+   ostree admin os-init {STATEROOT}
+
+USAGE
+=====
+
+.. code-block:: console
+
+   root@32b81b5fc0ca:/usr/src/tmp/example# ostree admin os-init --help 
+   Usage:
+     ostree admin os-init [OPTION?] OSNAME
+   
+   Initialize empty state for given operating system
+   
+   Help Options:
+     -h, --help         Show help options
+   
+   Application Options:
+     --sysroot=PATH     Create a new OSTree sysroot at PATH
+     -v, --verbose      Print debug information during command processing
+     --version          Print version information and exit
+   
+      		
+   
+DESCRIPTION
+===========
+
+
+Initializes an new stateroot (AKA "osname") for an operating system.
+
+Ensures that the core subdirectories of /var (/tmp, /lib, /run, and /lock) exist
+
+and initialize the given STATEROOT as OSTree stateroot. Each deployment location
+
+is comprised of a single shared var and a set of deployments (chroots).
+
+Each deployment is grouped in exactly one “stateroot” (also known as an “osname”); the former term is preferred.
+
+From above, you can see that a stateroot is physically represented in the /ostree/deploy/$stateroot directory. For example, OSTree can allow parallel installing Debian in /ostree/deploy/debian and Red Hat Enterprise Linux in /ostree/deploy/rhel (subject to operating system support, present released versions of these operating systems may not support this).
+
+Each stateroot has exactly one copy of the traditional Unix /var, stored physically in /ostree/deploy/$stateroot/var. OSTree provides support tools for systemd to create a Linux bind mount that ensures the booted deployment sees the shared copy of /var.
+
+OSTree does not touch the contents of /var. Operating system components such as daemon services are required to create any directories they require there at runtime (e.g. /var/cache/$daemonname), and to manage upgrading data formats inside those directories.
+
+EXAMPLE
+=======
+
+issue command: **ostree admin os-init --sysroot /usr/src/tmp/example elxr**
+
+.. code-block:: console 
+   
+   root@32b81b5fc0ca:/usr/src/tmp/example# ls
+   boot  dev  home  ostree  proc  root  run  sys  tmp
+   root@32b81b5fc0ca:/usr/src/tmp/example# 
+   root@32b81b5fc0ca:/usr/src/tmp/example# tree ostree/deploy/
+   ostree/deploy/
+   
+   0 directories, 0 files
+   root@32b81b5fc0ca:/usr/src/tmp/example# ostree admin os-init --sysroot /usr/src/tmp/example elxr
+   ostree/deploy/elxr initialized as OSTree root
+   root@32b81b5fc0ca:/usr/src/tmp/example# ls
+   boot  dev  home  ostree  proc  root  run  sys  tmp
+   root@32b81b5fc0ca:/usr/src/tmp/example# tree ostree/deploy/
+   ostree/deploy/
+   `-- elxr
+       `-- var
+           |-- lib
+           |-- lock -> ../run/lock
+           |-- log
+           |-- run -> ../run
+           `-- tmp
+   
+   6 directories, 2 files
+      

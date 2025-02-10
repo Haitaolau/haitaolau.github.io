@@ -1,0 +1,165 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Linux Bash PS1 variable &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Tmux" href="tmux.html" />
+    <link rel="prev" title="Numactl" href="numa.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="linux-bash-ps1-variable">
+<h1>Linux Bash PS1 variable<a class="headerlink" href="#linux-bash-ps1-variable" title="Permalink to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>d: The current date</p></li>
+<li><p>t: The current time</p></li>
+<li><p>h: The hostname of our Linux machine</p></li>
+<li><p>u: The username of the logged-in user</p></li>
+<li><p>w: The user’s working directory</p></li>
+<li><p>[: Beginning of a sequence of non-printable characters that somehow control the behavior of the terminal</p></li>
+<li><p>]: End of non-printable control characters sequence</p></li>
+</ul>
+<p>Using the ‘w’</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>hliu4@eeef568eba2c:kernel-meta<span class="nv">$PS1</span><span class="o">=</span><span class="s1">&#39;\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$&#39;</span>
+hliu4@eeef568eba2c:/buildarea1/LIN1022-7283/build/tmp-glibc/work/xilinx_zynqmp-wrs-linux/linux-yocto/5.15.155+gitAUTOINC+1427f4d13f_ab8d149d3f-r0/kernel-meta$
+</pre></div>
+</div>
+<p>Using the ‘W’</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>hliu4@eeef568eba2c:kernel-meta<span class="nv">$PS1</span><span class="o">=</span><span class="s1">&#39;\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\W\[\033[00m\]\$&#39;</span>
+hliu4@eeef568eba2c:kernel-meta<span class="nv">$pwd</span>
+/buildarea1/LIN1022-7283/build/tmp-glibc/work/xilinx_zynqmp-wrs-linux/linux-yocto/5.15.155+gitAUTOINC+1427f4d13f_ab8d149d3f-r0/kernel-meta
+hliu4@eeef568eba2c:kernel-meta$
+</pre></div>
+</div>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../corp.html">Corporation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Commands</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="git.html">Git</a></li>
+<li class="toctree-l2"><a class="reference internal" href="docker.html">Docker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ubuntu.html">Ubuntu</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kernel.html">Kernel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dhcp.html">Dhcp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ovs.html">OpenVswitch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lxc.html">Lxc container</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ip.html">Ip command</a></li>
+<li class="toctree-l2"><a class="reference internal" href="find.html">Find</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tcpdump.html">Tcpdump</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sed_awk.html">Sed and awk</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gcc.html">gcc/g++</a></li>
+<li class="toctree-l2"><a class="reference internal" href="virsh.html">Virsh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="numa.html">Numactl</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Linux Bash PS1 variable</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tmux.html">Tmux</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cplus/index.html">Cplus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Commands</a><ul>
+      <li>Previous: <a href="numa.html" title="previous chapter">Numactl</a></li>
+      <li>Next: <a href="tmux.html" title="next chapter">Tmux</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/cmds/ps1.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

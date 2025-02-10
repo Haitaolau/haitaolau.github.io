@@ -1,0 +1,234 @@
+
+.. _fundamental_functions:
+
+=======================
+ Fundamental Functions
+=======================
+
+
+.. contents:: Table of Contents
+
+.. note::
+
+   In Lisp, car, cdr, and cons are fundamental functions. The cons function is used
+   to construct lists, and the car and cdr functions are used to take them apart.
+
+
+1. Car
+======
+
+**car is an acronym from the phrase “Contents of the Address part of the Register”**
+
+The car of a list is, quite simply, the first item in the list. Thus the car of the list
+(rose violet daisy buttercup) is rose.
+
+.. code-block:: console
+
+   (car '(rose violet daisy buttercup))
+
+The output:
+
+
+.. code-block:: console
+
+   rose
+
+car does not remove the first item from the list; it only reports what it is. After
+car has been applied to a list, the list is still the same as it was.
+
+
+
+2. Cdr
+======
+
+**cdr (pronounced “could-er”) is an acronym from the phrase “Contents of the Decrement part of the Register”.**
+
+The cdr of a list is the rest of the list, that is, the cdr function returns the
+part of the list that follows the first item. Thus, while the car of the list '(rose
+violet daisy buttercup) is rose, the rest of the list, the value returned by the
+cdr function, is (violet daisy buttercup)
+
+
+.. code-block:: console
+
+   (cdr '(rose violet daisy buttercup))
+
+The output:
+
+
+.. code-block:: console
+
+   (violet daisy buttercup)
+
+3. Cons
+=======
+
+**The name of the cons function is not unreasonable: it is an abbreviation of the word “construct”.**
+
+The cons function constructs lists; it is the inverse of car and cdr. For example,
+cons can be used to make a four element list from the three element list, (fir oak
+maple):
+
+.. code-block:: console
+		
+   (cons 'pine '(fir oak maple))
+
+
+The output:
+
+.. code-block:: console
+
+   (pine fir oak maple)
+
+
+.. note::
+
+   cons must have a list to attach to.1 You cannot start from absolutely nothing.
+   If you are building a list, you need to provide at least an empty list at the beginning.
+
+
+.. code-block:: console
+
+   (cons 'buttercup ())
+   ⇒ (buttercup)
+   (cons 'daisy '(buttercup))
+   ⇒ (daisy buttercup)
+   (cons 'violet '(daisy buttercup))
+   ⇒ (violet daisy buttercup)
+   (cons 'rose '(violet daisy buttercup))
+   ⇒ (rose violet daisy buttercup)		
+   
+In the first example, the empty list is shown as () and a list made up of buttercup
+followed by the empty list is constructed.
+
+
+4. Find the Length of a List: length
+====================================
+
+
+You can find out how many elements there are in a list by using the Lisp function
+length, as in the following examples:
+
+.. code-block:: console
+
+   (length '(buttercup))
+   ⇒ 1
+   (length '(daisy buttercup))
+   ⇒ 2
+   (length (cons 'violet '(daisy buttercup)))
+   ⇒ 3
+   (length ())
+   ⇒ 0
+
+5. Nthcdr
+=========
+
+
+The nthcdr function is associated with the cdr function. What it does is take the
+cdr of a list repeatedly.
+
+
+.. code-block:: console
+
+   (cdr '(pine fir oak maple))
+   ⇒(fir oak maple)
+   (cdr '(fir oak maple))
+   ⇒ (oak maple)
+   (cdr '(oak maple))
+   ⇒(maple)
+   (cdr '(maple))
+   ⇒ nil
+   (cdr 'nil)
+   ⇒ nil
+   (cdr ())
+   ⇒ nil
+
+
+You can also do several cdrs without printing the values in between, like this:
+
+.. code-block:: console
+		
+   (cdr (cdr '(pine fir oak maple)))
+     ⇒ (oak maple)   
+
+
+The nthcdr function does the same as repeating the call to cdr. In the following
+example, the argument 2 is passed to the function nthcdr, along with the list, and
+the value returned is the list without its first two items, which is exactly the same
+as repeating cdr twice on the list:
+
+.. code-block:: console
+
+   (nthcdr 2 '(pine fir oak maple))
+      ⇒ (oak maple)     
+
+
+   ;; Leave the list as it was.
+   (nthcdr 0 '(pine fir oak maple))
+      ⇒ (pine fir oak maple)
+   ;; Return a copy without the first element.
+   (nthcdr 1 '(pine fir oak maple))
+      ⇒ (fir oak maple)
+   ;; Return a copy of the list without three elements.
+   (nthcdr 3 '(pine fir oak maple))
+      ⇒ (maple)
+   ;; Return a copy lacking all four elements.
+   (nthcdr 4 '(pine fir oak maple))
+      ⇒ nil
+   ;; Return a copy lacking all elements.
+   (nthcdr 5 '(pine fir oak maple))
+      ⇒ nil      
+
+
+6. nth
+======
+
+
+It returns the Nth element of the list.
+
+
+.. code-block:: console
+
+   (nth 0 '("one" "two" "three"))
+      ⇒ "one"
+   (nth 1 '("one" "two" "three"))
+      ⇒ "two"		
+
+
+7. setcar
+=========
+ 
+.. code-block:: console
+
+   (setq animals (list 'antelope 'giraffe 'lion 'tiger))
+   (setcar animals 'hippopotamus)
+   animals
+       ⇒ (hippopotamus giraffe lion tiger)
+   		
+The first element on the list, antelope is replaced by hippopotamus.
+So we can see that setcar did not add a new element to the list as cons would
+have; it replaced antelope with hippopotamus; it changed the list.
+
+
+8. setcdr
+=========
+
+
+The setcdr function is similar to the setcar function, except that the function
+replaces the second and subsequent elements of a list rather than the first element.
+
+
+.. code-block:: console
+
+   (setq domesticated-animals (list 'horse 'cow 'sheep 'goat))
+   domesticated-animals
+       ⇒ (horse cow sheep goat)
+   
+   (setcdr domesticated-animals '(cat dog))
+   
+   domesticated-animals
+       ⇒ (horse cat dog)
+
+
+Indeed, the list is changed from (horse cow sheep goat) to (horse cat dog). The
+cdr of the list is changed from (cow sheep goat) to (cat dog).       

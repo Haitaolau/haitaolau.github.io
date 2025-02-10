@@ -1,0 +1,674 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Welcome to Gdocs’s documentation! &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Corporation" href="corp.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="welcome-to-gdocs-s-documentation">
+<h1>Welcome to Gdocs’s documentation!<a class="headerlink" href="#welcome-to-gdocs-s-documentation" title="Permalink to this heading">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="corp.html">Corporation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="corp.html#links">Links</a></li>
+<li class="toctree-l2"><a class="reference internal" href="corp.html#build-wetson-wayland-for-lin1022">Build wetson &amp; wayland for LIN1022</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="corp.html#build-linux1022">1. build linux1022</a></li>
+<li class="toctree-l3"><a class="reference internal" href="corp.html#eanble-the-webston-and-wayland">2. Eanble the webston and wayland</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="corp.html#wrlinux-and-yocto-version">WRlinux and yocto version</a></li>
+<li class="toctree-l2"><a class="reference internal" href="corp.html#windows-image-iso">Windows Image(ISO)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="corp.html#add-new-printer">Add New printer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="corp.html#build-wrlinux">Build WRlinux</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="corp.html#wrlinux-1021">WRLinux 1021</a></li>
+<li class="toctree-l3"><a class="reference internal" href="corp.html#wrlinux-1019">WRLinux 1019</a></li>
+<li class="toctree-l3"><a class="reference internal" href="corp.html#wrlinux-1018">WRLinux 1018</a></li>
+<li class="toctree-l3"><a class="reference internal" href="corp.html#wrlinux-8">WRLinux 8</a></li>
+<li class="toctree-l3"><a class="reference internal" href="corp.html#wrlinux-7">WRLinux 7</a></li>
+<li class="toctree-l3"><a class="reference internal" href="corp.html#wrlinux-6">WRLinux 6</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="corp.html#wrlinux-ovp">WRLinux OVP</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="corp.html#ovp7">OVP7</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="corp.html#start-qemu-with-runqemu">Start Qemu with runqemu</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cmds/index.html">Commands</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cmds/git.html">Git</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cmds/git.html#git-log">Git Log</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cmds/git.html#push-an-existing-repository">Push an existing repository</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cmds/docker.html">Docker</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cmds/docker.html#setting-up-docker-hub-mirror">Setting up Docker Hub mirror</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cmds/docker.html#docker-file">Docker file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cmds/docker.html#create-docker-from-ala-lpdfs01">Create docker from ala-lpdfs01</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cmds/docker.html#create-docker-ubuntu20-04">Create docker ubuntu20:04</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cmds/docker.html#start-docker-ubuntu20-04">Start docker ubuntu20:04</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cmds/docker.html#connect-docker-with-ssh">Connect docker with ssh</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cmds/ubuntu.html">Ubuntu</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cmds/ubuntu.html#how-to-find-the-package-that-provides-a-file">How to find the package that provides a file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cmds/ubuntu.html#how-to-check-timezone-in-linux">How to Check Timezone in Linux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cmds/ubuntu.html#search-who-provide-the-boost">Search who provide the boost</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cmds/ubuntu.html#systemd-list-all-failed-services">Systemd list all failed services</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cmds/ubuntu.html#switching-boot-target-to-text">Switching boot target to text</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cmds/ubuntu.html#switching-boot-target-to-graphical">Switching boot target to graphical</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cmds/ubuntu.html#update-and-upgrade-the-ubuntu">update and upgrade the ubuntu</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cmds/ubuntu.html#install-the-development-tools">install the development tools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cmds/ubuntu.html#how-to-disable-sleep-on-ubuntu-server">How To: Disable Sleep on Ubuntu Server</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cmds/kernel.html">Kernel</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cmds/kernel.html#hugepage">HugePage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cmds/kernel.html#test-kernel-with-ltp">test kernel with ltp</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cmds/kernel.html#dump-kernel-config">dump kernel config</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cmds/kernel.html#show-filesystem-supported-by-kernel">show filesystem supported by kernel</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cmds/dhcp.html">Dhcp</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cmds/dhcp.html#create-the-bridge">1. create the bridge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cmds/dhcp.html#modify-the-dhcpd-configure-file">2. Modify the dhcpd configure file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cmds/dhcp.html#set-the-ip-address-for-br0">3. set the ip address for br0</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cmds/dhcp.html#start-the-dhcp-server-for-br0">4. Start the DHCP server for br0</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cmds/dhcp.html#generate-the-mac-address-for-qemu-client">5. Generate the Mac address for qemu client</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cmds/dhcp.html#create-the-qemu-ifup-sh-for-qemue-client-to-initiate-the-interface">6. Create the qemu-ifup.sh for qemue client to initiate the interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cmds/dhcp.html#create-and-start-a-qemu-client">7. Create and start a qemu client</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cmds/dhcp.html#access-the-vm-client-with-screen">8. access the VM client with screen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cmds/dhcp.html#exit-the-current-pty-and-enter-other-s-pty">9. exit the current pty and enter other’s pty</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cmds/dhcp.html#resolv-conf">10. resolv.conf</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cmds/ovs.html">OpenVswitch</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cmds/ovs.html#show-port-status">Show port status</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cmds/ovs.html#openvswith-example">OpenVswith Example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cmds/lxc.html">Lxc container</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cmds/lxc.html#the-configure-file">The configure file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cmds/lxc.html#start-lxc">Start Lxc</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cmds/ip.html">Ip command</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cmds/ip.html#set-vlan-interface">Set vlan interface</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cmds/find.html">Find</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cmds/find.html#find-executable-programes">find executable programes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cmds/find.html#get-the-iommu-group">get the iommu_group</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cmds/tcpdump.html">Tcpdump</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cmds/tcpdump.html#how-to-capture-dhcp-network-traffic">How to capture DHCP network traffic ?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cmds/tcpdump.html#how-to-capture-ssh-traffic-with-tcpdump">How to capture SSH Traffic with Tcpdump?</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cmds/sed_awk.html">Sed and awk</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cmds/sed_awk.html#print-specific-lines-from-a-file">print specific lines from a file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cmds/sed_awk.html#remove-empty-lines">Remove empty lines</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cmds/gcc.html">gcc/g++</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cmds/gcc.html#fverbose-asm-c">1. -fverbose-asm 自行注释对应的C代码</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cmds/virsh.html">Virsh</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cmds/virsh.html#virsh-autostart">virsh autostart</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cmds/numa.html">Numactl</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cmds/numa.html#show-inventory-of-available-nodes-on-the-system">1.Show inventory of available nodes on the system</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cmds/numa.html#show-numa-policy-settings-of-the-current-process">2.Show NUMA policy settings of the current process</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cmds/ps1.html">Linux Bash PS1 variable</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cmds/tmux.html">Tmux</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cmds/tmux.html#configuration">Configuration</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="kernel/index.html">Linux Kernel</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="kernel/debug_gdb.html">Debugging linux kernel with GDB and Qemu</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kernel/iommu.html">IOMMU</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kernel/rules_to_use_spinlock.html">Spinlock rules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="kernel/rules_to_use_spinlock.html#when-spinlock-is-used">1. When spinlock is used ?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kernel/rules_to_use_spinlock.html#what-are-the-rules-to-use-spinlocks">2. What are the rules to use spinlocks?</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="kernel/SMP-affinity.html">SMP IRQ Affinity</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="kernel/SMP-affinity.html#background">Background:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kernel/SMP-affinity.html#how-to-use-it">How to use it</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kernel/SMP-affinity.html#what-can-i-use-it-for">What can I use it for?</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="python/index.html">Python</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="python/python.html">Python</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="python/python.html#convert-hex-to-ascii">Convert Hex to ASCII</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="python/example/index.html">Example</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="python/example/00001.html">Compare kernel configure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/example/00002.html">Compare kernel commits</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="binaryAnalysis.html">BinaryAnalysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="binaryAnalysis.html#elf">ELF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="binaryAnalysis.html#get-the-sections-with-readelf">Get the sections with readelf</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cplus/index.html">Cplus</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cplus/libstdc%2B%2B_2_9_1/index.html">Libstd c++ 2.9.1</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/libstdc%2B%2B_2_9_1/vector/index.html">Vector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/libstdc%2B%2B_2_9_1/list/index.html">List</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/libstdc%2B%2B_2_9_1/deque/index.html">Double Ended Queue</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/libstdc%2B%2B_2_9_1/heap/index.html">Head</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/libstdc%2B%2B_2_9_1/tree/index.html">Tree</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/Operator_overloading/index.html">C++ Operator overloading</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/Operator_overloading/increment.html">Increment(++)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/access_modifiers.html">Access Modifiers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/references.html">References (or Aliases)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/references.html#syntax">Syntax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/references.html#example">Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/references.html#the-nature-of-reference">The nature of reference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/references.html#notes">Notes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/references.html#reference-vs-pointer">Reference vs pointer</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/const.html">const</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/const.html#char-const-p">char *const p</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/const.html#const-char-p">const char * p</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/const.html#allocate-memory">allocate memory</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/functemplate.html">Function template</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/functemplate.html#definition">Definition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/functemplate.html#example">Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/functemplate.html#calling-a-function-template">Calling a Function Template</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/passarguments.html">Pass arguments to function</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/passarguments.html#take-value-as-parameter">take value as parameter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/passarguments.html#take-pointer-as-parameter">take pointer as parameter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/passarguments.html#take-reference-as-parameter">take reference as parameter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/friend.html">Friend class and function</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/friend.html#friend-function">Friend function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/friend.html#friend-class">Friend Class</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/abstract.html">Abstract Class</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/abstract.html#defination">Defination</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/copyconstructor.html">Copy constructor</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/copyconstructor.html#example">Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/copyconstructor.html#id1">拷贝构造函数调用时机</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/rvalue.html">Cplus Rvalue</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/rvalue.html#introduction">Introduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/rvalue.html#rvalue-references">Rvalue References</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/rvalue.html#move-constructor">Move constructor</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/lvalue_and_rvalue.html">lvalue &amp;&amp; rvalue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/placement_new.html">Placement new operator</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/placement_new.html#syntax">Syntax</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/template/index.html">Template</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/template/instantiation.html">Instantiation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/template/parameter_deduction.html">Parameter Deduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/template/overide.html">Overide</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/template/variadic_function.html">Variadic function templates</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/template/fold_expressions.html">Fold Expressions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/template/universal_references.html">Universal References</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/template/type_deduction.html">Type Deduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/template/ref_and_cref.html">std::ref and std::cref</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/template/auto_type_deduction.html">Auto type deduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/template/perfect_forwarding.html">Perfect Forwarding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/template/trait.html">Traits</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/cast/index.html">C++ Cast</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/cast/static.html">C++ static Cast</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/cast/const.html">Const_cast</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/decltype.html">Decltype</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/decltype.html#what-is-the-use-of-decltype-in-c">What is the Use of decltype in C++?</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/explicit_implicit.html">Explicit and Implicit</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/explicit_implicit.html#implicit">Implicit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/explicit_implicit.html#explic">Explic</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/constructor.html">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/typedef_typename.html">typedef typename</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="els/index.html">ESL</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="els/workshop/index.html">Vocabulary Workshop</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="els/workshop/0001.html">st-,sta-,stat-,stan-,stant-,stin-</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="els/lecture/index.html">Barack Obama</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="els/lecture/0001.html">Senate Floor Speech on Ohio Electoral Vote Counting Procedures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="els/lecture/0003.html">Senate Floor Speech Honoring the Life of Rosa Parks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="els/lecture/0004.html">Senate Floor Speech on the PATRIOT Act</a></li>
+<li class="toctree-l3"><a class="reference internal" href="els/lecture/0005.html">Senate Floor Speech on the Passing of Coretta Scott King</a></li>
+<li class="toctree-l3"><a class="reference internal" href="els/lecture/0006.html">Senate Floor Speech on Voting Rights Act Reauthorization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="els/lecture/0007.html">Presidential Exploratory Committee Announcement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="els/lecture/0009.html">Senate Floor Speech in Favor of Iraq Federalism Amendment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="els/lecture/0010.html">Senate Floor Speech on the Iraq War After 4 Years</a></li>
+<li class="toctree-l3"><a class="reference internal" href="els/lecture/0011.html">Senate Floor Speech on Comprehensive Immigration Reform</a></li>
+<li class="toctree-l3"><a class="reference internal" href="els/lecture/0012.html">Speech at the Jefferson-Jackson Dinner</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="andorid/index.html">Andorid</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="andorid/framework.html">Android Framework</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="andorid/framework.html#android">Android架构组件</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="andorid/graphics/index.html">Android Graphics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="andorid/graphics/stack.html">Graphics stack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="andorid/graphics/hwcomposer.html">Hwcomposer</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="andorid/linux_graphics.html">Linux Graphics stack</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="andorid/linux_graphics.html#what-s-graphics">1. What’s Graphics？</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="andorid/bootup.html">Boot Up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="andorid/SurfaceFlinger.html">SurfaceFlinger</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="andorid/SurfaceFlinger.html#id1">合成方式</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="andorid/drm.html">Direct Rendering Manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="andorid/gralloc.html">Gralloc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="andorid/wayland.html">Wayland</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="andorid/wayland.html#waylandweston">Wayland与Weston简介</a></li>
+<li class="toctree-l3"><a class="reference internal" href="andorid/wayland.html#wayland-display-server-protocol">Wayland display server protocol</a></li>
+<li class="toctree-l3"><a class="reference internal" href="andorid/wayland.html#linux-graphics-drivers-dri-wayland">Linux graphics drivers DRI Wayland</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="andorid/waydroid.html">Waydroid</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="andorid/waydroid.html#hwc">HWC</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="yocto/index.html">Yocto</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="yocto/00001.html">Files/directories were installed but not shipped</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="yocto/00001.html#qa-issue-lvgl-files-directories-were-installed-but-not-shipped-in-any-package">QA Issue: lvgl: Files/directories were installed but not shipped in any package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="yocto/00002.html">Enable ptest</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="yocto/00002.html#wrl1022-ptest">WRL1022 ptest</a></li>
+<li class="toctree-l3"><a class="reference internal" href="yocto/00002.html#yocto-ptest">Yocto ptest</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="yocto/00003.html">intel socfpga agilex</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="yocto/00003.html#configure-and-build">Configure and build</a></li>
+<li class="toctree-l3"><a class="reference internal" href="yocto/00003.html#deployment">Deployment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="yocto/00003.html#boot-up">Boot up</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="yocto/00004.html">Automount disk</a></li>
+<li class="toctree-l2"><a class="reference internal" href="yocto/00005.html">How do I generate an ordered lists of the executed tasks</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="emacs/index.html">Emacs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="emacs/commands.html">Emacs Commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="emacs/0007.html">Emacs Commands: Blank Lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="emacs/0001.html">How do I insert &lt;some text&gt; at the beginning of every line?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="emacs/0002.html">How do I find the function definition?</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="emacs/0002.html#describe-function">describe-function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="emacs/0002.html#xref-find-definitions">xref-find-definitions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="emacs/0003.html">Complete Definition of beginning-of-buffer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="emacs/0004.html">Complete Definition of mark-whole-buffer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="emacs/0005.html">Fundamental Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="emacs/0005.html#car">1. Car</a></li>
+<li class="toctree-l3"><a class="reference internal" href="emacs/0005.html#cdr">2. Cdr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="emacs/0005.html#cons">3. Cons</a></li>
+<li class="toctree-l3"><a class="reference internal" href="emacs/0005.html#find-the-length-of-a-list-length">4. Find the Length of a List: length</a></li>
+<li class="toctree-l3"><a class="reference internal" href="emacs/0005.html#nthcdr">5. Nthcdr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="emacs/0005.html#nth">6. nth</a></li>
+<li class="toctree-l3"><a class="reference internal" href="emacs/0005.html#setcar">7. setcar</a></li>
+<li class="toctree-l3"><a class="reference internal" href="emacs/0005.html#setcdr">8. setcdr</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="emacs/0006.html">How to delete the first few n chars of every line?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="emacs/0008.html">jumps to the location of the mark - and M-&lt; sets the mark before jumping</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="virt/index.html">Virtulization</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="virt/qemu/index.html">Qemu</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="virt/qemu/0001.html">PCI: PCI-Express introduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="virt/qemu/0002.html">PCI:PCIe Device Emulation in QEMU</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="virt/virtio/index.html">Virtio</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="virt/virtio/0001-pre.html">Virtio devices and drivers overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="virt/virtio/0001.html">Introduction to virtio-networking and vhost-net</a></li>
+<li class="toctree-l3"><a class="reference internal" href="virt/virtio/0002.html">Deep dive into Virtio-networking and vhost-net</a></li>
+<li class="toctree-l3"><a class="reference internal" href="virt/virtio/0003.html">How vhost-user came into being: Virtio-networking and DPDK</a></li>
+<li class="toctree-l3"><a class="reference internal" href="virt/virtio/0004.html">A journey to the vhost-users realm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="virt/virtio/0005.html">Introduction to VirtIO</a></li>
+<li class="toctree-l3"><a class="reference internal" href="virt/virtio/0006.html">Qemu: Virtio-net Envrionment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="virt/virtio/0007.html">Qemu: Virtio_net_pci</a></li>
+<li class="toctree-l3"><a class="reference internal" href="virt/virtio/0009.html">Qemu: Virtio_bus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="virt/virtio/0008.html">Qemu: Virtio_net Device</a></li>
+<li class="toctree-l3"><a class="reference internal" href="virt/virtio/vhost-user.html">Vhost-user Protocol</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="virt/00001.html">Install Ret Hat 7 server</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="virt/00001.html#get-the-rhel7">Get the RHEL7</a></li>
+<li class="toctree-l3"><a class="reference internal" href="virt/00001.html#create-bootload-disk">Create Bootload Disk</a></li>
+<li class="toctree-l3"><a class="reference internal" href="virt/00001.html#install-rhel7">Install RHEL7</a></li>
+<li class="toctree-l3"><a class="reference internal" href="virt/00001.html#launch-up-rhel7">Launch up RHEL7</a></li>
+<li class="toctree-l3"><a class="reference internal" href="virt/00001.html#configure-the-network">Configure the Network</a></li>
+<li class="toctree-l3"><a class="reference internal" href="virt/00001.html#access-vm-via-ssh">Access VM via ssh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="virt/00001.html#set-up-yum-repository">Set up yum repository</a></li>
+<li class="toctree-l3"><a class="reference internal" href="virt/00001.html#references">References</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="virt/00002.html">Qemu ifup script</a></li>
+<li class="toctree-l2"><a class="reference internal" href="virt/00003.html">Random Mac address</a></li>
+<li class="toctree-l2"><a class="reference internal" href="virt/00004.html">Assign tap to VM Client</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="virt/00004.html#create-a-virtual-interface-with-ip-command">1. Create a virtual interface with IP command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="virt/00004.html#add-it-into-ovs-bridge">2. Add it into OVS bridge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="virt/00004.html#enable-the-interface">3. Enable the interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="virt/00004.html#assign-the-interface-to-vm">4. Assign the interface to VM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="virt/00005.html">Open vSwitch with Libvirt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="virt/00006.html">EAL: No free hugepages reported in hugepages-2048kB</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="virt/00006.html#advanced-hugepage-setup">1.Advanced Hugepage Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="virt/00006.html#mount-the-hugepage-fs">2.Mount the hugepage FS</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="virt/00007.html">Failed to connect socket /var/run/openvswitch/centos1_eth0: Permission denied</a></li>
+<li class="toctree-l2"><a class="reference internal" href="virt/00008.html">Establish OVP reference envrionment</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="virt/00008.html#set-the-hugepages">1. Set the hugepages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="virt/00008.html#mount-hugepagefs">2. Mount hugepageFS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="virt/00008.html#load-kernel-modules">3. Load Kernel modules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="virt/00008.html#set-up-interface-and-vf">4. Set up Interface and VF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="virt/00008.html#set-up-dpdk-for-ovs">5. Set up DPDK for OVS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="virt/00008.html#add-vhost-user">6. Add vhost user</a></li>
+<li class="toctree-l3"><a class="reference internal" href="virt/00008.html#create-vm-xml">7. create vm xml</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="virt/00009.html">libvirt: Specify the kernel and rootfs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="virt/00010.html">WRLinux with wayland and weston</a></li>
+<li class="toctree-l2"><a class="reference internal" href="virt/00011.html">Enable the support console for VM</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="virt/00011.html#configruate-the-xml-with">configruate the xml with</a></li>
+<li class="toctree-l3"><a class="reference internal" href="virt/00011.html#start-vm-and-modify-the-configuration-of-grub">start vm and modify the configuration of grub</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="virt/00012.html">Start Qemu with monitor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="virt/00013.html">Creating images from ISO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="virt/00014.html">Create image from Wrlinux image</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="virt/00014.html#id1">1.Create image from WRLinux image</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="debian/index.html">Debian</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="debian/0005.html">Launch up Debian VM with Qemu</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debian/debian-installer/index.html">Debian Installer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="debian/debian-installer/0001.html">Debian-Installer: Building the installer yourself</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debian/debian-installer/0002.html">Debian-Installer: Udeb</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="debian/debian-command/index.html">Debian command</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="debian/debian-command/debmake/index.html">Debmake Document</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debian/debian-command/001.html">apt-cache: policy</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="debian/live-cd/index.html">Debian Live CD</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="debian/live-cd/0001.html">lb_config</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debian/live-cd/0002.html">lb_build</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="debian/elxr_edge/index.html">eLxr Edge</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="debian/elxr_edge/0001.html">Simplify Ruckstack with shell script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="debian/os-tree/index.html">OS tree</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="debian/os-tree/0008.html">Ostree FileSystem Layout</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debian/os-tree/0001.html">ostree init</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debian/os-tree/0002.html">ostree admin init-fs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debian/os-tree/0003.html">ostree pull-local</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debian/os-tree/0004.html">ostree log</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debian/os-tree/0005.html">ostree summary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debian/os-tree/0006.html">ostree admin os-init</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debian/os-tree/0007.html">ostree admin deploy</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="debian/0001.html">Ruck: build pablo with minimal ostree rootfs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="debian/0001.html#load-configuration"><strong>1. Load Configuration</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="debian/0002.html">How to build deb package for libxfce4ui</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="debian/0002.html#get-the-libxfce4ui-project-from-debian">Get the libxfce4ui project from debian</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debian/0002.html#get-the-source-code-for-libxfce4ui">Get the source code for libxfce4ui</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debian/0002.html#building-with-debuild">Building with debuild</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debian/0002.html#buing-with-no-sign">Buing with no-sign</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="debian/0003.html">How to Search for Debian package?</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="debian/0003.html#use-apt-cache-available-since-debian-2-2">1. Use apt-cache (available since Debian 2.2)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debian/0003.html#using-apt">2. Using apt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="debian/0004.html">How to Check Debian package version?</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="debian/0004.html#debian-linux-package-version-using-apt-cache-command">Debian Linux package version using apt-cache command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debian/0004.html#debian-linux-package-version-using-apt-command">Debian Linux package version using apt command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debian/0004.html#debian-linux-package-version-using-dpkg-command">Debian linux package version using dpkg command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debian/0004.html#debian-linux-package-version-using-pkg-v">Debian Linux package version using pkg -v</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="debian/0006.html">How to download deb packages using apt</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="debian/0006.html#download-the-package-and-its-dependencies-using-apt">Download the package and its dependencies using apt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="debian/0007.html">E: You must put some ‘source’ URIs in your sources.list</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debian/0008.html">How can I specify the repository from which a package will be installed?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debian/0009.html">How to install build dependencies for packages ?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debian/0010.html">Create orig tarballs from git</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debian/0011.html">Debian: Building the package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="debian/0011.html#dpkg-buildpackages-us-uc-ui">dpkg-buildpackages -us -uc -ui</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="debian/pipeline/index.html">Debian Pipeline</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="debian/pipeline/0001.html">lintian warnung: out-of-date-standards-version</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debian/pipeline/0002.html">lintian errors: depends-on-obsolete-package Depends: lsb-base</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debian/pipeline/0003.html">lint-python3: 1 file would be reformatted</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tools/index.html">Tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tools/uml/index.html">UML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tools/uml/class_diagram.html">Class Diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tools/gitlab/index.html">GitLab</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tools/gitlab/0001.html">How To Install and Configure GitLab on Ubuntu</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="licence/index.html">OpenSource License</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="licence/0001.html">Opensource &amp; IP</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="licence/0001.html#types-of-licenses">Types of Licenses</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="licence/0002.html">Open Source: Attribution Licenses</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="licence/0002.html#example-mit-licences">Example MIT Licences</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="licence/0003.html">Open Source: GNU Public License</a></li>
+<li class="toctree-l2"><a class="reference internal" href="licence/iptest.html">IP Testing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="licence/iptest.html#who-are-the-stakeholders-that-depend-upon-the-successful-completion-of-a-product-ip-review">Who are the stakeholders that depend upon the successful completion of a product IP review ?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="licence/iptest.html#rd-party-ip-someone-else-s-ip-can-be-check-all-that-apply">3rd party IP(someone else’s IP) can be (check all that apply)?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="licence/iptest.html#software-can-be-protected-by">Software can be protected by</a></li>
+<li class="toctree-l3"><a class="reference internal" href="licence/iptest.html#whenever-an-engineer-encounters-an-ip-problem-issue-he-she-sould">Whenever an engineer encounters an Ip problem/issue, he/she sould</a></li>
+<li class="toctree-l3"><a class="reference internal" href="licence/iptest.html#a-copyright-holder-of-software-can-check-all-that-apply">A copyright holder of software can (check all that apply):</a></li>
+<li class="toctree-l3"><a class="reference internal" href="licence/iptest.html#if-one-downloads-software-found-on-the-internet-that-has-no-specified-license-it-means-that">If one downloads software found on the internet that has no specified license, it means that:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="licence/iptest.html#what-are-the-obligations-normally-imposed-by-an-attribution-style-open-sosurce-license">What are the obligations normally imposed by an attribution-style open sosurce license?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="licence/iptest.html#copyrights-always-require-special-registration-with-the-government">Copyrights always require special registration with the government</a></li>
+<li class="toctree-l3"><a class="reference internal" href="licence/iptest.html#who-at-wind-river-is-responsible-for-submitting-an-ip-disclosure-for-a-piece-of-3rd-partly-ip">Who at Wind River is responsible for submitting an IP disclosure for a piece of 3rd partly IP</a></li>
+<li class="toctree-l3"><a class="reference internal" href="licence/iptest.html#which-open-source-licenses-below-are-considered-to-be-attriibution-style-licenses">Which open source licenses below are considered to be attriibution-style licenses?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="licence/iptest.html#which-open-source-licenses-below-are-considered-to-be-copyleft-licenses">Which open source licenses below are considered to be copyleft licenses?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="licence/iptest.html#example-s-of-a-derivative-work-is">Example(s) of a derivative work is</a></li>
+<li class="toctree-l3"><a class="reference internal" href="licence/iptest.html#what-can-happen-if-you-fail-to-submit-a-disclosure-for-the-use-of-3rd-party-ip">What can happen if you fail to submit a disclosure for the use of 3rd party IP</a></li>
+<li class="toctree-l3"><a class="reference internal" href="licence/iptest.html#what-is-one-criterion-that-determines-whether-software-is-open-source-software">What is one criterion that determines whether software is open source software?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="licence/iptest.html#which-open-source-license-requires-to-provide-source-code-for-the-distribution-of-the-binary">Which open source license requires to provide source code for the distribution of the binary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="licence/iptest.html#why-is-the-developer-sign-off-acknowledging-all-the-3rd-party-ip-has-been-disclosed-required-for-ip-review-process">Why is the developer sign-off acknowledging all the 3rd party IP has been disclosed required for IP review process?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="licence/iptest.html#a-wind-river-engineer-may">A Wind River engineer may:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="licence/iptest.html#intellectual-property-ip-can-exist-in-the-form-of">Intellectual property(IP) can exist in the form of</a></li>
+<li class="toctree-l3"><a class="reference internal" href="licence/iptest.html#when-are-you-required-to-disclose-third-party-software-using-the-ip-portal">When are you required to disclose third party software(using the ip portal)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="licence/iptest.html#what-can-happen-if-a-wind-river-engineer-combines-gpl-licensed-code-with-wind-river-proprietary-code">What can happen if a Wind River engineer combines GPL licensed code with Wind River proprietary code?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="licence/iptest.html#according-to-the-company-s-global-ip-policy-wind-river-employees">According to the company’s global IP policy, Wind River employees</a></li>
+<li class="toctree-l3"><a class="reference internal" href="licence/iptest.html#who-is-responsible-for-providing-a-sign-off-to-acknowledge-that-he-she-has-disclosed-all-the-3rd-party-ip-in-a-given-release">Who is responsible for providing a sign off to acknowledge that he/she has disclosed all the 3rd party Ip in a given release?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="licence/iptest.html#you-have-third-party-software-that-you-would-like-to-integrate-into-vxworks-what-do-you-need-to-do">You have third party software that you would like to integrate into VxWorks. What do you need to do ?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="licence/iptest.html#what-are-the-potential-consequences-of-the-misuse-of-3rd-party-ip">What are the potential consequences of the misuse of 3rd party IP?</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cplus/index.html">Cplus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="corp.html" title="next chapter">Corporation</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

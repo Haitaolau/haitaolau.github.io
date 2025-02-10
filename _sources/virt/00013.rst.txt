@@ -1,0 +1,17 @@
+==========================
+ Creating images from ISO
+==========================
+
+.. code-block:: console 
+
+   #!/bin/bash
+
+   # $1 --qcow name
+   # $2 -- iso image or DVD image
+   
+   a=775e3aa31420
+   qemu-img create -f qcow2 $1.qcow2 60G
+   
+   qemu-system-x86_64 -cpu host -smp 8 -m 2048 -hda $1.qcow2 -cdrom $2 -boot d --enable-kvm -netdev user,id=mynet0,net=128.224.178.0/24 ,dhcpstart=128.224.178.100 \
+           -vga virtio -vnc :0  -device e1000,netdev=mynet0
+   

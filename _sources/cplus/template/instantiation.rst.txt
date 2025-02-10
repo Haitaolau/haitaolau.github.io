@@ -1,0 +1,84 @@
+=================
+Instantiation
+=================
+
+
+编译的时候，编译器就会对这个函数模板进行实例化,
+用具体的“类型”代替“类型模板参数”的过程就叫作实例化（也称为代码生成器）
+
+
+.. code-block:: 
+   
+    #include <iostream>
+    using namespace std;
+    template <typename T> T Sub(T tv1, T tv2) { return tv1 - tv2; }
+
+    int main(int argc, char* argv[]){
+        int subv = Sub(3, 5);
+        cout << "subv = " << subv << endl;
+        double subv2= Sub(4.7 , 2.1);
+        cout << "subv2 = " << subv2 << endl;
+        return 0;
+    }
+
+
+针对int和double两种类型，每种类型都会被实例化一次，所以，
+Sub()函数模板一共会被实例化两次，相当于产生了两个Sub()函数
+ 
+
+.. code-block::
+
+   wrsadmin@PEK-HLIU4-D1:~/workspace/tmp$ objdump -t template1  | grep Sub
+   000000000000132b  w    F .text  000000000000001e              _Z3SubIdET_S0_S0_
+   0000000000001315  w    F .text  0000000000000016              _Z3SubIiET_S0_S0_
+   wrsadmin@PEK-HLIU4-D1:~/workspace/tmp$ objdump -d template1
+   
+   [...]
+   0000000000001315 <_Z3SubIiET_S0_S0_>:
+       1315:       f3 0f 1e fa             endbr64
+       1319:       55                      push   %rbp
+       131a:       48 89 e5                mov    %rsp,%rbp
+       131d:       89 7d fc                mov    %edi,-0x4(%rbp)
+       1320:       89 75 f8                mov    %esi,-0x8(%rbp)
+       1323:       8b 45 fc                mov    -0x4(%rbp),%eax
+       1326:       2b 45 f8                sub    -0x8(%rbp),%eax
+       1329:       5d                      pop    %rbp
+       132a:       c3                      retq
+   
+   000000000000132b <_Z3SubIdET_S0_S0_>:
+       132b:       f3 0f 1e fa             endbr64
+       132f:       55                      push   %rbp
+       1330:       48 89 e5                mov    %rsp,%rbp
+       1333:       f2 0f 11 45 f8          movsd  %xmm0,-0x8(%rbp)
+       1338:       f2 0f 11 4d f0          movsd  %xmm1,-0x10(%rbp)
+       133d:       f2 0f 10 45 f8          movsd  -0x8(%rbp),%xmm0
+       1342:       f2 0f 5c 45 f0          subsd  -0x10(%rbp),%xmm0
+       1347:       5d                      pop    %rbp
+       1348:       c3                      retq
+       1349:       0f 1f 80 00 00 00 00    nopl   0x0(%rax)
+   
+实例化之后的函数名分别为Sub<int>和Sub<double>
+
+
+.. code-block::
+
+   /* First instantiated from: insights.cpp:8 */
+   #ifdef INSIGHTS_USE_TEMPLATE
+   template<>
+   int Sub<int>(int tv1, int tv2)
+   {
+     return tv1 - tv2;
+   }
+   #endif
+   
+   
+   /* First instantiated from: insights.cpp:10 */
+   #ifdef INSIGHTS_USE_TEMPLATE
+   template<>
+   double Sub<double>(double tv1, double tv2)
+   {
+     return tv1 - tv2;
+   }
+   #endif
+   
+   

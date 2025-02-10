@@ -1,0 +1,333 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Fundamental Functions &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="How to delete the first few n chars of every line?" href="0006.html" />
+    <link rel="prev" title="Complete Definition of mark-whole-buffer" href="0004.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="fundamental-functions">
+<span id="id1"></span><h1><a class="toc-backref" href="#id2" role="doc-backlink">Fundamental Functions</a><a class="headerlink" href="#fundamental-functions" title="Permalink to this heading">¶</a></h1>
+<nav class="contents" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#fundamental-functions" id="id2">Fundamental Functions</a></p>
+<ul>
+<li><p><a class="reference internal" href="#car" id="id3">1. Car</a></p></li>
+<li><p><a class="reference internal" href="#cdr" id="id4">2. Cdr</a></p></li>
+<li><p><a class="reference internal" href="#cons" id="id5">3. Cons</a></p></li>
+<li><p><a class="reference internal" href="#find-the-length-of-a-list-length" id="id6">4. Find the Length of a List: length</a></p></li>
+<li><p><a class="reference internal" href="#nthcdr" id="id7">5. Nthcdr</a></p></li>
+<li><p><a class="reference internal" href="#nth" id="id8">6. nth</a></p></li>
+<li><p><a class="reference internal" href="#setcar" id="id9">7. setcar</a></p></li>
+<li><p><a class="reference internal" href="#setcdr" id="id10">8. setcdr</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In Lisp, car, cdr, and cons are fundamental functions. The cons function is used
+to construct lists, and the car and cdr functions are used to take them apart.</p>
+</div>
+<section id="car">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">1. Car</a><a class="headerlink" href="#car" title="Permalink to this heading">¶</a></h2>
+<p><strong>car is an acronym from the phrase “Contents of the Address part of the Register”</strong></p>
+<p>The car of a list is, quite simply, the first item in the list. Thus the car of the list
+(rose violet daisy buttercup) is rose.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(car &#39;(rose violet daisy buttercup)</span><span class="go">)</span>
+</pre></div>
+</div>
+<p>The output:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">rose</span>
+</pre></div>
+</div>
+<p>car does not remove the first item from the list; it only reports what it is. After
+car has been applied to a list, the list is still the same as it was.</p>
+</section>
+<section id="cdr">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">2. Cdr</a><a class="headerlink" href="#cdr" title="Permalink to this heading">¶</a></h2>
+<p><strong>cdr (pronounced “could-er”) is an acronym from the phrase “Contents of the Decrement part of the Register”.</strong></p>
+<p>The cdr of a list is the rest of the list, that is, the cdr function returns the
+part of the list that follows the first item. Thus, while the car of the list ‘(rose
+violet daisy buttercup) is rose, the rest of the list, the value returned by the
+cdr function, is (violet daisy buttercup)</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(cdr &#39;(rose violet daisy buttercup)</span><span class="go">)</span>
+</pre></div>
+</div>
+<p>The output:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(violet daisy buttercup)</span>
+</pre></div>
+</div>
+</section>
+<section id="cons">
+<h2><a class="toc-backref" href="#id5" role="doc-backlink">3. Cons</a><a class="headerlink" href="#cons" title="Permalink to this heading">¶</a></h2>
+<p><strong>The name of the cons function is not unreasonable: it is an abbreviation of the word “construct”.</strong></p>
+<p>The cons function constructs lists; it is the inverse of car and cdr. For example,
+cons can be used to make a four element list from the three element list, (fir oak
+maple):</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(cons &#39;pine &#39;(fir oak maple)</span><span class="go">)</span>
+</pre></div>
+</div>
+<p>The output:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(pine fir oak maple)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>cons must have a list to attach to.1 You cannot start from absolutely nothing.
+If you are building a list, you need to provide at least an empty list at the beginning.</p>
+</div>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(cons &#39;buttercup ()</span><span class="go">)</span>
+<span class="go">⇒ (buttercup)</span>
+<span class="gp gp-VirtualEnv">(cons &#39;daisy &#39;(buttercup)</span><span class="go">)</span>
+<span class="go">⇒ (daisy buttercup)</span>
+<span class="gp gp-VirtualEnv">(cons &#39;violet &#39;(daisy buttercup)</span><span class="go">)</span>
+<span class="go">⇒ (violet daisy buttercup)</span>
+<span class="gp gp-VirtualEnv">(cons &#39;rose &#39;(violet daisy buttercup)</span><span class="go">)</span>
+<span class="go">⇒ (rose violet daisy buttercup)</span>
+</pre></div>
+</div>
+<p>In the first example, the empty list is shown as () and a list made up of buttercup
+followed by the empty list is constructed.</p>
+</section>
+<section id="find-the-length-of-a-list-length">
+<h2><a class="toc-backref" href="#id6" role="doc-backlink">4. Find the Length of a List: length</a><a class="headerlink" href="#find-the-length-of-a-list-length" title="Permalink to this heading">¶</a></h2>
+<p>You can find out how many elements there are in a list by using the Lisp function
+length, as in the following examples:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(length &#39;(buttercup)</span><span class="go">)</span>
+<span class="go">⇒ 1</span>
+<span class="gp gp-VirtualEnv">(length &#39;(daisy buttercup)</span><span class="go">)</span>
+<span class="go">⇒ 2</span>
+<span class="gp gp-VirtualEnv">(length (cons &#39;violet &#39;(daisy buttercup)</span><span class="go">))</span>
+<span class="go">⇒ 3</span>
+<span class="gp gp-VirtualEnv">(length ()</span><span class="go">)</span>
+<span class="go">⇒ 0</span>
+</pre></div>
+</div>
+</section>
+<section id="nthcdr">
+<h2><a class="toc-backref" href="#id7" role="doc-backlink">5. Nthcdr</a><a class="headerlink" href="#nthcdr" title="Permalink to this heading">¶</a></h2>
+<p>The nthcdr function is associated with the cdr function. What it does is take the
+cdr of a list repeatedly.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(cdr &#39;(pine fir oak maple)</span><span class="go">)</span>
+<span class="go">⇒(fir oak maple)</span>
+<span class="gp gp-VirtualEnv">(cdr &#39;(fir oak maple)</span><span class="go">)</span>
+<span class="go">⇒ (oak maple)</span>
+<span class="gp gp-VirtualEnv">(cdr &#39;(oak maple)</span><span class="go">)</span>
+<span class="go">⇒(maple)</span>
+<span class="gp gp-VirtualEnv">(cdr &#39;(maple)</span><span class="go">)</span>
+<span class="go">⇒ nil</span>
+<span class="gp gp-VirtualEnv">(cdr &#39;nil)</span>
+<span class="go">⇒ nil</span>
+<span class="gp gp-VirtualEnv">(cdr ()</span><span class="go">)</span>
+<span class="go">⇒ nil</span>
+</pre></div>
+</div>
+<p>You can also do several cdrs without printing the values in between, like this:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(cdr (cdr &#39;(pine fir oak maple)</span><span class="go">))</span>
+<span class="go">  ⇒ (oak maple)</span>
+</pre></div>
+</div>
+<p>The nthcdr function does the same as repeating the call to cdr. In the following
+example, the argument 2 is passed to the function nthcdr, along with the list, and
+the value returned is the list without its first two items, which is exactly the same
+as repeating cdr twice on the list:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(nthcdr 2 &#39;(pine fir oak maple)</span><span class="go">)</span>
+<span class="go">   ⇒ (oak maple)</span>
+
+
+<span class="go">;; Leave the list as it was.</span>
+<span class="gp gp-VirtualEnv">(nthcdr 0 &#39;(pine fir oak maple)</span><span class="go">)</span>
+<span class="go">   ⇒ (pine fir oak maple)</span>
+<span class="go">;; Return a copy without the first element.</span>
+<span class="gp gp-VirtualEnv">(nthcdr 1 &#39;(pine fir oak maple)</span><span class="go">)</span>
+<span class="go">   ⇒ (fir oak maple)</span>
+<span class="go">;; Return a copy of the list without three elements.</span>
+<span class="gp gp-VirtualEnv">(nthcdr 3 &#39;(pine fir oak maple)</span><span class="go">)</span>
+<span class="go">   ⇒ (maple)</span>
+<span class="go">;; Return a copy lacking all four elements.</span>
+<span class="gp gp-VirtualEnv">(nthcdr 4 &#39;(pine fir oak maple)</span><span class="go">)</span>
+<span class="go">   ⇒ nil</span>
+<span class="go">;; Return a copy lacking all elements.</span>
+<span class="gp gp-VirtualEnv">(nthcdr 5 &#39;(pine fir oak maple)</span><span class="go">)</span>
+<span class="go">   ⇒ nil</span>
+</pre></div>
+</div>
+</section>
+<section id="nth">
+<h2><a class="toc-backref" href="#id8" role="doc-backlink">6. nth</a><a class="headerlink" href="#nth" title="Permalink to this heading">¶</a></h2>
+<p>It returns the Nth element of the list.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(nth 0 &#39;(&quot;one&quot; &quot;two&quot; &quot;three&quot;)</span><span class="go">)</span>
+<span class="go">   ⇒ &quot;one&quot;</span>
+<span class="gp gp-VirtualEnv">(nth 1 &#39;(&quot;one&quot; &quot;two&quot; &quot;three&quot;)</span><span class="go">)</span>
+<span class="go">   ⇒ &quot;two&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="setcar">
+<h2><a class="toc-backref" href="#id9" role="doc-backlink">7. setcar</a><a class="headerlink" href="#setcar" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(setq animals (list &#39;antelope &#39;giraffe &#39;lion &#39;tiger)</span><span class="go">)</span>
+<span class="gp gp-VirtualEnv">(setcar animals &#39;hippopotamus)</span>
+<span class="go">animals</span>
+<span class="go">    ⇒ (hippopotamus giraffe lion tiger)</span>
+</pre></div>
+</div>
+<p>The first element on the list, antelope is replaced by hippopotamus.
+So we can see that setcar did not add a new element to the list as cons would
+have; it replaced antelope with hippopotamus; it changed the list.</p>
+</section>
+<section id="setcdr">
+<h2><a class="toc-backref" href="#id10" role="doc-backlink">8. setcdr</a><a class="headerlink" href="#setcdr" title="Permalink to this heading">¶</a></h2>
+<p>The setcdr function is similar to the setcar function, except that the function
+replaces the second and subsequent elements of a list rather than the first element.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(setq domesticated-animals (list &#39;horse &#39;cow &#39;sheep &#39;goat)</span><span class="go">)</span>
+<span class="go">domesticated-animals</span>
+<span class="go">    ⇒ (horse cow sheep goat)</span>
+
+<span class="gp gp-VirtualEnv">(setcdr domesticated-animals &#39;(cat dog)</span><span class="go">)</span>
+
+<span class="go">domesticated-animals</span>
+<span class="go">    ⇒ (horse cat dog)</span>
+</pre></div>
+</div>
+<p>Indeed, the list is changed from (horse cow sheep goat) to (horse cat dog). The
+cdr of the list is changed from (cow sheep goat) to (cat dog).</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cplus/index.html">Cplus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Emacs</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="commands.html">Emacs Commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0007.html">Emacs Commands: Blank Lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0001.html">How do I insert &lt;some text&gt; at the beginning of every line?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0002.html">How do I find the function definition?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0003.html">Complete Definition of beginning-of-buffer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0004.html">Complete Definition of mark-whole-buffer</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Fundamental Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#car">1. Car</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cdr">2. Cdr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cons">3. Cons</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#find-the-length-of-a-list-length">4. Find the Length of a List: length</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nthcdr">5. Nthcdr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nth">6. nth</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#setcar">7. setcar</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#setcdr">8. setcdr</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="0006.html">How to delete the first few n chars of every line?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0008.html">jumps to the location of the mark - and M-&lt; sets the mark before jumping</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Emacs</a><ul>
+      <li>Previous: <a href="0004.html" title="previous chapter">Complete Definition of mark-whole-buffer</a></li>
+      <li>Next: <a href="0006.html" title="next chapter">How to delete the first few n chars of every line?</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/emacs/0005.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

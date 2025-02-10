@@ -1,0 +1,96 @@
+
+====================
+const
+====================
+
+.. _cplus_const_pointer:
+
+char \*const p
+==============
+
+.. note::
+  p is a const pointer to char
+
+const 修饰 p，说明p是一个read-only 的变量
+而p 是char * 类型的，是一个字符指针
+
+.. code-block:: c
+
+  int main(int argc, char **argv){
+
+        char a = 'a';
+        char b = 'b';
+        char *const p = &a;
+        p = &b;
+
+        std::cout << *p << std::endl;
+        return 0;
+  }
+
+Output: 
+
+.. code-block:: console
+
+  hliu4@ala-lpggp2$g++ -o const1 const1.cc
+  const1.cc: In function ‘int main(int, char**)’:
+  const1.cc:9:7: error: assignment of read-only variable ‘p’
+  p = &b;
+       ^
+  hliu4@ala-lpggp2$
+
+
+.. _cplus_pointer_const:
+
+const char \* p
+===============
+
+const 修饰的是char \* 而不是p
+
+.. code-block:: c
+  
+  #include <iostream>
+
+
+  int main(int argc, char **argv){
+
+        char a = 'a';
+        char b = 'b';
+        const char * p = &a;
+        *p = 'c';
+
+        std::cout << *p << std::endl;
+        return 0;
+  }
+
+Output:
+
+.. code-block:: console
+
+  hliu4@ala-lpggp2$g++ -o const2 const2.cc
+  const2.cc: In function ‘int main(int, char**)’:
+  const2.cc:9:7: error: assignment of read-only location ‘* p’
+  *p = 'c';
+       ^~~
+
+  
+allocate memory
+===================
+
+C 语言中，const修饰的变量，是伪常量，编译器是会分配内存的；
+C++中，const不会分配内存
+
+.. code-block:: c
+
+  #include <iostream>
+
+  int main()
+  {
+      const int m_b = 100;
+      int* p = (int *)&m_b;
+      *p = 200;
+      std::cout << "m_b = " << m_b << " *p is "<< *p << std::endl;
+      std::cout << "&m_b is " << &m_b << " p is " << p << std::endl;
+  }
+
+  m_b = 100 *p is 200
+  &m_b is 000000F808F6F924 p is 000000F808F6F924

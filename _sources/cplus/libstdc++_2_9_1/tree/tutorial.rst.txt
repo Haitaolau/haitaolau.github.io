@@ -1,0 +1,41 @@
+================
+Tree tutorial
+================
+
+
+.. image:: ../../../_static/image/tree-tutorial-01.jpg
+
+	
+-----------------------
+	   
+size of E: 3
+
+height of E: 1
+
+depth of E: 2
+
+length of e: 2
+
+----------------------
+
+
+size of C: 4
+
+height of C: 2
+
+depth of C: 1
+
+length of C: 1
+
+----------------------
+
+
+size of A: 12
+
+height of A: 3
+
+depth of A: 0
+
+length of A: 0
+
+

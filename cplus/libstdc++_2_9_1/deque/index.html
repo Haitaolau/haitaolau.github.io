@@ -1,0 +1,250 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Double Ended Queue &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Iterator" href="iterator.html" />
+    <link rel="prev" title="sort" href="../list/sort.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="double-ended-queue">
+<h1>Double Ended Queue<a class="headerlink" href="#double-ended-queue" title="Permalink to this heading">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="iterator.html">Iterator</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="iterator.html#dataimplementation">DataImplementation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iterator.html#contrustor">Contrustor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iterator.html#operator">operator*</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iterator.html#id1">operator-&gt;</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iterator.html#id2">operator-</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iterator.html#id3">operator++</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iterator.html#id4">operator–</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iterator.html#id5">operator+=</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iterator.html#id6">operator+</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iterator.html#id7">operator-=</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iterator.html#id8">operator-</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iterator.html#id9">operator[]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iterator.html#id10">operator==</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iterator.html#id11">operator!=</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iterator.html#id12">operator&lt;</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iterator.html#id13">operator&gt;</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iterator.html#id14">operator&lt;=</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iterator.html#id15">operator&gt;=</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="constructor.html">Constructor</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="constructor.html#default-constructor">Default constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="constructor.html#copy-constructor">Copy constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="constructor.html#fill-constructor">Fill constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="constructor.html#range-constructor">Range constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="constructor.html#m-fill-initialize">_M_fill_initialize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="constructor.html#example">Example</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="constructor.html#output">output</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="base.html">Base</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="base.html#m-initialize-map">_M_initialize_map</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="base.html#example">Example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="base.html#deque-buf-size">__deque_buf_size</a></li>
+<li class="toctree-l2"><a class="reference internal" href="base.html#m-create-nodes">_M_create_nodes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="swap.html">swap</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="swap.html#id1">Swap</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="push_pop.html">push and pop</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="push_pop.html#push">Push</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="push_pop.html#push-back-const-value-type">push_back(const value_type&amp;)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="push_pop.html#push-back">push_back()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="push_pop.html#example-1">Example 1</a></li>
+<li class="toctree-l3"><a class="reference internal" href="push_pop.html#output">output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="push_pop.html#m-push-back-aux">_M_push_back_aux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="push_pop.html#example-2">Example 2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="push_pop.html#push-front-const-value-type-t">push_front(const value_type&amp; __t)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="push_pop.html#push-front">push_front</a></li>
+<li class="toctree-l3"><a class="reference internal" href="push_pop.html#m-push-front-aux">_M_push_front_aux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="push_pop.html#example-3">Example 3</a></li>
+<li class="toctree-l3"><a class="reference internal" href="push_pop.html#example-4">Example 4</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="push_pop.html#pop">Pop</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="push_pop.html#pop-back">pop_back</a></li>
+<li class="toctree-l3"><a class="reference internal" href="push_pop.html#m-pop-back-aux">_M_pop_back_aux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="push_pop.html#pop-front">pop_front</a></li>
+<li class="toctree-l3"><a class="reference internal" href="push_pop.html#m-pop-front-aux">_M_pop_front_aux</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="allocation.html">Allocation of _M_map and nodes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="allocation.html#m-reserve-map-at-back">_M_reserve_map_at_back</a></li>
+<li class="toctree-l2"><a class="reference internal" href="allocation.html#m-reserve-map-at-front">_M_reserve_map_at_front</a></li>
+<li class="toctree-l2"><a class="reference internal" href="allocation.html#m-reallocate-map">_M_reallocate_map</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="allocation.html#example">Example</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="clear.html">Clear</a></li>
+<li class="toctree-l1"><a class="reference internal" href="erase.html">erase</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="erase.html#iterator-erase-iterator">iterator erase(iterator)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="erase.html#iterator-erase-iterator-iterator">iterator erase(iterator, iterator)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="insert.html">Insert</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="insert.html#insert-iterator-const-value-type">insert(iterator, const value_type&amp;)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="insert.html#m-insert-aux">_M_insert_aux</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">Cplus</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">Libstd c++ 2.9.1</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../vector/index.html">Vector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../list/index.html">List</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Double Ended Queue</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../heap/index.html">Head</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tree/index.html">Tree</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../Operator_overloading/index.html">C++ Operator overloading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../access_modifiers.html">Access Modifiers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../references.html">References (or Aliases)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../const.html">const</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../functemplate.html">Function template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../passarguments.html">Pass arguments to function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../friend.html">Friend class and function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../abstract.html">Abstract Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../copyconstructor.html">Copy constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rvalue.html">Cplus Rvalue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../lvalue_and_rvalue.html">lvalue &amp;&amp; rvalue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../placement_new.html">Placement new operator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../template/index.html">Template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../cast/index.html">C++ Cast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../decltype.html">Decltype</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../explicit_implicit.html">Explicit and Implicit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../constructor.html">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../typedef_typename.html">typedef typename</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Cplus</a><ul>
+  <li><a href="../index.html">Libstd c++ 2.9.1</a><ul>
+      <li>Previous: <a href="../list/sort.html" title="previous chapter">sort</a></li>
+      <li>Next: <a href="iterator.html" title="next chapter">Iterator</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../../../_sources/cplus/libstdc++_2_9_1/deque/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,37 @@
+===========
+merge
+===========
+
+syntax
+-----------
+
+.. code-block:: cpp
+
+   void merge( list& other );
+   
+ 
+merges other into \*this. **Both lists should be sorted** 
+
+这里是说两个list都是递增排序的
+
+
+
+.. code-block:: c++
+
+   template <class _Tp, class _Alloc>
+	void list<_Tp, _Alloc>::merge(list<_Tp, _Alloc>& __x)
+	{
+	  iterator __first1 = begin();
+	  iterator __last1 = end();
+	  iterator __first2 = __x.begin();
+	  iterator __last2 = __x.end();
+	  while (__first1 != __last1 && __first2 != __last2)
+	    if (*__first2 < *__first1) {
+	      iterator __next = __first2;
+	      transfer(__first1, __first2, ++__next);
+	      __first2 = __next;
+	    }
+	    else
+	      ++__first1;
+	  if (__first2 != __last2) transfer(__last1, __first2, __last2);
+	}

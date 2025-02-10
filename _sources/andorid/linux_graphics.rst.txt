@@ -1,0 +1,33 @@
+======================
+Linux Graphics stack
+======================
+
+
+1. What's Graphics？
+---------------------
+
+picture由许多的像素 (pixel) 构成的，如何用数字来表示每一个像素的方式称为 color model，
+
+例如包含 3 个 color channel 的 RGB，而具体用多少位的数据来表示某个具体的颜色值的方式称为 color space，
+
+color model 是描述了颜色的组成方式，而 color space 则是物理图形世界和数字图形世界的准确链接方式。
+
+1、图片的尺寸 (dimension，宽度和高度)，以像素为单位。
+
+2、纵横比 (aspect ratio) 是宽:高的比例，例如 16:9、4:3。
+
+3、分辨率 (resolution)，像素个数/物理长度，可能是 pixels per inch 或者是 pixels per millimeter，容易和 dimension 混淆。
+
+4、根据像素在内存中的存储顺序的不同，显示时也会有不同的扫描顺序 (scan order)，例如 linear scan order、raster scan order。
+
+5、像素有特定的格式：
+
+多个 color channel;
+
+透明 (alpha) 通道;
+
+Depth (不包含 alpha channel )和 bits per pixel (bpp，包含 alpha channel);
+
+像素在内存里可能有不同的组织方式，可能是一个个像素存储，也可能是先存储所有像素的 red channel，再存储所有像素的 green channel，最后存储所有像素的 blue channel;
+
+Sub-sampling，多个像素共享同一个 color channel;

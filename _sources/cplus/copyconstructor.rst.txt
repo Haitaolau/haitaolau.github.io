@@ -1,0 +1,76 @@
+===================
+Copy constructor
+===================
+
+
+A copy constructor is a member function that initializes an object using another object of the same class. In simple terms, a constructor which creates an object by initializing it with an object of the same class, which has been created previously is known as a copy constructor.  
+
+Copy constructor is used to initialize the members of a newly created object by copying the members of an already existing object.
+
+Example
+---------
+
+.. code-block:: cpp
+   
+   class Myarray
+   {
+   public:
+   	Myarray();
+   	Myarray(int capacity);
+   	Myarray(const Myarray& array);
+   	~Myarray();
+   
+   	void Push_Back(int val);
+   
+   	int getData(int index);
+   
+   	void setData(int index, int val);
+   
+   private:
+   	int* pAddress;
+   	int m_Size;
+   	int m_Capacity;
+   };
+   void test2(){
+       Myarray* array = new Myarray(10);
+       for (int i = 0; i < 10; i++) {
+           array->Push_Back(i);
+       }
+       Myarray* array2 = Myarray(*array);
+   }
+   
+      
+ 
+output: 
+
+.. code-block:: console 
+
+   main.cpp(34,38): error C2440: 'initializing': cannot convert from 'Myarray' to 'Myarray *'
+   main.cpp(34,21): message : No user-defined-conversion operator
+   available that can perform this conversion, or the operator cannot be called
+
+应该更改为：
+
+.. code-block:: cpp
+
+   Myarray* array2 = new Myarray(*array);
+   
+   or
+   Myarray* array2 = *array
+   
+   or
+   Myarray array2 = Myarray(*array); 
+
+
+new会调用构造函数,但是返回是对象指针,如new Marray(\*array)直接调用构造函数，返回的是对象如Marray(\*array)
+
+拷贝构造函数调用时机
+---------------------
+
+以下情况都会调用拷贝构造函数：
+
+1) 一个对象以值传递的方式传入函数体。
+
+2) 一个对象以值传递的方式从函数返回。
+
+3) 一个对象需要通过另外一个对象进行初始化。

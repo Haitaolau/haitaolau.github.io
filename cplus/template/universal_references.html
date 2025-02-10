@@ -1,0 +1,258 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Universal References &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Type Deduction" href="type_deduction.html" />
+    <link rel="prev" title="Fold Expressions" href="fold_expressions.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="universal-references">
+<h1>Universal References<a class="headerlink" href="#universal-references" title="Permalink to this heading">¶</a></h1>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>T&amp;&amp; Doesn’t Always Mean “Rvalue Reference”</p>
+</div>
+<p><strong>Universal References 是一种类型</strong></p>
+<p>在C++ 11中，类型T的右值引用表示为T&amp;&amp;。然而并不是所有的形如T&amp;&amp;的类型都为rvalue reference。
+形如T&amp;&amp;的类型有两种情况：一种是普通的rvalue reference，另一种则被称为 universal reference，
+<strong>它既可能表示lvalue reference，也可能表示rvalue reference</strong></p>
+<ul class="simple">
+<li><p>1. 如果一个 <strong>函数模板参数的类型为T&amp;&amp;</strong>，其中T是需要 <strong>推导的类型</strong>，那么此处的T&amp;&amp;指代universal reference。
+若不严格满足T&amp;&amp;类型或没有发生类型推导，则T&amp;&amp;指代rvalue reference</p></li>
+</ul>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="n">f</span><span class="p">(</span><span class="n">T</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">param</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<p><strong>参与类型推导</strong></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">mytestc</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">public</span><span class="o">:</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">testfunc</span><span class="p">(</span><span class="n">T</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{};};</span><span class="w"></span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">*</span><span class="n">argv</span><span class="p">[])</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="n">mytestc</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">mc</span><span class="p">;</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w"></span>
+<span class="w">   </span><span class="n">mc</span><span class="p">.</span><span class="n">testfunc</span><span class="p">(</span><span class="n">i</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">wrsadmin@PEK-HLIU4-D1$</span>g++ template7.cpp
+<span class="go">template7.cpp: In function ‘int main(int, const char**)’:</span>
+<span class="go">template7.cpp:8:17: error: cannot bind rvalue reference of type ‘int&amp;&amp;’ to lvalue of type ‘int’</span>
+<span class="go">   8 |     mc.testfunc(i);</span>
+<span class="go">     |                 ^</span>
+<span class="go">template7.cpp:3:65: note:   initializing argument 1 of ‘void mytestc&lt;T&gt;::testfunc(T&amp;&amp;) [with T = int]’</span>
+<span class="go">   3 | template &lt;typename T&gt; class mytestc { public: void testfunc(T&amp;&amp; x) {};};</span>
+<span class="go">     |                                                             ~~~~^</span>
+<span class="gp">wrsadmin@PEK-HLIU4-D1$</span>
+</pre></div>
+</div>
+<p>因为testfunc()成员函数本身没有涉及类型推断，testfunc()成员函数是类模板mytestc的一部分，首先得用以下语句实例化这个类模板的一个具体的类。</p>
+<p>mytestc&lt;int&gt; mc;实例化完这个类之后，mytestc&lt;int&gt;类存在了，那么testfunc()成员函数才真正存在，</p>
+<p>所以testfunc()成员函数存在的时候就已经为void testfunc(int&amp;&amp; x) {};</p>
+<p>所以，testfunc()成员函数本身没有涉及类型推断，所以这个形参x是右值引用</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>T&amp;&amp;加上 <strong>cv qualifiers</strong> 就不是universal reference</p>
+</div>
+<p>比如下面的param参数为rvalue reference而不是universal reference</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="n">f</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">param</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Example:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="n">myfunc</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">tmprv</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">tmprv</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w">   </span><span class="k">return</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="kt">int</span><span class="w"> </span><span class="n">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">*</span><span class="n">argv</span><span class="p">[])</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w"></span>
+<span class="w">   </span><span class="n">myfunc</span><span class="p">(</span><span class="n">i</span><span class="p">);</span><span class="w"></span>
+<span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">wrsadmin@PEK-HLIU4-D1$</span>g++ template7.cpp
+<span class="go">template7.cpp: In function ‘int main(int, const char**)’:</span>
+<span class="go">template7.cpp:13:12: error: cannot bind rvalue reference of type ‘const int&amp;&amp;’ to lvalue of type ‘int’</span>
+<span class="go">   13 |     myfunc(i);</span>
+<span class="go">      |            ^</span>
+<span class="go">template7.cpp:4:23: note:   initializing argument 1 of ‘void myfunc(const T&amp;&amp;) [with T = int]’</span>
+<span class="go">   4 | void myfunc(const T&amp;&amp; tmprv)</span>
+<span class="go">      |             ~~~~~~~~~~^~~~~</span>
+<span class="gp">wrsadmin@PEK-HLIU4-D1$</span>
+</pre></div>
+</div>
+<p><strong>const修饰词会剥夺一个引用成为万能引用的资格</strong>,需要使用 <strong>myfunc(std::move(i))</strong> 转换为右值</p>
+<ul class="simple">
+<li><ol class="arabic simple" start="2">
+<li><p>如果一个对象的类型被定义为auto&amp;&amp;，则此对象为universal reference</p></li>
+</ol>
+</li>
+</ul>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">auto</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">g</span><span class="p">()</span><span class="w"></span>
+</pre></div>
+</div>
+<ol class="arabic simple">
+<li><p>如果universal reference是通过rvalue初始化的，那么它就对应一个rvalue reference；</p></li>
+<li><p>如果universal reference是通过lvalue初始化的，那么它就对应一个lvalue reference</p></li>
+</ol>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Cplus</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../libstdc%2B%2B_2_9_1/index.html">Libstd c++ 2.9.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Operator_overloading/index.html">C++ Operator overloading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../access_modifiers.html">Access Modifiers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../references.html">References (or Aliases)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../const.html">const</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../functemplate.html">Function template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../passarguments.html">Pass arguments to function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../friend.html">Friend class and function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../abstract.html">Abstract Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../copyconstructor.html">Copy constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rvalue.html">Cplus Rvalue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../lvalue_and_rvalue.html">lvalue &amp;&amp; rvalue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../placement_new.html">Placement new operator</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Template</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="instantiation.html">Instantiation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="parameter_deduction.html">Parameter Deduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="overide.html">Overide</a></li>
+<li class="toctree-l3"><a class="reference internal" href="variadic_function.html">Variadic function templates</a></li>
+<li class="toctree-l3"><a class="reference internal" href="fold_expressions.html">Fold Expressions</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Universal References</a></li>
+<li class="toctree-l3"><a class="reference internal" href="type_deduction.html">Type Deduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ref_and_cref.html">std::ref and std::cref</a></li>
+<li class="toctree-l3"><a class="reference internal" href="auto_type_deduction.html">Auto type deduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="perfect_forwarding.html">Perfect Forwarding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="trait.html">Traits</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../cast/index.html">C++ Cast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decltype.html">Decltype</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../explicit_implicit.html">Explicit and Implicit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../constructor.html">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../typedef_typename.html">typedef typename</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Cplus</a><ul>
+  <li><a href="index.html">Template</a><ul>
+      <li>Previous: <a href="fold_expressions.html" title="previous chapter">Fold Expressions</a></li>
+      <li>Next: <a href="type_deduction.html" title="next chapter">Type Deduction</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../../_sources/cplus/template/universal_references.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

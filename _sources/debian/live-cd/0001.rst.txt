@@ -1,0 +1,41 @@
+===========
+ lb_config
+===========
+
+
+
+.. contents:: The table of Contents
+
+
+
+
+Commands of eLxr
+================
+
+.. code-block:: bash
+
+
+
+   lb config noauto \
+       --distribution bookworm \
+       --apt-indices false \
+       --apt-recommends false \
+       --backports false \
+       --source false \
+       --debian-installer-distribution bookworm \
+       --debootstrap-options "--include=apt-transport-https,ca-certificates,openssl" \
+       --firmware-binary true \
+       --firmware-chroot true \
+       --initramfs live-boot \
+       --iso-publisher elxr-linux \
+       --iso-application elxr-linux \
+       --iso-preparer elxr-linux \
+       --iso-volume elxr-linux-24.06 \
+       --linux-packages "linux-image linux-headers" \
+       --bootappend-live "boot=live config console=ttyS0,115200n8 console=tty0 live-config.noautologin" \
+       --bootloaders grub-efi \
+       --bootappend-live-failsafe none \
+       --memtest memtest86+ \
+       --win32-loader true \
+   		
+   

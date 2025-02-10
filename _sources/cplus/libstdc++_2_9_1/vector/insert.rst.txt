@@ -1,0 +1,185 @@
+==========================
+Insert function
+==========================
+
+Last change: |today|
+
+.. code-block:: c++
+
+   template <class _Tp, class _Alloc>
+   void vector<_Tp, _Alloc>::_M_fill_insert(iterator __position, size_type __n, 
+                                            const _Tp& __x)
+   {
+     if (__n != 0) {
+       if (size_type(_M_end_of_storage - _M_finish) >= __n) {
+         _Tp __x_copy = __x;
+         const size_type __elems_after = end() - __position;
+         iterator __old_finish(_M_finish);
+         if (__elems_after > __n) {
+           uninitialized_copy(_M_finish - __n, _M_finish, _M_finish);
+           _M_finish += __n;
+           copy_backward(__position, __old_finish - __n, __old_finish);
+           fill(__position, __position + __n, __x_copy);
+         }
+         else {
+           uninitialized_fill_n(_M_finish, __n - __elems_after, __x_copy);
+           _M_finish += __n - __elems_after;
+           uninitialized_copy(__position, __old_finish, _M_finish);
+           _M_finish += __elems_after;
+           fill(__position, __old_finish, __x_copy);
+         }
+       }
+       else {
+         const size_type __old_size = size();        
+         const size_type __len = __old_size + max(__old_size, __n);
+         iterator __new_start(_M_allocate(__len));
+         iterator __new_finish(__new_start);
+         __STL_TRY {
+           __new_finish = uninitialized_copy(begin(), __position, __new_start);
+           __new_finish = uninitialized_fill_n(__new_finish, __n, __x);
+           __new_finish
+             = uninitialized_copy(__position, end(), __new_finish);
+         }
+         __STL_UNWIND((destroy(__new_start,__new_finish), 
+                       _M_deallocate(__new_start.base(),__len)));
+         destroy(_M_start, _M_finish);
+         _M_deallocate(_M_start, _M_end_of_storage - _M_start);
+         _M_start = __new_start.base();
+         _M_finish = __new_finish.base();
+         _M_end_of_storage = __new_start.base() + __len;
+       }
+     }
+   }
+
+(_M_end_of_storage - _M_finish) >= __n
+---------------------------------------
+
+备用空间大于等于"新增元素个数"
+
+1. __elems_after > __n
+++++++++++++++++++++++++
+
+**"插入点之后的现有元素个数"大于"新增元素个数"**
+
+如下图所示：
+
+1. 新增元素个数n: 4
+
+2. 插入点之后的现有元素个数elems_after:6
+
+
+.. image:: ../../../_static/image/vector_insert2.jpg
+
+算法：
+
+1. 把从finish-n 到finish的数据move 到 finish后边
+
+.. code-block:: c++
+
+   uninitialized_copy(_M_finish - __n, _M_finish, _M_finish);
+
+2. 将finish向后移动n
+
+.. code-block:: c++
+   
+   _M_finish += __n;
+
+3. 将剩下的2个数据copy 到old_finish位置，
+
+.. code-block:: c++
+   
+   copy_backward(__position, __old_finish - __n, __old_finish);
+
+4. 初始化数据
+
+
+.. code-block:: c++
+
+   fill(__position, __position + __n, __x_copy);
+
+
+
+2. __elems_after <= __n
+++++++++++++++++++++++++
+
+**"插入点之后的现有元素个数"小于等于"新增元素个数"**
+
+如下图所示：
+
+1. 新增元素个数n: 6
+
+2. 插入点之后的现有元素个数elems_after:4
+
+算法：
+
+1. 首先申请2元素并初始化为x：
+   
+.. code-block:: c++
+
+   uninitialized_fill_n(_M_finish, __n - __elems_after, __x_copy);
+
+2. finish 向后移动2个
+
+.. code-block:: c++
+
+   M_finish += __n - __elems_after;
+
+3.copy 从pos到old_finish之间的元素到finish后边
+
+.. code-block:: c++
+
+   uninitialized_copy(__position, __old_finish, _M_finish);
+   _M_finish += __elems_after;
+
+4.填充pos到old_finish之间的元素为x
+
+.. code-block:: c++
+
+   fill(__position, __old_finish, __x_copy);
+
+
+.. image:: ../../../_static/image/vector_insert.jpg
+
+(_M_end_of_storage - _M_finish) < __n
+---------------------------------------
+
+备用空间小于"新增元素个数",此时必须分配额外的空间
+
+
+.. image:: ../../../_static/image/vector_insert3.jpg 
+
+
+1. 首先决定新长度： 旧长度的两倍或者旧长度+新增元素个数
+
+.. code-block:: c++
+
+   const size_type __old_size = size();        
+   const size_type __len = __old_size + max(__old_size, __n);
+
+2. 配置新的vector空间，并配置指针(new_start, new_finish)
+
+.. code-block:: c++
+
+   iterator __new_start(_M_allocate(__len));
+   iterator __new_finish(__new_start);
+   
+3. 将旧vector的插入点之前的元素复制到新空间中
+ 
+.. code-block:: c++
+
+   __new_finish = uninitialized_copy(begin(), __position, __new_start);
+ 
+4. 将需要添加的元素插入到新vector的pos处
+
+.. code-block:: c++
+
+   new_finish = uninitialized_fill_n(__new_finish, __n, __x);
+
+5. 将就vector插入点之后的元素copy到新的vector
+
+.. code-block:: c++
+
+   uninitialized_copy(__position, end(), __new_finish);
+
+
+

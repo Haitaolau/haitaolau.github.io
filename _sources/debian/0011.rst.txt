@@ -1,0 +1,329 @@
+============================
+Debian: Building the package
+============================
+
+.. contents:: Table of contents
+	      
+
+Refer to `Chapter 6. Building the package <https://www.debian.org/doc/manuals/maint-guide/build.en.html#completebuild>`_
+
+
+dpkg-buildpackages -us -uc -ui
+==============================
+
+Issue the following command in the source directory
+
+.. code-block:: bash
+
+   dpkg-buildpackage -us -uc -ui
+
+This will do everything to make full binary and source packages for you. It will:
+
+
+1. clean the source tree (debian/rules clean)
+---------------------------------------------
+
+.. code-block:: bash
+
+   root@33f22f60cb16:/usr/src/work-ssl/tmp/libgcrypt# make -f debian/rules clean
+   dh clean --builddirectory=build
+   dh_auto_clean -O--builddirectory=build
+   dh_autoreconf_clean -O--builddirectory=build
+   dh_clean -O--builddirectory=build
+
+2. build the source package (dpkg-source -b)
+--------------------------------------------
+
+
+.. code-block:: bash
+
+   root@33f22f60cb16:/usr/src/work-ssl/tmp/libgcrypt-1.10.1# dpkg-source -b  .
+   dpkg-source: info: using source format '3.0 (quilt)'
+   dpkg-source: info: using patch list from debian/patches/series
+   dpkg-source: info: applying 12_lessdeps_libgcrypt-config.diff
+   dpkg-source: info: applying 15_multiarchpath_in_-L.diff
+   dpkg-source: info: applying 25_norevisionfromgit.diff
+   dpkg-source: info: applying 31_0002-kdf-argon2-Fix-for-the-case-output-64.patch
+   dpkg-source: info: applying 31_0003-hwf-ppc-fix-missing-HWF_PPC_ARCH_3_10-in-HW-feature.patch
+   dpkg-source: info: applying 32-build-Prefer-gpgrt-config-when-available.patch
+   dpkg-source: info: applying 35-keccak-Use-size_t-to-avoid-integer-overflow.patch
+   dpkg-source: info: applying 37-doc-Update-document-for-pkg-config-and-libgcrypt.m4.patch
+   dpkg-source: info: applying 38-fips-Unblock-MD5-in-fips-mode-but-mark-non-approved-.patch
+   dpkg-source: warning: upstream signing key but no upstream tarball signature
+   dpkg-source: info: building libgcrypt20 using existing ./libgcrypt20_1.10.1.orig.tar.bz2
+   dpkg-source: info: using patch list from debian/patches/series
+   dpkg-source: info: building libgcrypt20 in libgcrypt20_1.10.1-3elxr1.debian.tar.xz
+   dpkg-source: info: building libgcrypt20 in libgcrypt20_1.10.1-3elxr1.dsc
+
+The dpkg-source would apply the patches from debian/patches and generate xxxx.debian.tar.xz and xxxx.dsc file.
+
+
+.. code-block:: bash
+
+   root@33f22f60cb16:/usr/src/work-ssl/tmp/libgcrypt-1.10.1# ls ../
+   libgcrypt  libgcrypt-1.10.1  libgcrypt20_1.10.1-3elxr1.debian.tar.xz  libgcrypt20_1.10.1-3elxr1.dsc  libgcrypt20_1.10.1.orig.tar.bz2
+
+dpkg-source
+~~~~~~~~~~~
+
+
+The **/usr/bin/dpkg-source** is provided by dpkg-dev package.
+
+.. code-block:: bash
+
+   wrsadmin@pek-hliu4-d2:~/workspace/doc$ apt-file search /usr/bin/dpkg-source
+   dpkg-dev: /usr/bin/dpkg-source            
+   wrsadmin@pek-hliu4-d2:~/workspace/doc$ 		
+   
+`dpkg-source - Debian source package (.dsc) manipulation tool <https://manpages.debian.org/testing/dpkg-dev/dpkg-source.1.en.html>`_
+
+make the .dsc file
+~~~~~~~~~~~~~~~~~~
+
+The **libgcrypt20_1.10.1-3elxr1.dsc** is a summary of the contents of the source code. The file is generated from your control file, and is used when unpacking the source with dpkg-source.
+
+`dsc - Debian source package control file format <https://manpages.debian.org/testing/dpkg-dev/dsc.5.en.html>`_
+
+
+make the .debian.tar.gz file
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This compressed tarball contains your debian directory contents. Each and every addition you made to the original source code is stored as a quilt patch in debian/patches.
+
+If someone else wants to re-create your package from scratch, they can easily do so using the above three files. The extraction procedure is trivial: just copy the three files somewhere else and run **dpkg-source -x libgcrypt20_1.10.1-3elxr1.dsc**
+
+
+
+3. build the program (debian/rules build)
+-----------------------------------------
+
+   
+**make -f debian/rules build** would execute the **dh build** command which would run some other jobs.
+
+To see what commands are included in a sequence, without actually doing anything
+
+.. code-block:: bash
+
+   root@33f22f60cb16:/usr/src/work-ssl/tmp/libgcrypt-1.10.1# dh build --no-act
+   dh_testdir
+   dh_update_autotools_config
+   dh_autoreconf
+   debian/rules override_dh_auto_configure
+   debian/rules override_dh_auto_build-indep
+   dh_auto_build -Nlibgcrypt20-doc -Nlibgcrypt-mingw-w64-dev
+   dh_auto_test
+   create-stamp debian/debhelper-build-stamp
+
+
+   
+   	
+4. build binary packages (fakeroot debian/rules binary)
+-------------------------------------------------------
+
+**make -f debian/rules build** would execute the **dh binary** command which would run some other jobs.
+
+To see what commands are included in a sequence, without actually doing anything
+
+
+.. code-block:: bash
+
+   root@33f22f60cb16:/usr/src/work-ssl/tmp/libgcrypt-1.10.1# dh binary --no-act                                                                                                           
+   dh_testdir                                                                                                                                                  dh_update_autotools_config                                                                                                                                  dh_autoreconf                                                                                                                                               debian/rules override_dh_auto_configure                                                                                                                     debian/rules override_dh_auto_build-indep                                                                                                                   dh_auto_build -Nlibgcrypt20-doc -Nlibgcrypt-mingw-w64-dev                                                                                                   dh_auto_test                                                                                                                                                create-stamp debian/debhelper-build-stamp                                                                                                                   dh_testroot                                                                                                                                                 dh_prep                                                                                                                                                     dh_installdirs                                                                                                                                              debian/rules override_dh_auto_install-arch                                                                                                                  debian/rules override_dh_auto_install-indep                                                                                                                 dh_install                                                                                                                                                  dh_installdocs                                                                                                                                              dh_installchangelogs                                                                                                                                        dh_installexamples                                                                                                                                          dh_installman                                                                                                                                               dh_installcatalogs                                                                                                                                          dh_installcron
+   
+   dh_installdebconf
+   dh_installemacsen
+   dh_installifupdown
+   debian/rules override_dh_installinfo
+   dh_installinit
+   dh_installtmpfiles
+   dh_installsystemd
+   dh_installsystemduser
+   dh_installmenu
+   dh_installmime
+   dh_installmodules
+   dh_installlogcheck
+   dh_installlogrotate
+   dh_installpam
+   dh_installppp
+   dh_installudev
+   dh_installgsettings
+   dh_installinitramfs
+   dh_installalternatives
+   dh_bugfiles
+   dh_ucf
+   dh_lintian
+   dh_icons
+   dh_perl
+   dh_usrlocal
+   dh_link
+   dh_installwm
+   dh_installxfonts
+   dh_strip_nondeterminism
+   dh_compress
+   dh_fixperms
+   dh_missing
+   dh_dwz -a
+   dh_strip -a
+   dh_makeshlibs -a
+   dh_shlibdeps -a
+   dh_installdeb
+   dh_gencontrol
+   dh_md5sums
+   dh_builddeb
+
+dh_installdeb - install files into the DEBIAN directory
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Refert to : https://manpages.debian.org/testing/debhelper/dh_installdeb.1.en.html
+
+.. code-block:: bash
+
+   root@33f22f60cb16:/usr/src/work-ssl/tmp/libgcrypt-1.10.1# dh_installdeb -O--builddirectory=build --verbose
+    install -m0755 -d debian/libgcrypt20-doc/DEBIAN
+    install -m0755 -d debian/libgcrypt20-dev/DEBIAN
+    install -m0755 -d debian/libgcrypt20/DEBIAN
+    cp -f debian/libgcrypt20.postinst debian/libgcrypt20/DEBIAN/postinst
+    [META] Replace #TOKEN#s in "debian/libgcrypt20/DEBIAN/postinst"
+    chmod 0755 -- debian/libgcrypt20/DEBIAN/postinst
+    chown 0:0 -- debian/libgcrypt20/DEBIAN/postinst
+    install -p -m0644 debian/.debhelper/generated/libgcrypt20/triggers debian/libgcrypt20/DEBIAN/triggers
+    install -m0755 -d debian/libgcrypt20-udeb/DEBIAN
+    install -m0755 -d debian/libgcrypt-mingw-w64-dev/DEBIAN
+   root@33f22f60cb16:/usr/src/work-ssl/tmp/libgcrypt-1.10.1# 
+		
+   
+
+dh_gencontrol - generate and install control file
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Refer to https://manpages.debian.org/testing/debhelper/dh_gencontrol.1.en.html
+
+dh_gencontrol is merely a wrapper around **dpkg-gencontrol**
+
+dpkg-gencontrol gitlab: https://salsa.debian.org/dpkg-team/dpkg/-/blob/main/scripts/dpkg-gencontrol.pl?ref_type=heads
+
+dh_gencontrol is a debhelper program that is responsible for generating control files, and installing them into the DEBIAN directory with the proper permissions
+
+.. code-block:: bash
+
+        root@33f22f60cb16:/usr/src/work-ssl/tmp/libgcrypt-1.10.1# dh_gencontrol -O--builddirectory=build  --verbose
+        install -m0755 -d debian/libgcrypt20-doc/DEBIAN
+        dpkg-gencontrol -plibgcrypt20-doc -ldebian/changelog -Tdebian/libgcrypt20-doc.substvars -Pdebian/libgcrypt20-doc
+        chmod 0644 -- debian/libgcrypt20-doc/DEBIAN/control
+        chown 0:0 -- debian/libgcrypt20-doc/DEBIAN/control
+        install -m0755 -d debian/libgcrypt20-dev/DEBIAN
+        install -m0755 -d debian/.debhelper/libgcrypt20-dev/dbgsym-root/DEBIAN
+        dpkg-gencontrol -plibgcrypt20-dev -ldebian/changelog -Tdebian/libgcrypt20-dev.substvars -Pdebian/.debhelper/libgcrypt20-dev/dbgsym-root -UPre-Depends -URecommends -USuggests -UEnhances -UProvides -UEssential -UConflicts -DPriority=optional -UHomepage -UImportant -UBuilt-Using -DAuto-Built-Package=debug-symbols -UProtected -DPackage=libgcrypt20-dev-dbgsym "-DDepends=libgcrypt20-dev (= \${binary:Version})" "-DDescription=debug symbols for libgcrypt20-dev" "-DBuild-Ids=630a061decd5001bd93dd35722363eed025b1314 668a8375a03d6b17b7f41f38c59a2458ea1b8e2a fb90f3fccfb4cf23fd0830fec17f942c0af989d8" -DSection=debug -UMulti-Arch -UReplaces -UBreaks
+        dpkg-gencontrol: warning: package libgcrypt20-dev: substitution variable ${shlibs:Depends} unused, but is defined
+        chmod 0644 -- debian/.debhelper/libgcrypt20-dev/dbgsym-root/DEBIAN/control
+        chown 0:0 -- debian/.debhelper/libgcrypt20-dev/dbgsym-root/DEBIAN/control
+        dpkg-gencontrol -plibgcrypt20-dev -ldebian/changelog -Tdebian/libgcrypt20-dev.substvars -Pdebian/libgcrypt20-dev
+        dpkg-gencontrol: warning: package libgcrypt20-dev: substitution variable ${shlibs:Depends} unused, but is defined
+        chmod 0644 -- debian/libgcrypt20-dev/DEBIAN/control
+        chown 0:0 -- debian/libgcrypt20-dev/DEBIAN/control
+        install -m0755 -d debian/libgcrypt20/DEBIAN
+        install -m0755 -d debian/.debhelper/libgcrypt20/dbgsym-root/DEBIAN
+        dpkg-gencontrol -plibgcrypt20 -ldebian/changelog -Tdebian/libgcrypt20.substvars -Pdebian/.debhelper/libgcrypt20/dbgsym-root -UPre-Depends -URecommends -USuggests -UEnhances -UProvides -UEssential -UConflicts -DPriority=optional -UHomepage -UImportant -UBuilt-Using -DAuto-Built-Package=debug-symbols -UProtected -DPackage=libgcrypt20-dbgsym "-DDepends=libgcrypt20 (= \${binary:Version})" "-DDescription=debug symbols for libgcrypt20" -DBuild-Ids=8b97035b9bbc512bde064bc8fd5fdfa78645ccce -DSection=debug -UReplaces -UBreaks
+        chmod 0644 -- debian/.debhelper/libgcrypt20/dbgsym-root/DEBIAN/control
+        chown 0:0 -- debian/.debhelper/libgcrypt20/dbgsym-root/DEBIAN/control
+        dpkg-gencontrol -plibgcrypt20 -ldebian/changelog -Tdebian/libgcrypt20.substvars -Pdebian/libgcrypt20
+        chmod 0644 -- debian/libgcrypt20/DEBIAN/control
+        chown 0:0 -- debian/libgcrypt20/DEBIAN/control
+        install -m0755 -d debian/libgcrypt20-udeb/DEBIAN
+        dpkg-gencontrol -plibgcrypt20-udeb -ldebian/changelog -Tdebian/libgcrypt20-udeb.substvars -Pdebian/libgcrypt20-udeb
+        chmod 0644 -- debian/libgcrypt20-udeb/DEBIAN/control
+        chown 0:0 -- debian/libgcrypt20-udeb/DEBIAN/control
+        install -m0755 -d debian/libgcrypt-mingw-w64-dev/DEBIAN
+        dpkg-gencontrol -plibgcrypt-mingw-w64-dev -ldebian/changelog -Tdebian/libgcrypt-mingw-w64-dev.substvars -Pdebian/libgcrypt-mingw-w64-dev
+        dpkg-gencontrol: warning: Depends field of package libgcrypt-mingw-w64-dev: substitution variable ${shlibs:Depends} used, but is not defined
+        chmod 0644 -- debian/libgcrypt-mingw-w64-dev/DEBIAN/control
+        chown 0:0 -- debian/libgcrypt-mingw-w64-dev/DEBIAN/control
+
+
+Debian binary package control files - DEBIAN/control
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+
+`deb-control - Debian binary package control file format <https://manpages.debian.org/testing/dpkg-dev/deb-control.5.en.html>`_
+
+
+
+
+dh_builddeb - build Debian binary packages
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Refer to `dh_builddeb <https://manpages.debian.org/testing/debhelper/dh_builddeb.1.en.html>`_
+
+dh_builddeb: https://salsa.debian.org/debian/debhelper/-/blob/main/dh_builddeb?ref_type=heads
+
+
+.. code-block:: bash
+
+   root@33f22f60cb16:/usr/src/work-ssl/tmp/libgcrypt-1.10.1# dh_builddeb -O--builddirectory=build
+   dpkg-deb: building package 'libgcrypt20-doc' in '../libgcrypt20-doc_1.10.1-3elxr1_all.deb'.
+   dpkg-deb: building package 'libgcrypt20-dev' in '../libgcrypt20-dev_1.10.1-3elxr1_amd64.deb'.
+   dpkg-deb: building package 'libgcrypt20-dev-dbgsym' in '../libgcrypt20-dev-dbgsym_1.10.1-3elxr1_amd64.deb'.
+   dpkg-deb: building package 'libgcrypt20' in '../libgcrypt20_1.10.1-3elxr1_amd64.deb'.
+   dpkg-deb: building package 'libgcrypt20-dbgsym' in '../libgcrypt20-dbgsym_1.10.1-3elxr1_amd64.deb'.
+   dpkg-deb: building package 'libgcrypt20-udeb' in 'debian/.debhelper/scratch-space/build-libgcrypt20-udeb/libgcrypt20-udeb_1.10.1-3elxr1_amd64.deb'.
+           Renaming libgcrypt20-udeb_1.10.1-3elxr1_amd64.deb to libgcrypt20-udeb_1.10.1-3elxr1_amd64.udeb
+   dpkg-deb: building package 'libgcrypt-mingw-w64-dev' in '../libgcrypt-mingw-w64-dev_1.10.1-3elxr1_all.deb'.
+   		
+
+The **/usr/bin/dpkg-deb** is provided by dpkg package.
+
+gitlab: https://salsa.debian.org/dpkg-team/dpkg/-/tree/main/src/deb?ref_type=heads
+
+.. code-block:: bash
+
+   wrsadmin@pek-hliu4-d2:~/workspace/doc$ apt-file search /usr/bin/dpkg-deb
+   dpkg: /usr/bin/dpkg-deb 		
+
+   
+5. make the .buildinfo file, using dpkg-genbuildinfo
+----------------------------------------------------
+
+Refer to https://dyn.manpages.debian.org/testing/dpkg-dev/dpkg-genbuildinfo.1.en.html?
+
+
+.. code-block:: bash
+
+   dpkg-genbuildinfo -O../libgcrypt20_1.10.1-3elxr1_amd64.buildinfo		
+
+   
+.buildinfo: https://dyn.manpages.debian.org/testing/dpkg-dev/deb-buildinfo.5.en.html
+
+
+The **/usr/bin/dpkg-genbuildinfo** is provided by dpkg-dev package.
+
+.. code-block:: bash
+
+   wrsadmin@pek-hliu4-d2:~/workspace/doc$ apt-file search dpkg-genbuildinfo
+   dpkg-dev: /usr/bin/dpkg-genbuildinfo 		
+
+   
+   
+6. make the .changes file, using dpkg-genchanges
+------------------------------------------------
+
+Refer to https://dyn.manpages.debian.org/testing/dpkg-dev/dpkg-genchanges.1.en.html?
+
+.. code-block:: bash
+
+   dpkg-genchanges -O../libgcrypt20_1.10.1-3elxr1_amd64.changes
+
+.changes: https://dyn.manpages.debian.org/testing/dpkg-dev/deb-changes.5.en.html
+
+The **/usr/bin/dpkg-genchanges** is provided by dpkg-dev package.
+
+.. code-block:: bash
+
+   wrsadmin@pek-hliu4-d2:~/workspace/doc$ apt-file search dpkg-genchanges
+   dpkg-dev: /usr/bin/dpkg-genchanges		
+
+
+
+This file describes all the changes made in the current package revision; it is used by the Debian FTP archive maintenance programs to install the binary and source packages. It is partly generated from the changelog file and the .dsc file.
+
+As you keep working on the package, its behavior will change and new features will be added. People downloading your package can look at this file and quickly see what has changed   

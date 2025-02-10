@@ -1,0 +1,88 @@
+===============================================================
+ lintian errors: depends-on-obsolete-package Depends: lsb-base
+===============================================================
+
+
+.. contents:: Table of contents
+
+Errors
+======
+
+
+.. code-block:: console
+
+   E: memcached: depends-on-obsolete-package Depends: lsb-base
+   W: memcached source: build-depends-on-obsolete-package Build-Depends: pkg-config => pkgconf
+   W: memcached: debian-news-entry-has-unknown-version 1.5.1-1 [usr/share/doc/memcached/NEWS.Debian.gz:1]
+   I: memcached source: repackaged-source-not-advertised [debian/copyright]
+
+depends-on-obsolete-package
+===========================
+
+The package depends on a package that has been superseded. If the superseded package is part of an ORed group, it should not be the first package in the group.
+
+* list of `all the affected packages <https://udd.debian.org/lintian-tag.cgi?tag=depends-on-obsolete-package>`_
+* the `source <https://salsa.debian.org/lintian/lintian/-/blob/2.118.0/tags/d/depends-on-obsolete-package.tag>`_ of this tag
+ 
+  
+Official recommendation
+=======================
+
+
+::
+
+   On Wed, Jan 18, 2023 at 08:19:15AM -0800, Otto Kekäläinen wrote:
+   > Lintian just started erroring on 'depends-on-obsolete-package
+   > lsb-base' on many of my packages yesterday.
+   
+   It's a very low priority cleanup; the Depends is redundant but
+   harmless.
+   
+   > There are no new uploads of lsb-base recently
+   
+   Relevant changes are from September.  The lsb-base package is empty,
+   and would have been gone completely if debootstrap understood Provides.
+   
+   > and I did not find any news about this topic. The
+   > Lintian page https://lintian.debian.org/tags/depends-on-obsolete-package
+   > is only about the error in general, not any mention of lsb-base
+   > specific changes.
+   
+   The description of "$PACKAGE1 => $PACKAGE2" are clear enough, of
+   "$PACKAGE => nothing" a bit less, indeed.  You can just drop the dependency.
+   
+   > Does somebody know what is going on?
+   > 
+   > Example:
+   > E: mariadb-server: depends-on-obsolete-package Depends: lsb-base (>= 3.0-10)
+   
+   The severity of this warning is grossly overstated.  It shouldn't be an
+   "error" but a "mild warning to fix if you're bored".
+
+
+https://lists.debian.org/debian-devel/2023/01/msg00152.html
+
+
+.. tip::
+
+   **The lsb-base package is empty,and would have been gone completely if debootstrap understood Provides.**
+
+   
+
+Solution
+========
+
+
+commit `dca731cf836fde6418f4c3260a8b3d61802bb120 <https://salsa.debian.org/lamby/pkg-memcached/-/commit/dca731cf836fde6418f4c3260a8b3d61802bb120>`_ of pkg-memcached
+
+**debian/gitlab-ci.yml**
+
+.. code-block:: diff
+
+   include:
+   -- https://salsa.debian.org/salsa-ci-team/pipeline/raw/master/recipes/debian.yml
+
+  + lintian:
+  +    allow_failure: true
+   		
+   

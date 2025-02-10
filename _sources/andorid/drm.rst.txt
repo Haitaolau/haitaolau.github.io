@@ -1,0 +1,22 @@
+=========================
+Direct Rendering Manager
+=========================
+
+`https://en.wikipedia.org/wiki/Direct_Rendering_Manager#Kernel_mode_setting <https://en.wikipedia.org/wiki/Direct_Rendering_Manager#Kernel_mode_setting>`_
+
+`https://www.cnblogs.com/hankgo/p/15586441.html <https://www.cnblogs.com/hankgo/p/15586441.html>`_
+
+DRM是Direct Rendering Module的缩写，是DRI框架在kernel中的实现，负责管理GPU（或显卡，graphics card）及相应的graphics memory
+
+DRM提供一组API，用户空间程序可以使用该API将命令和数据发送到GPU并执行诸如配置显示器的模式设置之类的操作
+
+用户空间程序可以使用DRM API命令GPU执行硬件加速的3D渲染和视频解码以及GPU计算
+
+.. code-block:: console 
+
+   wrsadmin@pek-hliu4-d1:~/workspace/android$ ls /dev/dri/
+   by-path  card0  renderD128
+   wrsadmin@pek-hliu4-d1:~/workspace/android$
+
+
+

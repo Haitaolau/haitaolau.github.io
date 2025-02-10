@@ -1,0 +1,316 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>SMP IRQ Affinity &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Python" href="../python/index.html" />
+    <link rel="prev" title="Spinlock rules" href="rules_to_use_spinlock.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="smp-irq-affinity">
+<h1>SMP IRQ Affinity<a class="headerlink" href="#smp-irq-affinity" title="Permalink to this heading">¶</a></h1>
+<section id="background">
+<h2>Background:<a class="headerlink" href="#background" title="Permalink to this heading">¶</a></h2>
+<p>Whenever a piece of hardware, such as disk controller or ethernet card,
+needs attention from the CPU, it throws an interrupt.  The interrupt tells
+the CPU that something has happened and that the CPU should drop what
+it’s doing to handle the event.  In order to prevent mutliple devices from
+sending the same interrupts, the IRQ system was established where each device
+in a computer system is assigned its own special IRQ so that its interrupts
+are unique.</p>
+<p>Starting with the 2.4 kernel, Linux has gained the ability to assign certain
+IRQs to specific processors (or groups of processors).  This is known
+as SMP IRQ affinity, and it allows you control how your system will respond
+to various hardware events.  It allows you to restrict or repartition
+the work load that you server must do so that it can more efficiently do
+it’s job.</p>
+<p>Obviously, in order for this to work, you will need a system that has more
+than one processor (SMP).  You will also need to be running a 2.4 or higher
+kernel.</p>
+<p>Some brief and very bare information on SMP IRQ affinity is provided in
+the kernel source tree of the 2.4 kernel in the file:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">/usr/src/linux-2.4/Documentation/IRQ-affinity.txt</span>
+</pre></div>
+</div>
+</section>
+<section id="how-to-use-it">
+<h2>How to use it<a class="headerlink" href="#how-to-use-it" title="Permalink to this heading">¶</a></h2>
+<p>SMP affinity is controlled by manipulating files in the /proc/irq/ directory.
+In /proc/irq/ are directories that correspond to the IRQs present on your
+system (not all IRQs may be available). In each of these directories is
+the “smp_affinity” file, and this is where we will work our magic.</p>
+<p>The first order of business is to figure out what IRQ a device is using.
+This information is available in the /proc/interrupts file.  Here’s a sample:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">[root@archimedes /proc]# </span>cat /proc/interrupts
+<span class="go">           CPU0       CPU1       CPU2       CPU3</span>
+<span class="go">  0:    4865302    5084964    4917705    5017077    IO-APIC-edge  timer</span>
+<span class="go">  1:        132        108        159        113    IO-APIC-edge  keyboard</span>
+<span class="go">  2:          0          0          0          0          XT-PIC  cascade</span>
+<span class="go">  8:          0          1          0          0    IO-APIC-edge  rtc</span>
+<span class="go"> 10:          0          0          0          0   IO-APIC-level  usb-ohci</span>
+<span class="go"> 14:          0          0          1          1    IO-APIC-edge  ide0</span>
+<span class="go"> 24:      87298      86066      86012      86626   IO-APIC-level  aic7xxx</span>
+<span class="go"> 31:      93707     106211     107988      93329   IO-APIC-level  eth0</span>
+<span class="go">NMI:          0          0          0          0</span>
+<span class="go">LOC:   19883500   19883555   19883441   19883424</span>
+<span class="go">ERR:          0</span>
+<span class="go">MIS:          0</span>
+</pre></div>
+</div>
+<p>As you can see, this is a 4 processor machine.  The first column (unlabelled)
+lists the IRQs used on the system.  The rows with letters (ie, “NMI”, “LOC”)
+are parts of other drivers used on the system and aren’t really accessible
+to us, so we’ll just ignore them.</p>
+<p>The second through fifth columns (labelled CPU0-CPU3) show the number of times
+the corresponding process has handled an interrupt from that particular IRQ.
+For example, all of the CPUs have handled roughly the same number of interrupts
+for IRQ 24 (around 86,000 with CPU0 handling a little over 87,000).</p>
+<p>The sixth column lists whether or not the device driver associated with the
+interrupt supports IO-APIC (see /usr/src/linux/Documentation/i386/IO-APIC.txt
+for more information).  The only reason to look at this value is that
+SMP affinity will only work for IO-APIC enabled device drivers.  For
+example, we will not be able to change the affinity for the “cascade”
+driver (IRQ 2) because it doesn’t support IO-APIC.</p>
+<p>Finally, the seventh and last column lists the driver or device that is
+associated with the interrupt.  In the above example, our ethernet card
+(eth0) is using IRQ 31, and our SCSI controller (aic7xxx) is using IRQ 24.</p>
+<p>The first and last columns are really the only ones we’re interested in here.
+For the rest of this example, I’m going to assume that we want to adjust
+the SMP affinity for th SCSI controller (IRQ 24).</p>
+<p>Now that we’ve got the IRQ, we can change the processor affinity.  To
+do this, we’ll go into the /proc/irq/24/ directory, and see what the
+affinity is currently set to:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">[root@archimedes Documentation]# </span>cat /proc/irq/24/smp_affinity
+<span class="go">ffffffff</span>
+</pre></div>
+</div>
+<p>This is a bitmask that represents which processors any interrupts on IRQ
+24 should be routed to.  Each field in the bit mask corresponds to a processor.
+The number held in the “smp_affinity” file is presented in hexadecimal format,
+so in order to manipulate it properly we will need to convert our bit patterns
+from binary to hex before setting them in the proc file.</p>
+<p>Each of the “f”s above represents a group of 4 CPUs, with the rightmost
+group being the least significant.  For the purposes of our discussion,
+we’re going to limit ourselves to only the first 4 CPUs (although we can
+address up to 32).</p>
+<p>In short, this means you only have to worry about the rightmost “f” and you
+can assume everything else is a “0” (ie, our bitmask is “0000000f”).</p>
+<p>“f” is the hexadecimal represenatation for the decimal number 15 (fifteen)
+and the binary pattern of “1111”.  Each of the places in the binary pattern
+corresponds to a CPU in the server, which means we can use the following
+chart to represent the CPU bit patterns:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">CPU      Binary       Hex</span>
+<span class="go">CPU 0    0001         1</span>
+<span class="go">CPU 1    0010         2</span>
+<span class="go">CPU 2    0100         4</span>
+<span class="go">CPU 3    1000         8</span>
+</pre></div>
+</div>
+<p>By combining these bit patterns (basically, just adding the Hex values), we
+can address more than one processor at a time.   For example, if I wanted
+to talk to both CPU0 and CPU2 at the same time, the result is:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">CPU      Binary       Hex</span>
+<span class="go">CPU 0    0001         1</span>
+<span class="go">CPU 2    0100         4</span>
+<span class="go">-----------------------</span>
+<span class="go">both     0101         5</span>
+</pre></div>
+</div>
+<p>If I want to address all four of the processors at once, then the result is:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">CPU      Binary       Hex</span>
+<span class="go">CPU 0    0001         1</span>
+<span class="go">CPU 1    0010         2</span>
+<span class="go">CPU 2    0100         4</span>
+<span class="go">CPU 3    1000         8</span>
+<span class="go">-----------------------</span>
+<span class="go">both     1111         f</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>(Remember that we use the letters “a” through “f” to represent the numbers</dt><dd><p>“10” to “15” in hex notation).</p>
+</dd>
+</dl>
+<p>Given that, we now know that if we have a four processor system, we can
+assign any of 15 different CPU combinations to an IRQ (it would be 16, but
+it isn’t legal to assign an IRQ affinity of “0” to any IRQ… if you try,
+Linux will just ignore your attempt).</p>
+<p>So.  Now we get to the fun part.  Remember in our /proc/interrupts listing
+above that all four of our CPUs had handled the close to the same amount of
+interrupts for our SCSI card?  We now have the tools needed to limit managing
+the SCSI card to just one processor and leave the other three free to
+concentrate on doing other tasks.   Let’s assume that we want to dedicate
+our first CPU (CPU0) to handling the SCSI controller interrupts.  To do this,
+we would simply run the following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">[root@archimedes /proc]# </span><span class="nb">echo</span> <span class="m">1</span> &gt; /proc/irq/24/smp_affinity
+<span class="gp">[root@archimedes /proc]# </span>cat /proc/irq/24/smp_affinity
+<span class="go">00000001</span>
+</pre></div>
+</div>
+<p>Now, let’s test it out and see what happens:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">[root@archimedes /proc]# </span><span class="nb">cd</span> /tmp/
+<span class="gp">[root@archimedes /tmp]# </span>tar -zcf test.tgz /usr/src/linux-2.4.2
+<span class="go">tar: Removing leading `/&#39; from member names</span>
+<span class="gp">[root@archimedes /tmp]# </span>tar -zxf test.tgz <span class="o">&amp;&amp;</span> rm -rf usr/
+<span class="gp">[root@archimedes /tmp]# </span>tar -zxf test.tgz <span class="o">&amp;&amp;</span> rm -rf usr/
+<span class="gp">[root@archimedes /tmp]# </span>tar -zxf test.tgz <span class="o">&amp;&amp;</span> rm -rf usr/
+<span class="gp">[root@archimedes /tmp]# </span>tar -zxf test.tgz <span class="o">&amp;&amp;</span> rm -rf usr/
+<span class="gp">[root@archimedes /tmp]# </span>tar -zxf test.tgz <span class="o">&amp;&amp;</span> rm -rf usr/
+<span class="gp">[root@archimedes /tmp]# </span>cat /proc/interrupts <span class="p">|</span> grep <span class="m">24</span>:
+<span class="go"> 24:      99719      86067      86012      86627   IO-APIC-level  aic7xxx</span>
+</pre></div>
+</div>
+<p>Compare that to the previous run without having the IRQ bound to CPU0:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">24:      87298      86066      86012      86626   IO-APIC-level  aic7xxx</span>
+</pre></div>
+</div>
+<p>All of the interrupts from the disk controller are now handled exclusively
+by the first CPU (CPU0), which means that our other 3 proccessors are free
+to do other stuff now.</p>
+<p>Finally, it should be pointed out that if you decide you no longer want
+SMP affinity and would rather have the system revert back to the old set up,
+then you can simply do:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">[root@archimedes /tmp]# </span>cat /proc/irq/prof_cpu_mask &gt;/proc/irq/24/smp_affinity
+</pre></div>
+</div>
+<p>This will reset the “smp_affinity” file to use all “f”s, and will return to
+the load sharing arrangement that we saw earlier.</p>
+</section>
+<section id="what-can-i-use-it-for">
+<h2>What can I use it for?<a class="headerlink" href="#what-can-i-use-it-for" title="Permalink to this heading">¶</a></h2>
+<blockquote>
+<div><dl class="simple">
+<dt>“balance” out multiple NICs in a multi-processor machine.  By tying a single</dt><dd><p>NIC to a single CPU, you should be able to scale the amount of traffic
+your server can handle nicely.</p>
+</dd>
+<dt>database servers (or servers with lots of disk storage) that also have</dt><dd><p>heavy network loads can dedicate a CPU to their disk controller and assign
+another to deal with the NIC to help improve response times.</p>
+</dd>
+</dl>
+</div></blockquote>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cmds/index.html">Commands</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Linux Kernel</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="debug_gdb.html">Debugging linux kernel with GDB and Qemu</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iommu.html">IOMMU</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rules_to_use_spinlock.html">Spinlock rules</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">SMP IRQ Affinity</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#background">Background:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#how-to-use-it">How to use it</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#what-can-i-use-it-for">What can I use it for?</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cplus/index.html">Cplus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Linux Kernel</a><ul>
+      <li>Previous: <a href="rules_to_use_spinlock.html" title="previous chapter">Spinlock rules</a></li>
+      <li>Next: <a href="../python/index.html" title="next chapter">Python</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/kernel/SMP-affinity.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

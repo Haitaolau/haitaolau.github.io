@@ -1,0 +1,29 @@
+==================================================
+ How to install build dependencies for packages ?
+==================================================
+
+
+Install the build-dependencies on the host system (or in the chroot):
+
+.. code-block:: bash
+
+   apt build-dep debian-installer
+
+
+Verify that the build dependencies are all met using dpkg-checkbuilddeps. You may still see something like:
+
+.. code-block:: bash
+
+   $ dpkg-checkbuilddeps
+
+   dpkg-checkbuilddeps: Unmet build dependencies: grep-dctrl debiandoc-sgml glibc-pic libparted1.6-13 libslang2-pic
+
+which means some build dependencies are still missing. Correct this by installing the missing packages, for example:
+
+
+.. code-block:: bash
+
+   aptitude install -R grep-dctrl debiandoc-sgml [...]
+
+
+   

@@ -1,0 +1,21 @@
+============
+swap
+============
+
+
+Swap
+--------
+
+
+.. code-block:: cpp
+
+     void swap(deque& __x) {
+    __STD::swap(_M_start, __x._M_start);
+    __STD::swap(_M_finish, __x._M_finish);
+    __STD::swap(_M_map, __x._M_map);
+    __STD::swap(_M_map_size, __x._M_map_size);
+  }
+ 
+只需要将迭代器和map的指针和大小进行交换就可以，申请的空间不用移动，也不需要copy
+
+S

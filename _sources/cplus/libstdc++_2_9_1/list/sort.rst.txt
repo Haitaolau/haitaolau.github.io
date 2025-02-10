@@ -1,0 +1,387 @@
+=========
+sort
+=========
+
+
+Syntax
+---------
+
+.. code-block:: cpp
+
+   template <class _Tp, class _Alloc>
+   void list<_Tp, _Alloc>::sort()
+   {
+     // Do nothing if the list has length 0 or 1.
+       if (_M_node->_M_next != _M_node && _M_node->_M_next->_M_next != _M_node) {
+           list<_Tp, _Alloc> __carry;
+           list<_Tp, _Alloc> __counter[64];
+           int __fill = 0;
+           while (!empty()) {
+              __carry.splice(__carry.begin(), *this, begin());
+              int __i = 0;
+              while(__i < __fill && !__counter[__i].empty()) {
+                __counter[__i].merge(__carry);
+                __carry.swap(__counter[__i++]);
+              }
+              __carry.swap(__counter[__i]);         
+              if (__i == __fill) ++__fill;
+           } 
+
+           for (int __i = 1; __i < __fill; ++__i)
+             __counter[__i].merge(__counter[__i-1]);
+           swap(__counter[__fill-1]);
+        }
+    }
+
+Example
+---------------
+
+.. image:: ../../../_static/image/list_sort1.jpg
+
+
+1. get 4 
+++++++++++++++
+
+调用 __carry.splice(__carry.begin(), \*this, begin()) 将元素4挂在到carry上
+
+
+.. image:: ../../../_static/image/list_sort01.jpg
+
+
+由于i=0 and _fill=0,所以不会进入while循环，不会走2，3. 但是会直接调用4
+
+.. code-block:: cpp
+
+   __carry.swap(__counter[__i])
+
+将元素4 从__carry移动到__counter[0]上
+
+.. image:: ../../../_static/image/list_sort02.jpg
+
+由于i=0 and _fill=0, _fill ++
+
+.. code-block:: cpp
+
+   if (__i == __fill) ++__fill;
+
+.. image:: ../../../_static/image/list_sort04.jpg
+
+2. get 2
+++++++++++++++
+
+调用 __carry.splice(__carry.begin(), \*this, begin()) 将元素2挂在到carry上
+
+
+.. image:: ../../../_static/image/list_sort03.jpg
+
+此时i=0，_fill =1, 并且__counter[0]不为空,所以进入while循环执行2,3
+
+.. code-block:: cpp
+    
+   __counter[__i].merge(__carry);
+
+.. image:: ../../../_static/image/list_sort05.jpg
+
+将_counter[0]的内容交换到_carry上
+
+同时i++
+
+.. code-block:: cpp
+
+   __carry.swap(__counter[__i++]);
+
+
+.. image:: ../../../_static/image/list_sort06.jpg
+
+此时i=1
+fill=1,不满足进入while的条件，所以直接执行4,将__carry的内容move到__counter[1]上，并且将fill加
+
+所以此时_fill point to __counter[2]
+
+.. code-block:: cpp
+
+   __carry.swap(__counter[__i]);         
+   if (__i == __fill) ++__fill;
+
+
+.. image:: ../../../_static/image/list_sort07.jpg
+
+3. get 1
+++++++++++++++
+
+调用 __carry.splice(__carry.begin(), \*this, begin()) 将元素1挂在到carry上
+
+
+.. image:: ../../../_static/image/list_sort08.jpg
+
+
+此时i=0 fill=2,但是__counter[0] 为空，不满足进入while的条件，所以直接执行4,将__carry的内容move到__counter[0]
+
+
+.. image:: ../../../_static/image/list_sort09.jpg
+
+
+4. get 5
+++++++++++++++
+
+调用 __carry.splice(__carry.begin(), \*this, begin()) 将元素5挂在到carry上
+
+.. image:: ../../../_static/image/list_sort10.jpg
+
+
+此时i=0 fill=2,但是__counter[0] 不为空，满足进入while的条件，所以执行2,3
+
+将__carry的内容merge到__counter[0]
+
+.. code-block:: cpp
+    
+   __counter[__i].merge(__carry);
+
+
+.. image:: ../../../_static/image/list_sort11.jpg
+
+
+将_counter[0]的内容交换到_carry上
+
+同时i++
+
+.. code-block:: cpp
+
+   __carry.swap(__counter[__i++]);
+
+
+.. image:: ../../../_static/image/list_sort12.jpg
+
+
+此时i=1 fill=2,但是__counter[1] 不为空，满足进入while的条件，所以执行2,3
+
+将__carry的内容merge到__counter[1]
+
+.. code-block:: cpp
+    
+   __counter[__i].merge(__carry);
+
+
+.. image:: ../../../_static/image/list_sort13.jpg
+
+将_counter[1]的内容交换到_carry上
+
+同时i++
+
+.. code-block:: cpp
+
+   __carry.swap(__counter[__i++]);
+
+
+.. image:: ../../../_static/image/list_sort14.jpg
+
+
+
+此时i=2 fill=2,，不满足进入while的条件，所以直接执行4,将__carry的内容move到__counter[2]
+由于i=fill，所以_fill ++ 则_fill的值为3
+
+
+.. code-block:: cpp
+
+   __carry.swap(__counter[__i]);         
+   if (__i == __fill) ++__fill;
+
+.. image:: ../../../_static/image/list_sort15.jpg
+
+
+5. get 7
+++++++++++++++
+
+调用 __carry.splice(__carry.begin(), \*this, begin()) 将元素7挂在到carry上
+
+.. image:: ../../../_static/image/list_sort16.jpg
+
+此时i=0 fill=3,但是__counter[0] 为空，不满足进入while的条件，所以直接执行4,将__carry的内容move到__counter[0]
+
+.. code-block:: cpp
+
+   __carry.swap(__counter[__i]);         
+
+
+.. image:: ../../../_static/image/list_sort17.jpg
+
+6. get 6
+++++++++++++++
+
+调用 __carry.splice(__carry.begin(), \*this, begin()) 将元素6挂在到carry上
+
+
+.. image:: ../../../_static/image/list_sort18.jpg
+
+
+此时i=0 fill=3,但是__counter[0] 不为空，满足进入while的条件，所以执行2,3
+
+将__carry的内容merge到__counter[0]
+
+.. code-block:: cpp
+    
+   __counter[__i].merge(__carry);
+
+
+.. image:: ../../../_static/image/list_sort19.jpg
+
+
+将_counter[0]的内容交换到_carry上
+
+同时i++
+
+.. code-block:: cpp
+
+   __carry.swap(__counter[__i++]);
+
+
+.. image:: ../../../_static/image/list_sort20.jpg
+
+
+
+此时i=1 fill=3,但是__counter[1] 为空，不满足进入while的条件，所以直接执行4,将__carry的内容move到__counter[1]
+
+.. code-block:: cpp
+
+   __carry.swap(__counter[__i]);         
+
+
+.. image:: ../../../_static/image/list_sort21.jpg
+
+7. get 9
+++++++++++++++
+
+调用 __carry.splice(__carry.begin(), \*this, begin()) 将元素9挂在到carry上
+
+
+.. image:: ../../../_static/image/list_sort22.jpg
+
+
+此时i=0 fill=3,但是__counter[0] 为空，不满足进入while的条件，所以直接执行4,将__carry的内容move到__counter[0]
+
+.. code-block:: cpp
+
+   __carry.swap(__counter[__i]);         
+
+
+.. image:: ../../../_static/image/list_sort23.jpg
+
+
+8. get 10
+++++++++++++++
+
+调用 __carry.splice(__carry.begin(), \*this, begin()) 将元素10挂在到carry上
+
+
+.. image:: ../../../_static/image/list_sort24.jpg
+
+此时i=0 fill=3,但是__counter[0] 不为空，满足进入while的条件，所以执行2,3
+
+将__carry的内容merge到__counter[0]
+
+.. code-block:: cpp
+    
+   __counter[__i].merge(__carry);
+
+
+.. image:: ../../../_static/image/list_sort25.jpg
+
+将_counter[0]的内容交换到_carry上
+
+同时i++
+
+.. code-block:: cpp
+
+   __carry.swap(__counter[__i++]);
+
+
+.. image:: ../../../_static/image/list_sort26.jpg
+
+此时i=1 fill=3,但是__counter[1] 不为空，满足进入while的条件，所以执行2,3
+
+将__carry的内容merge到__counter[1]
+
+.. code-block:: cpp
+    
+   __counter[__i].merge(__carry);
+
+
+.. image:: ../../../_static/image/list_sort27.jpg
+
+将_counter[1]的内容交换到_carry上
+
+同时i++
+
+.. code-block:: cpp
+
+   __carry.swap(__counter[__i++]);
+
+
+.. image:: ../../../_static/image/list_sort28.jpg
+
+此时i=2 fill=3,但是__counter[2] 不为空，满足进入while的条件，所以执行2,3
+
+将__carry的内容merge到__counter[2]
+
+
+.. code-block:: cpp
+    
+   __counter[__i].merge(__carry);
+
+
+.. image:: ../../../_static/image/list_sort29.jpg
+
+将_counter[2]的内容交换到_carry上
+
+同时i++
+
+.. code-block:: cpp
+
+   __carry.swap(__counter[__i++]);
+
+
+.. image:: ../../../_static/image/list_sort30.jpg
+
+此时i=3 fill=3,，不满足进入while的条件，所以直接执行4,将__carry的内容move到__counter[3]
+
+.. code-block:: cpp
+
+   __carry.swap(__counter[__i]);         
+
+
+.. image:: ../../../_static/image/list_sort31.jpg
+
+9. get 8
+++++++++++++++
+
+调用 __carry.splice(__carry.begin(), \*this, begin()) 将元素8挂在到carry上
+
+
+.. image:: ../../../_static/image/list_sort32.jpg
+
+此时i=0 fill=4,但是__counter[0] 为空，不满足进入while的条件，所以直接执行4,将__carry的内容move到__counter[0]
+
+.. code-block:: cpp
+
+   __carry.swap(__counter[__i]);         
+
+
+.. image:: ../../../_static/image/list_sort33.jpg
+
+
+10. end
++++++++++++++++++++
+
+链表这个时候已经遍历完了，程序会直接执行5，6的步骤，将所有的counter合并，此时只要counter0和counter3存在数据
+
+
+.. code-block:: cpp
+
+   for (int __i = 1; __i < __fill; ++__i)
+         __counter[__i].merge(__counter[__i-1]);
+   swap(__counter[__fill-1]);
+
+
+.. image:: ../../../_static/image/list_sort34.jpg
+.. image:: ../../../_static/image/list_sort35.jpg
+.. image:: ../../../_static/image/list_sort36.jpg

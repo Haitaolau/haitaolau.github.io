@@ -1,0 +1,72 @@
+=======
+Insert
+=======
+
+
+insert(iterator, const value_type&)
+=====================================
+
+在某个点之前插入一个元素
+
+.. code-block:: cpp
+
+  iterator insert(iterator position, const value_type& __x) {
+    if (position._M_cur == _M_start._M_cur) { //如果插入点是deque的最前端
+      push_front(__x);
+      return _M_start;
+    }
+    else if (position._M_cur == _M_finish._M_cur) { //如果插入点是deque的最末端
+      push_back(__x);
+      iterator __tmp = _M_finish;
+      --__tmp; // --tmp._M_cur
+      return __tmp;
+    }
+    else {
+      return _M_insert_aux(position, __x);
+    }
+  }
+  
+  
+:ref: `_M_insert_aux <M_insert_aux>`
+
+.. _M_insert_aux:
+
+_M_insert_aux
+==================
+
+
+.. code-block:: cpp
+
+	template <class _Tp, class _Alloc>
+	typename deque<_Tp, _Alloc>::iterator
+	deque<_Tp,_Alloc>::_M_insert_aux(iterator __pos, const value_type& __x)
+	{
+	  //获得插入点之前的元素个数
+	  difference_type __index = __pos - _M_start; 
+	  value_type __x_copy = __x;
+	  //如果插入点之前的元素比较少，在deque的前半部分中
+	  if (static_cast<size_type>(__index) < size() / 2) {
+	    push_front(front());
+	    iterator __front1 = _M_start;
+	    ++__front1;
+	    iterator __front2 = __front1;
+	    ++__front2;
+	    __pos = _M_start + __index;
+	    iterator __pos1 = __pos;
+	    ++__pos1;
+	    copy(__front2, __pos1, __front1);
+	  }
+	  else {
+	   //如果插入点之后的元素比较少，在deque的后半部分中
+	    push_back(back());
+	    iterator __back1 = _M_finish;
+	    --__back1;
+	    iterator __back2 = __back1;
+	    --__back2;
+	    __pos = _M_start + __index;
+	    copy_backward(__pos, __back2, __back1);
+	  }
+	  *__pos = __x_copy;
+	  return __pos;
+	}  
+  

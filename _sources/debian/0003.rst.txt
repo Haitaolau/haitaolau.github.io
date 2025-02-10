@@ -1,0 +1,35 @@
+=====================================
+ How to Search for Debian package?
+=====================================
+
+
+1. Use apt-cache (available since Debian 2.2)
+=============================================
+
+apt-cache allows searching rapidly among the entire list of available Debian packages. The most current usage is to use the "search" option with a rational expression as a parameter.
+
+
+.. code-block:: console
+
+   root@localhost:~# apt-cache search xfce4-about
+   libxfce4ui-utils - Utility files for libxfce4ui
+   root@localhost:~# whereis xfce4-about
+   xfce4-about: /usr/bin/xfce4-about /usr/share/man/man1/xfce4-about.1.gz
+   root@localhost:~# apt-cache search xfce4-about
+   libxfce4ui-utils - Utility files for libxfce4ui
+   root@localhost:~# 
+
+
+2. Using apt
+============
+
+
+.. code-block:: console
+
+   root@32b81b5fc0ca:/usr/src/lsb-11.6# apt search lsb-base
+   Sorting... Done
+   Full Text Search... Done
+   lsb-base/stable,now 11.6 all [installed]
+     transitional package for Linux Standard Base init script functionality
+   
+   

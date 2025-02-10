@@ -1,0 +1,10 @@
+==========
+UML
+==========
+
+
+.. toctree::
+   :maxdepth: 2
+
+   class_diagram
+

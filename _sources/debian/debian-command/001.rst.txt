@@ -1,0 +1,29 @@
+===================
+ apt-cache: policy
+===================
+
+
+apt-cache policy
+-------------------
+
+
+Specifying the package name will show whether the package is installed, which version is available from which repository and its priority. By default, each installed package version has a priority of 100 and a non-installed package has a priority of 500.
+
+
+
+.. code-block:: console
+
+   root@localhost:~# apt-cache policy desktop-base
+   desktop-base:
+     Installed: 12.0.7elxr2
+     Candidate: 12.0.7elxr2
+     Version table:
+    *** 12.0.7elxr2 900
+           900 http://mirror.elxr.dev/elxr aria/main amd64 Packages
+           100 /usr/share/dpkg/database/status
+        12.0.7elxr1 900
+           900 http://mirror.elxr.dev/elxr aria/main amd64 Packages
+        12.0.6+nmu1~deb12u1 500
+           500 http://deb.debian.org/debian bookworm/main amd64 Packages
+   
+   	

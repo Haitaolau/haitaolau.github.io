@@ -1,0 +1,28 @@
+=============
+Enable ptest
+=============
+
+
+
+WRL1022 ptest
+--------------------
+
+.. code-block:: console 
+
+    EXTRA_IMAGE_FEATURES:append = " dbg-pkgs"
+    DISTRO_FEATURES:append = " ptest"
+    EXTRA_IMAGE_FEATURES += "ptest-pkgs"
+    IMAGE_FSTYPES:remove += " hddimg live"
+    IMAGE_INSTALL:append += " ptest-runner openssl-ptest"
+
+Yocto ptest
+--------------------
+
+.. code-block:: console 
+
+    DISTRO_FEATURES:append = " ptest"
+    EXTRA_IMAGE_FEATURES += "ptest-pkgs"
+
+
+
+

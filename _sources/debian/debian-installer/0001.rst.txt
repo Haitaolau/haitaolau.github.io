@@ -1,0 +1,77 @@
+===================================================
+ Debian-Installer: Building the installer yourself
+===================================================
+
+
+
+Refer to https://wiki.debian.org/DebianInstaller/Build
+
+
+Get the source
+==============
+
+
+.. code-block:: console
+
+   git clone https://salsa.debian.org/installer-team/debian-installer.git
+
+   git checkout bookworm
+
+
+Preparing the build system
+==========================
+
+
+*  Change to the directory installer/ under your TOP directory.
+
+*  Read build/README
+
+*  Install the build-dependencies on the host system (or in the chroot):
+
+
+.. code-block:: console
+
+   apt build-dep debian-installer
+
+
+*  Verify that the build dependencies are all met using dpkg-checkbuilddeps. You may still see something like:    
+
+
+.. code-block:: console
+
+   dpkg-checkbuilddeps
+
+
+Building an image
+=================
+
+
+.. code-block:: console
+		
+   harrison@debian-build:~/debian-installer$ ls
+
+   build  build-stamp  debian  doc
+   harrison@debian-build:~/debian-installer$ fakeroot debian/rules binary-arch
+
+   ....
+
+   ....
+
+   ./installer-amd64/20230607+deb12u6/images/netboot/xen/vmlinuz
+   ./installer-amd64/20230607+deb12u6/images/udeb.list
+   ./installer-amd64/current
+   dpkg-distaddfile debian-installer-images_20230607+deb12u6_amd64.tar.gz raw-installer -
+
+Get the tar.gz from your home directory
+
+.. code-block:: console
+
+   harrison@debian-build:~/debian-installer$ ls ~/ -lh
+   total 908M
+   drwxr-xr-x 9 harrison harrison 4.0K Jul 17 18:29 debian-cd
+   drwxr-xr-x 6 harrison harrison 4.0K Jul 17 23:24 debian-installer
+   -rw-r--r-- 1 harrison harrison 656K Jul 17 23:37 debian-installer_20230607+deb12u6_amd64.deb
+   -rw-r--r-- 1 harrison harrison 908M Jul 17 23:37 debian-installer-images_20230607+deb12u6_amd64.tar.gz
+   -rw-r--r-- 1 root     root      458 Jul 17 01:16 sources.list
+   harrison@debian-build:~/debian-installer$ 
+		

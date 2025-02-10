@@ -1,0 +1,780 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Qemu: Virtio-net Envrionment &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Qemu: Virtio_net_pci" href="0007.html" />
+    <link rel="prev" title="Introduction to VirtIO" href="0005.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="qemu-virtio-net-envrionment">
+<span id="virtio-net-envrionment"></span><h1><a class="toc-backref" href="#id1" role="doc-backlink">Qemu: Virtio-net Envrionment</a><a class="headerlink" href="#qemu-virtio-net-envrionment" title="Permalink to this heading">¶</a></h1>
+<nav class="contents" id="tables-of-contents">
+<p class="topic-title">Tables of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#qemu-virtio-net-envrionment" id="id1">Qemu: Virtio-net Envrionment</a></p>
+<ul>
+<li><p><a class="reference internal" href="#the-commands-to-start-qemu" id="id2">The commands to start Qemu</a></p></li>
+<li><p><a class="reference internal" href="#the-pci-bus-topology" id="id3">The PCI bus topology</a></p></li>
+<li><p><a class="reference internal" href="#initialize-virtio-net-pci-instance" id="id4">initialize virtio_net_pci instance</a></p>
+<ul>
+<li><p><a class="reference internal" href="#function-qdev-device-add" id="id5">function: qdev_device_add</a></p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+<section id="the-commands-to-start-qemu">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">The commands to start Qemu</a><a class="headerlink" href="#the-commands-to-start-qemu" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">/usr/bin/qemu-system-x86_64  \</span>
+<span class="go">     -machine pc-i440fx-1.7,accel=kvm,usb=off,dump-guest-core=off \</span>
+<span class="go">     -boot strict=on -kernel /run/media/sda1/study/bzImage -append &quot;console=ttyS0 root=/dev/vda rw &quot;\</span>
+<span class="go">     -drive file=/run/media/sda1/study/wrlinux-image-std-intel-x86-64.ext4,format=raw,if=none,id=drive-virtio-disk0,cache=none \</span>
+<span class="go">     -device virtio-blk-pci,scsi=off,bus=pci.0,addr=0x3,drive=drive-virtio-disk0,id=virtio-disk0,bootindex=1,write-cache=on  \</span>
+<span class="go">     -netdev tap,id=mynet0,ifname=tap0,script=no,downscript=no \</span>
+<span class="go">     -device virtio-net-pci,netdev=mynet0,id=net0,mac=52:54:00:61:20:46,bus=pci.0,addr=0x4 \</span>
+<span class="go">     -vnc :0 -monitor stdio</span>
+</pre></div>
+</div>
+<p><strong>-netdev</strong> 定义一个网卡后端设备，这里tap表示使用tap设备作为后端，</p>
+<p><strong>ifname</strong> 表示tap设备的名称</p>
+<p><strong>script</strong> 表示虚拟机打开tap网卡的时候，需要执行的脚本</p>
+<p><strong>downscript</strong> 表示虚拟机在关闭的时候需要执行的脚本，这里都设置为no，表示不需要执行额外的操作。</p>
+<p>这里我们创建一个网路设备，-device virtio-net-pci</p>
+<p>Qemu 会在main函数中对所有-device的参数进行具体化, 设备的具体化函数一般都是device_set_realized</p>
+</section>
+<section id="the-pci-bus-topology">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">The PCI bus topology</a><a class="headerlink" href="#the-pci-bus-topology" title="Permalink to this heading">¶</a></h2>
+<img alt="../../_images/virtio-pci-device.jpg" src="../../_images/virtio-pci-device.jpg" />
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(qemu)</span> <span class="go">info sev</span>
+<span class="go">SEV is not enabled</span>
+<span class="gp gp-VirtualEnv">(qemu)</span> <span class="go">info pci</span>
+<span class="go">  Bus  0, device   0, function 0:</span>
+<span class="go">    Host bridge: PCI device 8086:1237</span>
+<span class="go">      PCI subsystem 1af4:1100</span>
+<span class="go">      id &quot;&quot;</span>
+<span class="go">  Bus  0, device   1, function 0:</span>
+<span class="go">    ISA bridge: PCI device 8086:7000</span>
+<span class="go">      PCI subsystem 1af4:1100</span>
+<span class="go">      id &quot;&quot;</span>
+<span class="go">  Bus  0, device   1, function 1:</span>
+<span class="go">    IDE controller: PCI device 8086:7010</span>
+<span class="go">      PCI subsystem 1af4:1100</span>
+<span class="go">      BAR4: I/O at 0xc060 [0xc06f].</span>
+<span class="go">      id &quot;&quot;</span>
+<span class="go">  Bus  0, device   1, function 3:</span>
+<span class="go">    Bridge: PCI device 8086:7113</span>
+<span class="go">      PCI subsystem 1af4:1100</span>
+<span class="go">      IRQ 9.</span>
+<span class="go">      id &quot;&quot;</span>
+<span class="go">  Bus  0, device   2, function 0:</span>
+<span class="go">    VGA controller: PCI device 1013:00b8</span>
+<span class="go">      PCI subsystem 1af4:1100</span>
+<span class="go">      BAR0: 32 bit prefetchable memory at 0xfc000000 [0xfdffffff].</span>
+<span class="go">      BAR1: 32 bit memory at 0xfebd0000 [0xfebd0fff].</span>
+<span class="go">      BAR6: 32 bit memory at 0xffffffffffffffff [0x0000fffe].</span>
+<span class="go">      id &quot;&quot;</span>
+<span class="go">  Bus  0, device   3, function 0:</span>
+<span class="go">    SCSI controller: PCI device 1af4:1001</span>
+<span class="go">      PCI subsystem 1af4:0002</span>
+<span class="go">      IRQ 11.</span>
+<span class="go">      BAR0: I/O at 0xc000 [0xc03f].</span>
+<span class="go">      BAR1: 32 bit memory at 0xfebd1000 [0xfebd1fff].</span>
+<span class="go">      id &quot;virtio-disk0&quot;</span>
+<span class="go">  Bus  0, device   4, function 0:</span>
+<span class="go">    Ethernet controller: PCI device 1af4:1000</span>
+<span class="go">      PCI subsystem 1af4:0001</span>
+<span class="go">      IRQ 11.</span>
+<span class="go">      BAR0: I/O at 0xc040 [0xc05f].</span>
+<span class="go">      BAR1: 32 bit memory at 0xfebd2000 [0xfebd2fff].</span>
+<span class="go">      BAR6: 32 bit memory at 0xffffffffffffffff [0x0003fffe].</span>
+<span class="go">      id &quot;net0&quot;</span>
+<span class="gp gp-VirtualEnv">(qemu)</span> <span class="go">info qtree</span>
+<span class="go">bus: main-system-bus</span>
+<span class="go">  type System</span>
+<span class="go">  dev: hpet, id &quot;&quot;</span>
+<span class="go">    gpio-in &quot;&quot; 2</span>
+<span class="go">    gpio-out &quot;&quot; 1</span>
+<span class="go">    gpio-out &quot;sysbus-irq&quot; 32</span>
+<span class="go">    timers = 3 (0x3)</span>
+<span class="go">    msi = false</span>
+<span class="go">    hpet-intcap = 4 (0x4)</span>
+<span class="go">    hpet-offset-saved = false</span>
+<span class="go">    mmio 00000000fed00000/0000000000000400</span>
+<span class="go">  dev: kvm-ioapic, id &quot;&quot;</span>
+<span class="go">    gpio-in &quot;&quot; 24</span>
+<span class="go">    gsi_base = 0 (0x0)</span>
+<span class="go">    mmio 00000000fec00000/0000000000001000</span>
+<span class="go">  dev: i440FX-pcihost, id &quot;&quot;</span>
+<span class="go">    pci-hole64-size = 2147483648 (2 GiB)</span>
+<span class="go">    short_root_bus = 0 (0x0)</span>
+<span class="go">    x-pci-hole64-fix = false</span>
+<span class="go">    bus: pci.0</span>
+<span class="go">      type PCI</span>
+<span class="go">      dev: virtio-net-pci, id &quot;net0&quot;</span>
+<span class="go">        disable-legacy = &quot;off&quot;</span>
+<span class="go">        disable-modern = true</span>
+<span class="go">        ioeventfd = true</span>
+<span class="go">        vectors = 3 (0x3)</span>
+<span class="go">        virtio-pci-bus-master-bug-migration = true</span>
+<span class="go">        migrate-extra = false</span>
+<span class="go">        modern-pio-notify = false</span>
+<span class="go">        x-disable-pcie = true</span>
+<span class="go">        page-per-vq = true</span>
+<span class="go">        x-ignore-backend-features = true</span>
+<span class="go">        ats = false</span>
+<span class="go">        x-pcie-deverr-init = false</span>
+<span class="go">        x-pcie-lnkctl-init = false</span>
+<span class="go">        x-pcie-pm-init = false</span>
+<span class="go">        addr = 04.0</span>
+<span class="go">        romfile = &quot;efi-virtio.rom&quot;</span>
+<span class="go">        rombar = 1 (0x1)</span>
+<span class="go">        multifunction = false</span>
+<span class="go">        command_serr_enable = true</span>
+<span class="go">        x-pcie-lnksta-dllla = false</span>
+<span class="go">        x-pcie-extcap-init = false</span>
+<span class="go">        class Ethernet controller, addr 00:04.0, pci id 1af4:1000 (sub 1af4:0001)</span>
+<span class="go">        bar 0: i/o at 0xc040 [0xc05f]</span>
+<span class="go">        bar 1: mem at 0xfebd2000 [0xfebd2fff]</span>
+<span class="go">        bar 6: mem at 0xffffffffffffffff [0x3fffe]</span>
+<span class="go">        bus: virtio-bus</span>
+<span class="go">          type virtio-pci-bus</span>
+<span class="go">          dev: virtio-net-device, id &quot;&quot;</span>
+<span class="go">            csum = true</span>
+<span class="go">            guest_csum = true</span>
+<span class="go">            gso = true</span>
+<span class="go">            guest_tso4 = true</span>
+<span class="go">            guest_tso6 = true</span>
+<span class="go">            guest_ecn = true</span>
+<span class="go">            guest_ufo = true</span>
+<span class="go">            guest_announce = false</span>
+<span class="go">            host_tso4 = true</span>
+<span class="go">            host_tso6 = true</span>
+<span class="go">            host_ecn = true</span>
+<span class="go">            host_ufo = true</span>
+<span class="go">            mrg_rxbuf = true</span>
+<span class="go">            status = true</span>
+<span class="go">            ctrl_vq = true</span>
+<span class="go">            ctrl_rx = true</span>
+<span class="go">            ctrl_vlan = true</span>
+<span class="go">            ctrl_rx_extra = true</span>
+<span class="go">            ctrl_mac_addr = true</span>
+<span class="go">            ctrl_guest_offloads = true</span>
+<span class="go">            mq = false</span>
+<span class="go">            guest_rsc_ext = false</span>
+<span class="go">            rsc_interval = 300000 (0x493e0)</span>
+<span class="go">            mac = &quot;52:54:00:61:20:46&quot;</span>
+<span class="go">            netdev = &quot;mynet0&quot;</span>
+<span class="go">            x-txtimer = 150000 (0x249f0)</span>
+<span class="go">            x-txburst = 256 (0x100)</span>
+<span class="go">            tx = &quot;&quot;</span>
+<span class="go">            rx_queue_size = 256 (0x100)</span>
+<span class="go">            tx_queue_size = 256 (0x100)</span>
+<span class="go">            host_mtu = 0 (0x0)</span>
+<span class="go">            x-mtu-bypass-backend = false</span>
+<span class="go">            speed = -1 (0xffffffffffffffff)</span>
+<span class="go">            duplex = &quot;&quot;</span>
+<span class="go">            indirect_desc = true</span>
+<span class="go">            event_idx = true</span>
+<span class="go">            notify_on_empty = true</span>
+<span class="go">            any_layout = true</span>
+<span class="go">            iommu_platform = false</span>
+<span class="go">            use-started = false</span>
+<span class="go">      dev: virtio-blk-pci, id &quot;virtio-disk0&quot;</span>
+<span class="go">        disable-legacy = &quot;off&quot;</span>
+<span class="go">        disable-modern = true</span>
+<span class="go">        class = 0 (0x0)</span>
+<span class="go">        ioeventfd = true</span>
+<span class="go">        vectors = 2 (0x2)</span>
+<span class="go">        virtio-pci-bus-master-bug-migration = true</span>
+<span class="go">        migrate-extra = false</span>
+<span class="go">        modern-pio-notify = false</span>
+<span class="go">        x-disable-pcie = true</span>
+<span class="go">        page-per-vq = true</span>
+<span class="go">        x-ignore-backend-features = true</span>
+<span class="go">        ats = false</span>
+<span class="go">        x-pcie-deverr-init = false</span>
+<span class="go">        x-pcie-lnkctl-init = false</span>
+<span class="go">        x-pcie-pm-init = false</span>
+<span class="go">        addr = 03.0</span>
+<span class="go">        romfile = &quot;&quot;</span>
+<span class="go">        rombar = 1 (0x1)</span>
+<span class="go">        multifunction = false</span>
+<span class="go">        command_serr_enable = true</span>
+<span class="go">        x-pcie-lnksta-dllla = false</span>
+<span class="go">        x-pcie-extcap-init = false</span>
+<span class="go">        class SCSI controller, addr 00:03.0, pci id 1af4:1001 (sub 1af4:0002)</span>
+<span class="go">        bar 0: i/o at 0xc000 [0xc03f]</span>
+<span class="go">        bar 1: mem at 0xfebd1000 [0xfebd1fff]</span>
+<span class="go">        bus: virtio-bus</span>
+<span class="go">          type virtio-pci-bus</span>
+<span class="go">          dev: virtio-blk-device, id &quot;&quot;</span>
+<span class="go">            drive = &quot;drive-virtio-disk0&quot;</span>
+<span class="go">            logical_block_size = 512 (0x200)</span>
+<span class="go">            physical_block_size = 512 (0x200)</span>
+<span class="go">            min_io_size = 0 (0x0)</span>
+<span class="go">            opt_io_size = 0 (0x0)</span>
+<span class="go">            discard_granularity = 4294967295 (0xffffffff)</span>
+<span class="go">            write-cache = &quot;on&quot;</span>
+<span class="go">            share-rw = false</span>
+<span class="go">            rerror = &quot;auto&quot;</span>
+<span class="go">            werror = &quot;auto&quot;</span>
+<span class="go">            cyls = 1919 (0x77f)</span>
+<span class="go">            heads = 16 (0x10)</span>
+<span class="go">            secs = 63 (0x3f)</span>
+<span class="go">            serial = &quot;&quot;</span>
+<span class="go">            config-wce = true</span>
+<span class="go">            scsi = false</span>
+<span class="go">            request-merging = true</span>
+<span class="go">            num-queues = 1 (0x1)</span>
+<span class="go">            queue-size = 128 (0x80)</span>
+<span class="go">            iothread = &quot;&quot;</span>
+<span class="go">            discard = false</span>
+<span class="go">            write-zeroes = false</span>
+<span class="go">            max-discard-sectors = 4194303 (0x3fffff)</span>
+<span class="go">            max-write-zeroes-sectors = 4194303 (0x3fffff)</span>
+<span class="go">            indirect_desc = true</span>
+<span class="go">            event_idx = true</span>
+<span class="go">            notify_on_empty = true</span>
+<span class="go">            any_layout = false</span>
+<span class="go">            iommu_platform = false</span>
+<span class="go">            use-started = false</span>
+<span class="go">      dev: PIIX4_PM, id &quot;&quot;</span>
+<span class="go">        smb_io_base = 1792 (0x700)</span>
+<span class="go">        disable_s3 = 0 (0x0)</span>
+<span class="go">        disable_s4 = 0 (0x0)</span>
+<span class="go">        s4_val = 2 (0x2)</span>
+<span class="go">        acpi-pci-hotplug-with-bridge-support = false</span>
+<span class="go">        memory-hotplug-support = false</span>
+<span class="go">        addr = 01.3</span>
+<span class="go">        romfile = &quot;&quot;</span>
+<span class="go">        rombar = 1 (0x1)</span>
+<span class="go">        multifunction = false</span>
+<span class="go">        command_serr_enable = true</span>
+<span class="go">        x-pcie-lnksta-dllla = false</span>
+<span class="go">        x-pcie-extcap-init = false</span>
+<span class="go">        class Bridge, addr 00:01.3, pci id 8086:7113 (sub 1af4:1100)</span>
+<span class="go">        bus: i2c</span>
+<span class="go">          type i2c-bus</span>
+<span class="go">          dev: smbus-eeprom, id &quot;&quot;</span>
+<span class="go">            address = 87 (0x57)</span>
+<span class="go">          dev: smbus-eeprom, id &quot;&quot;</span>
+<span class="go">            address = 86 (0x56)</span>
+<span class="go">          dev: smbus-eeprom, id &quot;&quot;</span>
+<span class="go">            address = 85 (0x55)</span>
+<span class="go">          dev: smbus-eeprom, id &quot;&quot;</span>
+<span class="go">            address = 84 (0x54)</span>
+<span class="go">          dev: smbus-eeprom, id &quot;&quot;</span>
+<span class="go">            address = 83 (0x53)</span>
+<span class="go">          dev: smbus-eeprom, id &quot;&quot;</span>
+<span class="go">            address = 82 (0x52)</span>
+<span class="go">          dev: smbus-eeprom, id &quot;&quot;</span>
+<span class="go">            address = 81 (0x51)</span>
+<span class="go">          dev: smbus-eeprom, id &quot;&quot;</span>
+<span class="go">            address = 80 (0x50)</span>
+<span class="go">      dev: piix3-ide, id &quot;&quot;</span>
+<span class="go">        addr = 01.1</span>
+<span class="go">        romfile = &quot;&quot;</span>
+<span class="go">        rombar = 1 (0x1)</span>
+<span class="go">        multifunction = false</span>
+<span class="go">        command_serr_enable = true</span>
+<span class="go">        x-pcie-lnksta-dllla = false</span>
+<span class="go">        x-pcie-extcap-init = false</span>
+<span class="go">        class IDE controller, addr 00:01.1, pci id 8086:7010 (sub 1af4:1100)</span>
+<span class="go">        bar 4: i/o at 0xc060 [0xc06f]</span>
+<span class="go">        bus: ide.1</span>
+<span class="go">          type IDE</span>
+<span class="go">          dev: ide-cd, id &quot;&quot;</span>
+<span class="go">            drive = &quot;ide1-cd0&quot;</span>
+<span class="go">            logical_block_size = 512 (0x200)</span>
+<span class="go">            physical_block_size = 512 (0x200)</span>
+<span class="go">            min_io_size = 0 (0x0)</span>
+<span class="go">            opt_io_size = 0 (0x0)</span>
+<span class="go">            discard_granularity = 512 (0x200)</span>
+<span class="go">            write-cache = &quot;auto&quot;</span>
+<span class="go">            share-rw = false</span>
+<span class="go">            rerror = &quot;auto&quot;</span>
+<span class="go">            werror = &quot;auto&quot;</span>
+<span class="go">            ver = &quot;1.7.0&quot;</span>
+<span class="go">            wwn = 0 (0x0)</span>
+<span class="go">            serial = &quot;QM00003&quot;</span>
+<span class="go">            model = &quot;&quot;</span>
+<span class="go">            unit = 0 (0x0)</span>
+<span class="go">        bus: ide.0</span>
+<span class="go">          type IDE</span>
+<span class="go">      dev: cirrus-vga, id &quot;&quot;</span>
+<span class="go">        vgamem_mb = 8 (0x8)</span>
+<span class="go">        blitter = true</span>
+<span class="go">        global-vmstate = true</span>
+<span class="go">        addr = 02.0</span>
+<span class="go">        romfile = &quot;vgabios-cirrus.bin&quot;</span>
+<span class="go">        rombar = 1 (0x1)</span>
+<span class="go">        multifunction = false</span>
+<span class="go">        command_serr_enable = true</span>
+<span class="go">        x-pcie-lnksta-dllla = false</span>
+<span class="go">        x-pcie-extcap-init = false</span>
+<span class="go">        class VGA controller, addr 00:02.0, pci id 1013:00b8 (sub 1af4:1100)</span>
+<span class="go">        bar 0: mem at 0xfc000000 [0xfdffffff]</span>
+<span class="go">        bar 1: mem at 0xfebd0000 [0xfebd0fff]</span>
+<span class="go">        bar 6: mem at 0xffffffffffffffff [0xfffe]</span>
+<span class="go">      dev: PIIX3, id &quot;&quot;</span>
+<span class="go">        addr = 01.0</span>
+<span class="go">        romfile = &quot;&quot;</span>
+<span class="go">        rombar = 1 (0x1)</span>
+<span class="go">        multifunction = true</span>
+<span class="go">        command_serr_enable = true</span>
+<span class="go">        x-pcie-lnksta-dllla = false</span>
+<span class="go">        x-pcie-extcap-init = false</span>
+<span class="go">        class ISA bridge, addr 00:01.0, pci id 8086:7000 (sub 1af4:1100)</span>
+<span class="go">        bus: isa.0</span>
+<span class="go">          type ISA</span>
+<span class="go">          dev: port92, id &quot;&quot;</span>
+<span class="go">            gpio-out &quot;a20&quot; 1</span>
+<span class="go">          dev: vmmouse, id &quot;&quot;</span>
+<span class="go">          dev: vmport, id &quot;&quot;</span>
+<span class="go">          dev: i8042, id &quot;&quot;</span>
+<span class="go">            gpio-out &quot;a20&quot; 1</span>
+<span class="go">            isa irqs 1,12</span>
+<span class="go">          dev: isa-fdc, id &quot;&quot;</span>
+<span class="go">            iobase = 1008 (0x3f0)</span>
+<span class="go">            irq = 6 (0x6)</span>
+<span class="go">            dma = 2 (0x2)</span>
+<span class="go">            driveA = &quot;&quot;</span>
+<span class="go">            driveB = &quot;&quot;</span>
+<span class="go">            check_media_rate = true</span>
+<span class="go">            fdtypeA = &quot;auto&quot;</span>
+<span class="go">            fdtypeB = &quot;auto&quot;</span>
+<span class="go">            fallback = &quot;144&quot;</span>
+<span class="go">            isa irq 6</span>
+<span class="go">            bus: floppy-bus.0</span>
+<span class="go">              type floppy-bus</span>
+<span class="go">              dev: floppy, id &quot;&quot;</span>
+<span class="go">                unit = 0 (0x0)</span>
+<span class="go">                drive = &quot;floppy0&quot;</span>
+<span class="go">                logical_block_size = 512 (0x200)</span>
+<span class="go">                physical_block_size = 512 (0x200)</span>
+<span class="go">                min_io_size = 0 (0x0)</span>
+<span class="go">                opt_io_size = 0 (0x0)</span>
+<span class="go">                discard_granularity = 4294967295 (0xffffffff)</span>
+<span class="go">                write-cache = &quot;auto&quot;</span>
+<span class="go">                share-rw = false</span>
+<span class="go">                drive-type = &quot;144&quot;</span>
+<span class="go">          dev: isa-parallel, id &quot;&quot;</span>
+<span class="go">            index = 0 (0x0)</span>
+<span class="go">            iobase = 888 (0x378)</span>
+<span class="go">            irq = 7 (0x7)</span>
+<span class="go">            chardev = &quot;parallel0&quot;</span>
+<span class="go">            isa irq 7</span>
+<span class="go">          dev: isa-serial, id &quot;&quot;</span>
+<span class="go">            index = 0 (0x0)</span>
+<span class="go">            iobase = 1016 (0x3f8)</span>
+<span class="go">            irq = 4 (0x4)</span>
+<span class="go">            chardev = &quot;serial0&quot;</span>
+<span class="go">            wakeup = 0 (0x0)</span>
+<span class="go">            isa irq 4</span>
+<span class="go">          dev: i8257, id &quot;&quot;</span>
+<span class="go">            base = 192 (0xc0)</span>
+<span class="go">            page-base = 136 (0x88)</span>
+<span class="go">            pageh-base = -1 (0xffffffffffffffff)</span>
+<span class="go">            dshift = 1 (0x1)</span>
+<span class="go">          dev: i8257, id &quot;&quot;</span>
+<span class="go">            base = 0 (0x0)</span>
+<span class="go">            page-base = 128 (0x80)</span>
+<span class="go">            pageh-base = -1 (0xffffffffffffffff)</span>
+<span class="go">            dshift = 0 (0x0)</span>
+<span class="go">          dev: isa-pcspk, id &quot;&quot;</span>
+<span class="go">            iobase = 97 (0x61)</span>
+<span class="go">            migrate = false</span>
+<span class="go">          dev: kvm-pit, id &quot;&quot;</span>
+<span class="go">            gpio-in &quot;&quot; 1</span>
+<span class="go">            iobase = 64 (0x40)</span>
+<span class="go">            lost_tick_policy = &quot;delay&quot;</span>
+<span class="go">          dev: mc146818rtc, id &quot;&quot;</span>
+<span class="go">            gpio-out &quot;&quot; 1</span>
+<span class="go">            base_year = 0 (0x0)</span>
+<span class="go">            lost_tick_policy = &quot;discard&quot;</span>
+<span class="go">          dev: kvm-i8259, id &quot;&quot;</span>
+<span class="go">            iobase = 160 (0xa0)</span>
+<span class="go">            elcr_addr = 1233 (0x4d1)</span>
+<span class="go">            elcr_mask = 222 (0xde)</span>
+<span class="go">            master = false</span>
+<span class="go">          dev: kvm-i8259, id &quot;&quot;</span>
+<span class="go">            iobase = 32 (0x20)</span>
+<span class="go">            elcr_addr = 1232 (0x4d0)</span>
+<span class="go">            elcr_mask = 248 (0xf8)</span>
+<span class="go">            master = true</span>
+<span class="go">      dev: i440FX, id &quot;&quot;</span>
+<span class="go">        addr = 00.0</span>
+<span class="go">        romfile = &quot;&quot;</span>
+<span class="go">        rombar = 1 (0x1)</span>
+<span class="go">        multifunction = false</span>
+<span class="go">        command_serr_enable = true</span>
+<span class="go">        x-pcie-lnksta-dllla = false</span>
+<span class="go">        x-pcie-extcap-init = false</span>
+<span class="go">        class Host bridge, addr 00:00.0, pci id 8086:1237 (sub 1af4:1100)</span>
+<span class="go">  dev: fw_cfg_io, id &quot;&quot;</span>
+<span class="go">    dma_enabled = false</span>
+<span class="go">    x-file-slots = 16 (0x10)</span>
+<span class="go">  dev: kvmclock, id &quot;&quot;</span>
+<span class="go">    x-mach-use-reliable-get-clock = false</span>
+<span class="go">  dev: kvmvapic, id &quot;&quot;</span>
+<span class="gp gp-VirtualEnv">(qemu)</span>
+</pre></div>
+</div>
+</section>
+<section id="initialize-virtio-net-pci-instance">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">initialize virtio_net_pci instance</a><a class="headerlink" href="#initialize-virtio-net-pci-instance" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Thread 1 &quot;qemu-system-x86&quot; hit Breakpoint 3, virtio_net_pci_instance_init (obj=0x555557293140) at /usr/src/debug/qemu/4.1.0-r0/qemu-4.1.0/hw/virtio/virtio-net-pci.c:76</span>
+<span class="go">76   /usr/src/debug/qemu/4.1.0-r0/qemu-4.1.0/hw/virtio/virtio-net-pci.c: No such file or directory.</span>
+<span class="gp gp-VirtualEnv">(gdb)</span> <span class="go">bt</span>
+<span class="gp">#</span><span class="m">0</span>  virtio_net_pci_instance_init <span class="o">(</span><span class="nv">obj</span><span class="o">=</span>0x555557293140<span class="o">)</span> at /usr/src/debug/qemu/4.1.0-r0/qemu-4.1.0/hw/virtio/virtio-net-pci.c:76
+<span class="gp">#</span><span class="m">1</span>  0x0000555555ad5179 <span class="k">in</span> object_init_with_type <span class="o">(</span><span class="nv">obj</span><span class="o">=</span>0x555557293140, <span class="nv">ti</span><span class="o">=</span>0x55555633a0e0<span class="o">)</span> at /usr/src/debug/qemu/4.1.0-r0/qemu-4.1.0/qom/object.c:355
+<span class="gp">#</span><span class="m">2</span>  0x0000555555ad5908 <span class="k">in</span> object_initialize_with_type <span class="o">(</span><span class="nv">data</span><span class="o">=</span>data@entry<span class="o">=</span>0x555557293140, <span class="nv">size</span><span class="o">=</span><span class="m">42096</span>, <span class="nv">type</span><span class="o">=</span>type@entry<span class="o">=</span>0x55555633a0e0<span class="o">)</span>
+<span class="go">    at /usr/src/debug/qemu/4.1.0-r0/qemu-4.1.0/qom/object.c:466</span>
+<span class="gp">#</span><span class="m">3</span>  0x0000555555ad59c4 <span class="k">in</span> object_new_with_type <span class="o">(</span><span class="nv">type</span><span class="o">=</span>0x55555633a0e0<span class="o">)</span> at /usr/src/debug/qemu/4.1.0-r0/qemu-4.1.0/qom/object.c:635
+<span class="gp">#</span><span class="m">4</span>  0x000055555593dfcc <span class="k">in</span> qdev_device_add <span class="o">(</span><span class="nv">opts</span><span class="o">=</span>0x55555637e1c0, <span class="nv">errp</span><span class="o">=</span>&lt;optimized out&gt;<span class="o">)</span> at /usr/src/debug/qemu/4.1.0-r0/qemu-4.1.0/qdev-monitor.c:615
+<span class="gp">#</span><span class="m">5</span>  0x00005555559403df <span class="k">in</span> device_init_func <span class="o">(</span><span class="nv">opaque</span><span class="o">=</span>&lt;optimized out&gt;, <span class="nv">opts</span><span class="o">=</span>&lt;optimized out&gt;, <span class="nv">errp</span><span class="o">=</span>&lt;optimized out&gt;<span class="o">)</span> at /usr/src/debug/qemu/4.1.0-r0/qemu-4.1.0/vl.c:2191
+<span class="gp">#</span><span class="m">6</span>  0x0000555555bcd30a <span class="k">in</span> qemu_opts_foreach <span class="o">(</span><span class="nv">list</span><span class="o">=</span>&lt;optimized out&gt;, <span class="nv">func</span><span class="o">=</span>0x5555559403d0 &lt;device_init_func&gt;, <span class="nv">opaque</span><span class="o">=</span>0x0, <span class="nv">errp</span><span class="o">=</span>0x5555562bb3d0 &lt;error_fatal&gt;<span class="o">)</span>
+<span class="go">    at /usr/src/debug/qemu/4.1.0-r0/qemu-4.1.0/util/qemu-option.c:1170</span>
+<span class="gp">#</span><span class="m">7</span>  0x00005555557e152c <span class="k">in</span> main <span class="o">(</span><span class="nv">argc</span><span class="o">=</span>&lt;optimized out&gt;, <span class="nv">argv</span><span class="o">=</span>&lt;optimized out&gt;, <span class="nv">envp</span><span class="o">=</span>&lt;optimized out&gt;<span class="o">)</span> at /usr/src/debug/qemu/4.1.0-r0/qemu-4.1.0/vl.c:4375
+<span class="gp gp-VirtualEnv">(gdb)</span> <span class="go">p *(TypeImpl *)0x55555633a0e0</span>
+<span class="gp">$</span><span class="nv">4</span> <span class="o">=</span> <span class="o">{</span><span class="nv">name</span> <span class="o">=</span> 0x55555633a260 <span class="s2">&quot;virtio-net-pci&quot;</span>, <span class="nv">class_size</span> <span class="o">=</span> <span class="m">248</span>, <span class="nv">instance_size</span> <span class="o">=</span> <span class="m">42096</span>, <span class="nv">class_init</span> <span class="o">=</span> 0x555555a67df0 &lt;virtio_pci_generic_class_init&gt;, <span class="nv">class_base_init</span> <span class="o">=</span> 0x0,
+<span class="go">  class_data = 0x0, instance_init = 0x0, instance_post_init = 0x0, instance_finalize = 0x0, abstract = false, parent = 0x55555633a280 &quot;virtio-net-pci-base&quot;,</span>
+<span class="go">  parent_type = 0x555556339f20, class = 0x55555639f330, num_interfaces = 2, interfaces = {{typename = 0x55555633a2a0 &quot;pci-express-device&quot;}, {</span>
+<span class="go">      typename = 0x55555633a2c0 &quot;conventional-pci-device&quot;}, {typename = 0x0} &lt;repeats 30 times&gt;}}</span>
+</pre></div>
+</div>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Thread 1 &quot;qemu-system-x86&quot; hit Breakpoint 1, virtio_net_device_realize (dev=0x55555729b2b0, errp=0x7fffffffe1f0)</span>
+<span class="go">    at /usr/src/debug/qemu/4.1.0-r0/qemu-4.1.0/hw/net/virtio-net.c:2658</span>
+<span class="go">2658 in /usr/src/debug/qemu/4.1.0-r0/qemu-4.1.0/hw/net/virtio-net.c</span>
+<span class="gp gp-VirtualEnv">(gdb)</span> <span class="go">bt</span>
+<span class="gp">#</span><span class="m">0</span>  virtio_net_device_realize <span class="o">(</span><span class="nv">dev</span><span class="o">=</span>0x55555729b2b0, <span class="nv">errp</span><span class="o">=</span>0x7fffffffe1f0<span class="o">)</span> at /usr/src/debug/qemu/4.1.0-r0/qemu-4.1.0/hw/net/virtio-net.c:2658
+<span class="gp">#</span><span class="m">1</span>  0x0000555555896628 <span class="k">in</span> virtio_device_realize <span class="o">(</span><span class="nv">dev</span><span class="o">=</span>0x55555729b2b0, <span class="nv">errp</span><span class="o">=</span>0x7fffffffe250<span class="o">)</span> at /usr/src/debug/qemu/4.1.0-r0/qemu-4.1.0/hw/virtio/virtio.c:2613
+<span class="gp">#</span><span class="m">2</span>  0x000055555599c655 <span class="k">in</span> device_set_realized <span class="o">(</span><span class="nv">obj</span><span class="o">=</span>&lt;optimized out&gt;, <span class="nv">value</span><span class="o">=</span>&lt;optimized out&gt;, <span class="nv">errp</span><span class="o">=</span>0x7fffffffe3d0<span class="o">)</span>
+<span class="go">    at /usr/src/debug/qemu/4.1.0-r0/qemu-4.1.0/hw/core/qdev.c:834</span>
+<span class="gp">#</span><span class="m">3</span>  0x0000555555ad4dd7 <span class="k">in</span> property_set_bool <span class="o">(</span><span class="nv">obj</span><span class="o">=</span>0x55555729b2b0, <span class="nv">v</span><span class="o">=</span>&lt;optimized out&gt;, <span class="nv">name</span><span class="o">=</span>&lt;optimized out&gt;, <span class="nv">opaque</span><span class="o">=</span>0x55555729e980, <span class="nv">errp</span><span class="o">=</span>0x7fffffffe3d0<span class="o">)</span>
+<span class="go">    at /usr/src/debug/qemu/4.1.0-r0/qemu-4.1.0/qom/object.c:2079</span>
+<span class="gp">#</span><span class="m">4</span>  0x0000555555ad9270 <span class="k">in</span> object_property_set_qobject <span class="o">(</span><span class="nv">obj</span><span class="o">=</span>0x55555729b2b0, <span class="nv">value</span><span class="o">=</span>&lt;optimized out&gt;, <span class="nv">name</span><span class="o">=</span>0x555555cac945 <span class="s2">&quot;realized&quot;</span>, <span class="nv">errp</span><span class="o">=</span>0x7fffffffe3d0<span class="o">)</span>
+<span class="go">    at /usr/src/debug/qemu/4.1.0-r0/qemu-4.1.0/qom/qom-qobject.c:26</span>
+<span class="gp">#</span><span class="m">5</span>  0x0000555555ad6b56 <span class="k">in</span> object_property_set_bool <span class="o">(</span><span class="nv">obj</span><span class="o">=</span>0x55555729b2b0, <span class="nv">value</span><span class="o">=</span>&lt;optimized out&gt;, <span class="nv">name</span><span class="o">=</span>0x555555cac945 <span class="s2">&quot;realized&quot;</span>, <span class="nv">errp</span><span class="o">=</span>0x7fffffffe3d0<span class="o">)</span>
+<span class="go">    at /usr/src/debug/qemu/4.1.0-r0/qemu-4.1.0/qom/object.c:1337</span>
+<span class="gp">#</span><span class="m">6</span>  0x0000555555a6b022 <span class="k">in</span> virtio_pci_realize <span class="o">(</span><span class="nv">pci_dev</span><span class="o">=</span>0x555557293140, <span class="nv">errp</span><span class="o">=</span>0x7fffffffe3d0<span class="o">)</span> at /usr/src/debug/qemu/4.1.0-r0/qemu-4.1.0/hw/virtio/virtio-pci.c:1788
+<span class="gp">#</span><span class="m">7</span>  0x0000555555a1bbab <span class="k">in</span> pci_qdev_realize <span class="o">(</span><span class="nv">qdev</span><span class="o">=</span>0x555557293140, <span class="nv">errp</span><span class="o">=</span>&lt;optimized out&gt;<span class="o">)</span> at /usr/src/debug/qemu/4.1.0-r0/qemu-4.1.0/hw/pci/pci.c:2096
+<span class="gp">#</span><span class="m">8</span>  0x000055555599c655 <span class="k">in</span> device_set_realized <span class="o">(</span><span class="nv">obj</span><span class="o">=</span>&lt;optimized out&gt;, <span class="nv">value</span><span class="o">=</span>&lt;optimized out&gt;, <span class="nv">errp</span><span class="o">=</span>0x7fffffffe598<span class="o">)</span>
+<span class="go">    at /usr/src/debug/qemu/4.1.0-r0/qemu-4.1.0/hw/core/qdev.c:834</span>
+<span class="gp">#</span><span class="m">9</span>  0x0000555555ad4dd7 <span class="k">in</span> property_set_bool <span class="o">(</span><span class="nv">obj</span><span class="o">=</span>0x555557293140, <span class="nv">v</span><span class="o">=</span>&lt;optimized out&gt;, <span class="nv">name</span><span class="o">=</span>&lt;optimized out&gt;, <span class="nv">opaque</span><span class="o">=</span>0x5555572197e0, <span class="nv">errp</span><span class="o">=</span>0x7fffffffe598<span class="o">)</span>
+<span class="go">    at /usr/src/debug/qemu/4.1.0-r0/qemu-4.1.0/qom/object.c:2079</span>
+<span class="gp">#</span><span class="m">10</span> 0x0000555555ad9270 <span class="k">in</span> object_property_set_qobject <span class="o">(</span><span class="nv">obj</span><span class="o">=</span>0x555557293140, <span class="nv">value</span><span class="o">=</span>&lt;optimized out&gt;, <span class="nv">name</span><span class="o">=</span>0x555555cac945 <span class="s2">&quot;realized&quot;</span>, <span class="nv">errp</span><span class="o">=</span>0x7fffffffe598<span class="o">)</span>
+<span class="go">    at /usr/src/debug/qemu/4.1.0-r0/qemu-4.1.0/qom/qom-qobject.c:26</span>
+<span class="gp">#</span><span class="m">11</span> 0x0000555555ad6b56 <span class="k">in</span> object_property_set_bool <span class="o">(</span><span class="nv">obj</span><span class="o">=</span>0x555557293140, <span class="nv">value</span><span class="o">=</span>&lt;optimized out&gt;, <span class="nv">name</span><span class="o">=</span>0x555555cac945 <span class="s2">&quot;realized&quot;</span>, <span class="nv">errp</span><span class="o">=</span>0x7fffffffe598<span class="o">)</span>
+<span class="go">    at /usr/src/debug/qemu/4.1.0-r0/qemu-4.1.0/qom/object.c:1337</span>
+<span class="gp">#</span><span class="m">12</span> 0x000055555593e394 <span class="k">in</span> qdev_device_add <span class="o">(</span><span class="nv">opts</span><span class="o">=</span>0x55555637e1c0, <span class="nv">errp</span><span class="o">=</span>&lt;optimized out&gt;<span class="o">)</span> at /usr/src/debug/qemu/4.1.0-r0/qemu-4.1.0/qdev-monitor.c:634
+<span class="gp">#</span><span class="m">13</span> 0x00005555559403df <span class="k">in</span> device_init_func <span class="o">(</span><span class="nv">opaque</span><span class="o">=</span>&lt;optimized out&gt;, <span class="nv">opts</span><span class="o">=</span>&lt;optimized out&gt;, <span class="nv">errp</span><span class="o">=</span>&lt;optimized out&gt;<span class="o">)</span> at /usr/src/debug/qemu/4.1.0-r0/qemu-4.1.0/vl.c:2191
+<span class="gp">#</span><span class="m">14</span> 0x0000555555bcd30a <span class="k">in</span> qemu_opts_foreach <span class="o">(</span><span class="nv">list</span><span class="o">=</span>&lt;optimized out&gt;, <span class="nv">func</span><span class="o">=</span>0x5555559403d0 &lt;device_init_func&gt;, <span class="nv">opaque</span><span class="o">=</span>0x0, <span class="nv">errp</span><span class="o">=</span>0x5555562bb3d0 &lt;error_fatal&gt;<span class="o">)</span>
+<span class="go">    at /usr/src/debug/qemu/4.1.0-r0/qemu-4.1.0/util/qemu-option.c:1170</span>
+<span class="gp">#</span><span class="m">15</span> 0x00005555557e152c <span class="k">in</span> main <span class="o">(</span><span class="nv">argc</span><span class="o">=</span>&lt;optimized out&gt;, <span class="nv">argv</span><span class="o">=</span>&lt;optimized out&gt;, <span class="nv">envp</span><span class="o">=</span>&lt;optimized out&gt;<span class="o">)</span> at /usr/src/debug/qemu/4.1.0-r0/qemu-4.1.0/vl.c:4375
+<span class="gp gp-VirtualEnv">(gdb)</span>
+</pre></div>
+</div>
+<section id="function-qdev-device-add">
+<h3><a class="toc-backref" href="#id5" role="doc-backlink">function: qdev_device_add</a><a class="headerlink" href="#function-qdev-device-add" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="n">DeviceState</span><span class="w"> </span><span class="o">*</span><span class="nf">qdev_device_add</span><span class="p">(</span><span class="n">QemuOpts</span><span class="w"> </span><span class="o">*</span><span class="n">opts</span><span class="p">,</span><span class="w"> </span><span class="n">Error</span><span class="w"> </span><span class="o">**</span><span class="n">errp</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">DeviceClass</span><span class="w"> </span><span class="o">*</span><span class="n">dc</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">driver</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">path</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">DeviceState</span><span class="w"> </span><span class="o">*</span><span class="n">dev</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">BusState</span><span class="w"> </span><span class="o">*</span><span class="n">bus</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">Error</span><span class="w"> </span><span class="o">*</span><span class="n">err</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">driver</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qemu_opt_get</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;driver&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">driver</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">error_setg</span><span class="p">(</span><span class="n">errp</span><span class="p">,</span><span class="w"> </span><span class="n">QERR_MISSING_PARAMETER</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;driver&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>driver是 “virtio-net-pci”</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(gdb)</span> <span class="go">info local</span>
+<span class="go">dc = 0x55555639f330</span>
+<span class="go">driver = 0x55555637e230 &quot;virtio-net-pci&quot;</span>
+<span class="go">path = &lt;optimized out&gt;</span>
+<span class="go">dev = &lt;optimized out&gt;</span>
+<span class="go">bus = 0x0</span>
+<span class="go">err = 0x0</span>
+<span class="go">__func__ = &quot;qdev_device_add&quot;</span>
+</pre></div>
+</div>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* find bus */</span><span class="w"></span>
+<span class="n">path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qemu_opt_get</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;bus&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">path</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">bus</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qbus_find</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="w"> </span><span class="n">errp</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">bus</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">object_dynamic_cast</span><span class="p">(</span><span class="n">OBJECT</span><span class="p">(</span><span class="n">bus</span><span class="p">),</span><span class="w"> </span><span class="n">dc</span><span class="o">-&gt;</span><span class="n">bus_type</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">error_setg</span><span class="p">(</span><span class="n">errp</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Device &#39;%s&#39; can&#39;t go on %s bus&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                   </span><span class="n">driver</span><span class="p">,</span><span class="w"> </span><span class="n">object_get_typename</span><span class="p">(</span><span class="n">OBJECT</span><span class="p">(</span><span class="n">bus</span><span class="p">)));</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">dc</span><span class="o">-&gt;</span><span class="n">bus_type</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">bus</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qbus_find_recursive</span><span class="p">(</span><span class="n">sysbus_get_default</span><span class="p">(),</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="n">dc</span><span class="o">-&gt;</span><span class="n">bus_type</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">bus</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">qbus_is_full</span><span class="p">(</span><span class="n">bus</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">error_setg</span><span class="p">(</span><span class="n">errp</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;No &#39;%s&#39; bus found for device &#39;%s&#39;&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                   </span><span class="n">dc</span><span class="o">-&gt;</span><span class="n">bus_type</span><span class="p">,</span><span class="w"> </span><span class="n">driver</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">qdev_hotplug</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">bus</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">qbus_is_hotpluggable</span><span class="p">(</span><span class="n">bus</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">error_setg</span><span class="p">(</span><span class="n">errp</span><span class="p">,</span><span class="w"> </span><span class="n">QERR_BUS_NO_HOTPLUG</span><span class="p">,</span><span class="w"> </span><span class="n">bus</span><span class="o">-&gt;</span><span class="n">name</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+<span class="w">                                                                                                                                   </span><span class="mi">609</span><span class="w">     </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">migration_is_idle</span><span class="p">())</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">error_setg</span><span class="p">(</span><span class="n">errp</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;device_add not allowed while migrating&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>The bus is <strong>pci.0</strong></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(gdb)</span> <span class="go">info local</span>
+<span class="go">dc = 0x55555639f330</span>
+<span class="go">driver = 0x55555637e230 &quot;virtio-net-pci&quot;</span>
+<span class="go">path = 0x55555637e3b0 &quot;pci.0&quot;</span>
+<span class="go">dev = &lt;optimized out&gt;</span>
+<span class="go">bus = 0x5555566c9270</span>
+<span class="go">err = 0x0</span>
+<span class="go">__func__ = &quot;qdev_device_add&quot;</span>
+<span class="gp gp-VirtualEnv">(gdb)</span> <span class="go">p *bus</span>
+<span class="gp">$</span><span class="nv">67</span> <span class="o">=</span> <span class="o">{</span><span class="nv">obj</span> <span class="o">=</span> <span class="o">{</span><span class="nv">class</span> <span class="o">=</span> 0x5555563bcfc0, <span class="nv">free</span> <span class="o">=</span> 0x7ffff7d2f3b0 &lt;g_free&gt;, <span class="nv">properties</span> <span class="o">=</span> 0x5555566c6d80, <span class="nv">ref</span> <span class="o">=</span> <span class="m">7</span>, <span class="nv">parent</span> <span class="o">=</span> 0x5555566c7a60<span class="o">}</span>, <span class="nv">parent</span> <span class="o">=</span> 0x5555566c7a60,
+<span class="go">  name = 0x5555566cadb0 &quot;pci.0&quot;, hotplug_handler = 0x55555710c210, max_index = 6, realized = true, num_children = 6, children = {tqh_first = 0x55555721afc0, tqh_circ = {</span>
+<span class="go">      tql_next = 0x55555721afc0, tql_prev = 0x555556705e50}}, sibling = {le_next = 0x0, le_prev = 0x5555566c7ac0}}</span>
+</pre></div>
+</div>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* create device */</span><span class="w"></span>
+<span class="n">dev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DEVICE</span><span class="p">(</span><span class="n">object_new</span><span class="p">(</span><span class="n">driver</span><span class="p">));</span><span class="w"></span>
+
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">bus</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">qdev_set_parent_bus</span><span class="p">(</span><span class="n">dev</span><span class="p">,</span><span class="w"> </span><span class="n">bus</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">qdev_hotplug</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">qdev_get_machine_hotplug_handler</span><span class="p">(</span><span class="n">dev</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="cm">/* No bus, no machine hotplug handler --&gt; device is not hotpluggable */</span><span class="w"></span>
+<span class="w">    </span><span class="n">error_setg</span><span class="p">(</span><span class="o">&amp;</span><span class="n">err</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Device &#39;%s&#39; can not be hotplugged on this machine&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">               </span><span class="n">driver</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">goto</span><span class="w"> </span><span class="n">err_del_dev</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="n">qdev_set_id</span><span class="p">(</span><span class="n">dev</span><span class="p">,</span><span class="w"> </span><span class="n">qemu_opts_id</span><span class="p">(</span><span class="n">opts</span><span class="p">));</span><span class="w"></span>
+
+<span class="cm">/* set properties */</span><span class="w"></span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">qemu_opt_foreach</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span><span class="w"> </span><span class="n">set_property</span><span class="p">,</span><span class="w"> </span><span class="n">dev</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">err</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">goto</span><span class="w"> </span><span class="n">err_del_dev</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="n">dev</span><span class="o">-&gt;</span><span class="n">opts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">opts</span><span class="p">;</span><span class="w"></span>
+<span class="n">object_property_set_bool</span><span class="p">(</span><span class="n">OBJECT</span><span class="p">(</span><span class="n">dev</span><span class="p">),</span><span class="w"> </span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;realized&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">err</span><span class="p">);</span><span class="w"></span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">dev</span><span class="o">-&gt;</span><span class="n">opts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w">                                                                                                              </span><span class="mi">637</span><span class="w">         </span><span class="k">goto</span><span class="w"> </span><span class="n">err_del_dev</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+<span class="k">return</span><span class="w"> </span><span class="n">dev</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+<p><strong>OBJECT(dev)会获取当前dev的Object 结构,所以通过object可以获取当前的dev 的class结构</strong></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(gdb)</span> <span class="go">p *(Object *)0x555557293140</span>
+<span class="gp">$</span><span class="nv">72</span> <span class="o">=</span> <span class="o">{</span><span class="nv">class</span> <span class="o">=</span> 0x55555639f330, <span class="nv">free</span> <span class="o">=</span> 0x7ffff7d2f3b0 &lt;g_free&gt;, <span class="nv">properties</span> <span class="o">=</span> 0x555557267c00, <span class="nv">ref</span> <span class="o">=</span> <span class="m">4</span>, <span class="nv">parent</span> <span class="o">=</span> 0x55555643dd40<span class="o">}</span>
+<span class="gp gp-VirtualEnv">(gdb)</span> <span class="go">p *$72-&gt;class</span>
+<span class="gp">$</span><span class="nv">73</span> <span class="o">=</span> <span class="o">{</span><span class="nb">type</span> <span class="o">=</span> 0x55555633a0e0, <span class="nv">interfaces</span> <span class="o">=</span> 0x555556399b10, <span class="nv">object_cast_cache</span> <span class="o">=</span> <span class="o">{</span>0x0, 0x555555c70165 <span class="s2">&quot;device&quot;</span>, 0x555555c767b7 <span class="s2">&quot;virtio-net-pci-base&quot;</span>,
+<span class="go">    0x555555c6a2d7 &quot;virtio-pci&quot;}, class_cast_cache = {0x0, 0x555555c70165 &quot;device&quot;, 0x555555c6a6fd &quot;pci-device&quot;, 0x555555c6a2d7 &quot;virtio-pci&quot;},</span>
+<span class="go">  unparent = 0x55555599ae70 &lt;device_unparent&gt;, properties = 0x55555639d5e0}</span>
+<span class="gp gp-VirtualEnv">(gdb)</span> <span class="go">p *(struct TypeImpl *)0x55555633a0e0</span>
+<span class="gp">$</span><span class="nv">74</span> <span class="o">=</span> <span class="o">{</span><span class="nv">name</span> <span class="o">=</span> 0x55555633a260 <span class="s2">&quot;virtio-net-pci&quot;</span>, <span class="nv">class_size</span> <span class="o">=</span> <span class="m">248</span>, <span class="nv">instance_size</span> <span class="o">=</span> <span class="m">42096</span>, <span class="nv">class_init</span> <span class="o">=</span> 0x555555a67df0 &lt;virtio_pci_generic_class_init&gt;, <span class="nv">class_base_init</span> <span class="o">=</span> 0x0,
+<span class="go">  class_data = 0x0, instance_init = 0x0, instance_post_init = 0x0, instance_finalize = 0x0, abstract = false, parent = 0x55555633a280 &quot;virtio-net-pci-base&quot;,</span>
+<span class="go">  parent_type = 0x555556339f20, class = 0x55555639f330, num_interfaces = 2, interfaces = {{typename = 0x55555633a2a0 &quot;pci-express-device&quot;}, {</span>
+<span class="go">      typename = 0x55555633a2c0 &quot;conventional-pci-device&quot;}, {typename = 0x0} &lt;repeats 30 times&gt;}}</span>
+</pre></div>
+</div>
+<p><strong>当前dev的typeImpl是virtio-net-pci,它的parent是virtio-net-pci-base</strong></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(gdb)</span> <span class="go">p *(struct TypeImpl *)0x555556339f20</span>
+<span class="gp">$</span><span class="nv">75</span> <span class="o">=</span> <span class="o">{</span><span class="nv">name</span> <span class="o">=</span> 0x55555633a0a0 <span class="s2">&quot;virtio-net-pci-base&quot;</span>, <span class="nv">class_size</span> <span class="o">=</span> <span class="m">248</span>, <span class="nv">instance_size</span> <span class="o">=</span> <span class="m">42096</span>, <span class="nv">class_init</span> <span class="o">=</span> 0x555555a67c90 &lt;virtio_pci_base_class_init&gt;,
+<span class="go">  class_base_init = 0x0, class_data = 0x555555fbe760 &lt;virtio_net_pci_info&gt;, instance_init = 0x5555558a7e90 &lt;virtio_net_pci_instance_init&gt;, instance_post_init = 0x0,</span>
+<span class="go">  instance_finalize = 0x0, abstract = true, parent = 0x55555633a0c0 &quot;virtio-pci&quot;, parent_type = 0x555556372790, class = 0x55555639f430, num_interfaces = 0, interfaces = {{</span>
+<span class="go">      typename = 0x0} &lt;repeats 32 times&gt;}}</span>
+</pre></div>
+</div>
+<p><strong>virtio-net-pci-base的parent是virtio-pci</strong></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(gdb)</span> <span class="go">p *(struct TypeImpl *)0x555556372790</span>
+<span class="gp">$</span><span class="nv">76</span> <span class="o">=</span> <span class="o">{</span><span class="nv">name</span> <span class="o">=</span> 0x555556372910 <span class="s2">&quot;virtio-pci&quot;</span>, <span class="nv">class_size</span> <span class="o">=</span> <span class="m">248</span>, <span class="nv">instance_size</span> <span class="o">=</span> <span class="m">33136</span>, <span class="nv">class_init</span> <span class="o">=</span> 0x555555a67fc0 &lt;virtio_pci_class_init&gt;, <span class="nv">class_base_init</span> <span class="o">=</span> 0x0,
+<span class="go">  class_data = 0x0, instance_init = 0x0, instance_post_init = 0x0, instance_finalize = 0x0, abstract = true, parent = 0x555556372930 &quot;pci-device&quot;,</span>
+<span class="go">  parent_type = 0x555556366c80, class = 0x55555637f1f0, num_interfaces = 0, interfaces = {{typename = 0x0} &lt;repeats 32 times&gt;}}</span>
+</pre></div>
+</div>
+<p><strong>virtio-pci的parent是pci-device</strong></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(gdb)</span> <span class="go">p *(struct TypeImpl *)0x555556366c80</span>
+<span class="gp">$</span><span class="nv">77</span> <span class="o">=</span> <span class="o">{</span><span class="nv">name</span> <span class="o">=</span> 0x555556366e00 <span class="s2">&quot;pci-device&quot;</span>, <span class="nv">class_size</span> <span class="o">=</span> <span class="m">232</span>, <span class="nv">instance_size</span> <span class="o">=</span> <span class="m">2272</span>, <span class="nv">class_init</span> <span class="o">=</span> 0x555555a174e0 &lt;pci_device_class_init&gt;,
+<span class="go">  class_base_init = 0x555555a17a50 &lt;pci_device_class_base_init&gt;, class_data = 0x0, instance_init = 0x0, instance_post_init = 0x0, instance_finalize = 0x0, abstract = true,</span>
+<span class="go">  parent = 0x555556366e20 &quot;device&quot;, parent_type = 0x555556356d10, class = 0x55555637f2f0, num_interfaces = 0, interfaces = {{typename = 0x0} &lt;repeats 32 times&gt;}}</span>
+</pre></div>
+</div>
+<p><strong>pci-device的parent是device</strong></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(gdb)</span> <span class="go">p *(struct TypeImpl *)0x555556356d10</span>
+<span class="gp">$</span><span class="nv">78</span> <span class="o">=</span> <span class="o">{</span><span class="nv">name</span> <span class="o">=</span> 0x555556356e90 <span class="s2">&quot;device&quot;</span>, <span class="nv">class_size</span> <span class="o">=</span> <span class="m">176</span>, <span class="nv">instance_size</span> <span class="o">=</span> <span class="m">120</span>, <span class="nv">class_init</span> <span class="o">=</span> 0x55555599ac00 &lt;device_class_init&gt;,
+<span class="go">  class_base_init = 0x55555599abd0 &lt;device_class_base_init&gt;, class_data = 0x0, instance_init = 0x55555599bdd0 &lt;device_initfn&gt;,</span>
+<span class="go">  instance_post_init = 0x55555599b010 &lt;device_post_init&gt;, instance_finalize = 0x55555599af00 &lt;device_finalize&gt;, abstract = true, parent = 0x555556356eb0 &quot;object&quot;,</span>
+<span class="go">  parent_type = 0x555556374d50, class = 0x55555637f3e0, num_interfaces = 0, interfaces = {{typename = 0x0} &lt;repeats 32 times&gt;}}</span>
+</pre></div>
+</div>
+<p><strong>device的parent是object</strong></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(gdb)</span> <span class="go">p *(struct TypeImpl *)0x555556374d50</span>
+<span class="gp">$</span><span class="nv">79</span> <span class="o">=</span> <span class="o">{</span><span class="nv">name</span> <span class="o">=</span> 0x555556374ed0 <span class="s2">&quot;object&quot;</span>, <span class="nv">class_size</span> <span class="o">=</span> <span class="m">96</span>, <span class="nv">instance_size</span> <span class="o">=</span> <span class="m">40</span>, <span class="nv">class_init</span> <span class="o">=</span> 0x555555ad88a0 &lt;object_class_init&gt;, <span class="nv">class_base_init</span> <span class="o">=</span> 0x0, <span class="nv">class_data</span> <span class="o">=</span> 0x0,
+<span class="go">  instance_init = 0x0, instance_post_init = 0x0, instance_finalize = 0x0, abstract = true, parent = 0x0, parent_type = 0x0, class = 0x55555637e6b0, num_interfaces = 0,</span>
+<span class="go">  interfaces = {{typename = 0x0} &lt;repeats 32 times&gt;}}</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cplus/index.html">Cplus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Virtulization</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../qemu/index.html">Qemu</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Virtio</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="0001-pre.html">Virtio devices and drivers overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0001.html">Introduction to virtio-networking and vhost-net</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0002.html">Deep dive into Virtio-networking and vhost-net</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0003.html">How vhost-user came into being: Virtio-networking and DPDK</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0004.html">A journey to the vhost-users realm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0005.html">Introduction to VirtIO</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Qemu: Virtio-net Envrionment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0007.html">Qemu: Virtio_net_pci</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0009.html">Qemu: Virtio_bus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0008.html">Qemu: Virtio_net Device</a></li>
+<li class="toctree-l3"><a class="reference internal" href="vhost-user.html">Vhost-user Protocol</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../00001.html">Install Ret Hat 7 server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00002.html">Qemu ifup script</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00003.html">Random Mac address</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00004.html">Assign tap to VM Client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00005.html">Open vSwitch with Libvirt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00006.html">EAL: No free hugepages reported in hugepages-2048kB</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00007.html">Failed to connect socket /var/run/openvswitch/centos1_eth0: Permission denied</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00008.html">Establish OVP reference envrionment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00009.html">libvirt: Specify the kernel and rootfs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00010.html">WRLinux with wayland and weston</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00011.html">Enable the support console for VM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00012.html">Start Qemu with monitor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00013.html">Creating images from ISO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00014.html">Create image from Wrlinux image</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Virtulization</a><ul>
+  <li><a href="index.html">Virtio</a><ul>
+      <li>Previous: <a href="0005.html" title="previous chapter">Introduction to VirtIO</a></li>
+      <li>Next: <a href="0007.html" title="next chapter">Qemu: Virtio_net_pci</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../../_sources/virt/virtio/0006.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

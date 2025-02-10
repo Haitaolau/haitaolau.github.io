@@ -1,0 +1,105 @@
+========================
+Assign tap to VM Client
+========================
+
+1. Create a virtual interface with IP command
+------------------------------------------------
+
+
+.. code-block:: console
+
+   root@intel-x86-64:~# ip tuntap add dev tap0 mode tap
+
+
+
+2. Add it into OVS bridge
+----------------------------
+
+
+.. code-block:: console
+
+   root@intel-x86-64:~# ovs-vsctl add-port ovs-sys-br tap0
+   device tap0 entered promiscuous mode
+   oot@intel-x86-64:~# ovs-ofctl show ovs-sys-br
+   OFPT_FEATURES_REPLY (xid=0x2): dpid:0000423a42c72a46
+   n_tables:254, n_buffers:0
+   capabilities: FLOW_STATS TABLE_STATS PORT_STATS QUEUE_STATS ARP_MATCH_IP
+   actions: output enqueue set_vlan_vid set_vlan_pcp strip_vlan mod_dl_src mod_dl_dst mod_nw_src mod_nw_dst mod_nw_tos mod_tp_src mod_tp_dst
+    1(tap0): addr:4a:fd:d0:33:2c:80
+        config:     PORT_DOWN
+        state:      LINK_DOWN
+        current:    10MB-FD COPPER
+        speed: 10 Mbps now, 0 Mbps max
+    LOCAL(ovs-sys-br): addr:42:3a:42:c7:2a:46
+        config:     PORT_DOWN
+        state:      LINK_DOWN
+        current:    10MB-FD COPPER
+        speed: 10 Mbps now, 0 Mbps max
+   OFPT_GET_CONFIG_REPLY (xid=0x4): frags=normal miss_send_len=0
+
+
+
+3. Enable the interface
+---------------------------
+
+
+.. code-block:: console
+   
+   root@intel-x86-64:~# ip link set dev tap0 up
+   root@intel-x86-64:~# ovs-ofctl show ovs-sys-br
+   OFPT_FEATURES_REPLY (xid=0x2): dpid:0000423a42c72a46
+   n_tables:254, n_buffers:0
+   capabilities: FLOW_STATS TABLE_STATS PORT_STATS QUEUE_STATS ARP_MATCH_IP
+   actions: output enqueue set_vlan_vid set_vlan_pcp strip_vlan mod_dl_src mod_dl_dst mod_nw_src mod_nw_dst mod_nw_tos mod_tp_src mod_tp_dst
+    1(tap0): addr:4a:fd:d0:33:2c:80
+        config:     0
+        state:      LINK_DOWN
+        current:    10MB-FD COPPER
+        speed: 10 Mbps now, 0 Mbps max
+    LOCAL(ovs-sys-br): addr:42:3a:42:c7:2a:46
+        config:     PORT_DOWN
+        state:      LINK_DOWN
+        current:    10MB-FD COPPER
+        speed: 10 Mbps now, 0 Mbps max
+   OFPT_GET_CONFIG_REPLY (xid=0x4): frags=normal miss_send_len=0
+
+
+   
+4. Assign the interface to VM
+------------------------------
+
+
+
+.. code-block:: console
+
+		
+    <interface type='ethernet'>
+           <target dev='tap0'/>            
+	  <model type='virtio'/>
+    </interface>
+
+
+Here is the above file :download:`qemu XML <src/qemu-example-1.xml>`
+
+.. code-block:: console
+
+   root@intel-x86-64:/run/media/sda3# ovs-ofctl show ovs-sys-br
+   OFPT_FEATURES_REPLY (xid=0x2): dpid:0000423a42c72a46
+   n_tables:254, n_buffers:0
+   capabilities: FLOW_STATS TABLE_STATS PORT_STATS QUEUE_STATS ARP_MATCH_IP
+   actions: output enqueue set_vlan_vid set_vlan_pcp strip_vlan mod_dl_src mod_dl_dst mod_nw_src mod_nw_dst mod_nw_tos mod_tp_src mod_tp_dst
+    1(tap0): addr:fe:54:00:7e:30:db
+        config:     0
+        state:      0
+        current:    10MB-FD COPPER
+        speed: 10 Mbps now, 0 Mbps max
+    LOCAL(ovs-sys-br): addr:42:3a:42:c7:2a:46
+        config:     PORT_DOWN
+        state:      LINK_DOWN
+        current:    10MB-FD COPPER
+        speed: 10 Mbps now, 0 Mbps max
+   OFPT_GET_CONFIG_REPLY (xid=0x4): frags=normal miss_send_len=0
+   root@intel-x86-64:/run/media/sda3# 
+       
+   		
+   

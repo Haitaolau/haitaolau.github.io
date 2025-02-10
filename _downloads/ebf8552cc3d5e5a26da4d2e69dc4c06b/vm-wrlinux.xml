@@ -1,0 +1,150 @@
+<domain type='kvm' id='2'>
+  <name>wrlinux</name>
+  <uuid>82ae8ce2-826f-473b-b09f-13e5ce400aa3</uuid>
+  <memory unit='KiB'>6291456</memory>
+  <currentMemory unit='KiB'>6291456</currentMemory>
+  <memoryBacking>
+    <hugepages>
+      <page size='1048576' unit='KiB'/>
+    </hugepages>
+  </memoryBacking>
+  <vcpu placement='static' cpuset='2-5,8-11'>2</vcpu>
+  <cputune>
+    <vcpupin vcpu='0' cpuset='2'/>
+    <vcpupin vcpu='1' cpuset='8'/>
+    <emulatorpin cpuset='2-5,8-11'/>
+  </cputune>
+  <resource>
+    <partition>/machine</partition>
+  </resource>
+  <sysinfo type='smbios'/>
+  <os>
+    <type arch='x86_64' machine='pc-i440fx-1.7'>hvm</type>
+    <boot dev='hd'/>
+    <kernel>/run/media/sda1/bzImage</kernel>
+    <cmdline>console=ttyS0 root=/dev/vda rw</cmdline>
+    <smbios mode='sysinfo'/>
+  </os>
+  <features>
+    <acpi/>
+    <apic/>
+    <pae/>
+  </features>
+  <cpu mode='custom'>
+    <model fallback='forbid'>Broadwell-noTSX-IBRS</model>
+    <vendor>Intel</vendor>
+    <feature policy='require' name='vme'/>
+    <feature policy='require' name='ss'/>
+    <feature policy='require' name='vmx'/>
+    <feature policy='require' name='f16c'/>
+    <feature policy='require' name='rdrand'/>
+    <feature policy='require' name='hypervisor'/>
+    <feature policy='require' name='arat'/>
+    <feature policy='require' name='tsc_adjust'/>
+    <feature policy='require' name='umip'/>
+    <feature policy='require' name='arch-capabilities'/>
+    <feature policy='require' name='pdpe1gb'/>
+    <feature policy='require' name='abm'/>
+    <feature policy='require' name='skip-l1dfl-vmentry'/>
+    <feature policy='disable' name='fma'/>
+    <feature policy='disable' name='xsave'/>
+    <feature policy='disable' name='avx'/>
+    <feature policy='disable' name='avx2'/>
+    <feature policy='disable' name='spec-ctrl'/>
+    <feature policy='disable' name='xsaveopt'/>
+	    <feature policy='disable' name='rdtscp'/>
+    <numa>
+      <cell id='0' cpus='0-1' memory='6291456' unit='KiB' memAccess='shared'/>
+    </numa>
+		</cpu>
+  <clock offset='utc'/>
+  <on_poweroff>destroy</on_poweroff>
+  <on_reboot>restart</on_reboot>
+  <on_crash>restart</on_crash>
+  <devices>
+    <emulator>/usr/bin/qemu-system-x86_64</emulator>
+    <disk type='file' device='disk'>
+      <driver name='qemu' type='raw' cache='none'/>
+      <source file="/run/media/sda1/core-image-base-intel-x86-64.ext4" />
+      <backingStore/>
+      <target dev='vda' bus='virtio'/>
+      <alias name='virtio-disk0'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x02' function='0x0'/>
+    </disk>
+    <controller type='usb' index='0' model='piix3-uhci'>
+      <alias name='usb'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x01' function='0x2'/>
+    </controller>
+    <controller type='pci' index='0' model='pci-root'>
+      <alias name='pci.0'/>
+    </controller>
+    <interface type='vhostuser'>
+      <mac address='30:7c:5e:4c:a8:50'/>
+      <source type='unix' path='/var/run/openvswitch/centos1_eth0' mode='client'/>
+      <target dev='centos1_eth0'/>
+      <guest dev='eth0'/>
+      <model type='virtio'/>
+      <alias name='net0'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x03' function='0x0'/>
+    </interface>
+    <interface type='vhostuser'>
+      <mac address='30:7c:5e:4c:a8:51'/>
+      <source type='unix' path='/var/run/openvswitch/centos1_eth1' mode='client'/>
+      <target dev='centos1_eth1'/>
+      <guest dev='eth1'/>
+      <model type='virtio'/>
+      <alias name='net1'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x04' function='0x0'/>
+    </interface>
+    <interface type='vhostuser'>
+      <mac address='30:7c:5e:4c:a8:4f'/>
+      <source type='unix' path='/var/run/openvswitch/centos1_eth2' mode='client'/>
+      <target dev='centos1_eth2'/>
+      <guest dev='eth2'/>
+      <model type='virtio'/>
+      <alias name='net2'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x05' function='0x0'/>
+    </interface>
+    <interface type='vhostuser'>
+      <mac address='30:7c:5e:4c:a8:52'/>
+      <source type='unix' path='/var/run/openvswitch/centos1_eth3' mode='client'/>
+      <target dev='centos1_eth3'/>
+      <guest dev='eth3'/>
+      <model type='virtio'/>
+      <alias name='net3'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x06' function='0x0'/>
+    </interface>
+    <interface type='vhostuser'>
+      <mac address='30:7c:5e:4c:a8:53'/>
+      <source type='unix' path='/var/run/openvswitch/centos1_eth4' mode='client'/>
+      <target dev='centos1_eth4'/>
+      <guest dev='eth4'/>
+      <model type='virtio'/>
+      <alias name='net4'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x07' function='0x0'/>
+    </interface>
+    <interface type='vhostuser'>
+      <mac address='30:7c:5e:4c:a8:54'/>
+      <source type='unix' path='/var/run/openvswitch/centos1_eth5' mode='client'/>
+      <target dev='centos1_eth5'/>
+      <guest dev='eth5'/>
+      <model type='virtio'/>
+      <alias name='net5'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x08' function='0x0'/>
+    </interface>
+    <serial type="pty">
+      <target port="0" type="isa-serial">
+        <model name="isa-serial" />
+      </target>
+    </serial>
+    <console type="pty">
+      <target port="0" type="serial" />
+    </console>
+    <memballoon model='none'/>
+  </devices>
+  <seclabel type='dynamic' model='dac' relabel='yes'>
+    <label>+0:+0</label>
+    <imagelabel>+0:+0</imagelabel>
+  </seclabel>
+</domain>
+

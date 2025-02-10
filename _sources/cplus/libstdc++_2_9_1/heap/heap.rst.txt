@@ -1,0 +1,22 @@
+=============
+Binary Heap
+=============
+
+
+
+Binary Heap
+====================
+
+
+
+所谓的Binary Heap其实就是一种complete binary tree，也就是说，完全binary tree，
+
+除了了底层的叶子节点之外，都是填满的。而且底层的叶子节点有左到右不能有空隙
+
+
+
+.. image:: ../../../_static/image/binary_heap01.jpg
+
+
+**当节点处于array的i处时候，其左节点处于2i，右节点处于2i+1，其父节点处于i/2处。**
+

@@ -1,0 +1,48 @@
+=============================
+Open vSwitch with Libvirt
+=============================
+
+
+.. code-block:: console
+
+		
+     <interface type='bridge'>
+        <source bridge='ovs-sys-br'/>
+        <virtualport type='openvswitch'/>
+        <address type='pci' domain='0x0000' bus='0x00' slot='0x03' function='0x0'/>
+     </interface>
+
+
+  
+The output:
+
+.. code-block:: console
+
+   root@intel-x86-64:/run/media/sda3# virsh create qemu-d2.xml
+   device vnet5 entered promiscuous mode
+   Domain 'vm_qemu_2' created from qemu-d2.xml
+    
+   root@intel-x86-64:/run/media/sda3# ovs-ofctl show ovs-sys-br
+   OFPT_FEATURES_REPLY (xid=0x2): dpid:0000423a42c72a46
+   n_tables:254, n_buffers:0
+   capabilities: FLOW_STATS TABLE_STATS PORT_STATS QUEUE_STATS ARP_MATCH_IP
+   actions: output enqueue set_vlan_vid set_vlan_pcp strip_vlan mod_dl_src mod_dl_dst mod_nw_src mod_nw_dst mod_nw_tos mod_tp_src mod_tp_dst
+    1(tap0): addr:fe:54:00:7e:30:db
+        config:     0
+        state:      0
+        current:    10MB-FD COPPER
+        speed: 10 Mbps now, 0 Mbps max
+    3(vnet5): addr:fe:54:00:a8:5d:10
+        config:     0
+        state:      0
+        current:    10MB-FD COPPER
+        speed: 10 Mbps now, 0 Mbps max
+    LOCAL(ovs-sys-br): addr:42:3a:42:c7:2a:46
+        config:     PORT_DOWN
+        state:      LINK_DOWN
+        current:    10MB-FD COPPER
+        speed: 10 Mbps now, 0 Mbps max
+   OFPT_GET_CONFIG_REPLY (xid=0x4): frags=normal miss_send_len=0
+   root@intel-x86-64:/run/media/sda3# 
+    
+   

@@ -1,0 +1,23 @@
+===========
+unique
+===========
+
+.. code-block:: c++
+
+   template <class _Tp, class _Alloc>
+   void list<_Tp, _Alloc>::unique()
+   {
+     iterator __first = begin();
+     iterator __last = end();
+     if (__first == __last) return;
+           iterator __next = __first;
+           while (++__next != __last) {
+              if (*__first == *__next)
+                 erase(__next);
+              else
+                 __first = __next;
+                 __next = __first;
+           }
+   }
+
+

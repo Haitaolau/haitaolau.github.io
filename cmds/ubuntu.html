@@ -1,0 +1,309 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Ubuntu &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Kernel" href="kernel.html" />
+    <link rel="prev" title="Docker" href="docker.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="ubuntu">
+<h1>Ubuntu<a class="headerlink" href="#ubuntu" title="Permalink to this heading">¶</a></h1>
+<section id="how-to-find-the-package-that-provides-a-file">
+<h2>How to find the package that provides a file<a class="headerlink" href="#how-to-find-the-package-that-provides-a-file" title="Permalink to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p>apt-file</p></li>
+</ol>
+<p>Install apt-file</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">apt-get install apt-file</span>
+<span class="go">apt-file update</span>
+</pre></div>
+</div>
+<p>Example:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">root@218c9deecf36:/buildarea1# </span>apt-file search makeinfo
+<span class="go">emacs-common: /usr/share/emacs/26.3/lisp/textmodes/makeinfo.elc</span>
+<span class="go">emacs-el: /usr/share/emacs/26.3/lisp/textmodes/makeinfo.el.gz</span>
+<span class="go">manpages-ja: /usr/share/man/ja/man1/makeinfo.1.gz</span>
+<span class="go">manpages-zh: /usr/share/man/zh_CN/man1/makeinfo.1.gz</span>
+<span class="go">manpages-zh: /usr/share/man/zh_TW/man1/makeinfo.1.gz</span>
+<span class="go">octave-common: /usr/share/octave/5.2.0/m/help/__makeinfo__.m</span>
+<span class="go">octave-doc: /usr/share/doc/octave/octave.html/XREFmakeinfo_005fprogram.html</span>
+<span class="go">octave-plplot: /usr/share/plplot_octave/support/__makeinfo__.m</span>
+<span class="go">sendmail-cf: /usr/share/sendmail/cf/sh/makeinfo.sh</span>
+<span class="go">texi2html: /usr/share/texi2html/makeinfo.init</span>
+<span class="go">texinfo: /usr/bin/makeinfo</span>
+<span class="go">texinfo: /usr/share/doc/texinfo/html/Invoking-makeinfo.html</span>
+<span class="go">texinfo: /usr/share/doc/texinfo/html/makeinfo-Advantages.html</span>
+<span class="go">texinfo: /usr/share/doc/texinfo/html/makeinfo-Options.html</span>
+<span class="go">texinfo: /usr/share/doc/texinfo/html/makeinfo-Pointer-Creation.html</span>
+<span class="go">texinfo: /usr/share/doc/texinfo/html/makeinfo-Preferred.html</span>
+<span class="go">texinfo: /usr/share/doc/texinfo/html/makeinfo-advantages.html</span>
+<span class="go">texinfo: /usr/share/doc/texinfo/html/makeinfo-in-Emacs.html</span>
+<span class="go">texinfo: /usr/share/doc/texinfo/html/makeinfo-top-command.html</span>
+<span class="go">texinfo: /usr/share/doc/texinfo/html/makeinfo-top.html</span>
+<span class="go">texinfo: /usr/share/man/man1/makeinfo.1.gz</span>
+<span class="go">vim-syntastic: /usr/share/vim/addons/syntax_checkers/texinfo/makeinfo.vim</span>
+<span class="go">xemacs21-basesupport: /usr/share/xemacs21/xemacs-packages/lisp/texinfo/makeinfo.elc</span>
+<span class="go">xemacs21-basesupport-el: /usr/share/xemacs21/xemacs-packages/lisp/texinfo/makeinfo.el.gz</span>
+<span class="gp">root@218c9deecf36:/buildarea1#</span>
+</pre></div>
+</div>
+</section>
+<section id="how-to-check-timezone-in-linux">
+<h2>How to Check Timezone in Linux<a class="headerlink" href="#how-to-check-timezone-in-linux" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">hliu4@ala-lpggp2$</span>cat /etc/timezone
+<span class="go">America/Los_Angeles</span>
+<span class="gp">hliu4@ala-lpggp2$</span>
+</pre></div>
+</div>
+</section>
+<section id="search-who-provide-the-boost">
+<h2>Search who provide the boost<a class="headerlink" href="#search-who-provide-the-boost" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">wrsadmin@PEK-HLIU4-D1$</span>aptitude search boost
+</pre></div>
+</div>
+</section>
+<section id="systemd-list-all-failed-services">
+<h2>Systemd list all failed services<a class="headerlink" href="#systemd-list-all-failed-services" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">root@intel-x86-64:~# </span>systemctl list-units --failed
+<span class="go">UNIT                      LOAD   ACTIVE SUB    DESCRIPTION</span>
+<span class="go">● apache2.service           loaded failed failed The Apache HTTP Server</span>
+<span class="go">● ceph-crash.service        loaded failed failed Ceph crash dump collector</span>
+<span class="go">● logrotate.service         loaded failed failed Rotate log files</span>
+<span class="go">● modprobe@drm.service      loaded failed failed Load Kernel Module drm</span>
+<span class="go">● nagios-core.service       loaded failed failed Nagios core</span>
+<span class="go">● named.service             loaded failed failed Berkeley Internet Name Domain (DNS)</span>
+<span class="go">● ninfod.service            loaded failed failed Respond to IPv6 Node Information Queries</span>
+<span class="go">● ovsdb-server.service      loaded failed failed Open vSwitch Database Unit</span>
+<span class="go">● postfix.service           loaded failed failed Postfix Mail Transport Agent</span>
+<span class="go">● rdisc.service             loaded failed failed Network Router Discovery Daemon</span>
+<span class="go">● rng-tools.service         loaded failed failed Hardware RNG Entropy Gatherer Daemon</span>
+<span class="go">● systemd-logind.service    loaded failed failed User Login Management</span>
+<span class="go">● systemd-resolved.service  loaded failed failed Network Name Resolution</span>
+<span class="go">● systemd-timesyncd.service loaded failed failed Network Time Synchronization</span>
+
+<span class="go">LOAD   = Reflects whether the unit definition was properly loaded.</span>
+<span class="go">ACTIVE = The high-level unit activation state, i.e. generalization of SUB.</span>
+<span class="go">SUB    = The low-level unit activation state, values depend on unit type.</span>
+<span class="go">14 loaded units listed.</span>
+</pre></div>
+</div>
+</section>
+<section id="switching-boot-target-to-text">
+<h2>Switching boot target to text<a class="headerlink" href="#switching-boot-target-to-text" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">sudo systemctl set-default multi-user.target</span>
+<span class="go">sudo reboot</span>
+</pre></div>
+</div>
+</section>
+<section id="switching-boot-target-to-graphical">
+<h2>Switching boot target to graphical<a class="headerlink" href="#switching-boot-target-to-graphical" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">sudo systemctl set-default graphical.target</span>
+<span class="go">sudo reboot</span>
+</pre></div>
+</div>
+</section>
+<section id="update-and-upgrade-the-ubuntu">
+<h2>update and upgrade the ubuntu<a class="headerlink" href="#update-and-upgrade-the-ubuntu" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">apt-get update</span>
+<span class="go">apt-get upgrade</span>
+</pre></div>
+</div>
+</section>
+<section id="install-the-development-tools">
+<h2>install the development tools<a class="headerlink" href="#install-the-development-tools" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">apt-get install build-essential</span>
+<span class="go">apt-get install autoconf automake gdb git libffi-dev zlib1g-dev</span>
+<span class="go">apt-get install wget vim libssl-dev</span>
+<span class="go">apt-get install fakeroot ncurses-dev xz-utils bc flex libelf-dev bison</span>
+<span class="go">apt-get install -y libgcrypt-dev</span>
+<span class="go">apt-get install pkg-config</span>
+<span class="go">apt-get install python3</span>
+<span class="go">apt-get install git</span>
+<span class="go">apt-get install git-email</span>
+<span class="go">apt-get install libboost-all-dev</span>
+</pre></div>
+</div>
+</section>
+<section id="how-to-disable-sleep-on-ubuntu-server">
+<h2>How To: Disable Sleep on Ubuntu Server<a class="headerlink" href="#how-to-disable-sleep-on-ubuntu-server" title="Permalink to this heading">¶</a></h2>
+<section id="confirm-sleep-status-with-systemd">
+<h3>Confirm Sleep Status with systemd<a class="headerlink" href="#confirm-sleep-status-with-systemd" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wrsadmin@pek-hliu4-d1:~$ systemctl status sleep.target
+○ sleep.target - Sleep
+  Loaded: loaded <span class="o">(</span>/lib/systemd/system/sleep.target<span class="p">;</span> static<span class="o">)</span>
+  Active: inactive <span class="o">(</span>dead<span class="o">)</span>
+  Docs: man:systemd.special<span class="o">(</span><span class="m">7</span><span class="o">)</span>
+</pre></div>
+</div>
+</section>
+<section id="disable-sleep-in-ubuntu-with-systemd">
+<h3>Disable Sleep in Ubuntu with systemd<a class="headerlink" href="#disable-sleep-in-ubuntu-with-systemd" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wrsadmin@pek-hliu4-d1:~$ systemctl status sleep.target
+○ sleep.target - Sleep
+ Loaded: loaded <span class="o">(</span>/lib/systemd/system/sleep.target<span class="p">;</span> static<span class="o">)</span>
+ Active: inactive <span class="o">(</span>dead<span class="o">)</span>
+ Docs: man:systemd.special<span class="o">(</span><span class="m">7</span><span class="o">)</span>
+ wrsadmin@pek-hliu4-d1:~$ sudo systemctl mask sleep.target
+ suspend.target hibernate.target hybrid-sleep.target
+ Created symlink /etc/systemd/system/sleep.target →
+ /dev/null.
+ Created symlink /etc/systemd/system/suspend.target →
+ /dev/null.
+ Created symlink /etc/systemd/system/hibernate.target →
+ /dev/null.
+ Created symlink /etc/systemd/system/hybrid-sleep.target →
+ /dev/null.
+ wrsadmin@pek-hliu4-d1:~$ systemctl status sleep.target
+ ○ sleep.target
+ Loaded: masked <span class="o">(</span>Reason: Unit sleep.target is masked.<span class="o">)</span>
+ Active: inactive <span class="o">(</span>dead<span class="o">)</span>
+ wrsadmin@pek-hliu4-d1:~$
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../corp.html">Corporation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Commands</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="git.html">Git</a></li>
+<li class="toctree-l2"><a class="reference internal" href="docker.html">Docker</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Ubuntu</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#how-to-find-the-package-that-provides-a-file">How to find the package that provides a file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#how-to-check-timezone-in-linux">How to Check Timezone in Linux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#search-who-provide-the-boost">Search who provide the boost</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#systemd-list-all-failed-services">Systemd list all failed services</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#switching-boot-target-to-text">Switching boot target to text</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#switching-boot-target-to-graphical">Switching boot target to graphical</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#update-and-upgrade-the-ubuntu">update and upgrade the ubuntu</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#install-the-development-tools">install the development tools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#how-to-disable-sleep-on-ubuntu-server">How To: Disable Sleep on Ubuntu Server</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="kernel.html">Kernel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dhcp.html">Dhcp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ovs.html">OpenVswitch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lxc.html">Lxc container</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ip.html">Ip command</a></li>
+<li class="toctree-l2"><a class="reference internal" href="find.html">Find</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tcpdump.html">Tcpdump</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sed_awk.html">Sed and awk</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gcc.html">gcc/g++</a></li>
+<li class="toctree-l2"><a class="reference internal" href="virsh.html">Virsh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="numa.html">Numactl</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ps1.html">Linux Bash PS1 variable</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tmux.html">Tmux</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cplus/index.html">Cplus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Commands</a><ul>
+      <li>Previous: <a href="docker.html" title="previous chapter">Docker</a></li>
+      <li>Next: <a href="kernel.html" title="next chapter">Kernel</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/cmds/ubuntu.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

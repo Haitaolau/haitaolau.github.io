@@ -1,0 +1,51 @@
+===================================
+ Open Source: Attribution Licenses
+===================================
+
+
+**Impose minimal obligations and restrictions on redistribution**
+
+**Openly grant right to: copy, modify, distribute**
+
+**In return**
+
+  * Provide Acknowledgement(attribution)
+
+  * Preserve author's copyright and license notices in source code
+
+**Also called: Permissive or Academic licenses**
+
+	      
+This licenses promote sharing of the code and are available to everyone.
+
+They do ask to provide attribution, that is to preserve the author's copyright note and the license notice in the code.
+
+Open source license attribution licenses are very popular because they make sharing of the code easy.
+
+Under these licenses there are almost no restrictions on the distribution of the code and these licenses provide open and broad permission to copy, modify, and distribute the software.
+
+To be able to use the software you need to retain the copyright owners notice as well as the license notice.
+
+In the code you acknowledge the owner and their copyright, which means to provide attribution.
+
+
+
+Example MIT Licences
+====================
+
+
+.. code-block:: console
+
+   Copyright (c) [year] [fullname]
+   
+   Permission is hereby granted, free of charge, to any person obtaining a copy
+   of this software and associated documentation files (the "Software"), to deal
+   in the Software without restriction, including without limitation the rights
+   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+   copies of the Software, and to permit persons to whom the Software is
+   furnished to do so, subject to the following conditions:
+   
+   The above copyright notice and this permission notice shall be included in all
+   copies or substantial portions of the Software.
+
+

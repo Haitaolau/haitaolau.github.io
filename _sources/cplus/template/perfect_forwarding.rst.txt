@@ -1,0 +1,140 @@
+====================
+Perfect Forwarding
+====================
+
+Concepts
+=========
+
+**1) 直接调用**
+
+   如从main()主函数中调用funcLast()函数，这其实就叫作直接调用
+
+**2) 转发**
+
+   从main()主函数中调用funcMiddle()函数,通过funcMiddle()函数调用funcLast()函数,
+   这就叫转发。显然,这种情况下,funcMiddle()函数就被当作一个 **跳板函数**。在转发的过程中,
+   main()主函数会传递一些参数,这些参数最终是要传递给funcLast()函数的，
+   因为引入了跳板函数funcMiddle(),那么这些参数需要通过funcMiddle()函数中转,间接传递给funcLast()函数
+   
+**3) 完美转发** 
+
+   在转发（中转这些参数）的过程中，这些参数的某些类型信息会丢失（如参数的const属性、左值或右值属性),
+   显然这种转发就是不完美的。但是，如果这些参数的类型信息可以原封不动（完全不丢失）地从funcMiddle()函
+   数转发到funcLast()函数，这种转发就叫作完美转发
+
+.. code-block:: cpp
+
+   #include <iostream>
+   #include <boost/type_index.hpp>
+   using namespace std;
+   using boost::typeindex::type_id_with_cvr;
+   
+   void funcLast2(int v1, int& v2)
+   {
+      ++v2;
+      cout << v1 << endl;
+      cout << v2 << endl;
+   }
+   
+   template <typename F, typename T1, typename T2>
+   void funcMiddle (F f, T1 t1, T2 t2)
+   {
+   
+      std::cout << "T1=" <<type_id_with_cvr<T1>().pretty_name() << std::endl;
+      std::cout << "t1=" <<type_id_with_cvr<decltype(t1)>().pretty_name() << std::endl;
+      f(t1, t2);
+   }
+   
+   int main(int argc, char const *argv[])
+   {
+   
+      int j = 70;
+      funcMiddle(funcLast2, 20, j);
+      return 0;
+   }
+   
+
+正常显示结果91，但是执行完这句后，j不是71， 仍然是70，这是个问题
+
+Output:
+
+.. code-block:: console 
+   
+   wrsadmin@pek-hliu4-d1:~/workspace/Cplus/test$ ./0004
+   T1=int
+   t1=int
+   T2=int
+   t2=int
+   91
+   70
+
+
+.. code-block:: cpp 
+   
+   #include <iostream>
+   #include <boost/type_index.hpp>
+   using namespace std;
+   using boost::typeindex::type_id_with_cvr;
+
+   void funcLast2(int&& v1, int& v2)
+   {
+      cout << v1 << endl;
+      cout << v2 << endl;
+   }
+
+   template <typename F, typename T1, typename T2>
+   void funcMiddle (F f, T1&& t1, T2&& t2)
+   {
+      
+      std::cout << "T1=" <<type_id_with_cvr<T1>().pretty_name() << std::endl;
+      std::cout << "t1=" <<type_id_with_cvr<decltype(t1)>().pretty_name() << std::endl;
+      f(t1, t2);
+   }
+
+   int main(int argc, char const *argv[])
+   {
+      
+      int j = 70; 
+      funcMiddle(funcLast2, 20, j);
+      return 0;
+   }
+
+Output: 
+
+.. code-block:: console 
+
+   wrsadmin@PEK-HLIU4-D1$g++ template9.cpp  -o template9
+   template9.cpp: In instantiation of ‘void funcMiddle(F, T1&&, T2&&) [with F = void (*)(int&&, int&); T1 = int; T2 = int&]’:
+   template9.cpp:25:32:   required from here
+   template9.cpp:18:6: error: cannot bind rvalue reference of type ‘int&&’ to lvalue of type ‘int’
+      18 |     f(t1, t2);
+         |     ~^~~~~~~~
+   wrsadmin@PEK-HLIU4-D1$
+
+1) funcMiddle(funcLast2, 20, j); 
+ 
+   20 --> rvalue 
+
+   j  --> lvalue
+
+2) template <typename F, typename T1, typename T2> void funcMiddle (F f, T1&& t1, T2&& t2)
+
+   T1的类型为int
+
+   t1的类型为int&&
+
+   T2的类型为int&
+
+   t2的类型为int&
+
+std::forward
+===================
+
+
+
+
+
+
+
+
+   

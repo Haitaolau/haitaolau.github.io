@@ -1,0 +1,331 @@
+======================================
+ Simplify Ruckstack with shell script
+======================================
+
+
+.. contents:: Table of contents
+
+
+Step1. creating rootfs with mmdebstrap
+======================================
+
+
+.. code-block:: bash
+
+   #!/bin/bash 
+
+   /usr/bin/mmdebstrap \
+   	--architecture amd64 \
+   	--verbose \
+   	--include=systemd-boot \
+   	--include=dracut \
+   	--include=linux-image-amd64 \
+   	--include=ca-certificates \
+   	--include=vim \
+   	--include=sudo \
+   	--include=net-tools \
+   	--include=openssh-client \
+   	--include=openssh-server \
+   	--include=procps \
+   	--include=less \
+   	--include=dbus \
+   	--include=policykit-1 \
+   	--include=curl \
+   	--include=wget \
+   	--include=ca-certificates \
+   	--include=ostree \
+   	--include=ostree-boot \
+   	--include=python3-apt-ostree \
+   	--include=uefi-ext4 \
+   	--include=systemd-resolved \
+   	--include=cloud-guest-utils \
+   	--include=xterm \
+   	--customize-hook='sync-in overlay/ostree/usr/lib /usr/lib' \
+   	--customize-hook='echo "root:root" | chroot "$1" chpasswd' \
+   	--customize-hook='systemctl enable --root="$1" systemd-networkd' \
+   	--customize-hook='systemctl enable --root="$1" elxr-growfs' \
+   	--customize-hook='chroot $1 echo "localhost" > $1/etc/hostname' \
+   	--customize-hook='mkdir -p $1/efi' \
+   	--setup-hook='sync-in overlay/debian/ /' \
+   	bookworm \
+   	/usr/src/tmp/elxr-ostree-0.1-amd64.tar.gz \
+   	/var/tmp/rucksack/elxr.list
+
+
+Here is the above file :download:`script <01-mmdebstrap.sh>`
+
+
+
+Step2. unpacking the rootfs
+===========================
+
+
+
+.. code-block:: bash
+
+   #!/bin/bash 
+
+   test -d "elxr-minimal-ostree-amd64" && rm -rf elxr-minimal-ostree-amd64/  
+   
+   mkdir -p elxr-minimal-ostree-amd64/rootfs 
+   
+   tar -C elxr-minimal-ostree-amd64/rootfs --exclude=./dev/* \
+       -zxf elxr-ostree-0.1-amd64.tar.gz --numeric-owner
+   		
+
+       
+Here is the above file :download:`script <02-unpacking.sh>`
+
+
+Step3. initializing the ostree
+==============================
+
+
+.. code-block:: bash
+
+   #!/bin/bash 
+   
+   ROOTFS=$(realpath elxr-minimal-ostree-amd64/rootfs/)
+   
+   test -d "/var/www/html/repo" && rm -rf /var/www/html/repo
+   
+   mkdir -p /var/www/html/repo
+   
+   ostree init --repo /var/www/html/repo --mode archive-z2 
+   
+   cd ${ROOTFS}
+   
+   echo "Setup up the ostree bootdir"
+   
+   KERNEL_VERSION=`ls boot/vmlinuz* | sed 's/.*vmlinuz-\(.*\)/\1/'`
+   
+   mv boot/vmlinuz* usr/lib/modules/${KERNEL_VERSION}/vmlinuz
+   mv boot/initrd.img* usr/lib/modules/${KERNEL_VERSION}/initramfs.img
+   
+   mv boot/* usr/lib/modules/${KERNEL_VERSION}/
+   
+   echo "Removing unnecessary files"
+   
+   test -d "boot/initrd.img" && rm -rf boot/initrd.img
+   
+   test -d "boot/vmlinuz" && rm -rf boot/vmlinuz
+   
+   test -d "initrd.img" && rm -rf initrd.img
+   
+   test -d "initrd.img.old" && rm -rf initrd.img.old
+   
+   test -d "vmlinuz" && rm -rf vmlinuz
+   
+   test -d "vmlinuz.old" && rm -rf vmlinuz.old
+   
+   echo "Moving /var/lib/dpkg to /usr/share/dpkg/database"
+   
+   mv var/lib/dpkg usr/share/dpkg/database
+   
+   echo "Backup /var"
+   
+   mkdir usr/rootdirs
+   
+   chmod 755 usr/rootdirs
+   
+   echo "Moving /var to /usr/rootdirs."
+   
+   mv var/ usr/rootdirs/
+   
+   mkdir var
+   
+   chmod 755 var
+   
+   mv etc usr/
+   
+   mkdir ostree
+   mkdir sysroot
+   
+   
+   echo "Setting up symlinks: media     -> run/media"
+   
+   rm media -rf
+   ln -s run/media media
+   
+   echo "Setting up symlinks. mnt       -> var/mnt"
+   
+   rm mnt -rf
+   ln -s var/mnt mnt
+   
+   echo "Setting up symlinks. opt       -> var/opt"
+   
+   rm opt -rf 
+   ln -s var/opt opt
+   
+   echo "Setting up symlinks. root      -> var/roothome"
+   
+   rm root -rf 
+   ln -s var/roothome root
+   
+   echo "Setting up symlinks. srv       -> var/srv"
+   rm srv -rf
+   ln -s var/srv srv
+   
+   echo "Setting up symlinks. usr/local -> ../var/usrlocal"
+   rm usr/local -rf
+   ln -s usr/local var/usrlocal
+   
+   echo "Committing to ostree"
+   
+   ostree commit ${ROOTFS} --repo=/var/www/html/repo --branch=elxr/amd64 --subject="Initial commit"
+   
+   echo "Updating summary of ostree repository"
+   
+   ostree summary -u --repo=/var/www/html/repo
+   
+
+Here is the above file :download:`script <03-ostree-and-init.sh>`
+
+
+Step4. creating image and making a partition
+============================================
+
+
+.. code-block:: bash
+
+   #!/bin/bash 
+   
+   CURRENT=`pwd`
+   
+   LOOPDEV="$(losetup -f)"
+   
+   IMAGE_NAME="$(pwd)/elxr-minimal-ostree-amd64-0.1-amd64.img"
+   ROOTFS="$(pwd)/elxr-minimal-ostree-amd64/rootfs"
+   
+   
+   echo "Create raw image ${IMAGE_NAME}"
+   
+   test -f "${IMAGE_NAME}" && rm -rf ${IMAGE_NAME}
+   
+   truncate -s 4G ${IMAGE_NAME}
+   
+   echo "Attach ${IMAGE_NAME} to ${LOOPDEV}"
+   
+   losetup --partscan ${LOOPDEV} ${IMAGE_NAME}
+   
+   
+   echo "Erase available filesystem on ${LOOPDEV}"
+   
+   wipefs -f -a ${LOOPDEV}
+   
+   
+   echo "Creating gpt disk label"
+   
+   parted ${LOOPDEV} --script mklabel gpt 
+   
+   echo "Creating partition 1: EFI"
+   
+   parted -a optimal -s ${LOOPDEV} -- mkpart EFI 0% 128MB 
+   parted -a optimal -s ${LOOPDEV} -- set 1 boot on
+   parted -a optimal -s ${LOOPDEV} -- set 1 esp on
+   sfdisk --part-type ${LOOPDEV} 1 c12a7328-f81f-11d2-ba4b-00a0c93ec93b
+   
+   
+   echo "Creating partition 2: BOOT"
+   
+   parted -a optimal -s ${LOOPDEV} -- mkpart BOOT 128M 640M
+   sfdisk --part-type ${LOOPDEV} 2 bc13c2ff-59e6-4262-a352-b275fd6f7172
+   
+   
+   echo "Creating partition 3: ROOT"
+   
+   parted -a optimal -s ${LOOPDEV} -- mkpart ROOT 640MB 100%
+   
+   echo "Formatting filesystems for EFI."
+   
+   mkfs.vfat -F 32 -n EFI ${LOOPDEV}p1
+   
+   echo "Formatting filesystems for BOOT."
+   
+   mkfs -F -t ext4 -L BOOT ${LOOPDEV}p2
+   
+   
+   echo "Formatting filesystems for ROOT"
+   
+   mkfs -F -t ext4 -L ROOT ${LOOPDEV}p3
+   
+   
+   echo "Mounting ${LOOPDEV}"
+   
+   systemd-dissect -m ${LOOPDEV} ${ROOTFS}
+   
+   
+   echo "Creating ${ROOTFS}/ostree/repo"
+   
+   test -d "${ROOTFS}/ostree/repo" || mkdir -p ${ROOTFS}/ostree/repo
+   
+   echo "Create ostree repository"
+   
+   ostree init --repo ${ROOTFS}/ostree/repo --mode archive-z2
+   
+   echo "Pull ostree from /var/www/html/repo"
+   
+   echo "Pulling elxr/amd64 from /var/www/html/repo" 
+   
+   ostree pull-local --repo ${ROOTFS}/ostree/repo /var/www/html/repo elxr/amd64
+   
+   echo "Updating summary of ostree repository"
+   
+   ostree summary -u --repo=${ROOTFS}/ostree/repo
+   
+   echo "Deploy ostree elxr/amd64 to ${LOOPDEV}"
+   echo "Configuring ${LOOPDEV} for ostree"
+   
+   ostree admin init-fs ${ROOTFS}
+   
+   ostree admin os-init --sysroot ${ROOTFS} elxr
+   
+   echo "Deploying elxr/amd64"
+   
+   ostree admin deploy --sysroot ${ROOTFS} --os elxr elxr/amd64 --karg=root=LABEL=ROOT --karg=rw --karg='console=ttyS0,115200n8 console=tty0'
+   
+   echo "Restoring /var"
+   VAR_SRC=$(realpath ${ROOTFS}/ostree/deploy/elxr/deploy/*.0)
+   VAR_DST="${ROOTFS}/ostree/deploy/elxr"
+   echo "Copying ${VAR_SRC}/usr/rootdirs/var -> ${VAR_DST}"
+   
+   cp -af ${VAR_SRC}/usr/rootdirs/var ${VAR_DST}
+   
+   echo "Installing boot loader for OSTree"
+   bwrap --bind ${VAR_SRC} / \
+   	--proc /proc \
+   	--dev-bind /dev /dev \
+   	--dir /run \
+   	--bind /sys /sys \
+   	--dir /run \
+   	--bind /tmp /tmp \
+   	--share-net \
+   	--die-with-parent \
+   	--chdir / \
+   	--bind ${ROOTFS}/boot /boot \
+   	--bind ${ROOTFS}/efi /efi \
+   	bootctl \
+   	install \
+   	--boot-path /boot \
+   	--no-variables \
+   	--entry-token \
+   	os-id 
+   
+   echo "Configuring boot loader"
+   
+   sed -i 's/#timeout/timeout/' ${ROOTFS}/efi/loader/loader.conf
+   
+   echo "Install ext4 file system driver for UEFI"
+   
+   cp ${VAR_SRC}/usr/share/edk2/drivers ${ROOTFS}/efi/EFI/systemd/ -rfv 
+   
+   echo "Unmounting ${LOOPDEV}"
+   
+   systemd-dissect -u ${ROOTFS}
+   
+   echo "Compress image $CURRENT/elxr-minimal-ostree-amd64-0.1-amd64.img"
+   
+   zstd -3 --keep -f -T128 $CURRENT/elxr-minimal-ostree-amd64-0.1-amd64.img
+   
+
+Here is the above file :download:`script <04-creat-image-and-parted.sh>`   

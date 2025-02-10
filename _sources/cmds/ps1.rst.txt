@@ -1,0 +1,31 @@
+=========================
+ Linux Bash PS1 variable
+=========================
+
+
+*    \d: The current date
+*    \t: The current time
+*    \h: The hostname of our Linux machine
+*    \u: The username of the logged-in user
+*    \w: The user’s working directory
+*    \[: Beginning of a sequence of non-printable characters that somehow control the behavior of the terminal
+*    \]: End of non-printable control characters sequence
+
+
+Using the '\w'
+
+
+.. code-block:: bash
+
+   hliu4@eeef568eba2c:kernel-meta$PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$'
+   hliu4@eeef568eba2c:/buildarea1/LIN1022-7283/build/tmp-glibc/work/xilinx_zynqmp-wrs-linux/linux-yocto/5.15.155+gitAUTOINC+1427f4d13f_ab8d149d3f-r0/kernel-meta$
+
+Using the '\W'
+
+
+.. code-block:: bash
+
+   hliu4@eeef568eba2c:kernel-meta$PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\W\[\033[00m\]\$'
+   hliu4@eeef568eba2c:kernel-meta$pwd
+   /buildarea1/LIN1022-7283/build/tmp-glibc/work/xilinx_zynqmp-wrs-linux/linux-yocto/5.15.155+gitAUTOINC+1427f4d13f_ab8d149d3f-r0/kernel-meta
+   hliu4@eeef568eba2c:kernel-meta$

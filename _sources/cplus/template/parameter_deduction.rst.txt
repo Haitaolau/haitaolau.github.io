@@ -1,0 +1,59 @@
+======================
+Parameter Deduction
+======================
+
+
+.. code-block:: 
+
+   template<typename T> 
+   T mydouble(T tmpvalue) 
+   { 
+        return tmpvalue * 2;
+   }
+
+
+Auto type deduction
+=====================
+
+指定实参，编译器会自动推断出模板参数的类型，调用代码如下。
+
+.. code-block::
+   
+   int result = mydouble(15);
+
+
+上述代码中，编译器可以根据传入的实参15，推断出函数模板mydouble()中类型模板参数T为int类型。
+
+
+
+
+Specify template parameters
+===========================
+
+同时指定实参和类型模板参数
+
+.. code-block:: 
+   
+   int result2 = mydouble<int>(16.9);
+
+显式指定了mydouble()函数模板的模板参数为int类型，
+所以就不存在编译器根据给定的实参（16.9）类型推断模板参数类型的情况
+
+
+Specify empty template parameter
+================================
+
+.. code-block::
+   
+   auto result4 = mydouble(16.9);
+
+mydouble模板参数的类型依旧是通过实参16.9类型推断，所以，推断出来的是double类型
+
+
+.. code-block::
+  
+   double mydouble(double tmpvalue) { return tmpvalue * 2; }
+   auto result4 = mydouble(16.9);
+   auto result3 = mydouble< >(16.9);
+
+< >这个空模板参数列表的用处是可以明确地指出：请调用mydouble()函数模板，而不是调用普通的mydouble()函数

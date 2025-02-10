@@ -1,0 +1,176 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Spinlock rules &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="SMP IRQ Affinity" href="SMP-affinity.html" />
+    <link rel="prev" title="IOMMU" href="iommu.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="spinlock-rules">
+<h1>Spinlock rules<a class="headerlink" href="#spinlock-rules" title="Permalink to this heading">¶</a></h1>
+<section id="when-spinlock-is-used">
+<h2>1. When spinlock is used ?<a class="headerlink" href="#when-spinlock-is-used" title="Permalink to this heading">¶</a></h2>
+<p>Ans: In the following situations.</p>
+<blockquote>
+<div><p>The thread that holds the lock is not allowed to sleep.
+The thread that is waiting for a lock does not sleep, but spins in a tight loop.</p>
+</div></blockquote>
+<p>When properly used, spinlock can give higher performance than semaphore. Ex: Intrrrupt handler.</p>
+</section>
+<section id="what-are-the-rules-to-use-spinlocks">
+<h2>2. What are the rules to use spinlocks?<a class="headerlink" href="#what-are-the-rules-to-use-spinlocks" title="Permalink to this heading">¶</a></h2>
+<p>Ans:
+Rule - 1: Any code that holds the spinlock, can not relinquish the processor for any reason except to service
+interrupts ( sometimes not even then). So code holding spinlock can not sleep.</p>
+<dl class="simple">
+<dt>Reason: suppose your driver holding spinlock goes to sleep. Ex: calls function copy_from_user() or copy_to_user(),</dt><dd><p>or kernel preemption kicks in so higher priority process pushed your code aside. Effectively the process
+relinquishes the CPU holding spinlock.</p>
+</dd>
+</dl>
+<p>Now we do not know when the code will release the lock. If some other thread tries to obtain the same lock, it
+would spin for very long time. In the worst case it would result in deedlock.</p>
+<p>Kernel preemption case is handled by the spinlock code itself. Anytime kernel code holds a spinlock, preemption
+is disabled on the relevant processor. Even uniprocessor system must disable the preemption in this way.</p>
+<p>Rule - 2: Disable interrupts on the local CPU, while the spinlock is held.</p>
+<dl class="simple">
+<dt>Reason: Support your driver take a spinlock that control access to the device</dt><dd><p>and then issues an interrupt. This causes the interrupt handler to run. Now the
+interrupt handler also needs the lock to access the device. If the interrupt handler runs
+on the same processor, it will start spinning. The driver code also can not run to release
+the lock. SO the processor will spin for ever.</p>
+</dd>
+</dl>
+<p>Rule - 3: Spinlocks must be held for the minimum time possible.</p>
+<dl class="simple">
+<dt>Reason: Long lock hold times also keeps the current processor from scheduling, meaning a higher</dt><dd><p>priority process may have to wait to get the CPU.</p>
+</dd>
+</dl>
+<p>So it impacts kernel latency (time a process may have to wait to be scheduled). Typically spinlocks
+should be held for the time duration, less than that CPU takes to do a contex switch between threads.</p>
+<p>Rule -4: if you have semaphores and spinlocks both to be taken. Then take semaphore first and then spinlock.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cmds/index.html">Commands</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Linux Kernel</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="debug_gdb.html">Debugging linux kernel with GDB and Qemu</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iommu.html">IOMMU</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Spinlock rules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#when-spinlock-is-used">1. When spinlock is used ?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#what-are-the-rules-to-use-spinlocks">2. What are the rules to use spinlocks?</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="SMP-affinity.html">SMP IRQ Affinity</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cplus/index.html">Cplus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Linux Kernel</a><ul>
+      <li>Previous: <a href="iommu.html" title="previous chapter">IOMMU</a></li>
+      <li>Next: <a href="SMP-affinity.html" title="next chapter">SMP IRQ Affinity</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/kernel/rules_to_use_spinlock.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

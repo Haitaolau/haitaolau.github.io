@@ -1,0 +1,156 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Linux Graphics stack &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Boot Up" href="bootup.html" />
+    <link rel="prev" title="Hwcomposer" href="graphics/hwcomposer.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="linux-graphics-stack">
+<h1>Linux Graphics stack<a class="headerlink" href="#linux-graphics-stack" title="Permalink to this heading">¶</a></h1>
+<section id="what-s-graphics">
+<h2>1. What’s Graphics？<a class="headerlink" href="#what-s-graphics" title="Permalink to this heading">¶</a></h2>
+<p>picture由许多的像素 (pixel) 构成的，如何用数字来表示每一个像素的方式称为 color model，</p>
+<p>例如包含 3 个 color channel 的 RGB，而具体用多少位的数据来表示某个具体的颜色值的方式称为 color space，</p>
+<p>color model 是描述了颜色的组成方式，而 color space 则是物理图形世界和数字图形世界的准确链接方式。</p>
+<p>1、图片的尺寸 (dimension，宽度和高度)，以像素为单位。</p>
+<p>2、纵横比 (aspect ratio) 是宽:高的比例，例如 16:9、4:3。</p>
+<p>3、分辨率 (resolution)，像素个数/物理长度，可能是 pixels per inch 或者是 pixels per millimeter，容易和 dimension 混淆。</p>
+<p>4、根据像素在内存中的存储顺序的不同，显示时也会有不同的扫描顺序 (scan order)，例如 linear scan order、raster scan order。</p>
+<p>5、像素有特定的格式：</p>
+<p>多个 color channel;</p>
+<p>透明 (alpha) 通道;</p>
+<p>Depth (不包含 alpha channel )和 bits per pixel (bpp，包含 alpha channel);</p>
+<p>像素在内存里可能有不同的组织方式，可能是一个个像素存储，也可能是先存储所有像素的 red channel，再存储所有像素的 green channel，最后存储所有像素的 blue channel;</p>
+<p>Sub-sampling，多个像素共享同一个 color channel;</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cplus/index.html">Cplus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../els/index.html">ESL</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Andorid</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="framework.html">Android Framework</a></li>
+<li class="toctree-l2"><a class="reference internal" href="graphics/index.html">Android Graphics</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Linux Graphics stack</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#what-s-graphics">1. What’s Graphics？</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="bootup.html">Boot Up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="SurfaceFlinger.html">SurfaceFlinger</a></li>
+<li class="toctree-l2"><a class="reference internal" href="drm.html">Direct Rendering Manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gralloc.html">Gralloc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wayland.html">Wayland</a></li>
+<li class="toctree-l2"><a class="reference internal" href="waydroid.html">Waydroid</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Andorid</a><ul>
+      <li>Previous: <a href="graphics/hwcomposer.html" title="previous chapter">Hwcomposer</a></li>
+      <li>Next: <a href="bootup.html" title="next chapter">Boot Up</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/andorid/linux_graphics.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

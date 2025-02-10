@@ -1,0 +1,167 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Files/directories were installed but not shipped &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Enable ptest" href="00002.html" />
+    <link rel="prev" title="Yocto" href="index.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="files-directories-were-installed-but-not-shipped">
+<h1>Files/directories were installed but not shipped<a class="headerlink" href="#files-directories-were-installed-but-not-shipped" title="Permalink to this heading">¶</a></h1>
+<section id="qa-issue-lvgl-files-directories-were-installed-but-not-shipped-in-any-package">
+<h2>QA Issue: lvgl: Files/directories were installed but not shipped in any package<a class="headerlink" href="#qa-issue-lvgl-files-directories-were-installed-but-not-shipped-in-any-package" title="Permalink to this heading">¶</a></h2>
+<p>Question:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">ERROR: lvgl-8.1.0-r0 do_package: QA Issue: lvgl: Files/directories were installed but not shipped in any package:</span>
+<span class="go">/usr/lib</span>
+<span class="go">/usr/lib/liblvgl.a</span>
+<span class="go">Please set FILES such that these items are packaged. Alternatively if they are unneeded, avoid installing them or delete them within do_install.</span>
+<span class="go">lvgl: 2 installed and not shipped files. [installed-vs-shipped]</span>
+<span class="go">ERROR: lvgl-8.1.0-r0 do_package: Fatal QA errors were found, failing task.</span>
+<span class="go">ERROR: Logfile of failure stored in: /buildarea1/LIN1022-graphics/build/tmp-glibc/work/corei7-64-wrs-linux/lvgl/8.1.0-r0/temp/log.do_package.3615826</span>
+<span class="go">ERROR: Task (/buildarea1/LIN1022-graphics/layers/meta-openembedded/meta-oe/recipes-graphics/lvgl/lvgl_8.1.0.bb:do_package) failed with exit code &#39;1&#39;</span>
+</pre></div>
+</div>
+<p>Solution:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">hliu4@218c9deecf36$</span>git diff meta-oe/recipes-graphics/lvgl/lvgl_8.1.0.bb
+<span class="go">diff --git a/meta-oe/recipes-graphics/lvgl/lvgl_8.1.0.bb b/meta-oe/recipes-graphics/lvgl/lvgl_8.1.0.bb</span>
+<span class="go">index 2005afa2f..6942d013d 100644</span>
+<span class="go">--- a/meta-oe/recipes-graphics/lvgl/lvgl_8.1.0.bb</span>
+<span class="go">+++ b/meta-oe/recipes-graphics/lvgl/lvgl_8.1.0.bb</span>
+<span class="go">@@ -35,3 +35,5 @@ FILES:${PN}-dev += &quot;\</span>
+<span class="gp">  $</span><span class="o">{</span>includedir<span class="o">}</span>/<span class="si">${</span><span class="nv">PN</span><span class="si">}</span>/ <span class="se">\</span>
+<span class="gp">  $</span><span class="o">{</span>includedir<span class="o">}</span>/<span class="si">${</span><span class="nv">PN</span><span class="si">}</span>/lvgl/ <span class="se">\</span>
+  <span class="s2">&quot;</span>
+<span class="go">+</span>
+<span class="go">+FILES:${PN}-staticdev = &quot;${nonarch_libdir}/*.a&quot;</span>
+<span class="gp">hliu4@218c9deecf36$</span>
+</pre></div>
+</div>
+<p>nonarch_libdir is “/usr/lib”</p>
+<p>libdir is /usr/lib64</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cplus/index.html">Cplus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Yocto</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Files/directories were installed but not shipped</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#qa-issue-lvgl-files-directories-were-installed-but-not-shipped-in-any-package">QA Issue: lvgl: Files/directories were installed but not shipped in any package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="00002.html">Enable ptest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="00003.html">intel socfpga agilex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="00004.html">Automount disk</a></li>
+<li class="toctree-l2"><a class="reference internal" href="00005.html">How do I generate an ordered lists of the executed tasks</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Yocto</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Yocto</a></li>
+      <li>Next: <a href="00002.html" title="next chapter">Enable ptest</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/yocto/00001.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

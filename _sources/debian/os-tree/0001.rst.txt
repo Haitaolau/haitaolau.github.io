@@ -1,0 +1,84 @@
+=============
+ ostree init
+=============
+
+.. contents:: Table of content
+
+NAME
+====
+
+::
+   
+  ostree-init - Initialize a new empty repository
+
+
+
+SYNOPSIS
+========
+
+::
+
+   ostree init [OPTIONS...]
+
+DESCRIPTION
+===========
+
+::
+   
+   Creates a new empty repository.
+
+OPTIONS
+=======
+
+::
+   
+   --mode="MODE"
+      
+      Initialize repository in given mode (bare, bare-user, bare-user-only, archive).
+      The default is bare. Note that for archive the repository configuration file
+      will actually have archive-z2, as that's the historical name.
+
+      See the manual for differences between these modes. Briefly, bare mode stores
+      files as they are, so they can be directly hardlinked, bare-user uses extended
+      attributes to store ownership and xattr information, allowing non-root operations,
+      bare-user-only does not store ownership information, and archive stores files
+      compressed, to be served over the network.
+
+   --collection-id=COLLECTION-ID
+
+     Set the collection ID of the repository. Remotes in clones of this repository must
+     configure the same value in order to pull refs which originated in this repository
+     over peer to peer.
+
+     This collection ID must be persistent and globally unique. It is formatted as a
+     reverse DNS name (like a D-Bus interface). It must be set to a reverse DNS domain
+     under your control.
+
+     This option may be omitted (the default) to leave peer to peer distribution unsupported
+     for the repository. A collection ID may be added to an existing repository in future to
+     enable peer to peer distribution from that point onwards.
+
+     If the collection ID is changed for the repository in future, peer to peer distribution
+     of refs from the repository will break for all peers who do not update their remote
+     configuration to the new collection ID.
+
+
+EXAMPLE
+=======
+
+
+.. code-block:: console
+
+   root@32b81b5fc0ca:/usr/src/tmp/example# ostree init --repo /usr/src/tmp/example/ostree/repo/ --mode archive-z2
+   root@32b81b5fc0ca:/usr/src/tmp/example# ls /usr/src/tmp/example/ostree/repo/
+   config  extensions  objects  refs  state  tmp
+   root@32b81b5fc0ca:/usr/src/tmp/example# ls /usr/src/tmp/example/ostree/repo/ -lh
+   total 4.0K
+   -rw-r--r-- 1 root root 38 Aug 20 06:44 config
+   drwxr-xr-x 2 root root 10 Aug 20 06:44 extensions
+   drwxr-xr-x 2 root root 10 Aug 20 06:44 objects
+   drwxr-xr-x 5 root root 62 Aug 20 06:44 refs
+   drwxr-xr-x 2 root root 10 Aug 20 06:44 state
+   drwxr-xr-x 3 root root 26 Aug 20 06:44 tmp
+   root@32b81b5fc0ca:/usr/src/tmp/example# 
+   

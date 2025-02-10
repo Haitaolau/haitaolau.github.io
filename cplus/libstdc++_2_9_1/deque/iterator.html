@@ -1,0 +1,394 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Iterator &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Constructor" href="constructor.html" />
+    <link rel="prev" title="Double Ended Queue" href="index.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="iterator">
+<h1>Iterator<a class="headerlink" href="#iterator" title="Permalink to this heading">¶</a></h1>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">_Deque_iterator</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">_Deque_iterator</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="w"> </span><span class="n">_Tp</span><span class="o">&amp;</span><span class="p">,</span><span class="w"> </span><span class="n">_Tp</span><span class="o">*&gt;</span><span class="w">             </span><span class="n">iterator</span><span class="p">;</span><span class="w"></span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">_Deque_iterator</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">_Tp</span><span class="o">&amp;</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">_Tp</span><span class="o">*&gt;</span><span class="w"> </span><span class="n">const_iterator</span><span class="p">;</span><span class="w"></span>
+<span class="k">static</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="nf">_S_buffer_size</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">__deque_buf_size</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">_Tp</span><span class="p">));</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="n">random_access_iterator_tag</span><span class="w"> </span><span class="n">iterator_category</span><span class="p">;</span><span class="w"></span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">_Tp</span><span class="w"> </span><span class="n">value_type</span><span class="p">;</span><span class="w"></span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">_Ptr</span><span class="w"> </span><span class="n">pointer</span><span class="p">;</span><span class="w"></span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">_Ref</span><span class="w"> </span><span class="n">reference</span><span class="p">;</span><span class="w"></span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">size_type</span><span class="p">;</span><span class="w"></span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">ptrdiff_t</span><span class="w"> </span><span class="n">difference_type</span><span class="p">;</span><span class="w"></span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">_Tp</span><span class="o">**</span><span class="w"> </span><span class="n">_Map_pointer</span><span class="p">;</span><span class="w"></span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="n">_Deque_iterator</span><span class="w"> </span><span class="n">_Self</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+<section id="dataimplementation">
+<h2>DataImplementation<a class="headerlink" href="#dataimplementation" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">_Tp</span><span class="o">*</span><span class="w"> </span><span class="n">_M_cur</span><span class="p">;</span><span class="w"></span>
+<span class="n">_Tp</span><span class="o">*</span><span class="w"> </span><span class="n">_M_first</span><span class="p">;</span><span class="w"></span>
+<span class="n">_Tp</span><span class="o">*</span><span class="w"> </span><span class="n">_M_last</span><span class="p">;</span><span class="w"></span>
+<span class="n">_Map_pointer</span><span class="w"> </span><span class="n">_M_node</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+<p>node: 指向此迭代器所指向的缓冲区</p>
+<p>cur: 指向此迭代器所指向的缓冲区的当前元素(current）</p>
+<p>first: 指向此迭代器所指向的缓冲区的头</p>
+<p>last: 指向此迭代器所指向的缓冲区的尾</p>
+<img alt="../../../_images/deque_iterator.jpg" src="../../../_images/deque_iterator.jpg" />
+</section>
+<section id="contrustor">
+<h2>Contrustor<a class="headerlink" href="#contrustor" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">_Deque_iterator</span><span class="p">(</span><span class="n">_Tp</span><span class="o">*</span><span class="w"> </span><span class="n">__x</span><span class="p">,</span><span class="w"> </span><span class="n">_Map_pointer</span><span class="w"> </span><span class="n">__y</span><span class="p">)</span><span class="w"></span>
+<span class="w">      </span><span class="o">:</span><span class="w"> </span><span class="n">_M_cur</span><span class="p">(</span><span class="n">__x</span><span class="p">),</span><span class="w"> </span><span class="n">_M_first</span><span class="p">(</span><span class="o">*</span><span class="n">__y</span><span class="p">),</span><span class="w"></span>
+<span class="w">      </span><span class="n">_M_last</span><span class="p">(</span><span class="o">*</span><span class="n">__y</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">_S_buffer_size</span><span class="p">()),</span><span class="w"> </span><span class="n">_M_node</span><span class="p">(</span><span class="n">__y</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
+
+<span class="n">_Deque_iterator</span><span class="p">()</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">_M_cur</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="n">_M_first</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="n">_M_last</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="n">_M_node</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
+
+<span class="n">_Deque_iterator</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">iterator</span><span class="o">&amp;</span><span class="w"> </span><span class="n">__x</span><span class="p">)</span><span class="w"></span>
+<span class="w">      </span><span class="o">:</span><span class="w"> </span><span class="n">_M_cur</span><span class="p">(</span><span class="n">__x</span><span class="p">.</span><span class="n">_M_cur</span><span class="p">),</span><span class="w"> </span><span class="n">_M_first</span><span class="p">(</span><span class="n">__x</span><span class="p">.</span><span class="n">_M_first</span><span class="p">),</span><span class="w"></span>
+<span class="w">      </span><span class="n">_M_last</span><span class="p">(</span><span class="n">__x</span><span class="p">.</span><span class="n">_M_last</span><span class="p">),</span><span class="w"> </span><span class="n">_M_node</span><span class="p">(</span><span class="n">__x</span><span class="p">.</span><span class="n">_M_node</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>主要是数据结构的初始化</p>
+</section>
+<section id="operator">
+<h2>operator*<a class="headerlink" href="#operator" title="Permalink to this heading">¶</a></h2>
+<p>返回_M_cur指针所指向的内容</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">reference</span><span class="w"> </span><span class="k">operator</span><span class="o">*</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="o">*</span><span class="n">_M_cur</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="id1">
+<h2>operator-&gt;<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<p>返回_M_cur</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">pointer</span><span class="w"> </span><span class="k">operator</span><span class="o">-&gt;</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">_M_cur</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="id2">
+<h2>operator-<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">difference_type</span><span class="w"> </span><span class="k">operator</span><span class="o">-</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">_Self</span><span class="o">&amp;</span><span class="w"> </span><span class="n">__x</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">difference_type</span><span class="p">(</span><span class="n">_S_buffer_size</span><span class="p">())</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">_M_node</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">__x</span><span class="p">.</span><span class="n">_M_node</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"></span>
+<span class="w">       </span><span class="p">(</span><span class="n">_M_cur</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">_M_first</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">__x</span><span class="p">.</span><span class="n">_M_last</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">__x</span><span class="p">.</span><span class="n">_M_cur</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<img alt="../../../_images/deque_iterator2.jpg" src="../../../_images/deque_iterator2.jpg" />
+<p>1 获取map中第二节点的空间，在本示例中x是第一个节点，self是第三个节点，要获取x与self之间的第二个节点的空间</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">difference_type</span><span class="p">(</span><span class="n">_S_buffer_size</span><span class="p">())</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">_M_node</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">__x</span><span class="p">.</span><span class="n">_M_node</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"></span>
+</pre></div>
+</div>
+<p>2 获取当前节点所使用的空间cur- first</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">_M_cur</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">_M_first</span><span class="p">)</span><span class="w"></span>
+</pre></div>
+</div>
+<p>3 获取x节点未使用的空间last-cur</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">__x</span><span class="p">.</span><span class="n">_M_last</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">__x</span><span class="p">.</span><span class="n">_M_cur</span><span class="p">)</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="id3">
+<h2>operator++<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
+<p>前置++，返回对象的引用，首先++操作，然后判断当前的指针cur是不是已经处于存储空间的末端了（last），</p>
+<p>如果处于末端，就向map重新申请一个node节点,并将cur指向first</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">_Self</span><span class="o">&amp;</span><span class="w"> </span><span class="k">operator</span><span class="o">++</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="o">++</span><span class="n">_M_cur</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">_M_cur</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">_M_last</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">     </span><span class="n">_M_set_node</span><span class="p">(</span><span class="n">_M_node</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w"></span>
+<span class="w">     </span><span class="n">_M_cur</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_M_first</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="k">return</span><span class="w"> </span><span class="o">*</span><span class="k">this</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>后置++，返回对象本身，先将this保存到tmp中，然后调用前置++，将cur进行移动，并返回tmp</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">_Self</span><span class="w"> </span><span class="k">operator</span><span class="o">++</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="w">  </span><span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="n">_Self</span><span class="w"> </span><span class="n">__tmp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="k">this</span><span class="p">;</span><span class="w"></span>
+<span class="w">   </span><span class="o">++*</span><span class="k">this</span><span class="p">;</span><span class="w"></span>
+<span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="n">__tmp</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="id4">
+<h2>operator–<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h2>
+<p>前置–</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">_Self</span><span class="o">&amp;</span><span class="w"> </span><span class="k">operator</span><span class="o">--</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">_M_cur</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">_M_first</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">     </span><span class="n">_M_set_node</span><span class="p">(</span><span class="n">_M_node</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w"></span>
+<span class="w">     </span><span class="n">_M_cur</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_M_last</span><span class="p">;</span><span class="w"></span>
+<span class="w">   </span><span class="p">}</span><span class="w"></span>
+<span class="w">   </span><span class="o">--</span><span class="n">_M_cur</span><span class="p">;</span><span class="w"></span>
+<span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="o">*</span><span class="k">this</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>后置–</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">_Self</span><span class="w"> </span><span class="k">operator</span><span class="o">--</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">_Self</span><span class="w"> </span><span class="n">__tmp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="k">this</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="o">--*</span><span class="k">this</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__tmp</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="id5">
+<h2>operator+=<a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">_Self</span><span class="o">&amp;</span><span class="w"> </span><span class="k">operator</span><span class="o">+=</span><span class="p">(</span><span class="n">difference_type</span><span class="w"> </span><span class="n">__n</span><span class="p">)</span><span class="w"></span>
+<span class="w">  </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">difference_type</span><span class="w"> </span><span class="n">__offset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__n</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">_M_cur</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">_M_first</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">__offset</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">__offset</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">difference_type</span><span class="p">(</span><span class="n">_S_buffer_size</span><span class="p">()))</span><span class="w"></span>
+<span class="w">      </span><span class="n">_M_cur</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">__n</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="n">difference_type</span><span class="w"> </span><span class="n">__node_offset</span><span class="w"> </span><span class="o">=</span><span class="w"></span>
+<span class="w">        </span><span class="n">__offset</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">__offset</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">difference_type</span><span class="p">(</span><span class="n">_S_buffer_size</span><span class="p">())</span><span class="w"></span>
+<span class="w">                   </span><span class="o">:</span><span class="w"> </span><span class="o">-</span><span class="n">difference_type</span><span class="p">((</span><span class="o">-</span><span class="n">__offset</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">_S_buffer_size</span><span class="p">())</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"></span>
+<span class="w">      </span><span class="n">_M_set_node</span><span class="p">(</span><span class="n">_M_node</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">__node_offset</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="n">_M_cur</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_M_first</span><span class="w"> </span><span class="o">+</span><span class="w"></span>
+<span class="w">        </span><span class="p">(</span><span class="n">__offset</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">__node_offset</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">difference_type</span><span class="p">(</span><span class="n">_S_buffer_size</span><span class="p">()));</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">*</span><span class="k">this</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>这里__n可以是正数也可以是负数.</p>
+<p>__offset是表示迭代器指针需要偏移的量</p>
+<ol class="arabic simple">
+<li><p>当需要偏移的量__offset的值在当前的node节点空间内，直接让 _M_cur + __n 即可</p></li>
+</ol>
+<img alt="../../../_images/deque_iterator3.jpg" src="../../../_images/deque_iterator3.jpg" />
+<ol class="arabic simple" start="2">
+<li><p>当需要偏移量__offset的值超出了当前node节点的空间，需要占用另外的node节点</p></li>
+</ol>
+<p>首先需要计算出需要的node节点数</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">__offset</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">difference_type</span><span class="p">(</span><span class="n">_S_buffer_size</span><span class="p">())</span><span class="w"></span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>当需要偏移量为负数的时候，即需要将指针向后移动</p></li>
+</ol>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="o">-</span><span class="n">difference_type</span><span class="p">((</span><span class="o">-</span><span class="n">__offset</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">_S_buffer_size</span><span class="p">())</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="id6">
+<h2>operator+<a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h2>
+<p>主要调用operatior+=来实现</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="w"> </span><span class="n">_Self</span><span class="w"> </span><span class="k">operator</span><span class="o">+</span><span class="p">(</span><span class="n">difference_type</span><span class="w"> </span><span class="n">__n</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="n">_Self</span><span class="w"> </span><span class="n">__tmp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="k">this</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">__tmp</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">__n</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="id7">
+<h2>operator-=<a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">_Self</span><span class="o">&amp;</span><span class="w"> </span><span class="k">operator</span><span class="o">-=</span><span class="p">(</span><span class="n">difference_type</span><span class="w"> </span><span class="n">__n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="o">*</span><span class="k">this</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="o">-</span><span class="n">__n</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="id8">
+<h2>operator-<a class="headerlink" href="#id8" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">_Self</span><span class="w"> </span><span class="k">operator</span><span class="o">-</span><span class="p">(</span><span class="n">difference_type</span><span class="w"> </span><span class="n">__n</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="n">_Self</span><span class="w"> </span><span class="n">__tmp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="k">this</span><span class="p">;</span><span class="w"></span>
+<span class="k">return</span><span class="w"> </span><span class="n">__tmp</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="n">__n</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="id9">
+<h2>operator[]<a class="headerlink" href="#id9" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">reference</span><span class="w"> </span><span class="k">operator</span><span class="p">[](</span><span class="n">difference_type</span><span class="w"> </span><span class="n">__n</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="o">*</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">__n</span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="id10">
+<h2>operator==<a class="headerlink" href="#id10" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">bool</span><span class="w"> </span><span class="k">operator</span><span class="o">==</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">_Self</span><span class="o">&amp;</span><span class="w"> </span><span class="n">__x</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">_M_cur</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">__x</span><span class="p">.</span><span class="n">_M_cur</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="id11">
+<h2>operator!=<a class="headerlink" href="#id11" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">bool</span><span class="w"> </span><span class="k">operator</span><span class="o">!=</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">_Self</span><span class="o">&amp;</span><span class="w"> </span><span class="n">__x</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="o">!</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">__x</span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="id12">
+<h2>operator&lt;<a class="headerlink" href="#id12" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">bool</span><span class="w"> </span><span class="k">operator</span><span class="o">&lt;</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">_Self</span><span class="o">&amp;</span><span class="w"> </span><span class="n">__x</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="n">_M_node</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">__x</span><span class="p">.</span><span class="n">_M_node</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"></span>
+<span class="w">  </span><span class="p">(</span><span class="n">_M_cur</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">__x</span><span class="p">.</span><span class="n">_M_cur</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="n">_M_node</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">__x</span><span class="p">.</span><span class="n">_M_node</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="id13">
+<h2>operator&gt;<a class="headerlink" href="#id13" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">bool</span><span class="w"> </span><span class="k">operator</span><span class="o">&gt;</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">_Self</span><span class="o">&amp;</span><span class="w"> </span><span class="n">__x</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">__x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="o">*</span><span class="k">this</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="id14">
+<h2>operator&lt;=<a class="headerlink" href="#id14" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">bool</span><span class="w"> </span><span class="k">operator</span><span class="o">&lt;=</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">_Self</span><span class="o">&amp;</span><span class="w"> </span><span class="n">__x</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="o">!</span><span class="p">(</span><span class="n">__x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="o">*</span><span class="k">this</span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="id15">
+<h2>operator&gt;=<a class="headerlink" href="#id15" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">bool</span><span class="w"> </span><span class="k">operator</span><span class="o">&gt;=</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">_Self</span><span class="o">&amp;</span><span class="w"> </span><span class="n">__x</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="o">!</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">__x</span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">Cplus</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">Libstd c++ 2.9.1</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../vector/index.html">Vector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../list/index.html">List</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Double Ended Queue</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../heap/index.html">Head</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tree/index.html">Tree</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../Operator_overloading/index.html">C++ Operator overloading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../access_modifiers.html">Access Modifiers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../references.html">References (or Aliases)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../const.html">const</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../functemplate.html">Function template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../passarguments.html">Pass arguments to function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../friend.html">Friend class and function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../abstract.html">Abstract Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../copyconstructor.html">Copy constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rvalue.html">Cplus Rvalue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../lvalue_and_rvalue.html">lvalue &amp;&amp; rvalue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../placement_new.html">Placement new operator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../template/index.html">Template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../cast/index.html">C++ Cast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../decltype.html">Decltype</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../explicit_implicit.html">Explicit and Implicit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../constructor.html">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../typedef_typename.html">typedef typename</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Cplus</a><ul>
+  <li><a href="../index.html">Libstd c++ 2.9.1</a><ul>
+  <li><a href="index.html">Double Ended Queue</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Double Ended Queue</a></li>
+      <li>Next: <a href="constructor.html" title="next chapter">Constructor</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../../../_sources/cplus/libstdc++_2_9_1/deque/iterator.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

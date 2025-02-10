@@ -1,0 +1,284 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>OpenVswitch &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Lxc container" href="lxc.html" />
+    <link rel="prev" title="Dhcp" href="dhcp.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="openvswitch">
+<h1>OpenVswitch<a class="headerlink" href="#openvswitch" title="Permalink to this heading">¶</a></h1>
+<section id="show-port-status">
+<h2>Show port status<a class="headerlink" href="#show-port-status" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">root@intel-x86-64:~# </span>ovs-appctl dpif-netdev/pmd-rxq-show
+<span class="go">pmd thread numa_id 0 core_id 1:</span>
+<span class="go">isolated : false</span>
+<span class="go">port: dpdk0             queue-id:  0  pmd usage:  0 %</span>
+<span class="go">port: dpdk1             queue-id:  0  pmd usage:  0 %</span>
+<span class="go">port: dpdk2             queue-id:  0  pmd usage:  0 %</span>
+<span class="go">port: dpdk3             queue-id:  0  pmd usage:  0 %</span>
+<span class="go">port: l3_h_ge_1_0_0     queue-id:  0  pmd usage:  0 %</span>
+</pre></div>
+</div>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">root@intel-x86-64:~# </span>ovs-appctl dpif-netdev/pmd-stats-show
+<span class="go">pmd thread numa_id 0 core_id 1:</span>
+<span class="go">  packets received: 160074</span>
+<span class="go">  packet recirculations: 0</span>
+<span class="go">  avg. datapath passes per packet: 1.00</span>
+<span class="go">  emc hits: 160066</span>
+<span class="go">  smc hits: 0</span>
+<span class="go">  megaflow hits: 6</span>
+<span class="go">  avg. subtable lookups per megaflow hit: 1.33</span>
+<span class="go">  miss with success upcall: 2</span>
+<span class="go">  miss with failed upcall: 0</span>
+<span class="go">  avg. packets per output batch: 1.00</span>
+<span class="go">  idle cycles: 704072931765432 (100.00%)</span>
+<span class="go">  processing cycles: 1080008774 (0.00%)</span>
+<span class="go">  avg cycles per packet: 4398428300.50 (704074011774206/160074)</span>
+<span class="go">  avg processing cycles per packet: 6746.93 (1080008774/160074)</span>
+<span class="go">main thread:</span>
+<span class="go">  packets received: 0</span>
+<span class="go">  packet recirculations: 0</span>
+<span class="go">  avg. datapath passes per packet: 0.00</span>
+<span class="go">  emc hits: 0</span>
+<span class="go">  smc hits: 0</span>
+<span class="go">  megaflow hits: 0</span>
+<span class="go">  avg. subtable lookups per megaflow hit: 0.00</span>
+<span class="go">  miss with success upcall: 0</span>
+<span class="go">  miss with failed upcall: 0</span>
+<span class="go">  avg. packets per output batch: 0.00</span>
+<span class="gp">root@intel-x86-64:~#</span>
+</pre></div>
+</div>
+</section>
+<section id="openvswith-example">
+<h2>OpenVswith Example<a class="headerlink" href="#openvswith-example" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">#</span>!/bin/bash
+
+<span class="go">if [ ! -d /dev/huge1G ]</span>
+<span class="go">then</span>
+<span class="go">    mkdir /dev/huge1G</span>
+<span class="go">fi</span>
+
+<span class="go">echo 15 &gt; /sys/kernel/mm/hugepages/hugepages-1048576kB/nr_hugepages</span>
+<span class="go">mount -t hugetlbfs -o pagesize=1G none /dev/huge1G</span>
+
+<span class="go">chmod a+w /dev/huge1G -R</span>
+
+<span class="go">sysctl -w kernel.core_pattern=/core.%u.%e.%p</span>
+<span class="go">sysctl -w vm.nr_hugepages=4096</span>
+
+
+<span class="go">modprobe kvm</span>
+<span class="go">modprobe kvm-intel</span>
+<span class="go">modprobe igb_uio</span>
+<span class="go">modprobe vfio-pci</span>
+<span class="go">brctl addbr eth0br</span>
+
+<span class="go">chmod a+x /dev/vfio</span>
+<span class="go">chmod 0666 /dev/vfio/*</span>
+
+
+<span class="gp"># </span>clean the environment
+<span class="go">killall ovsdb-server ovs-vswitchd</span>
+<span class="go">rm -f /var/run/openvswitch/vhost-user*</span>
+<span class="go">rm -f /etc/openvswitch/conf.db</span>
+<span class="go">num=`mount | grep &quot;huge1G&quot; | wc -l`</span>
+
+<span class="go">for(( i=0; i&lt;$num; i++ ))</span>
+<span class="go">{</span>
+<span class="go">        echo &quot;umount /dev/huge1G&quot;</span>
+<span class="go">        umount /dev/huge1G</span>
+<span class="go">}</span>
+
+
+<span class="gp">#</span>start database server
+
+<span class="go">export DB_SOCK=/var/run/openvswitch/db.sock</span>
+<span class="go">ovsdb-tool create /etc/openvswitch/conf.db /usr/share/openvswitch/vswitch.ovsschema</span>
+<span class="go">ovsdb-server --remote=punix:$DB_SOCK --remote=db:Open_vSwitch,Open_vSwitch,manager_options --pidfile --detach</span>
+
+<span class="gp">#</span>start ovs
+<span class="go">ovs-vsctl --no-wait init</span>
+<span class="gp">#</span>ovs-vsctl --no-wait <span class="nb">set</span> Open_vSwitch . other_config:dpdk-lcore-mask<span class="o">=</span>0xf
+<span class="gp">#</span>ovs-vsctl --no-wait <span class="nb">set</span> Open_vSwitch . other_config:dpdk-socket-mem<span class="o">=</span><span class="m">1024</span>,1024
+
+<span class="go">ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-lcore-mask=0x4</span>
+<span class="go">ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-socket-mem=4096,4096</span>
+<span class="go">ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-init=true</span>
+
+<span class="gp">#</span>pin the pmd to core <span class="m">2</span><span class="o">(</span>numa <span class="m">0</span><span class="o">)</span> and core <span class="m">18</span><span class="o">(</span>numa <span class="m">1</span><span class="o">)</span>
+<span class="gp">#</span>ovs-vsctl --no-wait <span class="nb">set</span> Open_vSwitch . other_config:pmd-cpu-mask<span class="o">=</span>0x40004
+<span class="go">ovs-vsctl --no-wait set Open_vSwitch . other_config:pmd-cpu-mask=0x40006</span>
+
+<span class="go">ovs-vswitchd unix:$DB_SOCK --pidfile --detach --log-file=/var/log/openvswitch/ovs-vswitchd.log</span>
+
+<span class="gp">#</span>Configure the bridge
+<span class="go">ovs-vsctl add-br ovsbr0 -- set bridge ovsbr0 datapath_type=netdev</span>
+<span class="go">ovs-vsctl add-port ovsbr0 vhost-user1 -- set Interface vhost-user1 type=dpdkvhostuser</span>
+<span class="go">ovs-vsctl add-port ovsbr0 vhost-user2 -- set Interface vhost-user2 type=dpdkvhostuser</span>
+
+<span class="gp">#</span>create dpdk port
+<span class="go">/opt/dpdk/share/tools/dpdk-devbind.py --bind=igb_uio 0000:05:00.0</span>
+<span class="go">/opt/dpdk/share/tools/dpdk-devbind.py --bind=igb_uio 0000:05:00.1</span>
+<span class="go">ovs-vsctl add-port ovsbr0 dpdk0 -- set Interface dpdk0 type=dpdk options:dpdk-devargs=0000:05:00.0</span>
+<span class="go">ovs-vsctl add-port ovsbr0 dpdk1 -- set Interface dpdk1 type=dpdk options:dpdk-devargs=0000:05:00.1</span>
+
+<span class="go">ovs-vsctl set port dpdk1 tag=100</span>
+<span class="go">ovs-vsctl set port dpdk0 tag=50</span>
+<span class="go">ovs-vsctl set port vhost-user1 tag=50</span>
+<span class="go">ovs-vsctl set port vhost-user2 tag=100</span>
+
+<span class="gp">#</span>ovs-vsctl <span class="nb">set</span> Interface dpdk1 options:n_rxq<span class="o">=</span><span class="m">2</span>
+<span class="gp">#</span>ovs-vsctl <span class="nb">set</span> Interface dpdk0 options:n_rxq<span class="o">=</span><span class="m">2</span>
+<span class="gp">#</span>ovs-vsctl <span class="nb">set</span> Interface vhost-user1 options:n_rxq<span class="o">=</span><span class="m">2</span>
+<span class="gp">#</span>ovs-vsctl <span class="nb">set</span> Interface vhost-user2 options:n_rxq<span class="o">=</span><span class="m">2</span>
+<span class="go">ovs-vsctl set Interface dpdk0 other_config:pmd-rxq-affinity=&quot;0:1&quot;</span>
+<span class="go">ovs-vsctl set Interface dpdk1 other_config:pmd-rxq-affinity=&quot;0:2&quot;</span>
+<span class="go">ovs-vsctl set Interface vhost-user1 other_config:pmd-rxq-affinity=&quot;0:1&quot;</span>
+<span class="go">ovs-vsctl set Interface vhost-user2 other_config:pmd-rxq-affinity=&quot;0:2&quot;</span>
+
+
+<span class="go">chmod 777 /var/run/openvswitch/* -R</span>
+<span class="go">virtlogd -d</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../corp.html">Corporation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Commands</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="git.html">Git</a></li>
+<li class="toctree-l2"><a class="reference internal" href="docker.html">Docker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ubuntu.html">Ubuntu</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kernel.html">Kernel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dhcp.html">Dhcp</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">OpenVswitch</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#show-port-status">Show port status</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#openvswith-example">OpenVswith Example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="lxc.html">Lxc container</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ip.html">Ip command</a></li>
+<li class="toctree-l2"><a class="reference internal" href="find.html">Find</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tcpdump.html">Tcpdump</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sed_awk.html">Sed and awk</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gcc.html">gcc/g++</a></li>
+<li class="toctree-l2"><a class="reference internal" href="virsh.html">Virsh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="numa.html">Numactl</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ps1.html">Linux Bash PS1 variable</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tmux.html">Tmux</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cplus/index.html">Cplus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Commands</a><ul>
+      <li>Previous: <a href="dhcp.html" title="previous chapter">Dhcp</a></li>
+      <li>Next: <a href="lxc.html" title="next chapter">Lxc container</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/cmds/ovs.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

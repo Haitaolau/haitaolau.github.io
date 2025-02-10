@@ -1,0 +1,48 @@
+=============
+Waydroid
+=============
+
+
+
+HWC
+=================
+
+
+SurfaceFlinger Server <--> HWC Client <--> Binder <--> HWC2 Server <--> HWC2 Vendor Impl 
+                                    
+* HWC2 Client端
+
+  这一部分属于SurfaceFlinger进程，其直接通过Binder通信，和HWC2的HAL Server交互。这部分的代码也在SurfaceFlinger进程中，但是采用Hwc2的命名空间
+
+* HWC Server端
+
+  这一部分还是属于Android的系统，这里将建立一个进程，实现HWC的服务端，Server端再调底层Vendor的具体实现。并且，对于底层合成的实现不同，这里会做一些适配，适配HWC1.x，和FrameBuffer的实现。这部分包含三部分：接口，实现和服务，以动态库的形式存在
+
+.. code-block:: console 
+
+   android.hardware.graphics.composer@2.1.so
+   android.hardware.graphics.composer@2.1-impl.so
+   android.hardware.graphics.composer@2.1-service.so
+
+源代码：
+
+.. code-block:: console 
+
+   hardware/interfaces/graphics/composer/2.1/default
+
+1. hwc_open
+-----------------
+
+
+call trace
+
+android.hardware.graphics.composer@2.1-service -> hwcomposer.waydroid.so 
+
+.. code-block:: console
+
+   00 pc 000000000002e83c  /vendor/lib64/hw/hwcomposer.waydroid.so (hwc_open(hw_module_t const*, char const*, hw_device_t**)+96)
+   01 pc 0000000000006674  /vendor/bin/hw/android.hardware.graphics.composer@2.1-service (android::hardware::graphics::composer::V2_1::passthrough::HwcLoader::openDeviceWithAdapter(hw_module_t const*, bool*)+376)
+   02 pc 000000000000638c  /vendor/bin/hw/android.hardware.graphics.composer@2.1-service (android::hardware::graphics::composer::V2_1::passthrough::HwcLoader::createHalWithAdapter(hw_module_t const*)+48)
+   03 pc 00000000000062bc  /vendor/bin/hw/android.hardware.graphics.composer@2.1-service (android::hardware::graphics::composer::V2_1::passthrough::HwcLoader::load()+148)
+   04 pc 0000000000006138  /vendor/bin/hw/android.hardware.graphics.composer@2.1-service (main+240)
+   05 pc 000000000008506c  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+108)

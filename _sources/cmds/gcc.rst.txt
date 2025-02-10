@@ -1,0 +1,194 @@
+================
+gcc/g++
+================
+
+1. -fverbose-asm 自行注释对应的C代码
+-------------------------------------
+
+source code
+
+.. code-block:: console 
+
+   #include <iostream>
+   #include <string>
+
+   using namespace std;
+
+   template <typename T> T Sub(T tv1, T tv2) { return tv1 - tv2; }
+
+   int main(int arch, char** argv)
+   {
+        int subv = Sub(3, 5);
+
+        cout << "subv = " << subv << endl;
+
+        double subv2= Sub(4.7 , 2.1);
+
+        cout << "subv2 = " << subv2 << endl;
+
+        return 0;
+   }
+
+添加-fverbose-asm
+
+.. code-block:: console 
+
+   g++ -S demo.c -fverbose-asm //编译出的demo.s文件中会自行注释对应的C代码。
+
+Result:
+
+.. code-block:: console
+
+
+   main:
+   .LFB1732:
+           .cfi_startproc
+           endbr64
+           pushq   %rbp    #
+           .cfi_def_cfa_offset 16
+           .cfi_offset 6, -16
+           movq    %rsp, %rbp      #,
+           .cfi_def_cfa_register 6
+           subq    $32, %rsp       #,
+           movl    %edi, -20(%rbp) # arch, arch
+           movq    %rsi, -32(%rbp) # argv, argv
+   # 1.cpp:10:     int subv = Sub(3, 5);
+           movl    $5, %esi        #,
+           movl    $3, %edi        #,
+           call    _Z3SubIiET_S0_S0_       #
+           movl    %eax, -12(%rbp) # tmp88, subv
+   # 1.cpp:12:     cout << "subv = " << subv << endl;
+           leaq    .LC0(%rip), %rax        #, tmp89
+           movq    %rax, %rsi      # tmp89,
+           leaq    _ZSt4cout(%rip), %rax   #, tmp90
+           movq    %rax, %rdi      # tmp90,
+           call    _ZStlsISt11char_traitsIcEERSt13basic_ostreamIcT_ES5_PKc@PLT     #
+           movq    %rax, %rdx      #, _1
+   # 1.cpp:12:     cout << "subv = " << subv << endl;
+           movl    -12(%rbp), %eax # subv, tmp91
+           movl    %eax, %esi      # tmp91,
+           movq    %rdx, %rdi      # _1,
+           call    _ZNSolsEi@PLT   #
+   # 1.cpp:12:     cout << "subv = " << subv << endl;
+           movq    _ZSt4endlIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_@GOTPCREL(%rip), %rdx #, tmp93
+           movq    %rdx, %rsi      # tmp92,
+           movq    %rax, %rdi      # _2,
+           call    _ZNSolsEPFRSoS_E@PLT    #
+   # 1.cpp:14:     double subv2= Sub(4.7 , 2.1);
+           movsd   .LC1(%rip), %xmm0       #, tmp94
+           movq    .LC2(%rip), %rax        #, tmp95
+           movapd  %xmm0, %xmm1    # tmp94,
+           movq    %rax, %xmm0     # tmp95,
+           call    _Z3SubIdET_S0_S0_       #
+           movq    %xmm0, %rax     #, tmp96
+           movq    %rax, -8(%rbp)  # tmp96, subv2
+   # 1.cpp:16:     cout << "subv2 = " << subv2 << endl;
+           leaq    .LC3(%rip), %rax        #, tmp97
+           movq    %rax, %rsi      # tmp97,
+           leaq    _ZSt4cout(%rip), %rax   #, tmp98
+           movq    %rax, %rdi      # tmp98,
+           call    _ZStlsISt11char_traitsIcEERSt13basic_ostreamIcT_ES5_PKc@PLT     #
+           movq    %rax, %rdx      #, _3
+   # 1.cpp:16:     cout << "subv2 = " << subv2 << endl;
+           movq    -8(%rbp), %rax  # subv2, tmp99
+           movq    %rax, %xmm0     # tmp99,
+           movq    %rdx, %rdi      # _3,
+           call    _ZNSolsEd@PLT   #
+   # 1.cpp:16:     cout << "subv2 = " << subv2 << endl;
+           movq    _ZSt4endlIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_@GOTPCREL(%rip), %rdx #, tmp101
+           movq    %rdx, %rsi      # tmp100,
+           movq    %rax, %rdi      # _4,
+           call    _ZNSolsEPFRSoS_E@PLT    #
+   # 1.cpp:18:     return 0;
+           movl    $0, %eax        #, _20
+   # 1.cpp:19: }
+           leave
+           .cfi_def_cfa 7, 8
+           ret
+           .cfi_endproc
+   .LFE1732:
+           .size   main, .-main
+           .section        .text._Z3SubIiET_S0_S0_,"axG",@progbits,_Z3SubIiET_S0_S0_,comdat
+           .weak   _Z3SubIiET_S0_S0_
+           .type   _Z3SubIiET_S0_S0_, @function
+   _Z3SubIiET_S0_S0_:
+   .LFB1993:
+           .cfi_startproc
+           endbr64
+           pushq   %rbp    #
+           .cfi_def_cfa_offset 16
+           .cfi_offset 6, -16
+           movq    %rsp, %rbp      #,
+           .cfi_def_cfa_register 6
+           movl    %edi, -4(%rbp)  # tv1, tv1
+           movl    %esi, -8(%rbp)  # tv2, tv2
+   # 1.cpp:6: template <typename T> T Sub(T tv1, T tv2) { return tv1 - tv2; }
+           movl    -4(%rbp), %eax  # tv1, tmp84
+           subl    -8(%rbp), %eax  # tv2, _3
+   # 1.cpp:6: template <typename T> T Sub(T tv1, T tv2) { return tv1 - tv2; }
+           popq    %rbp    #
+           .cfi_def_cfa 7, 8
+           ret
+           .cfi_endproc
+   .LFE1993:
+           .size   _Z3SubIiET_S0_S0_, .-_Z3SubIiET_S0_S0_
+           .section        .text._Z3SubIdET_S0_S0_,"axG",@progbits,_Z3SubIdET_S0_S0_,comdat
+           .weak   _Z3SubIdET_S0_S0_
+           .type   _Z3SubIdET_S0_S0_, @function
+   _Z3SubIdET_S0_S0_:
+   .LFB1997:
+           .cfi_startproc
+           endbr64
+           pushq   %rbp    #
+           .cfi_def_cfa_offset 16
+           .cfi_offset 6, -16
+           movq    %rsp, %rbp      #,
+           .cfi_def_cfa_register 6
+           movsd   %xmm0, -8(%rbp) # tv1, tv1
+           movsd   %xmm1, -16(%rbp)        # tv2, tv2
+   # 1.cpp:6: template <typename T> T Sub(T tv1, T tv2) { return tv1 - tv2; }
+           movsd   -8(%rbp), %xmm0 # tv1, tmp84
+           subsd   -16(%rbp), %xmm0        # tv2, _3
+           movq    %xmm0, %rax     # _3, <retval>
+   # 1.cpp:6: template <typename T> T Sub(T tv1, T tv2) { return tv1 - tv2; }
+           movq    %rax, %xmm0     # <retval>,
+           popq    %rbp    #
+           .cfi_def_cfa 7, 8
+           ret
+           .cfi_endproc
+   .LFE1997:
+           .size   _Z3SubIdET_S0_S0_, .-_Z3SubIdET_S0_S0_
+           .text
+           .type   _Z41__static_initialization_and_destruction_0ii, @function
+   _Z41__static_initialization_and_destruction_0ii:
+   .LFB2238:
+           .cfi_startproc
+           endbr64
+           pushq   %rbp    #
+           .cfi_def_cfa_offset 16
+           .cfi_offset 6, -16
+           movq    %rsp, %rbp      #,
+           .cfi_def_cfa_register 6
+           subq    $16, %rsp       #,
+           movl    %edi, -4(%rbp)  # __initialize_p, __initialize_p
+           movl    %esi, -8(%rbp)  # __priority, __priority
+   # 1.cpp:19: }
+           cmpl    $1, -4(%rbp)    #, __initialize_p
+           jne     .L9     #,
+   # 1.cpp:19: }
+           cmpl    $65535, -8(%rbp)        #, __priority
+           jne     .L9     #,
+   # /usr/include/c++/11/iostream:74:   static ios_base::Init __ioinit;
+           leaq    _ZStL8__ioinit(%rip), %rax      #, tmp82
+           movq    %rax, %rdi      # tmp82,
+           call    _ZNSt8ios_base4InitC1Ev@PLT     #
+           leaq    __dso_handle(%rip), %rax        #, tmp83
+           movq    %rax, %rdx      # tmp83,
+           leaq    _ZStL8__ioinit(%rip), %rax      #, tmp84
+           movq    %rax, %rsi      # tmp84,
+           movq    _ZNSt8ios_base4InitD1Ev@GOTPCREL(%rip), %rax    #, tmp86
+           movq    %rax, %rdi      # tmp85,
+           call    __cxa_atexit@PLT        #
+   .L9:
+   # 1.cpp:19: }
+   

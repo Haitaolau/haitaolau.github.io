@@ -1,0 +1,139 @@
+============
+Kernel
+============
+
+HugePage
+===================
+
+Allocate a number of 1G Huge pages
+------------------------------------
+
+For 1GB page, hugepage setting must be activated while booting system. It must be defined in boot loader configuration
+
+.. code-block:: console 
+   
+   root=/dev/nfs rw nfsroot=128.224.165.20:/export/pxeboot/vlm-boards/24866/rootfs rw ip=dhcp console=ttyS0,115200 hugepagesz=1GB hugepages=1 hugepagesz=2M hugepages=282 intel_iommu=on BOOT_IMAGE=vlm-boards/24866/kernel
+
+Allocate a number of 2M Huge pages
+------------------------------------
+
+For 2MB page, you can activate hugepages while booting or at anytime after system is booted
+
+.. code-block:: console 
+
+   $ echo 1024 > /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages
+
+For run-time allocation of huge pages, use the sysctl utility
+
+.. code-block:: console 
+   
+   $ sysctl -w vm.nr_hugepages=1024
+
+
+Mount hugepages
+-----------------
+
+Make the memory available for using hugepages
+
+
+.. code-block:: console 
+
+   #!/bin/bash
+
+   if [ ! -d /dev/huge1G ]
+   then
+       mkdir /dev/huge1G
+   fi
+   
+   mount -t hugetlbfs -o pagesize=1G none /dev/huge1G
+   
+   chmod a+w /dev/huge1G -R
+
+It is also available while booting by adding a configuration of mount point in /etc/fstab, or after booted
+
+The mount point for 2MB or 1GB can be made permanent accross reboot. For 2MB, it is no need to declare the size of hugepages explicity.
+
+
+.. code-block:: console 
+   
+   #/etc/fstab
+   huge /dev/huge1G hugetlbfs pagesize=1G 0 0
+   huge /dev/huge2M hugetlbfs pagesize=2M 0 0
+
+
+test kernel with ltp
+====================
+
+.. code-block:: console
+
+   #!/bin/bash
+
+   for i in admin_tools cap_bounds commands connectors containers dio  \
+            fcntl-locktests filecaps fs fs_bind fs_perms_simple fsx io  \
+            ipc kernel_misc math mm modules nptl pty sched syscalls syscalls-ipc timers
+   do
+           echo "$i"
+   
+           echo -e "\033[40;33m[START] /opt/ltp/wrLinux_ltp/wr-runltp -f $i \033[0m"
+       /opt/ltp/wrLinux_ltp/wr-runltp -f $i
+   
+           echo -e "\033[40;33m[END] /opt/ltp/wrLinux_ltp/wr-runltp -f $i \033[0m"
+   
+           echo -e "\033[40;33m[COPY] copy the $i.log \033[0m"
+   
+           cp /opt/ltp/wrLinux_ltp/results/LTP.log $i.log
+   done
+
+
+dump kernel config
+====================
+
+.. code-block:: console 
+
+  zcat /proc/config.gz > running.config
+
+show filesystem supported by kernel
+=====================================
+
+.. code-block:: console
+  
+  root@intel-x86-64:/usr/lib64/libhugetlbfs/tests# cat /proc/filesystems
+  nodev   sysfs
+  nodev   rootfs
+  nodev   ramfs
+  nodev   bdev
+  nodev   proc
+  nodev   cpuset
+  nodev   cgroup
+  nodev   cgroup2
+  nodev   tmpfs
+  nodev   devtmpfs
+  nodev   debugfs
+  nodev   tracefs
+  nodev   securityfs
+  nodev   sockfs
+  nodev   bpf
+  nodev   pipefs
+  nodev   hugetlbfs
+  nodev   rpc_pipefs
+  nodev   devpts
+          ext3
+          ext2
+          ext4
+          vfat
+          msdos
+          iso9660
+  nodev   nfs
+  nodev   nfs4
+  nodev   autofs
+  nodev   overlay
+  nodev   9p
+  nodev   aufs
+  nodev   mqueue
+  nodev   oprofilefs
+          btrfs
+  nodev   pstore
+  nodev   nfsd
+  nodev   ecryptfs
+
+

@@ -1,0 +1,88 @@
+=====================
+ ostree admin deploy
+=====================
+
+
+.. contents:: Table of Content
+
+
+NAME
+====
+
+
+::
+
+   ostree-admin-deploy - Checkout a revision as the new default deployment
+
+SYNOPSIS
+========
+
+::
+
+   ostree admin deploy [OPTIONS...] {REFSPEC}
+
+DESCRIPTION
+===========
+
+::
+
+   Takes a commit or revision REFSPEC, and queues the new deployment as
+   default upon reboot.
+
+OPTIONS
+=======
+
+
+   **--os="STATEROOT"**
+   
+
+       Use a different operating system root than the current one.
+
+   **--origin-file="FILENAME"**
+
+       Use FILENAME as the origin, which is where OSTree will look for updated versions of the tree.
+
+   **--retain**
+
+       Do not delete previous deployment.
+
+   **--retain-pending**
+
+       Do not delete pending deployments.
+
+   **--retain-rollback**
+
+       Do not delete rollback deployments.
+
+   **--not-as-default**
+
+       Append rather than prepend new deployment.
+
+   **--karg-proc-cmdline**
+
+       Import current /proc/cmdline.
+
+   **--karg="NAME=VALUE"**
+
+       Set kernel argument, like root=/dev/sda1; this overrides any earlier argument with the same name.
+
+   **--karg-append="NAME=VALUE"**
+
+       Append kernel argument; useful with e.g. console= that can be used multiple times.
+
+EXAMPLE¶
+========
+
+
+.. code-block:: console
+
+   root@32b81b5fc0ca:/usr/src/tmp/example# ostree admin deploy --sysroot /usr/src/tmp/example --os elxr elxr/amd64 --karg=root=LABEL=ROOT --karg=rw --karg='console=ttyS0,115200n8 console=tty0'
+   note: Deploying commit 320d15f07a1c9e5222778dfa6889b084a1a0968c9a9b53c16ab03f7f9ba1235e which contains content in /var/usrlocal that will be ignored.
+   Relabeling /var (no stamp file 'var/.ostree-selabeled' found)
+   Bootloader updated; bootconfig swap: yes; bootversion: boot.1.1, deployment count change: 1
+
+
+  root@32b81b5fc0ca:/usr/src/tmp/example# ostree admin status --sysroot /usr/src/tmp/example
+  elxr 320d15f07a1c9e5222778dfa6889b084a1a0968c9a9b53c16ab03f7f9ba1235e.0
+  origin refspec: elxr/amd64
+  root@32b81b5fc0ca:/usr/src/tmp/example# 

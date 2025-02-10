@@ -1,0 +1,31 @@
+===================
+Git
+===================
+
+
+Git Log
+============
+
+**1. simple**
+
+.. code-block:: console 
+
+   git log --format="%h %ci %s" 
+
+**2. Deleted file's log**
+
+.. code-block:: console 
+
+   git log --all --full-history --format="%h %ci %s" --
+
+
+
+Push an existing repository
+=============================
+
+.. code-block:: console
+
+   git remote add origin https://github.com/Haitaolau/meta-test.git
+   git branch -M main
+   git push -u origin main
+

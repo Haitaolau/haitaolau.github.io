@@ -1,0 +1,161 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Placement new operator &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Template" href="template/index.html" />
+    <link rel="prev" title="lvalue &amp;&amp; rvalue" href="lvalue_and_rvalue.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="placement-new-operator">
+<h1>Placement new operator<a class="headerlink" href="#placement-new-operator" title="Permalink to this heading">¶</a></h1>
+<p>Placement new is a variation new operator in C++</p>
+<section id="syntax">
+<h2>Syntax<a class="headerlink" href="#syntax" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">new</span> <span class="p">(</span><span class="n">address</span><span class="p">)</span> <span class="p">(</span><span class="nb">type</span><span class="p">)</span> <span class="n">initializer</span>
+</pre></div>
+</div>
+<p>As it allows to construct an object on memory that is already allocated,
+it is required for optimizations as it is faster not to re-allocate all the time.</p>
+<p>There may be cases when it is required to re-construct an object multiple times so,
+placement new operator might be more efficient in these cases.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Cplus</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="libstdc%2B%2B_2_9_1/index.html">Libstd c++ 2.9.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Operator_overloading/index.html">C++ Operator overloading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="access_modifiers.html">Access Modifiers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="references.html">References (or Aliases)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="const.html">const</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functemplate.html">Function template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="passarguments.html">Pass arguments to function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="friend.html">Friend class and function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="abstract.html">Abstract Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="copyconstructor.html">Copy constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rvalue.html">Cplus Rvalue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lvalue_and_rvalue.html">lvalue &amp;&amp; rvalue</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Placement new operator</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#syntax">Syntax</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="template/index.html">Template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cast/index.html">C++ Cast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="decltype.html">Decltype</a></li>
+<li class="toctree-l2"><a class="reference internal" href="explicit_implicit.html">Explicit and Implicit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="constructor.html">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="typedef_typename.html">typedef typename</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Cplus</a><ul>
+      <li>Previous: <a href="lvalue_and_rvalue.html" title="previous chapter">lvalue &amp;&amp; rvalue</a></li>
+      <li>Next: <a href="template/index.html" title="next chapter">Template</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/cplus/placement_new.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,109 @@
+=============================
+References (or Aliases)
+=============================
+
+Recall that C/C++ use & to denote the address-of operator in an expression. 
+
+C++ assigns an additional meaning to & in declaration to declare a reference variable.
+
+When it is used in an expression, & denotes the address-of operator, which returns 
+the address of a variable, e.g., if number is an int variable, &number returns the 
+address of the variable number
+
+
+Howeve, when & is used in a declaration (including function formal parameters), 
+
+it is part of the type identifier and is used to declare a reference variable (or reference or alias or alternate name). 
+
+It is used to provide another name, or another reference, or alias to an existing variable.
+
+Syntax
+---------------------
+
+**The syntax is as follow:**
+
+.. code-block:: c
+
+   type &newName = existingName;
+   // or
+   type& newName = existingName;
+   // or
+   type & newName = existingName;
+
+It shall be read as "newName is a reference to exisitngName", or "newNew is an alias of existingName". 
+
+Example
+----------------
+
+.. code-block:: c
+
+  /* Test reference declaration and initialization (TestReferenceDeclaration.cpp) */
+  #include <iostream>
+  using namespace std;
+   
+  int main() {
+     int number = 88;          // Declare an int variable called number
+     int & refNumber = number; // Declare a reference (alias) to the variable number
+                               // Both refNumber and number refer to the same value
+   
+     cout << number << endl;    // Print value of variable number (88)
+     cout << refNumber << endl; // Print value of reference (88)
+   
+     refNumber = 99;            // Re-assign a new value to refNumber
+     cout << refNumber << endl;
+     cout << number << endl;    // Value of number also changes (99)
+   
+     number = 55;               // Re-assign a new value to number
+     cout << number << endl;
+     cout << refNumber << endl; // Value of refNumber also changes (55)
+  }
+
+.. image:: ../_static/image/PointerReferencing.png
+
+The nature of reference
+-----------------------
+
+.. code-block:: c
+
+   int main(){
+     int a = 10;
+     int& aRef = a; //自动转换为int* const aRef = &a 这也说明为什么引用必须初始化（指针常量）
+     aRef = 20; // 内部发现aRef是引用，自动帮我们转换为：*aRef = 20
+   }
+
+Notes
+----------------------
+
+1. 引用必须引用一块合法的内存空间
+
+.. code-block:: c  
+   
+   int main()
+   {
+   	  //1. 引用必须引用一块合法的内存空间
+   	  int& a = 10;
+   	
+   }
+
+error C2440: 'initializing': cannot convert from 'int' to 'int &
+
+2. 不要返回局部变量的引用
+
+3. 不能有NULL引用
+
+4. 引用在定义时必须初始化，且与变量类型保持一致
+
+5. 引用在初始化时不能绑定常量值，如int&b=10是错误的
+
+6. 引用在初始化后，其值不能再更改，即不能用作其他变量的引用
+
+
+Reference vs pointer
+----------------------------
+
+引用是隐式的指针，但引用却不等同于指针，使用引用与使用指针有着本质的区别
+
+1. 指针指向一个变量，需要占据额外的内存单元，而引用指向一个变量，不占据额外内存单元
+
+2. 作为函数参数时，指针的实参是变量的地址，而引用的实参是变量本身，但系统向引用传递的是变量的地址而不是变量的值
+

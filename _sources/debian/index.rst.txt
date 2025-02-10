@@ -1,0 +1,25 @@
+==================
+Debian
+==================
+
+.. toctree::
+   :maxdepth: 1
+
+   0005
+   debian-installer/index
+   debian-command/index
+   live-cd/index
+   elxr_edge/index
+   os-tree/index
+   0001
+   0002   
+   0003
+   0004
+   0006
+   0007
+   0008
+   0009
+   0010
+   0011
+   pipeline/index
+   

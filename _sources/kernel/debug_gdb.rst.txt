@@ -1,0 +1,35 @@
+============================================
+Debugging linux kernel with GDB and Qemu
+============================================
+
+Build the linux kernel that you want to debug.
+
+    Check the configuration. Set CONFIG_DEBUG_INFO=y if not configured
+
+Run the qemu with the following options. **-S** stops qemu waiting gdb and **-s** makes gdb be able to attach through localhost:1234
+
+
+.. code-block:: console 
+
+   kvm -cpu host \
+       -smp 10 -m 8192 \
+       -nographic wrlinux-image-std-qemux86-64.ext4 \
+       --enable-kvm -append "root=/dev/hda rw  console=ttyS0 ip=dhcp nokaslr" \
+       -kernel /run/media/sda1/kernel/bzImage \
+       -s -S
+
+Run gdb, load symbol file, and attach to the qemu execution
+
+.. code-block:: console 
+  
+   gdb
+   (gdb) file vmlinux
+   Reading symbols from vmlinux...
+   (gdb) target remote localhost:1234
+   Remote debugging using localhost:1234
+   0x000000000000fff0 in entry_stack_storage ()
+   (gdb) hbreak zone_sizes_init
+   Hardware assisted breakpoint 1 at 0xffffffff825aade8: file /usr/src/kernel/arch/x86/mm/init.c, line 933.
+   (gdb) c
+   Continuing.
+

@@ -1,0 +1,55 @@
+================================================
+ lintian warnung: out-of-date-standards-version
+================================================
+
+.. contents:: Table of contents
+	      
+
+
+warnings
+=============
+
+.. code-block:: console
+
+   W: memcached source: no-nmu-in-changelog [debian/changelog:1]
+   W: memcached source: source-nmu-has-incorrect-version-number 1.6.18-1+elxr1 [debian/changelog:1]
+   I: memcached source: out-of-date-standards-version 4.6.1 (released 2022-05-11) (current is 4.6.2)
+
+
+Out of data standards version
+==============================
+
+The source package refers to a **Standards-Version** older than the one that was current at the time the package was created (according to the timestamp of the latest debian/changelog entry). Please consider updating the package to current Policy and setting this control field appropriately.
+
+
+
+If the package is already compliant with the current standards, you don't have to re-upload the package just to adjust the Standards-Version control field. However, please remember to update this field next time you upload the package.
+
+See /usr/share/doc/debian-policy/upgrading-checklist.txt.gz in the debian-policy package for a summary of changes in newer versions of Policy.
+
+**See also**
+
+
+* https://www.debian.org/doc/debian-policy/upgrading-checklist.html
+
+* list of `all the affected packages <https://udd.debian.org/lintian-tag.cgi?tag=out-of-date-standards-version>`_
+
+
+Solution
+========
+
+commit `a5851c7951a5998fcfc1d676e2d557ff93399b66 <https://salsa.debian.org/lamby/pkg-memcached/-/commit/a5851c7951a5998fcfc1d676e2d557ff93399b66>`_ of pkg-memcached
+
+Modify file **debian/control**
+
+.. code-block:: diff
+
+     libssl-
+     pkg-config,
+     Homepage: https://memcached.org/
+   - Standards-Version: 4.6.1
+   + Standards-Version: 4.6.2
+     Vcs-Browser: https://salsa.debian.org/lamby/pkg-memcached
+     Vcs-Git: https://salsa.debian.org/lamby/pkg-memcached.git
+     Rules-Requires-Root: no
+   

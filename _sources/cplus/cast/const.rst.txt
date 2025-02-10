@@ -1,0 +1,71 @@
+============
+Const_cast
+============
+
+
+
+
+The const_cast operator can be used to remove/add the const attribute from a class.
+
+
+Syntax
+------------
+const_cast< new-type >( expression ) 		
+
+
+
+Remove the const attribute
+----------------------------
+
+.. code-block:: cpp 
+
+   #include <iostream>
+   #include <boost/type_index.hpp>
+   using namespace std;
+   using boost::typeindex::type_id_with_cvr;
+   
+   int main(int argc, char const *argv[])
+   {
+           const int ca = 30;
+           const int * p = &ca;
+   
+           auto a = const_cast<int*>(p);
+           *a = 10;
+   
+           std::cout << "p=" <<type_id_with_cvr<decltype(p)>().pretty_name() << std::endl;
+           std::cout << "a=" <<type_id_with_cvr<decltype(a)>().pretty_name() << std::endl;
+           std::cout << "ca=" << ca << " address "<< &ca<< std::endl;
+           std::cout << "a=" << *a << " address "<< a  << std::endl;
+           std::cout << "p=" << *p << " address "<< p  << std::endl;
+           return 0;
+   }
+
+Output:
+
+.. code-block:: cpp
+
+   p=int const*
+   a=int*
+   ca=30 address 0x7fffc452b2b4
+   a=10 address 0x7fffc452b2b4
+   p=10 address 0x7fffc452b2b4
+
+ 
+Add the const attribute
+----------------------------
+
+
+
+.. code-block:: cpp 
+
+   const string& shorter(const string& s1, const string& s2) {
+   	return s1.size() <= s2.size() ? s1 : s2;
+   }
+   
+   string& shorter(string& s1, string& s2) {
+   	//重载调用到上一个函数，它已经写好了比较的逻辑
+   	auto &r = shorter(const_cast<const string&>(s1), const_cast<const string&>(s2));
+   	//auto等号右边为引用，类型会忽略掉引用
+   	return const_cast<string&>(r);
+   }
+

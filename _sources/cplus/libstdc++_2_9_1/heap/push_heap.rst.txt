@@ -1,0 +1,160 @@
+============
+Push heap
+============
+
+
+
+Testing Case
+-----------------
+
+
+.. code-block:: cpp
+
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    
+    using namespace std;
+    
+    void print(vector<int>& vc)
+    {
+    	for (auto i : vc) {
+    		cout << i << " ";
+    	}
+    	cout << endl;
+    }
+    
+    int main(int argc, char **argv)
+    {
+    	// Initializing a vector
+        vector<int> v1 = { 13,16,19,21,24,26,31,32,65,68};
+    	cout << "vector     :";
+    	print(v1);
+    	// Converting vector into a heap
+    	// using make_heap()
+    	make_heap(v1.begin(), v1.end());
+    	cout << "make_heap  :";
+    	print(v1);
+    	v1.push_back(66);
+    	cout << "vector push:";
+    	print(v1);
+    	push_heap(v1.begin(), v1.end());
+    	cout << "push_heap  :";
+    	print(v1);
+    
+    	return 0;
+    }
+    
+**output**
+
+
+.. code-block:: console 
+
+
+    wrsadmin@pek-hliu4-d1:~/workspace/test$ ./heap
+    vector     :13 16 19 21 24 26 31 32 65 68
+    make_heap  :68 65 31 32 24 26 19 13 21 16
+    vector push:68 65 31 32 24 26 19 13 21 16 66
+    push_heap  :68 66 31 32 65 26 19 13 21 16 24
+    wrsadmin@pek-hliu4-d1:~/workspace/test$      
+        
+
+
+Push Heap
+------------------
+
+.. code-block:: cpp
+   
+    // Heap-manipulation functions: push_heap, pop_heap, make_heap, sort_heap.
+    
+    template <class _RandomAccessIterator, class _Distance, class _Tp>
+    void 
+    __push_heap(_RandomAccessIterator __first,
+                _Distance __holeIndex, _Distance __topIndex, _Tp __value)
+    {
+      _Distance __parent = (__holeIndex - 1) / 2;
+      while (__holeIndex > __topIndex && *(__first + __parent) < __value) {
+        *(__first + __holeIndex) = *(__first + __parent);
+        __holeIndex = __parent;
+        __parent = (__holeIndex - 1) / 2;
+      }    
+      *(__first + __holeIndex) = __value;
+    }
+    
+    template <class _RandomAccessIterator, class _Distance, class _Tp>
+    inline void 
+    __push_heap_aux(_RandomAccessIterator __first,
+                    _RandomAccessIterator __last, _Distance*, _Tp*)
+    {
+      __push_heap(__first, _Distance((__last - __first) - 1), _Distance(0), 
+                  _Tp(*(__last - 1)));
+    }
+    
+    template <class _RandomAccessIterator>
+    inline void 
+    push_heap(_RandomAccessIterator __first, _RandomAccessIterator __last)
+    {
+      __STL_REQUIRES(_RandomAccessIterator, _Mutable_RandomAccessIterator);
+      __STL_REQUIRES(typename iterator_traits<_RandomAccessIterator>::value_type,
+                     _LessThanComparable);
+      __push_heap_aux(__first, __last,
+                      __DISTANCE_TYPE(__first), __VALUE_TYPE(__first));
+    }
+    
+.. image:: ../../../_static/image/push_heap01.jpg
+
+First Step
+==============
+
+此时 __holeIndex = (__last - __first) - 1
+
+则__first + __holeIndex = __first + (__last - __first) - 1 = __last - 1 就是最后一个元素66
+    
+所以此时__holeIndex 就是最后一个元素 
+
+
+判断*(__first + __parent) 与需要添加的元素__value 的大小，如果*(__first +
+__parent) < __value 则将*(__first + __parent) 移动到*(__first + __holeIndex) 处
+
+
+.. image:: ../../../_static/image/push_heap02.jpg
+
+Second Step
+===============
+
+重新计算__holeIndex和__parent的值
+
+.. code-block:: cpp
+
+    __holeIndex = __parent;
+    __parent = (__holeIndex - 1) / 2;
+
+此时__holeIndex = 4 __parent = 1
+
+.. image:: ../../../_static/image/push_heap03.jpg
+
+此时__first + __parent(65) 依然小于 __value(66),所以再次将*(__first + __parent) 移动到*(__first + __holeIndex) 处
+
+
+Third Step
+===============
+
+重新计算__holeIndex和__parent的值
+
+.. code-block:: cpp
+
+    __holeIndex = __parent;
+    __parent = (__holeIndex - 1) / 2;
+
+
+此时__holeIndex = 1 __parent = 0
+
+此时__first + __parent(68) 不小于 __value(66),
+所以将vlaue赋值到*(__first + __holeIndex) 处
+
+.. code-block:: cpp 
+
+   *(__first + __holeIndex) = __value;
+
+
+.. image:: ../../../_static/image/push_heap04.jpg

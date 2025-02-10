@@ -1,0 +1,49 @@
+====================================================
+EAL: No free hugepages reported in hugepages-2048kB
+====================================================
+
+
+
+.. code-block:: console
+
+   2024-04-26T08:06:50.972Z|00007|dpdk|INFO|Using DPDK 18.11.2
+   2024-04-26T08:06:50.972Z|00008|dpdk|INFO|DPDK Enabled - initializing...
+   2024-04-26T08:06:50.972Z|00009|dpdk|INFO|No vhost-sock-dir provided - defaulting to /var/run/openvswitch
+   2024-04-26T08:06:50.972Z|00010|dpdk|INFO|IOMMU support for vhost-user-client disabled.
+   2024-04-26T08:06:50.972Z|00011|dpdk|INFO|Per port memory for DPDK devices disabled.
+   2024-04-26T08:06:50.972Z|00012|dpdk|INFO|EAL ARGS: ovs-vswitchd -c 0x1 --socket-mem 1088
+   2024-04-26T08:06:50.977Z|00013|dpdk|INFO|EAL: Detected 88 lcore(s)
+   2024-04-26T08:06:50.977Z|00014|dpdk|INFO|EAL: Detected 2 NUMA nodes
+   2024-04-26T08:06:50.984Z|00015|dpdk|INFO|EAL: Multi-process socket /var/run/dpdk/rte/mp_socket
+   2024-04-26T08:06:51.012Z|00016|dpdk|WARN|EAL: No free hugepages reported in hugepages-2048kB
+   2024-04-26T08:06:51.013Z|00017|dpdk|WARN|EAL: No free hugepages reported in hugepages-2048kB
+   2024-04-26T08:06:51.013Z|00018|dpdk|WARN|EAL: No free hugepages reported in hugepages-2048kB
+   2024-04-26T08:06:51.013Z|00019|dpdk|INFO|EAL: 8 hugepages of size 1073741824 reserved, but no mounted hugetlbfs found for that size
+   2024-04-26T08:06:51.013Z|00020|dpdk|ERR|EAL: Cannot get hugepage information.
+   2024-04-26T08:06:51.013Z|00021|dpdk|EMER|Unable to initialize DPDK: Permission denied
+   2024-04-26T08:06:51.305Z|00002|daemon_unix|ERR|fork child died before signaling startup (killed (Aborted), core dumped)
+   2024-04-26T08:06:51.305Z|00003|daemon_unix|EMER|could not detach from foreground session
+
+
+1.Advanced Hugepage Setup
+=========================
+
+
+Adding the following options to the kernel bootline.
+
+.. code-block:: console
+
+   hugepagesz=2M hugepages=1408 hugepagesz=1G hugepages=8
+
+
+2.Mount the hugepage FS
+=======================
+
+
+Adding the following options to /etc/fstab
+
+
+.. code-block:: console
+
+   huge /dev/huge1G hugetlbfs pagesize=1G 0 0
+   huge /dev/huge2M hugetlbfs pagesize=2M 0 0

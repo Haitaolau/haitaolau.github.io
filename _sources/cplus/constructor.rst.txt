@@ -1,0 +1,61 @@
+========================
+Constructor
+========================
+
+
+
+.. code-block:: cpp 
+
+   #include <iostream>
+
+   using namespace std;
+   
+   
+   class Time
+   {
+           int Hour;
+           int Minute;
+           int Second;
+           public:
+                   Time(int tmphour, int tmpmin, int tmpsec);
+   
+   };
+   
+   Time:: Time(int tmphour, int tmpmin, int tmpsec)
+   {
+           Hour = tmphour;
+           Minute = tmpmin;
+           Second = tmpsec;
+   
+           cout << "Time(int tmphour, int tmpmin, int tmpsec): "
+                << tmphour << ","
+                << tmpmin  << ","
+                << tmpsec  << ","
+                << endl;
+   }
+   
+   
+   
+   int main(int argc, const char * argv[])
+   {
+      Time myTime = Time(12,13,52);
+      Time myTime2(20,50,12);
+      Time myTime3 = Time{07,30,21};
+      Time myTime4{14,19,05};
+      Time myTime5 = {10,45,19};
+      return 0;
+   }
+ 
+
+Output:
+
+.. code-block:: console 
+
+   wrsadmin@pek-hliu4-d1:~/workspace/Cplus/test$ ./0012
+   Time(int tmphour, int tmpmin, int tmpsec): 12,13,52,
+   Time(int tmphour, int tmpmin, int tmpsec): 20,50,12,
+   Time(int tmphour, int tmpmin, int tmpsec): 7,30,21,
+   Time(int tmphour, int tmpmin, int tmpsec): 14,19,5,
+   Time(int tmphour, int tmpmin, int tmpsec): 10,45,19,
+   wrsadmin@pek-hliu4-d1:~/workspace/Cplus/test$ cat 0012.cpp
+

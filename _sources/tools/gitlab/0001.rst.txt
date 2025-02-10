@@ -1,0 +1,212 @@
+===============================================
+ How To Install and Configure GitLab on Ubuntu
+===============================================
+
+
+
+
+Step 1 — Installing the Dependencies
+====================================
+
+
+.. code-block:: bash
+
+   sudo apt-get update
+   sudo apt-get install -y curl openssh-server ca-certificates tzdata perl
+
+
+
+Next, install Postfix (or Sendmail) to send notification emails. If you want to use another solution to send emails please skip this step and configure an external SMTP server after GitLab has been installed
+
+.. code-block:: bash
+		
+   sudo apt-get install -y postfix
+
+
+During Postfix installation a configuration screen may appear. Select 'Internet Site' and press enter. Use your server's external DNS for 'mail name' and press enter. If additional screens appear, continue to press enter to accept the defaults.
+   
+		
+
+
+
+Step 2 — Installing GitLab
+==========================
+
+
+.. code-block:: bash
+
+   curl --silent "https://packages.gitlab.com/install/repositories/gitlab/gitlab-ee/script.deb.sh" | sudo bash
+   sudo apt-get install --download-only gitlab-ee
+   sudo apt-get install gitlab-ee
+		
+
+
+Step 3 — Enabling SSL(optional)
+===============================
+
+These steps reflect those for https://docs.gitlab.com/omnibus/settings/ssl/index.html
+
+By default, HTTPS is not enabled. To enable HTTPS, you can:
+
+*    Use Let’s Encrypt for free, automated HTTPS.
+*    Manually configure HTTPS with your own certificates. 
+
+
+Enable the Let’s Encrypt integration
+-------------------------------------------
+
+Let’s Encrypt is enabled by default if external_url is set with the HTTPS protocol and no other certificates are configured.
+
+Prerequisites:
+
+
+*    Ports 80 and 443 must be accessible to the public Let’s Encrypt servers that run the validation checks. The validation does not work with non-standard ports. If the environment is private or air-gapped, certbot (the tool used by Let’s Encrypt) provides a manual method to install a Let’s Encrypt certificate. 
+
+
+To enable Let’s Encrypt:
+
+1. Edit /etc/gitlab/gitlab.rb and add or change the following entries:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+.. code-block:: bash
+
+   ## GitLab instance
+   external_url "https://gitlab.example.com"         # Must use https protocol
+   letsencrypt['contact_emails'] = ['foo@email.com'] # Optional
+   
+   ## Container Registry (optional), must use https protocol
+   registry_external_url "https://registry.example.com"
+   #registry_nginx['ssl_certificate'] = "path/to/cert"      # Must be absent or commented out
+   
+   ## Mattermost (optional), must use https protocol
+   mattermost_external_url "https://mattermost.example.com"		
+
+
+
+*    Certificates expire every 90 days. Email addresses you specify for contact_emails receive an alert when the expiration date approaches.
+*    The GitLab instance is the primary domain name on the certificate. Additional services such as the Container Registry are added as alternate domain names to the same certificate. In the example above, the primary domain is gitlab.example.com and the Container Registry domain is registry.example.com. You don’t need to set up wildcard certificates.
+
+
+2. Reconfigure GitLab:
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+		
+   sudo gitlab-ctl reconfigure
+
+
+Configure HTTPS manually
+-----------------------------
+   
+1. Make the following changes to /etc/gitlab/gitlab.rb:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+   # Update external_url from "http" to "https"
+   external_url "https://pek-hliu4-d1"
+
+   # Set Let's Encrypt to false
+   letsencrypt['enable'] = false		
+   
+
+
+2. Create the following directories with the appropriate permissions for generating self-signed certificates:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   
+
+
+.. code-block:: bash
+
+   sudo mkdir -p /etc/gitlab/ssl
+   sudo chmod 755 /etc/gitlab/ssl		
+   sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/gitlab/ssl/pek-hliu4-d1.internal.key -out /etc/gitlab/ssl/pek-hliu4-d1.internal.cr
+
+   
+   
+3. Reconfigure your instance to apply the changes:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+.. code-block:: bash
+
+   sudo gitlab-ctl reconfigure		
+
+
+Step 4 — Editing the GitLab Configuration File
+===================================================================
+
+Search for the external_url configuration line. Update it to match your domain and make sure to change http to https to automatically redirect users to the site protected by the Let’s Encrypt certificate:
+
+.. code-block:: bash
+
+   external_url 'https://your_domain'		
+
+
+Next, find the letsencrypt['contact_emails'] setting. If you’re using nano, you can enable a search prompt by pressing CTRL+W. Write letsencrypt['contact_emails'] into the prompt, then press ENTER. This setting defines a list of email addresses that the Let’s Encrypt project can use to contact you if there are problems with your domain. It’s recommended to uncomment and fill this out to inform yourself of any issues that may occur:
+
+
+.. code-block:: bash
+
+   letsencrypt['contact_emails'] = ['sammy@example.com']		
+
+
+
+Run the following command to reconfigure GitLab:
+
+.. code-block:: bash
+
+   sudo gitlab-ctl reconfigure
+
+
+Step 5 — Performing Initial Configuration Through the Web Interface
+===================================================================
+
+
+Visit the domain name of your GitLab server in your web browser:
+
+.. code-block:: bash
+
+   https://your_domain
+
+
+On your first visit, you’ll be greeted with a login page:
+
+GitLab generates an initial secure password for you. It is stored in a folder that you can access as an administrative sudo user:
+
+
+.. code-block:: bash
+
+   cat /etc/gitlab/initial_root_password
+   
+   # WARNING: This value is valid only in the following conditions
+   
+   #          1. If provided manually (either via `GITLAB_ROOT_PASSWORD` environment variable or via `gitlab_rails['initial_root_password']` setting in `gitlab.rb`, it was provided before database was seeded for the firs$
+   
+   #          2. Password hasn't been changed manually, either via UI or via command line.
+   
+   #
+   
+   #          If the password shown here doesn't work, you must reset the admin password following https://docs.gitlab.com/ee/security/reset_user_password.html#reset-your-root-password.
+   
+   Password: YOUR_PASSWORD
+   
+   # NOTE: This file will be automatically deleted in the first reconfigure run after 24 hours.
+   
+   		
+
+
+By default, a Linux package installation automatically generates a password for the initial administrator user account (root) and stores it to /etc/gitlab/initial_root_password for at least 24 hours. For security reasons, after 24 hours, this file is automatically removed by the first gitlab-ctl reconfigure.
+
+.. note::
+
+   So please update your root password
+   
+
+Back on the login page, enter the following:
+
+*    Username: root
+
+*    Password: [the password listed on /etc/gitlab/initial_root_password]
+

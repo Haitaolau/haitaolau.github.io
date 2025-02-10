@@ -1,0 +1,116 @@
+========================
+Universal References
+========================
+
+
+.. note:: 
+
+   T&& Doesn’t Always Mean “Rvalue Reference”
+
+**Universal References 是一种类型**
+
+
+在C++ 11中，类型T的右值引用表示为T&&。然而并不是所有的形如T&&的类型都为rvalue reference。
+形如T&&的类型有两种情况：一种是普通的rvalue reference，另一种则被称为 universal reference，
+**它既可能表示lvalue reference，也可能表示rvalue reference**
+
+- 1. 如果一个 **函数模板参数的类型为T&&**，其中T是需要 **推导的类型**，那么此处的T&&指代universal reference。
+  若不严格满足T&&类型或没有发生类型推导，则T&&指代rvalue reference
+
+.. code-block:: cpp
+
+   template<typename T>
+   void f(T&& param);
+
+**参与类型推导**
+
+.. code-block:: cpp 
+
+   template <typename T> class mytestc { public: void testfunc(T&& x) {};};
+
+   int main(int argc, char const *argv[])
+   {
+      mytestc<int> mc; int i = 100; 
+      mc.testfunc(i);
+      
+      return 0;
+   }
+
+Output: 
+
+.. code-block:: console 
+
+   wrsadmin@PEK-HLIU4-D1$g++ template7.cpp 
+   template7.cpp: In function ‘int main(int, const char**)’:
+   template7.cpp:8:17: error: cannot bind rvalue reference of type ‘int&&’ to lvalue of type ‘int’
+      8 |     mc.testfunc(i);
+        |                 ^
+   template7.cpp:3:65: note:   initializing argument 1 of ‘void mytestc<T>::testfunc(T&&) [with T = int]’
+      3 | template <typename T> class mytestc { public: void testfunc(T&& x) {};};
+        |                                                             ~~~~^
+   wrsadmin@PEK-HLIU4-D1$
+
+因为testfunc()成员函数本身没有涉及类型推断，testfunc()成员函数是类模板mytestc的一部分，首先得用以下语句实例化这个类模板的一个具体的类。
+
+mytestc<int> mc;实例化完这个类之后，mytestc<int>类存在了，那么testfunc()成员函数才真正存在，
+
+所以testfunc()成员函数存在的时候就已经为void testfunc(int&& x) {};
+
+所以，testfunc()成员函数本身没有涉及类型推断，所以这个形参x是右值引用
+
+
+
+.. note:: 
+     
+   T&&加上 **cv qualifiers** 就不是universal reference
+
+比如下面的param参数为rvalue reference而不是universal reference
+
+.. code-block:: cpp 
+
+   template<typename T>
+   void f(const T&& param);
+
+Example: 
+
+.. code-block:: cpp
+
+   #include <iostream>
+
+   template <typename T>
+   void myfunc(const T&& tmprv)
+   {
+      std::cout << tmprv << std::endl;
+      return;
+   }
+
+   int main(int argc, char const *argv[])
+   {
+      int i = 100;
+      myfunc(i);
+      return 0;
+   }
+
+.. code-block:: console 
+   
+   wrsadmin@PEK-HLIU4-D1$g++ template7.cpp 
+   template7.cpp: In function ‘int main(int, const char**)’:
+   template7.cpp:13:12: error: cannot bind rvalue reference of type ‘const int&&’ to lvalue of type ‘int’
+      13 |     myfunc(i);
+         |            ^
+   template7.cpp:4:23: note:   initializing argument 1 of ‘void myfunc(const T&&) [with T = int]’
+      4 | void myfunc(const T&& tmprv)
+         |             ~~~~~~~~~~^~~~~
+   wrsadmin@PEK-HLIU4-D1$
+
+**const修饰词会剥夺一个引用成为万能引用的资格**,需要使用 **myfunc(std::move(i))** 转换为右值
+
+- 2. 如果一个对象的类型被定义为auto&&，则此对象为universal reference
+
+.. code-block:: cpp
+
+   auto&& f = g()
+
+
+1) 如果universal reference是通过rvalue初始化的，那么它就对应一个rvalue reference；
+2) 如果universal reference是通过lvalue初始化的，那么它就对应一个lvalue reference

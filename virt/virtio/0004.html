@@ -1,0 +1,411 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>A journey to the vhost-users realm &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Introduction to VirtIO" href="0005.html" />
+    <link rel="prev" title="How vhost-user came into being: Virtio-networking and DPDK" href="0003.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="a-journey-to-the-vhost-users-realm">
+<span id="vhost-users-realm"></span><h1><a class="toc-backref" href="#id1" role="doc-backlink">A journey to the vhost-users realm</a><a class="headerlink" href="#a-journey-to-the-vhost-users-realm" title="Permalink to this heading">¶</a></h1>
+<nav class="contents" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#a-journey-to-the-vhost-users-realm" id="id1">A journey to the vhost-users realm</a></p>
+<ul>
+<li><p><a class="reference internal" href="#introduction" id="id2">Introduction</a></p></li>
+<li><p><a class="reference internal" href="#dpdk-and-its-benefits" id="id3">DPDK and its benefits</a></p></li>
+<li><p><a class="reference internal" href="#dpdk-and-ovs-a-perfect-combination" id="id4">DPDK and OVS: A perfect combination</a></p></li>
+<li><p><a class="reference internal" href="#vhost-user-library-in-dpdk" id="id5">Vhost-user library in DPDK</a></p></li>
+<li><p><a class="reference internal" href="#userland-networking-in-the-guest" id="id6">Userland Networking in the guest</a></p></li>
+<li><p><a class="reference internal" href="#vfio" id="id7">VFIO</a></p></li>
+<li><p><a class="reference internal" href="#virtio-pmd" id="id8">Virtio-pmd</a></p></li>
+<li><p><a class="reference internal" href="#introducing-the-iommu" id="id9">Introducing the IOMMU</a></p></li>
+<li><p><a class="reference internal" href="#viommu-iommu-for-the-guest" id="id10">vIOMMU - IOMMU for the guest</a></p></li>
+<li><p><a class="reference internal" href="#viommu-and-dpdk-integration" id="id11">vIOMMU and DPDK integration</a></p></li>
+<li><p><a class="reference internal" href="#viommu-and-vhost-user-integration" id="id12">vIOMMU and vhost-user integration</a></p></li>
+<li><p><a class="reference internal" href="#putting-everything-together" id="id13">Putting everything together</a></p></li>
+<li><p><a class="reference internal" href="#an-example-flow" id="id14">An example flow</a></p></li>
+<li><p><a class="reference internal" href="#control-plane" id="id15">Control Plane</a></p></li>
+<li><p><a class="reference internal" href="#summary-and-conclusions" id="id16">Summary and conclusions</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<p>Copy from <a class="reference external" href="https://www.redhat.com/en/blog/journey-vhost-users-realm">https://www.redhat.com/en/blog/journey-vhost-users-realm</a></p>
+<p>This post is a technical deep dive into the vhost-user/virtio-pmd architecture targeting high performance userland networking using DPDK, building on the introduction provided by the <a class="reference internal" href="0003.html#how-vhost-user-came-into-being-virtio-networking-and-dpdk"><span class="std std-ref">solution overview post</span></a>. It is intended for architects and developers who are interested in understanding the nuts and bolts of this architecture, and will be followed by a complementary hands on blog to explore these concepts first handed.</p>
+<section id="introduction">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">Introduction</a><a class="headerlink" href="#introduction" title="Permalink to this heading">¶</a></h2>
+<p>In the previous :ref: <cite>deep dive blog &lt;virtio_networking_and_vhost_net&gt;</cite>, we showed the benefits moving the network processing out of qemu and into a kernel driver by using the vhost-net protocol. In this post we will go one step further and show how to achieve better network performance by moving the dataplane from the kernel to userspace in both the guest and the host using the DPDK: Data Plane Development Kit. To achieve this we will also look in detail into a new implementation of the vhost protocol: the vhost-user library.</p>
+<p>By the end of this post, you should have a deep understanding of all the components involved in a vhost-user/virtio-pmd based architecture and understand the reasons behind the significant performance improvement it provides.</p>
+</section>
+<section id="dpdk-and-its-benefits">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">DPDK and its benefits</a><a class="headerlink" href="#dpdk-and-its-benefits" title="Permalink to this heading">¶</a></h2>
+<p>It’s likely that you have already heard about DPDK. This userspace fast packet processing library is in the core of many Network Function Virtualization (NFV) applications allowing them to be implemented entirely in userspace, bypassing the kernel’s networking stack.</p>
+<p>DPDK is a set of user space libraries that enable a user to create optimized, performant packet processing applications. It brings many advantages making it very popular among developers and a powerful tool. Following are some of them:</p>
+<ul class="simple">
+<li><p>Processor affinity - DPDK pins each of the different threads to a specific logical core to maximize parallelism.</p></li>
+<li><p>Huge pages - DPDK has several layers of memory management (such as the Mempool library or the Mbuf library). However, under the hood, all the memory is allocated using mmap in hugetlbfs. Using 2MB or even 1GB pages, DPDK reduces cache misses and TLB lookups.</p></li>
+<li><p>Lockless ring buffers - DPDKs packet processing is based on a <a class="reference external" href="https://doc.dpdk.org/guides/prog_guide/ring_lib.html?highlight=lockless">Ring library</a> that provides an efficient, lockless ring queue that supports burst enqueue and dequeue operations.</p></li>
+<li><p>Poll Mode Driver - To avoid the interrupt overhead, a <a class="reference external" href="https://doc.dpdk.org/guides/prog_guide/poll_mode_drv.html">Poll Mode Driver (PMD)</a> abstraction is available in DPDK.</p></li>
+<li><p>VFIO support - <a class="reference external" href="https://www.kernel.org/doc/Documentation/vfio.txt">VFIO (Virtual Function I/O)</a> provides a userspace driver development framework allowing userspace applications to interact directly with hardware devices by mapping the I/O space directly to the application’s memory.</p></li>
+</ul>
+<p>In addition to these features there are two other technologies also supported by DPDK that provide us the tooling to greatly enhance the performance of network applications in cloud environments. These are:</p>
+<ul class="simple">
+<li><p>Vhost-user library - A userspace library that implements the vhost protocol (described in the <a class="reference internal" href="0001.html#introduction-virtio-networking-vhost-net"><span class="std std-ref">virtio-networking vhost-net</span></a> post).</p></li>
+<li><p>Virtio-PMD - Built on DPDK’s PMD abstraction, the virtio-pmd driver implements the virtio specification and allows the use of virtual devices in a standard an efficient way.</p></li>
+</ul>
+</section>
+<section id="dpdk-and-ovs-a-perfect-combination">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">DPDK and OVS: A perfect combination</a><a class="headerlink" href="#dpdk-and-ovs-a-perfect-combination" title="Permalink to this heading">¶</a></h2>
+<p>A good example of the benefits of DPDK is the performance increase that brought to the already popular Open vSwitch (OVS-DPDK). Open vSwitch is a feature-rich, multilayer, distributed virtual switch widely used as the main networking layer on virtual environments and other SDN applications.</p>
+<p>It has traditionally been divided into a fast kernel-based datapath (fastpath) consisting of a flow table and a slower userspace datapath (slowpath) that processes packets that did not match any flow in the fastpath. By integrating OVS with DPDK, the fastpath is also in userland, minimizing kernel to userland interactions as well as leveraging the high performance offered by DPDK. The result is a ~10x performance increase of OVS with DPDK over native OVS.</p>
+<p>So, how can we combine the features and performance of OVS-DPDK with a virtio-based architecture? We will walk you through the needed components one by one in the next sections.</p>
+</section>
+<section id="vhost-user-library-in-dpdk">
+<h2><a class="toc-backref" href="#id5" role="doc-backlink">Vhost-user library in DPDK</a><a class="headerlink" href="#vhost-user-library-in-dpdk" title="Permalink to this heading">¶</a></h2>
+<p>The vhost protocol is a set of messages and mechanisms designed to offload the virtio datapath processing from QEMU (the primary, that wants to offload packet processing) to an external element (the handler, that configures the virtio rings and does the actual packet processing.). The most relevant mechanisms are:</p>
+<ul class="simple">
+<li><p>A set of messages that allow the primary to send the virtqueue’s memory layout and configuration to the handler.</p></li>
+<li><p>A pair of eventfd-type file descriptors that allow the guest to bypass the primary and directly send and receive notifications to/from the handler: Available Buffer Notification (sent from the guest to the handler to indicate there are buffers ready to be processed) and the Used Buffer Notification (sent from the handler to the guest to indicate it has finished processing the buffers)</p></li>
+</ul>
+<p>In the <a class="reference internal" href="0002.html#virtio-networking-and-vhost-net"><span class="std std-ref">“virtio-networking vhost-net”</span></a> post, we described a concrete implementation of this protocol (the vhost-net kernel module) and how it allows qemu to offload network processing to the host’s kernel. Now we introduce the vhost-user library. This library, built in DPDK, is a userspace implementation of the vhost protocol that allows qemu to offload the virtio device packet processing to any DPDK application (such as Open vSwitch).</p>
+<p>The main difference between the vhost-user library and the vhost-net kernel driver is the communication channel. While the vhost-net kernel driver implements this channel using ioctls, the vhost-user library <a class="reference internal" href="vhost-user.html#vhost-user-proto"><span class="std std-ref">defines the structure of messages</span></a> that are sent over a unix socket.</p>
+<p>The DPDK application can be configured to provide the unix socket (server mode) and let QEMU connect to it (client mode). However, the opposite is also possible, which allows the DPDK to be restarted without restarting the VMs.</p>
+<p>On this socket, all requests are initiated by the primary (i.e: QEMU) and some of them require a response such as the GET_FEATURES request or any request that has the REPLY_ACK bit set.</p>
+<p>As in the case of the vhost-net kernel module, the vhost-user library allows the primary to configure the dataplane offloading by performing the following important actions:</p>
+<ol class="arabic simple">
+<li><p>Feature negotiation: Both the virtio features and the vhost-user-specific features are negotiated in a similar way: First the primary “gets” the handler’s supported features bitmask and then it “sets” the subset of them it also supports.</p></li>
+<li><p>Memory region configuration: The master sets the memory map regions so the handler can mmap() them.</p></li>
+<li><p>Vring configuration: The primary sets the number of virtqueues to use and their addresses within the memory regions. Note that vhost-user supports multiqueue so more than one virtqueue can be configured to improve performance.</p></li>
+<li><p>Kick and Call file descriptors sending: Usually, the irqfd and the ioeventfd mechanisms are used. For more on these mechanisms, see <a class="reference internal" href="0002.html#virtio-networking-and-vhost-net"><span class="std std-ref">“Deep dive into Virtio-networking and vhost-net”</span></a>, for more on the virtio queue mechanism see the upcoming virtio dataplane post.</p></li>
+</ol>
+<p>As a result of this mechanism, the DPDK application can now process packets by sharing the memory region with the guest and can send and receive notifications directly to and from the guest without qemu having to intervene.</p>
+<p>The last element that glues everything together is QEMU’s virtio device model. It has two main tasks:</p>
+<ul class="simple">
+<li><p>It emulates a virtio device that shows up in the guest in a specific PCI port that can be probed and configured seamlessly by the guest. In addition, it maps  the ioeventfd to the emulated device’s Memory-mapped I/O space and the irqfd to it’s Global System Interrupt (GSI). The result is that the guest is unaware of the fact that both the notifications and the interrupts are being forwarded to and from the vhost-user library without QEMU’s intervention</p></li>
+<li><p>Instead of implementing the actual virtio datapath it acts as the master in the vhost-user protocol to offload this processing to the vhost-user library in the DPDK process</p></li>
+<li><p>It processes the requests coming from the control virtqueue, which, in some cases, are translated into vhost-user requests and forwarded to the slave.</p></li>
+</ul>
+<p>This diagram shows how the vhost-user-library running as part of the DPDK-APP interacts with qemu and the guest using the virtio-device-model and the virtio-pci device:</p>
+<img alt="../../_images/2019-09-24-virtio-networking-fig1.png" src="../../_images/2019-09-24-virtio-networking-fig1.png" />
+<p>A few points to mention on this diagram:</p>
+<ul class="simple">
+<li><p>The virtio memory region is initially allocated by the guest.</p></li>
+<li><p>The corresponding virtio driver interacts with the virtio device normally, through the PCI BARs configuration interface defined in the virtio specification.</p></li>
+<li><p>The virtio-device-model (inside QEMU) uses the vhost-user protocol to configure the vhost-user library, as well as setting the irqfd and ioeventfd file descriptors.</p></li>
+<li><p>The virtio memory region that was allocated by the guest is mapped (using mmap syscall) by the vhost-user library, i.e: the DPDK application.</p></li>
+<li><p>The result is that the DPDK application can read and write packets directly to and from guest memory and use the irqfd and the ioeventfd mechanisms to notify with the guest directly.</p></li>
+</ul>
+</section>
+<section id="userland-networking-in-the-guest">
+<h2><a class="toc-backref" href="#id6" role="doc-backlink">Userland Networking in the guest</a><a class="headerlink" href="#userland-networking-in-the-guest" title="Permalink to this heading">¶</a></h2>
+<p>We’ve already covered how DPDK’s vhost-user implementation allows us to offload the datapath processing from the host kernel (vhost-net) to a dedicated DPDK userspace application (such as Open vSwitch) hence improving the performance of our network dramatically. Now, we will see how to do the same with the guest by running a high performance networking application (such as as NFV service) in the guest’s userspace replacing the virtio-net kernel approach.</p>
+<p>In order to be able to run a userspace networking application directly on the device we need three components:</p>
+<ol class="arabic simple">
+<li><p>VFIO: VFIO is a userspace driver development framework that allows userspace applications to directly interact with devices (bypassing the kernel)</p></li>
+<li><p>Virtio-pmd driver: is a DPDK driver, built on the Poll Mode Driver abstraction, that implements the virtio protocol</p></li>
+<li><p>IOMMU driver: The IOMMU driver is in managing the virtual IOMMU (I/O Memory Management Unit), an emulated device that performs I/O address mappings for DMA-capable devices.</p></li>
+</ol>
+<p>Let’s go one by one and describe these components in more detail.</p>
+</section>
+<section id="vfio">
+<h2><a class="toc-backref" href="#id7" role="doc-backlink">VFIO</a><a class="headerlink" href="#vfio" title="Permalink to this heading">¶</a></h2>
+<p>VFIO stands for Virtual Function I/O. However, Alex Williamson, maintainer of vfio-pci kernel driver suggested calling it “Versatile Framework for userspace I/O,” which might be more accurate. VFIO is basically a framework for building userspace drivers that provides:</p>
+<ul class="simple">
+<li><p>Mapping of device’s configuration and I/O memory regions to user memory</p></li>
+<li><p>DMA and interrupt remapping and isolation based on IOMMU groups. We will go deeper into what the IOMMU is and how it works later on this post. For now, let’s say it allows the creation of virtual I/O memory spaces that get mapped to physical memory (similarly to how the normal MMU maps non-IO virtual memory), so when a device wants to DMA to a virtual I/O address, the IOMMU will remap that address and potentially apply isolation and other security policies.</p></li>
+<li><p>Eventfd and irqfd (remember those?) based signalling mechanism to support events and interrupts from and to the userspace application.</p></li>
+</ul>
+<p>Quoting the <a class="reference external" href="https://www.kernel.org/doc/Documentation/vfio.txt">kernel documentation</a>: “If you wanted to write a driver prior to VFIO, you had to either go through the full development cycle to become proper upstream driver, be maintained out-of-tree or make use of the UIO framework which has no notion of IOMMU protection, limited interrupt support and requires root privileges to access things like PCI configuration space.”</p>
+<p>VFIO exposes a user friendly API creating character devices (in /dev/vfio/) that support ioctl calls for describing the device, the I/O regions and their read/write/mmap offsets on the device descriptor as well as mechanisms for describing and registering interrupt notifications.</p>
+</section>
+<section id="virtio-pmd">
+<h2><a class="toc-backref" href="#id8" role="doc-backlink">Virtio-pmd</a><a class="headerlink" href="#virtio-pmd" title="Permalink to this heading">¶</a></h2>
+<p>DPDK provides a driver abstraction called Poll Mode Driver (PMD) that sits between the device driver and the user application. It offers a lot of flexibility to the user application while keeping the extensibility, i.e. the capability of implementing drivers for new devices.</p>
+<p>Some of its more remarkable features are listed below:</p>
+<ul class="simple">
+<li><p>A set of APIs allow the specific driver to implement the device-specific receive and transmit functions.</p></li>
+<li><p>Per-port and per-queue hardware offloading can be configured both statically and dynamically</p></li>
+<li><p>An extensible API for statistics is available, allowing the driver to define its own driver-specific statistics and the application to probe the available statistics and retrieve them.</p></li>
+</ul>
+<p>The virtio Poll Mode Driver (virtio-pmd) is one of the many drivers that use the PMD API and offers applications written with DPDK a fast and lock-free access to a virtio device providing the basic functionality of packet reception and transmission using virtio’s virtqueues.</p>
+<p>Apart from all the features that any PMD has, the virtio-pmd driver implementation supports:</p>
+<ul class="simple">
+<li><p>Flexible mergeable buffers per packet when receiving and scattered buffer per packet when transmitting</p></li>
+<li><p>Multicast and promiscuous mode</p></li>
+<li><p>MAC/vlan filtering</p></li>
+</ul>
+<p>The result is a high performance userspace virtio driver that allows any DPDK application to seamlessly use virtio’s standard interface.</p>
+</section>
+<section id="introducing-the-iommu">
+<h2><a class="toc-backref" href="#id9" role="doc-backlink">Introducing the IOMMU</a><a class="headerlink" href="#introducing-the-iommu" title="Permalink to this heading">¶</a></h2>
+<p>An IOMMU is pretty much the equivalent of an MMU for I/O space (where devices access memory directly using DMA). It sits between the main memory and the devices, creates a virtual I/O space for each device, and provides a mechanism to map that virtual I/O memory dynamically to physical memory. So, when a driver configures a device’s DMA (for example, a network card), it configures the virtual addresses and when the device tries to access them, they get remapped by the IOMMU.</p>
+<p>It provides many advantages such as:</p>
+<ul class="simple">
+<li><p>Large contiguous virtual memory regions can be allocated without needing to be contiguous in physical memory.</p></li>
+<li><p>Some devices do not support addresses long enough to access the entire physical memory, the IOMMU solves that problem.</p></li>
+<li><p>Memory is protected from DMA attacks performed by malicious our faulty devices that attempt to access memory not explicitly allocated for them. The devices only “see” the virtual address space and the running OS exclusively controls the IOMMU’s mappings.</p></li>
+<li><p>In some architectures, Interrupt Remapping is supported which can allow for interrupt isolation and migration.</p></li>
+</ul>
+<img alt="../../_images/2019-09-24-virtio-networking-fig2.png" src="../../_images/2019-09-24-virtio-networking-fig2.png" />
+<p>As usual everything comes with a cost, in the case of IOMMU the disadvantages are:</p>
+<ul class="simple">
+<li><p>There is a performance degradation related with the page translation service</p></li>
+<li><p>There is consumption of physical memory for the added page translation tables</p></li>
+</ul>
+<p>Lastly, the IOMMU offers a PCIe Address Translation Service interface that devices can use to query and cache address translations in their internal Device Table Lookaside Buffers (TLB).</p>
+</section>
+<section id="viommu-iommu-for-the-guest">
+<h2><a class="toc-backref" href="#id10" role="doc-backlink">vIOMMU - IOMMU for the guest</a><a class="headerlink" href="#viommu-iommu-for-the-guest" title="Permalink to this heading">¶</a></h2>
+<p>Of course, if there is a physical IOMMU (for example Intel VT-d and AMD-VI) there is a virtual IOMMU inside qemu. Specifically, QEMU’s vIOMMU has the following characteristics:</p>
+<ul class="simple">
+<li><p>It translates guest I/O virtual addresses (IOVA) to guest physical addresses (GPA), which can be translated to QEMU’s host virtual address (HVA) through QEMU’s memory management system.</p></li>
+<li><p>Performs device isolation.</p></li>
+<li><p>Implements a I/O TLB API so that the mappings can be consulted from outside qemu.</p></li>
+</ul>
+<p>So, in order to get a virtual device working with a virtual IOMMU we have to:</p>
+<ol class="arabic simple">
+<li><p>Use one of the available APIs to create the necessary IOVA mappings into the vIOMMU. Currently those APIs are:</p></li>
+</ol>
+<blockquote>
+<div><ul class="simple">
+<li><p>The kernel’s DMA API for kernel drivers</p></li>
+<li><p>VFIO for userspace drivers</p></li>
+</ul>
+</div></blockquote>
+<ol class="arabic simple" start="2">
+<li><p>Configure the device’s DMA with the virtual I/O addresses</p></li>
+</ol>
+</section>
+<section id="viommu-and-dpdk-integration">
+<h2><a class="toc-backref" href="#id11" role="doc-backlink">vIOMMU and DPDK integration</a><a class="headerlink" href="#viommu-and-dpdk-integration" title="Permalink to this heading">¶</a></h2>
+<p>The integration between the virtual IOMMU and any userspace network application is usually done through the VFIO driver. As we have already mentioned, this driver will perform device isolation and automatically add the iova-to-gpa mappings to the IOMMU.</p>
+<p>In addition to supporting VFIO to set up the network device, the use of DPDK has another very important benefit with regards to the IOMMU. Thanks to the memory management mechanism used by DPDK, which allocates a static memory pool that is then used to store the packet buffers and the virtual queues, the number of Device TLB synchronization messages drop dramatically and so does the performance penalty associated with them. The use of hugepages further contributes to optimize the TLB lookups, since less number of memory pages can cover the same amount of memory.</p>
+</section>
+<section id="viommu-and-vhost-user-integration">
+<h2><a class="toc-backref" href="#id12" role="doc-backlink">vIOMMU and vhost-user integration</a><a class="headerlink" href="#viommu-and-vhost-user-integration" title="Permalink to this heading">¶</a></h2>
+<p>When a device that is being emulated in QEMU attempts to DMA to the guest’s virtio I/O space it will use the vIOMMU TLB to look up the page mapping and perform a secured DMA access. Question is what happens if the actual DMA was being offloaded to an external process such as a DPDK application using vhost-user library?</p>
+<p>When the vhost-user library tries to directly access the shared memory, it has to translate all the addresses (I/O virtual addresses) into its own memory. It does that by asking QEMU’s vIOMMU for the translation through the Device TLB API. Vhost-user library (as well as vhost-kernel driver) uses PCIe’s Address Translation Services standard set of messages to request a page translation to QEMU using a secondary communication channel (another unix socket) that it creates when IOMMU support is configured.</p>
+<p>Overall, there are 3 address translations that have to be made:</p>
+<ol class="arabic simple">
+<li><p>QEMU’s vIOMMU translates IOVA (I/O virtual address) to GPA (Guest Physical Address).</p></li>
+<li><p>Qemu’s memory management translates GPA (Guest Physical Address) to HVA (Host Virtual Address within the address space of the qemu process).</p></li>
+<li><p>Vhost-user library translates (QEMU’s) HVA to its own HVA. This is usually as simple as adding the QEMU’s HVA to the address returned by mmap(2) when the vhost-user library mapped QEMUs memory.</p></li>
+</ol>
+<p>Obviously, all these translations can potentially have an important performance impact, especially if dynamic mapping is used. However, static, hugepage allocation (which is exactly what DPDK does) can minimize this performance penalty.</p>
+<p>The following diagram enhances the previous vhost-user architecture to include the IOMMU components:</p>
+<img alt="../../_images/2019-09-24-virtio-networking-fig3.png" src="../../_images/2019-09-24-virtio-networking-fig3.png" />
+<p>A few points to mention on this, rather complex, diagram:</p>
+<ul class="simple">
+<li><p>The guest’s physical memory space is the memory the guest perceives as physical but, obviously, it is inside QEMU’s process (host) virtual address. When the virtqueue memory region is allocated, it ends up somewhere in the guest’s physical memory space.</p></li>
+<li><p>When an I/O virtual address is assigned to the memory range that contains the virtqueues, an entry with it’s associated guest physical address (GPA) is added to the vIOMMU’s TLB table.</p></li>
+<li><p>On the other side, QEMU’s memory management system is aware of where the guest physical memory space resides within its own memory space. Therefore, it is able to translate guest physical addresses to host (QEMU’s) virtual addresses.</p></li>
+<li><p>When the vhost-user library tries to access an IOVA it has no translation for, it sends a IOTLB miss message through the secondary unix socket.</p></li>
+<li><p>The IOTLB API receives the request and looks up the address, first translating the IOVA to the GPA and finally the GPA to the HVA. It then sends the translated address through the master unix socket back to the vhost-user library.</p></li>
+<li><p>Finally, the vhost-user library has to make one final translation. Since it has qemu’s memory mapped into its own, it has to translate qemu’s HVA to its own HVA and access the shared memory.</p></li>
+</ul>
+</section>
+<section id="putting-everything-together">
+<h2><a class="toc-backref" href="#id13" role="doc-backlink">Putting everything together</a><a class="headerlink" href="#putting-everything-together" title="Permalink to this heading">¶</a></h2>
+<p>In this post we have covered a number of components including DPDK, virtio-pmd, VFIO, IOMMU etc…</p>
+<p>The following diagram shows how these building blocks work together to implement a vhost-user/virtio-pmd architecture:</p>
+<img alt="../../_images/2019-09-24-virtio-networking-fig4.jpg" src="../../_images/2019-09-24-virtio-networking-fig4.jpg" />
+<p>A few points to mention on this diagram:</p>
+<ul class="simple">
+<li><p>Comparing this diagram with the previous one we’ve added the components needed to connect the host’s OVS-DPDK application to a physical NIC using the hardware IOMMU, VFIO and a vendor-specific PMD driver. By now, this should not raise any eyebrows since it is equivalent to what it is done for the guest.</p></li>
+</ul>
+</section>
+<section id="an-example-flow">
+<h2><a class="toc-backref" href="#id14" role="doc-backlink">An example flow</a><a class="headerlink" href="#an-example-flow" title="Permalink to this heading">¶</a></h2>
+<p>The following  flow diagram presents the steps needed to set up the virtio high-performance dataplane:</p>
+<img alt="../../_images/2019-09-24-virtio-networking-fig5.jpg" src="../../_images/2019-09-24-virtio-networking-fig5.jpg" />
+</section>
+<section id="control-plane">
+<h2><a class="toc-backref" href="#id15" role="doc-backlink">Control Plane</a><a class="headerlink" href="#control-plane" title="Permalink to this heading">¶</a></h2>
+<p>Here are the steps necessary to set up the control plane:</p>
+<ol class="arabic simple">
+<li><p>When the DPDK application in the host (OvS) starts it creates a socket used (in server mode) for virtio-related negotiations with qemu.</p></li>
+<li><p>When qemu starts it connects to the main socket and, if the feature VHOST_USER_PROTOCOL_F_SLAVE_REQ is offered by vhost-user, it creates a second socket and passes it to vhost-user for it to connect to and send iotlb synchronization messages.</p></li>
+<li><p>When the QEMU &lt;-&gt; vhost-library negotiation ends, two sockets are shared between them. One for virtio configuration and the other one for iotlb message exchange.</p></li>
+<li><p>The guest boots and the vfio driver is bound to the PCI device. It creates accesses to the iommu groups (which depend on HW topology)</p></li>
+<li><p>When the dpdk application starts in the guest it performs the following initialization steps:</p></li>
+</ol>
+<blockquote>
+<div><ol class="loweralpha simple">
+<li><p>Initialize the PCI-vfio device. Also, the vfio driver maps the PCI config space to user memory.</p></li>
+<li><p>The virtqueues are allocated.</p></li>
+<li><p>Using vfio, a DMA mapping request of the virtqueue memory space is performed, which adds the dma mappings to the vIOMMU device through the IOMMU kernel driver.</p></li>
+<li><p>Then, the virtio feature negotiation takes place. In this case, the address that is used as virtqueue base address is the IOVA (in the I/O virtual address space). Mappings of eventfd and irqfd are set so that interrupts and notifications can be routed directly between the guest and the vhost-user library without QEMU’s intervention.</p></li>
+<li><p>Finally, the dpdk application allocates a big chunk of contiguous memory for network buffers. Mappings for this memory region are also added to the vIOMMU through the VFIO and the IOMMU driver.</p></li>
+</ol>
+</div></blockquote>
+<p>At this point the configuration is finished and the dataplane (virtqueues and notification mechanisms) is ready to use.</p>
+<p>Data Plane</p>
+<p>In order to transmit a packet, the following steps take place:</p>
+<ol class="arabic simple">
+<li><p>The DPDK application in the guest commands the virtio-pmd to send a packet. It writes the buffers and adds their corresponding descriptors in the available descriptor ring.</p></li>
+<li><p>The vhost-user PMD in the host is polling the virtqueue, so it immediately detects new descriptors are available and begins processing them.</p></li>
+<li><p>For each descriptor, the vhost-user PMD maps its buffer (i.e: translates its IOVA to a HVA). In the rare case the buffer memory is a page not already mapped in the vhost-user’s IOTLB, a request to QEMU will be sent. However, the fact that the DPDK application in the guest allocates static hugepages keeps the IOTLB requests to QEMU to a minimum.</p></li>
+<li><p>The vhost-user PMD copies the buffers into mbufs (the message buffers used by DPDK applications).</p></li>
+<li><p>The descriptors are added to the used descriptor ring. These are immediately detected by the DPDK application in the guest who is also polling the virtqueues.</p></li>
+<li><p>The mbufs are processed by the DPDK application in the host.</p></li>
+</ol>
+</section>
+<section id="summary-and-conclusions">
+<h2><a class="toc-backref" href="#id16" role="doc-backlink">Summary and conclusions</a><a class="headerlink" href="#summary-and-conclusions" title="Permalink to this heading">¶</a></h2>
+<p>DPDK is a promising technology that is gaining a lot of traction for the benefits it brings to the high performance networking in userland. Not only this technology, combined with the Open vSwitch, can provide the flexibility and performance modern virtual environments require, but it will also plays a key role in the NFV deployments.</p>
+<p>In order to fully leverage this technology, both as the datacenter switching datapath  and as an enabler for NFV applications in the guests, it is necessary to securely create an efficient datapath between the host and the guests. Here is where virtio-net technology comes into play.</p>
+<p>Vhost-user provides a reliable and secure mechanism to offload the network processing to DPDK based applications. It integrates with the vIOMMU to provide isolation and memory protection while liberating QEMU from the hard work of processing all the packets.</p>
+<p>In the guest, the implementation of the virtio specification in DPDK (virtio-pmd) enables the creation of a fast datapath in guests, leveraging the efficient memory management and the high speed provided by DPDK’s Poll Mode Driver.</p>
+<p>If you want to learn more about virtio technology, vhost-user and DPDK and you’re not afraid of getting your hands dirty, don’t miss our hands-on post on vhost-user!</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cplus/index.html">Cplus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Virtulization</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../qemu/index.html">Qemu</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Virtio</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="0001-pre.html">Virtio devices and drivers overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0001.html">Introduction to virtio-networking and vhost-net</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0002.html">Deep dive into Virtio-networking and vhost-net</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0003.html">How vhost-user came into being: Virtio-networking and DPDK</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">A journey to the vhost-users realm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0005.html">Introduction to VirtIO</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0006.html">Qemu: Virtio-net Envrionment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0007.html">Qemu: Virtio_net_pci</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0009.html">Qemu: Virtio_bus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0008.html">Qemu: Virtio_net Device</a></li>
+<li class="toctree-l3"><a class="reference internal" href="vhost-user.html">Vhost-user Protocol</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../00001.html">Install Ret Hat 7 server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00002.html">Qemu ifup script</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00003.html">Random Mac address</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00004.html">Assign tap to VM Client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00005.html">Open vSwitch with Libvirt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00006.html">EAL: No free hugepages reported in hugepages-2048kB</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00007.html">Failed to connect socket /var/run/openvswitch/centos1_eth0: Permission denied</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00008.html">Establish OVP reference envrionment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00009.html">libvirt: Specify the kernel and rootfs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00010.html">WRLinux with wayland and weston</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00011.html">Enable the support console for VM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00012.html">Start Qemu with monitor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00013.html">Creating images from ISO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00014.html">Create image from Wrlinux image</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Virtulization</a><ul>
+  <li><a href="index.html">Virtio</a><ul>
+      <li>Previous: <a href="0003.html" title="previous chapter">How vhost-user came into being: Virtio-networking and DPDK</a></li>
+      <li>Next: <a href="0005.html" title="next chapter">Introduction to VirtIO</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../../_sources/virt/virtio/0004.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

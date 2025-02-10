@@ -1,0 +1,260 @@
+================
+C++ static Cast
+================
+
+This is the simplest type of cast that can be used. It is a compile-time cast. It does things like implicit conversions between types (such as int to float, or pointer to void*), and it can also call explicit conversion functions.
+
+
+Syntax:
+
+.. code-block:: c
+
+   static_cast <dest_type> (source);
+
+The return value of static_cast will be of dest_type.
+
+static_cast<>是最常用的类型转换运算符，主要执行非多态的转换，用于代替C语言中通常的转换操作。static_cast<>可以实现下列转换
+
+1. 基本数据类型之间的转换
+
+2. 将任何类型转换为void类型
+
+3. 把空指针转换成目标类型的指针
+
+4. 用于类层次结构中基类和派生类之间指针或引用的转换。向上转换（派生类转换为基类）是安全的；向下转换（基类转换为派生类）没有动态类型检查，是不安全的
+
+Example:
+
+.. code-block:: c
+
+   // C++ Program to demonstrate
+   // static_cast
+   #include <iostream>
+   using namespace std;
+   
+   // Driver code
+   int main()
+   {
+   	float f = 3.5;
+   
+   	// Implicit type case
+   	// float to int
+   	int a = f;
+   	cout << "The Value of a: " << a;
+   
+   	// using static_cast for float to int
+   	int b = static_cast<int>(f);
+   	cout << "\nThe Value of b: " << b;
+   }
+   
+Output
+
+.. code-block:: console 
+
+   The Value of a: 3
+   The Value of b: 3
+
+1. static_cast for primitive data type pointers:
+-------------------------------------------------
+
+.. code-block:: c 
+
+   // C++ Program to demonstrate
+   // static_cast char* to int*
+   #include <iostream>
+   using namespace std;
+   
+   // Driver code
+   int main()
+   {
+   int a = 10;
+   char c = 'a';
+   
+   // Pass at compile time,
+   // may fail at run time
+   int* q = (int*)&c;
+   int* p = static_cast<int*>(&c);
+   return 0;
+   }
+   
+
+output:
+
+.. code-block:: console 
+
+   error: invalid 'static_cast' from type 'int*' to type 'char*'
+
+This means that even if you think you can somehow typecast a particular object pointer into another but it’s illegal, the static_cast will not allow you to do this.
+
+
+2. Converting an Object using a User-Defined Conversion Operator
+-----------------------------------------------------------------
+
+
+static_cast is able to call the conversion operator of the class if it is defined. Let’s take another example of converting an object to and from a class.
+
+
+.. code-block:: c
+
+   // C++ Program to cast
+   // class object to string
+   // object
+   #include <iostream>
+   #include <string>
+   using namespace std;
+   
+   // new class
+   class integer {
+   	int x;
+   
+   public:
+   	// constructor
+   	integer(int x_in = 0)
+   		: x{ x_in }
+   	{
+   		cout << x <<" Constructor Called" << endl;
+   	}
+   
+   	// user defined conversion operator to string type
+   	operator string()
+   	{
+   		cout << x << " Conversion Operator Called" << endl;
+   		return to_string(x);
+   	}
+   };
+   
+   // Driver code
+   int main()
+   {
+   	integer obj(3);
+   	string str = obj;
+   	obj = 20;
+   
+   	// using static_cast for typecasting
+   	string str2 = static_cast<string>(obj);
+   	obj = static_cast<integer>(30);
+   
+   	return 0;
+   }
+   
+
+Output: 
+
+.. code-block:: c
+
+   3 Constructor Called
+   3 Conversion Operator Called
+   20 Constructor Called
+   20 Conversion Operator Called
+   30 Constructor Called
+
+
+3. static_cast for Inheritance in C++
+---------------------------------------
+
+
+static_cast can provide both upcasting and downcasting in case of inheritance. The following example demonstrates the use of static_cast in the case of upcasting.
+
+.. code-block:: c
+
+   // C++ Program to demonstrate
+   // static_cast in inheritance
+   #include <iostream>
+   using namespace std;
+   class Base
+   {};
+   class Derived : public Base
+   {};
+   
+   // Driver code
+   int main()
+   {
+       Derived d1;
+   
+       // Implicit cast allowed
+       Base* b1 = (Base*)(&d1);
+   
+       // upcasting using static_cast
+       Base* b2 = static_cast<Base*>(&d1);
+       return 0;
+   }
+
+In the above example, we inherited the base class as public. What happens when we inherit it as private? The below example demonstrate the following:
+
+
+.. code-block:: c 
+
+   // C++ program to demonstrate
+   // static_cast in case of
+   // private inheritance
+   #include <iostream>
+   using namespace std;
+   
+   class Base
+   {};
+   
+   class Derived: private Base
+   {
+   // Inherited private/protected
+   // not public
+   };
+   
+   // Driver code
+   int main()
+   {
+      Derived d1;
+      
+      // Implicit type cast allowed
+      Base* b1 = (Base*)(&d1);
+      
+      // static_cast not allowed
+      Base* b2 = static_cast<Base*>(&d1);
+      return 0;
+   }
+
+
+Compile-time Error: 
+
+.. code-block:: console 
+
+   [Error] 'Base' is an inaccessible base of 'Derived'
+
+The above code will not compile even if you inherit it as protected.
+
+so to use static_cast in case of inheritance, the base class must be accessible, non virtual and unambiguous.
+
+
+
+4. static_cast to Cast ‘to and from’ Void Pointer
+--------------------------------------------------
+
+
+static_cast operator allows casting from any pointer type to void pointer and vice versa.
+
+
+.. code-block:: c
+
+   // C++ program to demonstrate
+   // static_cast to cast 'to and
+   // from' the void pointer
+   #include <iostream>
+   using namespace std;
+   
+   // Driver code
+   int main()
+   {
+      int i = 10;
+      void* v = static_cast<void*>(&i);
+      int* ip = static_cast<int*>(v);
+      cout << *ip;
+      return 0;
+   }
+
+Output:
+
+.. code-block:: console 
+
+   10
+
+
+

@@ -1,0 +1,137 @@
+=============
+Docker
+=============
+
+.. contents:: Table of Contents
+
+
+
+Setting up Docker Hub mirror
+============================
+
+.. code-block:: console
+
+   sudo tee /etc/docker/daemon.json <<-'EOF'
+   {
+       "registry-mirrors": [
+           "https://docker.m.daocloud.io",
+           "https://dockerproxy.com",
+           "https://docker.mirrors.ustc.edu.cn",
+           "https://docker.nju.edu.cn"
+       ]
+   }
+   EOF
+   # Restart Docker service
+   sudo systemctl daemon-reload
+   sudo systemctl restart docker		
+   
+
+Docker file 
+=====================
+
+.. code-block:: console 
+
+	hliu4@ala-lpggp2$cat Dockerfile
+	FROM dorowu/ubuntu-desktop-lxde-vnc:latest
+	
+	RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+	RUN apt-get -y update
+	RUN apt-get -y upgrade
+	RUN apt-get install -y apt-utils \
+	&& apt-get install -y  sudo \
+	&& apt-get install -y  m4 \
+	&& apt-get install -y  libncurses5 \
+	&& apt-get install -y  libncurses5-dev \
+	&& apt-get install -y  git \
+	&& apt-get install -y  git-lfs \
+	&& apt-get install -y  vim \
+	&& apt-get install -y  git-core \
+	&& apt-get install -y  pkg-config \
+	&& apt-get install -y  cutils \
+	&& apt-get install -y  gnupg \
+	&& apt-get install -y  flex \
+	&& apt-get install -y  bison \
+	&& apt-get install -y  build-essential \
+	&& apt-get install -y  zip \
+	&& apt-get install -y  curl \
+	&& apt-get install -y  zlib1g-dev \
+	&& apt-get install -y  gcc-multilib \
+	&& apt-get install -y  g++-multilib \
+	&& apt-get install -y  libc6-dev-i386 \
+	&& apt-get install -y  lib32ncurses5-dev \
+	&& apt-get install -y  x11proto-core-dev \
+	&& apt-get install -y  libx11-dev \
+	&& apt-get install -y  lib32z1-dev \
+	&& apt-get install -y  libgl1-mesa-dev \
+	&& apt-get install -y  libxml2-utils \
+	&& apt-get install -y  xsltproc \
+	&& apt-get install -y  unzip \
+	&& apt-get install -y  fontconfig \
+	&& apt-get install -y  iputils-ping \
+	&& apt-get install -y  python3-mako \
+	&& apt-get install -y  glslang-tools \
+	&& apt-get install -y  python3 \
+	&& apt-get install -y  python3-pip \
+	&& apt-get install -y  python3-setuptools \
+	&& apt-get install -y  python3-wheel \
+	&& apt-get install -y  ninja-build \
+	&& apt-get install -y  bc \
+	&& apt-get install -y  coreutils \
+	&& apt-get install -y  dosfstools \
+	&& apt-get install -y  e2fsprogs \
+	&& apt-get install -y  fdisk \
+	&& apt-get install -y  kpartx \
+	&& apt-get install -y  mtools \
+	&& apt-get install -y  android-sdk-libsparse-utils
+	
+	RUN ln -s /usr/bin/python3 /usr/bin/python
+	RUN apt-get remove meson
+	RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+	RUN apt-get -y update
+	RUN apt-get install -y  python3-pip
+	RUN python3 -m pip install meson
+	RUN curl https://storage.googleapis.com/git-repo-downloads/repo > /usr/bin/repo ; chmod a+x /usr/bin/repo
+	RUN pip3 install mako jinja2 ply pyyaml
+	
+	
+
+Create docker from ala-lpdfs01
+===================================
+.. code-block:: console
+
+    #!/bin/bash
+
+    sudo docker run -i --privileged --name haitao-build -t -v \
+         /buildarea/raid0/haitao/docker-build:/buildarea1   \
+         -w "/buildarea1" ala-lpdfs01:5000/$1 /bin/bash
+
+Create docker ubuntu20:04
+==================================
+.. code-block:: console
+
+   docker run -i --privileged --name haitao-build -t \
+   -v /nobackup/hliu4/build-docker:/buildarea1 \
+   -w "/buildarea1" ubuntu:20.04 /bin/bash
+
+
+Start docker ubuntu20:04 
+==================================
+.. code-block:: console 
+
+   #!/bin/bash
+
+   a=`sudo docker container ls | awk '/haitao-build/{print $1}'`
+   sudo docker container exec -it $a /bin/bash
+
+Connect docker with ssh 
+=================================
+.. code-block:: console 
+
+   #!/bin/bash
+
+   a=`sudo docker container ls | awk '/haitao-build/{print $1}'`
+   sshcomd=`sudo docker container exec $a ifconfig eth0 | sed -n 's/^.* inet \(.*\) netmask.*$/ssh hliu4@\1/p'`
+
+   exec $sshcomd
+
+

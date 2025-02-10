@@ -1,0 +1,26 @@
+===========
+pop
+===========
+
+pop_front
+-----------------
+
+syntax
+
+.. code-block:: c++
+
+    void pop_front() { erase(begin()); }
+
+pop_back
+-----------------
+
+syntax
+
+.. code-block:: c++
+
+    void pop_back() { 
+         iterator __tmp = end();
+         erase(--__tmp);
+         }
+
+please refer to :doc:`erase`

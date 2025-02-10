@@ -1,0 +1,316 @@
+==============
+Traits
+==============
+
+
+
+1. Introduce the problem
+-----------------------------
+
+
+.. code-block:: cpp 
+
+   #include <iostream>
+   
+   using namespace std;
+   
+   
+   template <typename T>
+   T funcsum(const T* begin, const T* end)
+   {
+           T sum{};
+   
+           for(;;)
+           {
+                   sum += (*begin);
+                   if (begin == end)
+                           break;
+                   ++begin;
+           }
+           return sum;
+   }
+   
+   
+   int main(int argc, const char * argv[])
+   {
+           int myintarray1[] = {10,15,20};
+           int myintarray2[] = {1000000000,1500000000,2000000000};
+           char mychararray[] = "abc"; //97,98,99
+           cout << funcsum(&myintarray1[0],&myintarray1[2]) << endl;
+           cout << funcsum(&myintarray2[0],&myintarray2[2]) << endl;
+           cout << (int)(funcsum(&mychararray[0],&mychararray[2])) << endl;
+           return 0;
+   }
+
+Output: 
+
+
+.. code-block:: console 
+
+   45
+   205032704
+   38
+
+从结果中不难看到，只有第1行的结果是对的，第2行和第3行结果都不对
+
+
+*方案1*
+
+修改一下funcsum()函数模板，新引入一个类型模板参数U，用于指定结果类型
+
+.. code-block:: cpp
+
+   #include <iostream>
+
+   using namespace std;
+   
+   
+   template <typename U,typename T>
+   U funcsum(const T* begin, const T* end)
+   {
+           U sum{};
+   
+           for(;;)
+           {
+                   sum += (*begin);
+                   if (begin == end)
+                           break;
+                   ++begin;
+           }
+           return sum;
+   }
+   
+   
+   int main(int argc, const char * argv[])
+   {
+           int myintarray1[] = {10,15,20};
+           int myintarray2[] = {1000000000,1500000000,2000000000};
+           char mychararray[] = "abc"; //97,98,99
+           cout << funcsum<std::int64_t>(&myintarray1[0],&myintarray1[2]) << endl;
+           cout << funcsum<std::int64_t>(&myintarray2[0],&myintarray2[2]) << endl;
+           cout << (int)(funcsum<int>(&mychararray[0],&mychararray[2])) << endl;
+           return 0;
+   }
+
+
+output:
+
+.. code-block:: console 
+
+   45
+   4500000000
+   294
+
+
+
+
+   
+   
+   
+   
+*方案2*
+
+过写一个trait类模板来解决，这里要写的trait类模板就是一个固定萃取类模板
+
+
+.. code-block:: cpp
+
+   #include <iostream>
+   
+   using namespace std;
+   
+   template <typename T>
+   struct SumFixedTraits;
+   
+   template <>
+   struct SumFixedTraits<char>
+   {
+           using sumT = int;
+   };
+   
+   template<>
+   struct SumFixedTraits<int>
+   {
+           using sumT = std::int64_t;
+   };
+   
+   template<typename T>
+   auto funcsum(const T* begin, const T* end)
+   {
+           using sumT = typename SumFixedTraits<T>::sumT;
+   
+           sumT sum{};
+   
+           for (;;)
+           {
+                   sum += (*begin);
+                   if (begin == end)
+                           break;
+                   ++begin;
+           }
+   
+           return sum;
+   }
+   
+   
+   int main(int argc, const char* argv[])
+   {
+           int myintarray1[] = {10,15,20};
+           int myintarray2[] ={1000000000,1500000000,2000000000}; //10亿，15亿，20亿
+           char mychararray[] = "abc"; //97,98,99
+           cout << funcsum(&myintarray1[0],&myintarray1[2]) << endl;
+           cout << funcsum(&myintarray2[0],&myintarray2[2]) << endl;
+           cout << (int)(funcsum(&mychararray[0],&mychararray[2])) << endl;
+           return 0;
+   }
+   
+output:
+
+.. code-block:: console 
+
+   45
+   4500000000
+   294
+
+
+（1）当传入一个int类型（int类型数组myintarray1和myintarray2元素的类型），固定萃取类模板可以返回一个__int64类型（数组元素的和值类型）用来保存数组元素和值。
+
+（2）当传入一个char类型（char类型数组mychararray元素的类型），固定萃取类模板可以返回一个int类型（数组元素的和值类型）用来保存数组元素和值。
+
+
+2. iterator_traits
+-------------------------
+
+
+<stl_iterator_base_types.h>
+
+
+Example:
+
+
+.. code-block:: cpp 
+
+   #include <iostream>
+   #include <vector>
+   #include <list>
+   
+   using namespace std;
+   
+   void _display_category(output_iterator_tag mutag)
+   {
+           std::cout << "output_iterator_tag" << std::endl;
+   }
+   
+   void _display_category(input_iterator_tag mutag)
+   {
+           std::cout << "input_iterator_tag" << std::endl;
+   }
+   
+   void _display_category(forward_iterator_tag mutag)
+   {
+           std::cout << "forward_iterator_tag" << std::endl;
+   }
+   
+   void _display_category(bidirectional_iterator_tag mutag)
+   {
+           std::cout << "bidirectional_iterator_tag" << std::endl;
+   }
+   
+   void _display_category(random_access_iterator_tag mutag)
+   {
+           std::cout << "random_access_iterator_tag" << std::endl;
+   }
+   
+   template <typename T>
+   void display_category(T iter)
+   {
+           typename std::iterator_traits<T>::iterator_category cagy;
+           _display_category(cagy);
+   }
+   
+   int main(int argc, const char* argv[])
+   {
+           display_category(std::vector<int>::iterator());
+           display_category(std::list<int>::iterator());
+           return 0;
+   }
+
+Output: 
+
+.. code-block:: console
+
+   random_access_iterator_tag
+   bidirectional_iterator_tag
+
+vector容器对应的迭代器种类是random_access_iterator_tag，list容器对应的迭代器种类是bidirectional_iterator_tag。
+
+
+Defination
++++++++++++++++
+
+
+.. code-block:: cpp 
+
+   template<typename _Iterator>
+     struct __iterator_traits<_Iterator,
+         __void_t<typename _Iterator::iterator_category,
+           typename _Iterator::value_type,
+           typename _Iterator::difference_type,
+           typename _Iterator::pointer,
+           typename _Iterator::reference>>
+     {
+       typedef typename _Iterator::iterator_category iterator_category;
+       typedef typename _Iterator::value_type value_type;
+       typedef typename _Iterator::difference_type difference_type;
+       typedef typename _Iterator::pointer pointer;
+       typedef typename _Iterator::reference reference;
+     };
+
+
+   template<typename _Iterator>
+     struct iterator_traits
+     : public __iterator_traits<_Iterator> { };
+
+   template<typename _Iter>
+     inline constexpr
+     typename iterator_traits<_Iter>::iterator_category
+     __iterator_category(const _Iter&)
+     { return typename iterator_traits<_Iter>::iterator_category(); }
+ 
+
+
+List iterator_category
++++++++++++++++++++++++++++
+
+.. code-block:: cpp
+
+   template<typename _Tp>
+       struct _List_iterator
+       {
+           typedef std::bidirectional_iterator_tag    iterator_category;
+       }
+
+
+
+.. code-block:: cpp 
+    
+    template<typename _Tp>
+    struct iterator_traits<_Tp*>
+    {
+      using iterator_concept  = contiguous_iterator_tag;
+      using iterator_category = random_access_iterator_tag;
+      using value_type        = remove_cv_t<_Tp>;
+      using difference_type   = ptrdiff_t;
+      using pointer           = _Tp*;
+      using reference         = _Tp&;
+    };
+    template<typename _Iter>
+      __attribute__((__always_inline__))
+      inline _GLIBCXX_CONSTEXPR
+      typename iterator_traits<_Iter>::iterator_category
+      __iterator_category(const _Iter&)
+      { return typename iterator_traits<_Iter>::iterator_category(); }
+
+
+利用using定义类型别名
+

@@ -1,0 +1,544 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Qemu: Virtio_net Device &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Vhost-user Protocol" href="vhost-user.html" />
+    <link rel="prev" title="Qemu: Virtio_bus" href="0009.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="qemu-virtio-net-device">
+<span id="id1"></span><h1><a class="toc-backref" href="#id6" role="doc-backlink">Qemu: Virtio_net Device</a><a class="headerlink" href="#qemu-virtio-net-device" title="Permalink to this heading">¶</a></h1>
+<nav class="contents" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#qemu-virtio-net-device" id="id6">Qemu: Virtio_net Device</a></p>
+<ul>
+<li><p><a class="reference internal" href="#realize-virtio-net-device" id="id7">Realize virtio_net_device</a></p>
+<ul>
+<li><p><a class="reference internal" href="#virtio-device-realize" id="id8">virtio_device_realize</a></p></li>
+<li><p><a class="reference internal" href="#virtio-net-device-realize" id="id9">virtio_net_device_realize</a></p></li>
+<li><p><a class="reference internal" href="#virtio-init" id="id10">virtio_init</a></p></li>
+<li><p><a class="reference internal" href="#virtio-add-queue" id="id11">virtio_add_queue</a></p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+<img alt="../../_images/virtio-pci-virtio-net-device.jpg" src="../../_images/virtio-pci-virtio-net-device.jpg" />
+<section id="realize-virtio-net-device">
+<h2><a class="toc-backref" href="#id7" role="doc-backlink">Realize virtio_net_device</a><a class="headerlink" href="#realize-virtio-net-device" title="Permalink to this heading">¶</a></h2>
+<p>virtio_net_pci_realize会通过object_property_set_bool调用virtio_net_device的realize函数</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">virtio_net_pci_realize</span><span class="p">(</span><span class="n">VirtIOPCIProxy</span><span class="w"> </span><span class="o">*</span><span class="n">vpci_dev</span><span class="p">,</span><span class="w"> </span><span class="n">Error</span><span class="w"> </span><span class="o">**</span><span class="n">errp</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">DeviceState</span><span class="w"> </span><span class="o">*</span><span class="n">qdev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DEVICE</span><span class="p">(</span><span class="n">vpci_dev</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">VirtIONetPCI</span><span class="w"> </span><span class="o">*</span><span class="n">dev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">VIRTIO_NET_PCI</span><span class="p">(</span><span class="n">vpci_dev</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">DeviceState</span><span class="w"> </span><span class="o">*</span><span class="n">vdev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DEVICE</span><span class="p">(</span><span class="o">&amp;</span><span class="n">dev</span><span class="o">-&gt;</span><span class="n">vdev</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">virtio_net_set_netclient_name</span><span class="p">(</span><span class="o">&amp;</span><span class="n">dev</span><span class="o">-&gt;</span><span class="n">vdev</span><span class="p">,</span><span class="w"> </span><span class="n">qdev</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">,</span><span class="w"></span>
+<span class="w">                                  </span><span class="n">object_get_typename</span><span class="p">(</span><span class="n">OBJECT</span><span class="p">(</span><span class="n">qdev</span><span class="p">)));</span><span class="w"></span>
+<span class="w">    </span><span class="n">qdev_set_parent_bus</span><span class="p">(</span><span class="n">vdev</span><span class="p">,</span><span class="w"> </span><span class="n">BUS</span><span class="p">(</span><span class="o">&amp;</span><span class="n">vpci_dev</span><span class="o">-&gt;</span><span class="n">bus</span><span class="p">));</span><span class="w"></span>
+<span class="w">    </span><span class="n">object_property_set_bool</span><span class="p">(</span><span class="n">OBJECT</span><span class="p">(</span><span class="n">vdev</span><span class="p">),</span><span class="w"> </span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;realized&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">errp</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(gdb)</span> <span class="go">s</span>
+<span class="go">object_property_set_bool (obj=0x55555729b2b0, value=true, name=0x555555cac945 &quot;realized&quot;, errp=0x7fffffffe3d0) at /usr/src/debug/qemu/4.1.0-r0/qemu-4.1.0/qom/object.c:1336</span>
+<span class="go">1336 /usr/src/debug/qemu/4.1.0-r0/qemu-4.1.0/qom/object.c: No such file or directory.</span>
+<span class="gp gp-VirtualEnv">(gdb)</span> <span class="go">p *obj</span>
+<span class="gp">$</span><span class="nv">91</span> <span class="o">=</span> <span class="o">{</span><span class="nv">class</span> <span class="o">=</span> 0x5555563d1790, <span class="nv">free</span> <span class="o">=</span> 0x0, <span class="nv">properties</span> <span class="o">=</span> 0x555557267c60, <span class="nv">ref</span> <span class="o">=</span> <span class="m">2</span>, <span class="nv">parent</span> <span class="o">=</span> 0x555557293140<span class="o">}</span>
+<span class="gp gp-VirtualEnv">(gdb)</span> <span class="go">p *obj-&gt;class</span>
+<span class="gp">$</span><span class="nv">92</span> <span class="o">=</span> <span class="o">{</span><span class="nb">type</span> <span class="o">=</span> 0x5555563105a0, <span class="nv">interfaces</span> <span class="o">=</span> 0x0, <span class="nv">object_cast_cache</span> <span class="o">=</span> <span class="o">{</span>0x0, 0x0, 0x555555c70165 <span class="s2">&quot;device&quot;</span>, 0x555555c6d290 <span class="s2">&quot;virtio-net-device&quot;</span><span class="o">}</span>, <span class="nv">class_cast_cache</span> <span class="o">=</span> <span class="o">{</span>0x0, 0x0,
+<span class="go">    0x555555c70165 &quot;device&quot;, 0x555555c66dd3 &quot;virtio-device&quot;}, unparent = 0x55555599ae70 &lt;device_unparent&gt;, properties =</span>
+
+
+<span class="go"> (gdb) p *(struct TypeImpl*)0x5555563105a0</span>
+<span class="gp"> $</span><span class="nv">93</span> <span class="o">=</span> <span class="o">{</span><span class="nv">name</span> <span class="o">=</span> 0x555556310720 <span class="s2">&quot;virtio-net-device&quot;</span>, <span class="nv">class_size</span> <span class="o">=</span> <span class="m">320</span>, <span class="nv">instance_size</span> <span class="o">=</span> <span class="m">8960</span>, <span class="nv">class_init</span> <span class="o">=</span> 0x55555587ee50 &lt;virtio_net_class_init&gt;, <span class="nv">class_base_init</span> <span class="o">=</span> 0x0,
+<span class="go"> class_data = 0x0, instance_init = 0x55555587faf0 &lt;virtio_net_instance_init&gt;, instance_post_init = 0x0, instance_finalize = 0x0, abstract = false,</span>
+<span class="go"> parent = 0x555556310740 &quot;virtio-device&quot;, parent_type = 0x555556311a30, class = 0x5555563d1790, num_interfaces = 0, interfaces = {{typename = 0x0} &lt;repeats 32 times&gt;}}</span>
+<span class="go"> (gdb)</span>
+</pre></div>
+</div>
+<p>virtio_net_pci_realize 函数首先通过VIRTIO_NET_PCI将VirtIOPCIProxy转换为VirtIONetPCI</p>
+<p>相当于从一个父类转换为子类。</p>
+<p>接着通过DEVICE获取设备部分DeviceState</p>
+<p>设置virtio net pci设备的总线为VirtIOPCIProxy设备中的bus成员，也就是</p>
+<p>将此设备挂载到virtio的总线上</p>
+<p>调用object_property_set_bool将设备realized，这会导致virtio_device_realize的执行</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">Thread</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="s">&quot;qemu-system-x86&quot;</span><span class="w"> </span><span class="n">hit</span><span class="w"> </span><span class="n">Breakpoint</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">virtio_net_device_realize</span><span class="w"> </span><span class="p">(</span><span class="n">dev</span><span class="o">=</span><span class="mh">0x55555729b2b0</span><span class="p">,</span><span class="w"> </span><span class="n">errp</span><span class="o">=</span><span class="mh">0x7fffffffe1f0</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="n">at</span><span class="w"> </span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">debug</span><span class="o">/</span><span class="n">qemu</span><span class="o">/</span><span class="mf">4.1.0</span><span class="o">-</span><span class="n">r0</span><span class="o">/</span><span class="n">qemu</span><span class="mf">-4.1.0</span><span class="o">/</span><span class="n">hw</span><span class="o">/</span><span class="n">net</span><span class="o">/</span><span class="n">virtio</span><span class="o">-</span><span class="n">net</span><span class="p">.</span><span class="n">c</span><span class="o">:</span><span class="mi">2658</span><span class="w"></span>
+<span class="mi">2658</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">debug</span><span class="o">/</span><span class="n">qemu</span><span class="o">/</span><span class="mf">4.1.0</span><span class="o">-</span><span class="n">r0</span><span class="o">/</span><span class="n">qemu</span><span class="mf">-4.1.0</span><span class="o">/</span><span class="n">hw</span><span class="o">/</span><span class="n">net</span><span class="o">/</span><span class="n">virtio</span><span class="o">-</span><span class="n">net</span><span class="p">.</span><span class="n">c</span><span class="w"></span>
+<span class="w"> </span><span class="n">bt</span><span class="w"></span>
+<span class="mi">0</span><span class="w">  </span><span class="n">virtio_net_device_realize</span><span class="w"> </span><span class="p">(</span><span class="n">dev</span><span class="o">=</span><span class="mh">0x55555729b2b0</span><span class="p">,</span><span class="w"> </span><span class="n">errp</span><span class="o">=</span><span class="mh">0x7fffffffe1f0</span><span class="p">)</span><span class="w"> </span><span class="n">at</span><span class="w"> </span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">debug</span><span class="o">/</span><span class="n">qemu</span><span class="o">/</span><span class="mf">4.1.0</span><span class="o">-</span><span class="n">r0</span><span class="o">/</span><span class="n">qemu</span><span class="mf">-4.1.0</span><span class="o">/</span><span class="n">hw</span><span class="o">/</span><span class="n">net</span><span class="o">/</span><span class="n">virtio</span><span class="o">-</span><span class="n">net</span><span class="p">.</span><span class="n">c</span><span class="o">:</span><span class="mi">2658</span><span class="w"></span>
+<span class="mi">1</span><span class="w">  </span><span class="mh">0x0000555555896628</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="n">virtio_device_realize</span><span class="w"> </span><span class="p">(</span><span class="n">dev</span><span class="o">=</span><span class="mh">0x55555729b2b0</span><span class="p">,</span><span class="w"> </span><span class="n">errp</span><span class="o">=</span><span class="mh">0x7fffffffe250</span><span class="p">)</span><span class="w"> </span><span class="n">at</span><span class="w"> </span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">debug</span><span class="o">/</span><span class="n">qemu</span><span class="o">/</span><span class="mf">4.1.0</span><span class="o">-</span><span class="n">r0</span><span class="o">/</span><span class="n">qemu</span><span class="mf">-4.1.0</span><span class="o">/</span><span class="n">hw</span><span class="o">/</span><span class="n">virtio</span><span class="o">/</span><span class="n">virtio</span><span class="p">.</span><span class="n">c</span><span class="o">:</span><span class="mi">2613</span><span class="w"></span>
+<span class="mi">2</span><span class="w">  </span><span class="mh">0x000055555599c655</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="n">device_set_realized</span><span class="w"> </span><span class="p">(</span><span class="n">obj</span><span class="o">=&lt;</span><span class="n">optimized</span><span class="w"> </span><span class="n">out</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="o">=&lt;</span><span class="n">optimized</span><span class="w"> </span><span class="n">out</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">errp</span><span class="o">=</span><span class="mh">0x7fffffffe3d0</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="n">at</span><span class="w"> </span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">debug</span><span class="o">/</span><span class="n">qemu</span><span class="o">/</span><span class="mf">4.1.0</span><span class="o">-</span><span class="n">r0</span><span class="o">/</span><span class="n">qemu</span><span class="mf">-4.1.0</span><span class="o">/</span><span class="n">hw</span><span class="o">/</span><span class="n">core</span><span class="o">/</span><span class="n">qdev</span><span class="p">.</span><span class="n">c</span><span class="o">:</span><span class="mi">834</span><span class="w"></span>
+<span class="mi">3</span><span class="w">  </span><span class="mh">0x0000555555ad4dd7</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="n">property_set_bool</span><span class="w"> </span><span class="p">(</span><span class="n">obj</span><span class="o">=</span><span class="mh">0x55555729b2b0</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="o">=&lt;</span><span class="n">optimized</span><span class="w"> </span><span class="n">out</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="o">=&lt;</span><span class="n">optimized</span><span class="w"> </span><span class="n">out</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">opaque</span><span class="o">=</span><span class="mh">0x55555729e980</span><span class="p">,</span><span class="w"> </span><span class="n">errp</span><span class="o">=</span><span class="mh">0x7fffffffe3d0</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="n">at</span><span class="w"> </span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">debug</span><span class="o">/</span><span class="n">qemu</span><span class="o">/</span><span class="mf">4.1.0</span><span class="o">-</span><span class="n">r0</span><span class="o">/</span><span class="n">qemu</span><span class="mf">-4.1.0</span><span class="o">/</span><span class="n">qom</span><span class="o">/</span><span class="n">object</span><span class="p">.</span><span class="n">c</span><span class="o">:</span><span class="mi">2079</span><span class="w"></span>
+<span class="mi">4</span><span class="w">  </span><span class="mh">0x0000555555ad9270</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="n">object_property_set_qobject</span><span class="w"> </span><span class="p">(</span><span class="n">obj</span><span class="o">=</span><span class="mh">0x55555729b2b0</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="o">=&lt;</span><span class="n">optimized</span><span class="w"> </span><span class="n">out</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="o">=</span><span class="mh">0x555555cac945</span><span class="w"> </span><span class="s">&quot;realized&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">errp</span><span class="o">=</span><span class="mh">0x7fffffffe3d0</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="n">at</span><span class="w"> </span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">debug</span><span class="o">/</span><span class="n">qemu</span><span class="o">/</span><span class="mf">4.1.0</span><span class="o">-</span><span class="n">r0</span><span class="o">/</span><span class="n">qemu</span><span class="mf">-4.1.0</span><span class="o">/</span><span class="n">qom</span><span class="o">/</span><span class="n">qom</span><span class="o">-</span><span class="n">qobject</span><span class="p">.</span><span class="n">c</span><span class="o">:</span><span class="mi">26</span><span class="w"></span>
+<span class="mi">5</span><span class="w">  </span><span class="mh">0x0000555555ad6b56</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="n">object_property_set_bool</span><span class="w"> </span><span class="p">(</span><span class="n">obj</span><span class="o">=</span><span class="mh">0x55555729b2b0</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="o">=&lt;</span><span class="n">optimized</span><span class="w"> </span><span class="n">out</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="o">=</span><span class="mh">0x555555cac945</span><span class="w"> </span><span class="s">&quot;realized&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">errp</span><span class="o">=</span><span class="mh">0x7fffffffe3d0</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="n">at</span><span class="w"> </span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">debug</span><span class="o">/</span><span class="n">qemu</span><span class="o">/</span><span class="mf">4.1.0</span><span class="o">-</span><span class="n">r0</span><span class="o">/</span><span class="n">qemu</span><span class="mf">-4.1.0</span><span class="o">/</span><span class="n">qom</span><span class="o">/</span><span class="n">object</span><span class="p">.</span><span class="n">c</span><span class="o">:</span><span class="mi">1337</span><span class="w"></span>
+</pre></div>
+</div>
+<section id="virtio-device-realize">
+<span id="id2"></span><h3><a class="toc-backref" href="#id8" role="doc-backlink">virtio_device_realize</a><a class="headerlink" href="#virtio-device-realize" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">virtio_device_realize</span><span class="p">(</span><span class="n">DeviceState</span><span class="w"> </span><span class="o">*</span><span class="n">dev</span><span class="p">,</span><span class="w"> </span><span class="n">Error</span><span class="w"> </span><span class="o">**</span><span class="n">errp</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">VirtIODevice</span><span class="w"> </span><span class="o">*</span><span class="n">vdev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">VIRTIO_DEVICE</span><span class="p">(</span><span class="n">dev</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">VirtioDeviceClass</span><span class="w"> </span><span class="o">*</span><span class="n">vdc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">VIRTIO_DEVICE_GET_CLASS</span><span class="p">(</span><span class="n">dev</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">Error</span><span class="w"> </span><span class="o">*</span><span class="n">err</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="cm">/* Devices should either use vmsd or the load/save methods */</span><span class="w"></span>
+<span class="w">    </span><span class="n">assert</span><span class="p">(</span><span class="o">!</span><span class="n">vdc</span><span class="o">-&gt;</span><span class="n">vmsd</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">!</span><span class="n">vdc</span><span class="o">-&gt;</span><span class="n">load</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">vdc</span><span class="o">-&gt;</span><span class="n">realize</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">vdc</span><span class="o">-&gt;</span><span class="n">realize</span><span class="p">(</span><span class="n">dev</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">err</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">error_propagate</span><span class="p">(</span><span class="n">errp</span><span class="p">,</span><span class="w"> </span><span class="n">err</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="k">return</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">virtio_bus_device_plugged</span><span class="p">(</span><span class="n">vdev</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">err</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">error_propagate</span><span class="p">(</span><span class="n">errp</span><span class="p">,</span><span class="w"> </span><span class="n">err</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">vdc</span><span class="o">-&gt;</span><span class="n">unrealize</span><span class="p">(</span><span class="n">dev</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">listener</span><span class="p">.</span><span class="n">commit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">virtio_memory_listener_commit</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">memory_listener_register</span><span class="p">(</span><span class="o">&amp;</span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">listener</span><span class="p">,</span><span class="w"> </span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">dma_as</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>vdc-&gt;realize 在这里是 <a class="reference internal" href="#virtio-net-device-realize"><span class="std std-ref">virtio_net_device_realize</span></a> (hw/net/virtio-net.c)</p>
+<p><a class="reference internal" href="0009.html#virtio-bus-device-plugged"><span class="std std-ref">virtio_bus_device_plugged</span></a> 主要职责就是将virtio设备挂载到virtio总线上</p>
+</section>
+<section id="virtio-net-device-realize">
+<span id="id3"></span><h3><a class="toc-backref" href="#id9" role="doc-backlink">virtio_net_device_realize</a><a class="headerlink" href="#virtio-net-device-realize" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">virtio_net_device_realize</span><span class="p">(</span><span class="n">DeviceState</span><span class="w"> </span><span class="o">*</span><span class="n">dev</span><span class="p">,</span><span class="w"> </span><span class="n">Error</span><span class="w"> </span><span class="o">**</span><span class="n">errp</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">VirtIODevice</span><span class="w"> </span><span class="o">*</span><span class="n">vdev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">VIRTIO_DEVICE</span><span class="p">(</span><span class="n">dev</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">VirtIONet</span><span class="w"> </span><span class="o">*</span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">VIRTIO_NET</span><span class="p">(</span><span class="n">dev</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">NetClientState</span><span class="w"> </span><span class="o">*</span><span class="n">nc</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">net_conf</span><span class="p">.</span><span class="n">mtu</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">host_features</span><span class="w"> </span><span class="o">|=</span><span class="w"> </span><span class="p">(</span><span class="mi">1ULL</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">VIRTIO_NET_F_MTU</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">net_conf</span><span class="p">.</span><span class="n">duplex_str</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">strncmp</span><span class="p">(</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">net_conf</span><span class="p">.</span><span class="n">duplex_str</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;half&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">net_conf</span><span class="p">.</span><span class="n">duplex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DUPLEX_HALF</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">strncmp</span><span class="p">(</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">net_conf</span><span class="p">.</span><span class="n">duplex_str</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;full&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">net_conf</span><span class="p">.</span><span class="n">duplex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DUPLEX_FULL</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">error_setg</span><span class="p">(</span><span class="n">errp</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;&#39;duplex&#39; must be &#39;half&#39; or &#39;full&#39;&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">host_features</span><span class="w"> </span><span class="o">|=</span><span class="w"> </span><span class="p">(</span><span class="mi">1ULL</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">VIRTIO_NET_F_SPEED_DUPLEX</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">net_conf</span><span class="p">.</span><span class="n">duplex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DUPLEX_UNKNOWN</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">net_conf</span><span class="p">.</span><span class="n">speed</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">SPEED_UNKNOWN</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">error_setg</span><span class="p">(</span><span class="n">errp</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;&#39;speed&#39; must be between 0 and INT_MAX&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">net_conf</span><span class="p">.</span><span class="n">speed</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">host_features</span><span class="w"> </span><span class="o">|=</span><span class="w"> </span><span class="p">(</span><span class="mi">1ULL</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">VIRTIO_NET_F_SPEED_DUPLEX</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">virtio_net_set_config_size</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">host_features</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">virtio_init</span><span class="p">(</span><span class="n">vdev</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;virtio-net&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">VIRTIO_ID_NET</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">config_size</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="cm">/*</span>
+<span class="cm">     * We set a lower limit on RX queue size to what it always was.</span>
+<span class="cm">     * Guests that want a smaller ring can always resize it without</span>
+<span class="cm">     * help from us (using virtio 1 and up).</span>
+<span class="cm">     */</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">net_conf</span><span class="p">.</span><span class="n">rx_queue_size</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">VIRTIO_NET_RX_QUEUE_MIN_SIZE</span><span class="w"> </span><span class="o">||</span><span class="w"></span>
+<span class="w">        </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">net_conf</span><span class="p">.</span><span class="n">rx_queue_size</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">VIRTQUEUE_MAX_SIZE</span><span class="w"> </span><span class="o">||</span><span class="w"></span>
+<span class="w">        </span><span class="o">!</span><span class="n">is_power_of_2</span><span class="p">(</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">net_conf</span><span class="p">.</span><span class="n">rx_queue_size</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">error_setg</span><span class="p">(</span><span class="n">errp</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Invalid rx_queue_size (= %&quot;</span><span class="w"> </span><span class="n">PRIu16</span><span class="w"> </span><span class="s">&quot;), &quot;</span><span class="w"></span>
+<span class="w">                   </span><span class="s">&quot;must be a power of 2 between %d and %d.&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                   </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">net_conf</span><span class="p">.</span><span class="n">rx_queue_size</span><span class="p">,</span><span class="w"> </span><span class="n">VIRTIO_NET_RX_QUEUE_MIN_SIZE</span><span class="p">,</span><span class="w"></span>
+<span class="w">                   </span><span class="n">VIRTQUEUE_MAX_SIZE</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">virtio_cleanup</span><span class="p">(</span><span class="n">vdev</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">net_conf</span><span class="p">.</span><span class="n">tx_queue_size</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">VIRTIO_NET_TX_QUEUE_MIN_SIZE</span><span class="w"> </span><span class="o">||</span><span class="w"></span>
+<span class="w">        </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">net_conf</span><span class="p">.</span><span class="n">tx_queue_size</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">VIRTQUEUE_MAX_SIZE</span><span class="w"> </span><span class="o">||</span><span class="w"></span>
+<span class="w">        </span><span class="o">!</span><span class="n">is_power_of_2</span><span class="p">(</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">net_conf</span><span class="p">.</span><span class="n">tx_queue_size</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">error_setg</span><span class="p">(</span><span class="n">errp</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Invalid tx_queue_size (= %&quot;</span><span class="w"> </span><span class="n">PRIu16</span><span class="w"> </span><span class="s">&quot;), &quot;</span><span class="w"></span>
+<span class="w">                   </span><span class="s">&quot;must be a power of 2 between %d and %d&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                   </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">net_conf</span><span class="p">.</span><span class="n">tx_queue_size</span><span class="p">,</span><span class="w"> </span><span class="n">VIRTIO_NET_TX_QUEUE_MIN_SIZE</span><span class="p">,</span><span class="w"></span>
+<span class="w">                   </span><span class="n">VIRTQUEUE_MAX_SIZE</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">virtio_cleanup</span><span class="p">(</span><span class="n">vdev</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">max_queues</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MAX</span><span class="p">(</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">nic_conf</span><span class="p">.</span><span class="n">peers</span><span class="p">.</span><span class="n">queues</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">max_queues</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">VIRTIO_QUEUE_MAX</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">error_setg</span><span class="p">(</span><span class="n">errp</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Invalid number of queues (= %&quot;</span><span class="w"> </span><span class="n">PRIu32</span><span class="w"> </span><span class="s">&quot;), &quot;</span><span class="w"></span>
+<span class="w">                   </span><span class="s">&quot;must be a positive integer less than %d.&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                   </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">max_queues</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">VIRTIO_QUEUE_MAX</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">virtio_cleanup</span><span class="p">(</span><span class="n">vdev</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">vqs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">g_malloc0</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">VirtIONetQueue</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">max_queues</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">curr_queues</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">tx_timeout</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">net_conf</span><span class="p">.</span><span class="n">txtimer</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">net_conf</span><span class="p">.</span><span class="n">tx</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">strcmp</span><span class="p">(</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">net_conf</span><span class="p">.</span><span class="n">tx</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;timer&quot;</span><span class="p">)</span><span class="w"></span>
+<span class="w">                       </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">strcmp</span><span class="p">(</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">net_conf</span><span class="p">.</span><span class="n">tx</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;bh&quot;</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">warn_report</span><span class="p">(</span><span class="s">&quot;virtio-net: &quot;</span><span class="w"></span>
+<span class="w">                    </span><span class="s">&quot;Unknown option tx=%s, valid options: </span><span class="se">\&quot;</span><span class="s">timer</span><span class="se">\&quot;</span><span class="s"> </span><span class="se">\&quot;</span><span class="s">bh</span><span class="se">\&quot;</span><span class="s">&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">net_conf</span><span class="p">.</span><span class="n">tx</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">error_printf</span><span class="p">(</span><span class="s">&quot;Defaulting to </span><span class="se">\&quot;</span><span class="s">bh</span><span class="se">\&quot;</span><span class="s">&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">net_conf</span><span class="p">.</span><span class="n">tx_queue_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MIN</span><span class="p">(</span><span class="n">virtio_net_max_tx_queue_size</span><span class="p">(</span><span class="n">n</span><span class="p">),</span><span class="w"></span>
+<span class="w">                                    </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">net_conf</span><span class="p">.</span><span class="n">tx_queue_size</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">max_queues</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">virtio_net_add_queue</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">ctrl_vq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">virtio_add_queue</span><span class="p">(</span><span class="n">vdev</span><span class="p">,</span><span class="w"> </span><span class="mi">64</span><span class="p">,</span><span class="w"> </span><span class="n">virtio_net_handle_ctrl</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">qemu_macaddr_default_if_unset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">nic_conf</span><span class="p">.</span><span class="n">macaddr</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">memcpy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">mac</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="o">&amp;</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">nic_conf</span><span class="p">.</span><span class="n">macaddr</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">mac</span><span class="p">));</span><span class="w"></span>
+<span class="w">    </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">VIRTIO_NET_S_LINK_UP</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">qemu_announce_timer_reset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">announce_timer</span><span class="p">,</span><span class="w"> </span><span class="n">migrate_announce_params</span><span class="p">(),</span><span class="w"></span>
+<span class="w">                              </span><span class="n">QEMU_CLOCK_VIRTUAL</span><span class="p">,</span><span class="w"></span>
+<span class="w">                              </span><span class="n">virtio_net_announce_timer</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">announce_timer</span><span class="p">.</span><span class="n">round</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">            </span><span class="mi">2752</span><span class="w">     </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">netclient_type</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="cm">/*</span>
+<span class="cm">         * Happen when virtio_net_set_netclient_name has been called.</span>
+<span class="cm">         */</span><span class="w"></span>
+<span class="w">        </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">nic</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qemu_new_nic</span><span class="p">(</span><span class="o">&amp;</span><span class="n">net_virtio_info</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">nic_conf</span><span class="p">,</span><span class="w"></span>
+<span class="w">                              </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">netclient_type</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">netclient_name</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">nic</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qemu_new_nic</span><span class="p">(</span><span class="o">&amp;</span><span class="n">net_virtio_info</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">nic_conf</span><span class="p">,</span><span class="w"></span>
+<span class="w">                              </span><span class="n">object_get_typename</span><span class="p">(</span><span class="n">OBJECT</span><span class="p">(</span><span class="n">dev</span><span class="p">)),</span><span class="w"> </span><span class="n">dev</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">peer_test_vnet_hdr</span><span class="p">(</span><span class="n">n</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">peer_has_vnet_hdr</span><span class="p">(</span><span class="n">n</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">max_queues</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">qemu_using_vnet_hdr</span><span class="p">(</span><span class="n">qemu_get_subqueue</span><span class="p">(</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">nic</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">peer</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">host_hdr_len</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">virtio_net_hdr</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">host_hdr_len</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">qemu_format_nic_info_str</span><span class="p">(</span><span class="n">qemu_get_queue</span><span class="p">(</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">nic</span><span class="p">),</span><span class="w"> </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">nic_conf</span><span class="p">.</span><span class="n">macaddr</span><span class="p">.</span><span class="n">a</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">vqs</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">tx_waiting</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">tx_burst</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">net_conf</span><span class="p">.</span><span class="n">txburst</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">virtio_net_set_mrg_rx_bufs</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">promisc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="cm">/* for compatibility */</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">mac_table</span><span class="p">.</span><span class="n">macs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">g_malloc0</span><span class="p">(</span><span class="n">MAC_TABLE_ENTRIES</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">ETH_ALEN</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">vlans</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">g_malloc0</span><span class="p">(</span><span class="n">MAX_VLAN</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="mi">3</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">nc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qemu_get_queue</span><span class="p">(</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">nic</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">nc</span><span class="o">-&gt;</span><span class="n">rxfilter_notify_enabled</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">QTAILQ_INIT</span><span class="p">(</span><span class="o">&amp;</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">rsc_chains</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">qdev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dev</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>首先调用 <a class="reference internal" href="#virtio-init"><span class="std std-ref">virtio_init</span></a> 初始化virito设备的公共部分，</p>
+<p><a class="reference internal" href="#virtio-init"><span class="std std-ref">virtio_init</span></a> 的工作就是初始化所有virtio设备的基类 TYPE_VIRTIO_DEVICE的实列 VirtIODevice 结构体</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">max_queues</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">     </span><span class="n">virtio_net_add_queue</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="p">);</span><span class="w"></span>
+<span class="w"> </span><span class="p">}</span><span class="w"></span>
+
+<span class="w"> </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">ctrl_vq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">virtio_add_queue</span><span class="p">(</span><span class="n">vdev</span><span class="p">,</span><span class="w"> </span><span class="mi">64</span><span class="p">,</span><span class="w"> </span><span class="n">virtio_net_handle_ctrl</span><span class="p">);</span><span class="w"></span>
+
+<span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">virtio_net_add_queue</span><span class="p">(</span><span class="n">VirtIONet</span><span class="w"> </span><span class="o">*</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">index</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">VirtIODevice</span><span class="w"> </span><span class="o">*</span><span class="n">vdev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">VIRTIO_DEVICE</span><span class="p">(</span><span class="n">n</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">vqs</span><span class="p">[</span><span class="n">index</span><span class="p">].</span><span class="n">rx_vq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">virtio_add_queue</span><span class="p">(</span><span class="n">vdev</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">net_conf</span><span class="p">.</span><span class="n">rx_queue_size</span><span class="p">,</span><span class="w"></span>
+<span class="w">                                           </span><span class="n">virtio_net_handle_rx</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">net_conf</span><span class="p">.</span><span class="n">tx</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">strcmp</span><span class="p">(</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">net_conf</span><span class="p">.</span><span class="n">tx</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;timer&quot;</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">vqs</span><span class="p">[</span><span class="n">index</span><span class="p">].</span><span class="n">tx_vq</span><span class="w"> </span><span class="o">=</span><span class="w"></span>
+<span class="w">            </span><span class="n">virtio_add_queue</span><span class="p">(</span><span class="n">vdev</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">net_conf</span><span class="p">.</span><span class="n">tx_queue_size</span><span class="p">,</span><span class="w"></span>
+<span class="w">                             </span><span class="n">virtio_net_handle_tx_timer</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">vqs</span><span class="p">[</span><span class="n">index</span><span class="p">].</span><span class="n">tx_timer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">timer_new_ns</span><span class="p">(</span><span class="n">QEMU_CLOCK_VIRTUAL</span><span class="p">,</span><span class="w"></span>
+<span class="w">                                              </span><span class="n">virtio_net_tx_timer</span><span class="p">,</span><span class="w"></span>
+<span class="w">                                              </span><span class="o">&amp;</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">vqs</span><span class="p">[</span><span class="n">index</span><span class="p">]);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">vqs</span><span class="p">[</span><span class="n">index</span><span class="p">].</span><span class="n">tx_vq</span><span class="w"> </span><span class="o">=</span><span class="w"></span>
+<span class="w">            </span><span class="n">virtio_add_queue</span><span class="p">(</span><span class="n">vdev</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">net_conf</span><span class="p">.</span><span class="n">tx_queue_size</span><span class="p">,</span><span class="w"></span>
+<span class="w">                             </span><span class="n">virtio_net_handle_tx_bh</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">vqs</span><span class="p">[</span><span class="n">index</span><span class="p">].</span><span class="n">tx_bh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qemu_bh_new</span><span class="p">(</span><span class="n">virtio_net_tx_bh</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">vqs</span><span class="p">[</span><span class="n">index</span><span class="p">]);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">vqs</span><span class="p">[</span><span class="n">index</span><span class="p">].</span><span class="n">tx_waiting</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">vqs</span><span class="p">[</span><span class="n">index</span><span class="p">].</span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">n</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>调用 <a class="reference internal" href="#virtio-add-queue"><span class="std std-ref">virtio_add_queue</span></a> 创建queue</p>
+<ol class="arabic simple">
+<li><p>收报文的队列rx_vq, 处理函数为virtio_net_handle_rx</p></li>
+<li><p>发报文的队列tx_vq, 处理函数为virtio_net_handle_tx_bh</p></li>
+<li><p>负责处理控制信息的队列 ctrl_vq, 处理函数为virtio_net_handle_ctrl</p></li>
+</ol>
+</section>
+<section id="virtio-init">
+<span id="id4"></span><h3><a class="toc-backref" href="#id10" role="doc-backlink">virtio_init</a><a class="headerlink" href="#virtio-init" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">virtio_init</span><span class="p">(</span><span class="n">VirtIODevice</span><span class="w"> </span><span class="o">*</span><span class="n">vdev</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">name</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">device_id</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">config_size</span><span class="p">)</span><span class="w"></span>
+<span class="w">   </span><span class="p">{</span><span class="w"></span>
+<span class="w">       </span><span class="n">BusState</span><span class="w"> </span><span class="o">*</span><span class="n">qbus</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qdev_get_parent_bus</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">(</span><span class="n">vdev</span><span class="p">));</span><span class="w"></span>
+<span class="w">       </span><span class="n">VirtioBusClass</span><span class="w"> </span><span class="o">*</span><span class="n">k</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">VIRTIO_BUS_GET_CLASS</span><span class="p">(</span><span class="n">qbus</span><span class="p">);</span><span class="w"></span>
+<span class="w">       </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="p">;</span><span class="w"></span>
+<span class="w">       </span><span class="kt">int</span><span class="w"> </span><span class="n">nvectors</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">k</span><span class="o">-&gt;</span><span class="n">query_nvectors</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">k</span><span class="o">-&gt;</span><span class="n">query_nvectors</span><span class="p">(</span><span class="n">qbus</span><span class="o">-&gt;</span><span class="n">parent</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">       </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">nvectors</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">           </span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">vector_queues</span><span class="w"> </span><span class="o">=</span><span class="w"></span>
+<span class="w">               </span><span class="n">g_malloc0</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="o">*</span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">vector_queues</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">nvectors</span><span class="p">);</span><span class="w"></span>
+<span class="w">       </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">       </span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">start_on_kick</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span><span class="w"></span>
+<span class="w">       </span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">started</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span><span class="w"></span>
+<span class="w">       </span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">device_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">device_id</span><span class="p">;</span><span class="w"></span>
+<span class="w">       </span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">       </span><span class="n">atomic_set</span><span class="p">(</span><span class="o">&amp;</span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">isr</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="w">       </span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">queue_sel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">       </span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">config_vector</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">VIRTIO_NO_VECTOR</span><span class="p">;</span><span class="w"></span>
+<span class="w">       </span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">vq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">g_malloc0</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">VirtQueue</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">VIRTIO_QUEUE_MAX</span><span class="p">);</span><span class="w"></span>
+<span class="w">       </span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">vm_running</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">runstate_is_running</span><span class="p">();</span><span class="w"></span>
+<span class="w">       </span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">broken</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span><span class="w"></span>
+<span class="w">       </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">VIRTIO_QUEUE_MAX</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">           </span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">vq</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">vector</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">VIRTIO_NO_VECTOR</span><span class="p">;</span><span class="w"></span>
+<span class="w">           </span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">vq</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">vdev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vdev</span><span class="p">;</span><span class="w"></span>
+<span class="w">           </span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">vq</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">queue_index</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i</span><span class="p">;</span><span class="w"></span>
+<span class="w">       </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">       </span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">name</span><span class="p">;</span><span class="w"></span>
+<span class="w">       </span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">config_len</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">config_size</span><span class="p">;</span><span class="w"></span>
+<span class="w">       </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">config_len</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">           </span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">g_malloc0</span><span class="p">(</span><span class="n">config_size</span><span class="p">);</span><span class="w"></span>
+<span class="w">       </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">           </span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="w">       </span><span class="p">}</span><span class="w"></span>
+<span class="w">       </span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">vmstate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qdev_add_vm_change_state_handler</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">(</span><span class="n">vdev</span><span class="p">),</span><span class="w"></span>
+<span class="w">               </span><span class="n">virtio_vmstate_change</span><span class="p">,</span><span class="w"> </span><span class="n">vdev</span><span class="p">);</span><span class="w"></span>
+<span class="w">       </span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">device_endian</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">virtio_default_endian</span><span class="p">();</span><span class="w"></span>
+<span class="w">       </span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">use_guest_notifier_mask</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">   </span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line">1.VIrtIODevice的vector_queues成员和config_vector成员与MSI中断相关</div>
+</div>
+<div class="line-block">
+<div class="line">2. Device_id, staus, name成员表示设备的id， 状态和名字</div>
+</div>
+<div class="line-block">
+<div class="line">3. isr 表示中断请求</div>
+</div>
+<div class="line-block">
+<div class="line">4.  queue_sel用来进行配置队列的时候选择队列</div>
+</div>
+<div class="line-block">
+<div class="line">5.  vq成员表示的是该设备的virtio_queuq, 这里分配VIRTIO_QUEUE_MAX 给queue，并进行了初始化</div>
+</div>
+<div class="line-block">
+<div class="line">6. config_len 表示当前virtio设备配置空间的长度</div>
+</div>
+<div class="line-block">
+<div class="line">7. config表示给当前virtio设备数据存放区域</div>
+</div>
+<div class="line-block">
+<div class="line">8. use_guest_notifier_mask成员与irqfd有关</div>
+</div>
+</section>
+<section id="virtio-add-queue">
+<span id="id5"></span><h3><a class="toc-backref" href="#id11" role="doc-backlink">virtio_add_queue</a><a class="headerlink" href="#virtio-add-queue" title="Permalink to this heading">¶</a></h3>
+<p>从VirtIODevice的vq数组中找到一个还没有被使用的queue,每个数组成员是一个VirtQueue的结构体，</p>
+<p>找到queue之后，对其结构体成员进行初始化</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">VirtQueue</span><span class="w"> </span><span class="o">*</span><span class="nf">virtio_add_queue</span><span class="p">(</span><span class="n">VirtIODevice</span><span class="w"> </span><span class="o">*</span><span class="n">vdev</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">queue_size</span><span class="p">,</span><span class="w"></span>
+<span class="w">                            </span><span class="n">VirtIOHandleOutput</span><span class="w"> </span><span class="n">handle_output</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">VIRTIO_QUEUE_MAX</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">vq</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">vring</span><span class="p">.</span><span class="n">num</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"></span>
+<span class="w">            </span><span class="k">break</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">VIRTIO_QUEUE_MAX</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">queue_size</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">VIRTQUEUE_MAX_SIZE</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="n">abort</span><span class="p">();</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">vq</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">vring</span><span class="p">.</span><span class="n">num</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">queue_size</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">vq</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">vring</span><span class="p">.</span><span class="n">num_default</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">queue_size</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">vq</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">vring</span><span class="p">.</span><span class="n">align</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">VIRTIO_PCI_VRING_ALIGN</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">vq</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">handle_output</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">handle_output</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">vq</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">handle_aio_output</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">vq</span><span class="p">[</span><span class="n">i</span><span class="p">];</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cplus/index.html">Cplus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Virtulization</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../qemu/index.html">Qemu</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Virtio</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="0001-pre.html">Virtio devices and drivers overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0001.html">Introduction to virtio-networking and vhost-net</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0002.html">Deep dive into Virtio-networking and vhost-net</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0003.html">How vhost-user came into being: Virtio-networking and DPDK</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0004.html">A journey to the vhost-users realm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0005.html">Introduction to VirtIO</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0006.html">Qemu: Virtio-net Envrionment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0007.html">Qemu: Virtio_net_pci</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0009.html">Qemu: Virtio_bus</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Qemu: Virtio_net Device</a></li>
+<li class="toctree-l3"><a class="reference internal" href="vhost-user.html">Vhost-user Protocol</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../00001.html">Install Ret Hat 7 server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00002.html">Qemu ifup script</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00003.html">Random Mac address</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00004.html">Assign tap to VM Client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00005.html">Open vSwitch with Libvirt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00006.html">EAL: No free hugepages reported in hugepages-2048kB</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00007.html">Failed to connect socket /var/run/openvswitch/centos1_eth0: Permission denied</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00008.html">Establish OVP reference envrionment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00009.html">libvirt: Specify the kernel and rootfs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00010.html">WRLinux with wayland and weston</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00011.html">Enable the support console for VM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00012.html">Start Qemu with monitor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00013.html">Creating images from ISO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00014.html">Create image from Wrlinux image</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Virtulization</a><ul>
+  <li><a href="index.html">Virtio</a><ul>
+      <li>Previous: <a href="0009.html" title="previous chapter">Qemu: Virtio_bus</a></li>
+      <li>Next: <a href="vhost-user.html" title="next chapter">Vhost-user Protocol</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../../_sources/virt/virtio/0008.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

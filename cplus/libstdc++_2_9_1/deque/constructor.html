@@ -1,0 +1,246 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Constructor &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Base" href="base.html" />
+    <link rel="prev" title="Iterator" href="iterator.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="constructor">
+<h1>Constructor<a class="headerlink" href="#constructor" title="Permalink to this heading">¶</a></h1>
+<section id="default-constructor">
+<h2>Default constructor<a class="headerlink" href="#default-constructor" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">explicit</span><span class="w"> </span><span class="n">deque</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">allocator_type</span><span class="o">&amp;</span><span class="w"> </span><span class="n">__a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">allocator_type</span><span class="p">())</span><span class="w"></span>
+<span class="o">:</span><span class="w"> </span><span class="n">_Base</span><span class="p">(</span><span class="n">__a</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="copy-constructor">
+<h2>Copy constructor<a class="headerlink" href="#copy-constructor" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">deque</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">deque</span><span class="o">&amp;</span><span class="w"> </span><span class="n">__x</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">_Base</span><span class="p">(</span><span class="n">__x</span><span class="p">.</span><span class="n">get_allocator</span><span class="p">(),</span><span class="w"> </span><span class="n">__x</span><span class="p">.</span><span class="n">size</span><span class="p">())</span><span class="w"></span>
+<span class="p">{</span><span class="w"> </span><span class="n">uninitialized_copy</span><span class="p">(</span><span class="n">__x</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span><span class="w"> </span><span class="n">__x</span><span class="p">.</span><span class="n">end</span><span class="p">(),</span><span class="w"> </span><span class="n">_M_start</span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="fill-constructor">
+<h2>Fill constructor<a class="headerlink" href="#fill-constructor" title="Permalink to this heading">¶</a></h2>
+<p>Constructs a container with n elements. Each element is a copy if val.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">deque</span><span class="p">(</span><span class="n">size_type</span><span class="w"> </span><span class="n">__n</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">value_type</span><span class="o">&amp;</span><span class="w"> </span><span class="n">__value</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">allocator_type</span><span class="o">&amp;</span><span class="w"> </span><span class="n">__a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">allocator_type</span><span class="p">())</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">_Base</span><span class="p">(</span><span class="n">__a</span><span class="p">,</span><span class="w"> </span><span class="n">__n</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"> </span><span class="n">_M_fill_initialize</span><span class="p">(</span><span class="n">__value</span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="k">explicit</span><span class="w"> </span><span class="n">deque</span><span class="p">(</span><span class="n">size_type</span><span class="w"> </span><span class="n">__n</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">_Base</span><span class="p">(</span><span class="n">allocator_type</span><span class="p">(),</span><span class="w"> </span><span class="n">__n</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"> </span><span class="n">_M_fill_initialize</span><span class="p">(</span><span class="n">value_type</span><span class="p">());</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="range-constructor">
+<h2>Range constructor<a class="headerlink" href="#range-constructor" title="Permalink to this heading">¶</a></h2>
+<p>Constructs a container with as many elements as the range [first,last),
+with each element constructed from its corresponding element in that range, in the same order.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">deque</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">value_type</span><span class="o">*</span><span class="w"> </span><span class="n">__first</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">value_type</span><span class="o">*</span><span class="w"> </span><span class="n">__last</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="k">const</span><span class="w"> </span><span class="n">allocator_type</span><span class="o">&amp;</span><span class="w"> </span><span class="n">__a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">allocator_type</span><span class="p">())</span><span class="w"></span>
+<span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="n">_Base</span><span class="p">(</span><span class="n">__a</span><span class="p">,</span><span class="w"> </span><span class="n">__last</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">__first</span><span class="p">)</span><span class="w"></span>
+<span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="n">uninitialized_copy</span><span class="p">(</span><span class="n">__first</span><span class="p">,</span><span class="w"> </span><span class="n">__last</span><span class="p">,</span><span class="w"> </span><span class="n">_M_start</span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="n">deque</span><span class="p">(</span><span class="n">const_iterator</span><span class="w"> </span><span class="n">__first</span><span class="p">,</span><span class="w"> </span><span class="n">const_iterator</span><span class="w"> </span><span class="n">__last</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="k">const</span><span class="w"> </span><span class="n">allocator_type</span><span class="o">&amp;</span><span class="w"> </span><span class="n">__a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">allocator_type</span><span class="p">())</span><span class="w"></span>
+<span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="n">_Base</span><span class="p">(</span><span class="n">__a</span><span class="p">,</span><span class="w"> </span><span class="n">__last</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">__first</span><span class="p">)</span><span class="w"></span>
+<span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="n">uninitialized_copy</span><span class="p">(</span><span class="n">__first</span><span class="p">,</span><span class="w"> </span><span class="n">__last</span><span class="p">,</span><span class="w"> </span><span class="n">_M_start</span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Please refer to <a class="reference internal" href="base.html"><span class="doc">Base</span></a></p>
+</section>
+<section id="m-fill-initialize">
+<h2>_M_fill_initialize<a class="headerlink" href="#m-fill-initialize" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// Precondition: _M_start and _M_finish have already been initialized,</span>
+<span class="c1">// but none of the deque&#39;s elements have yet been constructed.</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">_Tp</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">_Alloc</span><span class="o">&gt;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="n">deque</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="n">_Alloc</span><span class="o">&gt;::</span><span class="n">_M_fill_initialize</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">value_type</span><span class="o">&amp;</span><span class="w"> </span><span class="n">__value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="n">_Map_pointer</span><span class="w"> </span><span class="n">__cur</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="n">__STL_TRY</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="c1">//为每个缓冲区设置初始值</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">__cur</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_M_start</span><span class="p">.</span><span class="n">_M_node</span><span class="p">;</span><span class="w"> </span><span class="n">__cur</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_node</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">__cur</span><span class="p">)</span><span class="w"></span>
+<span class="w">      </span><span class="n">uninitialized_fill</span><span class="p">(</span><span class="o">*</span><span class="n">__cur</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">__cur</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">_S_buffer_size</span><span class="p">(),</span><span class="w"> </span><span class="n">__value</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">uninitialized_fill</span><span class="p">(</span><span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_first</span><span class="p">,</span><span class="w"> </span><span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_cur</span><span class="p">,</span><span class="w"> </span><span class="n">__value</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="n">__STL_UNWIND</span><span class="p">(</span><span class="n">destroy</span><span class="p">(</span><span class="n">_M_start</span><span class="p">,</span><span class="w"> </span><span class="n">iterator</span><span class="p">(</span><span class="o">*</span><span class="n">__cur</span><span class="p">,</span><span class="w"> </span><span class="n">__cur</span><span class="p">)));</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">deque</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">ideq</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="mi">9</span><span class="p">);</span><span class="w"></span>
+
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="n">ideq</span><span class="p">.</span><span class="n">size</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">             </span><span class="n">ideq</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">deque</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;::</span><span class="n">iterator</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ideq</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span><span class="w"> </span><span class="n">it</span><span class="o">!=</span><span class="n">ideq</span><span class="p">.</span><span class="n">end</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">it</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="sc">&#39; &#39;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="o">*</span><span class="n">it</span><span class="p">;</span><span class="w"></span>
+
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+<section id="output">
+<h3>output<a class="headerlink" href="#output" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">liuhaitaodeMBP2:test $ </span>./deque1
+<span class="go">      0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19</span>
+<span class="gp">liuhaitaodeMBP2:test $</span>
+</pre></div>
+</div>
+<img alt="../../../_images/deque_ini.jpg" src="../../../_images/deque_ini.jpg" />
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>这里的start._M_cur是指向开始的位置</p>
+</div>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">Cplus</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">Libstd c++ 2.9.1</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../vector/index.html">Vector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../list/index.html">List</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Double Ended Queue</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../heap/index.html">Head</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tree/index.html">Tree</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../Operator_overloading/index.html">C++ Operator overloading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../access_modifiers.html">Access Modifiers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../references.html">References (or Aliases)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../const.html">const</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../functemplate.html">Function template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../passarguments.html">Pass arguments to function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../friend.html">Friend class and function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../abstract.html">Abstract Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../copyconstructor.html">Copy constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rvalue.html">Cplus Rvalue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../lvalue_and_rvalue.html">lvalue &amp;&amp; rvalue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../placement_new.html">Placement new operator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../template/index.html">Template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../cast/index.html">C++ Cast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../decltype.html">Decltype</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../explicit_implicit.html">Explicit and Implicit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../constructor.html">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../typedef_typename.html">typedef typename</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Cplus</a><ul>
+  <li><a href="../index.html">Libstd c++ 2.9.1</a><ul>
+  <li><a href="index.html">Double Ended Queue</a><ul>
+      <li>Previous: <a href="iterator.html" title="previous chapter">Iterator</a></li>
+      <li>Next: <a href="base.html" title="next chapter">Base</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../../../_sources/cplus/libstdc++_2_9_1/deque/constructor.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

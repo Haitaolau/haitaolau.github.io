@@ -1,0 +1,119 @@
+=======================
+push
+=======================
+
+Last change: |today|
+
+
+Please refer to :ref:`list_insert`
+
+.. code-block:: c++
+
+   iterator insert(iterator __position, const _Tp& __x) {
+      _Node* __tmp = _M_create_node(__x);
+      __tmp->_M_next = __position._M_node;
+      __tmp->_M_prev = __position._M_node->_M_prev;
+      __position._M_node->_M_prev->_M_next = __tmp;
+      __position._M_node->_M_prev = __tmp;
+      return __tmp;
+   }
+
+push_front
+===================
+
+.. code-block:: c++
+
+   void push_front(const _Tp& __x) { insert(begin(), __x); }
+   void push_front() {insert(begin());}
+
+
+.. image:: ../../../_static/image/list_push_front.jpg
+
+Example:
+
+.. code-block:: c++
+
+   #include <iostream>
+   #include <string>
+   #include <list>
+   
+   using namespace std;
+   
+   int main(int argc, const char** argv)
+   {
+   	std::list <std::string> word;
+   	word.push_front("1");
+   	word.push_front("2");
+   	word.push_front("3");
+   	word.push_front("4");
+   	word.push_front("5");
+   
+   
+   	for (auto it = word.begin(); it != word.end(); it++)
+   	{
+   		std::cout << *it << std::endl;
+   	}
+   	  return 0;
+   }
+
+The output:
+
+.. code-block:: console 
+
+   5
+   4
+   3
+   2
+   1
+
+
+push_back
+===================
+
+.. code-block:: c++
+
+   void push_back(const _Tp& __x) { insert(end(), __x); }
+   void push_back() {insert(end());}
+
+
+.. image:: ../../../_static/image/list_push_back.jpg
+
+
+Example:
+
+.. code-block:: c++
+
+   #include <iostream>
+   #include <string>
+   #include <list>
+   
+   using namespace std;
+   
+   int main(int argc, const char** argv)
+   {
+   	std::list <std::string> word;
+   	word.push_back("1");
+   	word.push_back("2");
+   	word.push_back("3");
+   	word.push_back("4");
+   	word.push_back("5");
+   
+   
+   	for (auto it = word.begin(); it != word.end(); it++)
+   	{
+   		std::cout << *it << std::endl;
+   	}
+   	  return 0;
+   }
+
+The output:
+
+.. code-block:: console 
+
+   1
+   2
+   3
+   4
+   5
+
+

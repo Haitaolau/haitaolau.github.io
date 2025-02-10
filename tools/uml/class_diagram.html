@@ -1,0 +1,364 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Class Diagram &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="GitLab" href="../gitlab/index.html" />
+    <link rel="prev" title="UML" href="index.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="class-diagram">
+<span id="id1"></span><h1><a class="toc-backref" href="#id2" role="doc-backlink">Class Diagram</a><a class="headerlink" href="#class-diagram" title="Permalink to this heading">¶</a></h1>
+<nav class="contents" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#class-diagram" id="id2">Class Diagram</a></p>
+<ul>
+<li><p><a class="reference internal" href="#what-are-class-diagrams" id="id3">What are class Diagrams?</a></p></li>
+<li><p><a class="reference internal" href="#what-is-a-class" id="id4">What is a class?</a></p></li>
+<li><p><a class="reference internal" href="#uml-class-notation" id="id5">UML Class Notation</a></p>
+<ul>
+<li><p><a class="reference internal" href="#parameter-directionality" id="id6">Parameter Directionality</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#relationships-between-classes" id="id7">Relationships between classes</a></p>
+<ul>
+<li><p><a class="reference internal" href="#association" id="id8">1. Association</a></p></li>
+<li><p><a class="reference internal" href="#directed-association" id="id9">2. Directed Association</a></p></li>
+<li><p><a class="reference internal" href="#aggregation" id="id10">3. Aggregation</a></p></li>
+<li><p><a class="reference internal" href="#composition" id="id11">4. Composition</a></p></li>
+<li><p><a class="reference internal" href="#generalization-inheritance" id="id12">5. Generalization(Inheritance)</a></p></li>
+<li><p><a class="reference internal" href="#realization-interface-implementation" id="id13">6. Realization (Interface Implementation)</a></p></li>
+<li><p><a class="reference internal" href="#dependency-relationship" id="id14">7. Dependency Relationship</a></p></li>
+<li><p><a class="reference internal" href="#usage-dependency-relationship" id="id15">8. Usage(Dependency) Relationship</a></p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+<p>Copy from <a class="reference external" href="https://www.geeksforgeeks.org/unified-modeling-language-uml-class-diagrams/?ref=lbp">https://www.geeksforgeeks.org/unified-modeling-language-uml-class-diagrams/?ref=lbp</a></p>
+<section id="what-are-class-diagrams">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">What are class Diagrams?</a><a class="headerlink" href="#what-are-class-diagrams" title="Permalink to this heading">¶</a></h2>
+<p>Class diagrams are a type of UML (Unified Modeling Language) diagram used in software engineering to visually represent the structure and relationships of classes within a system i.e. used to construct and visualize object-oriented systems.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In these diagrams, classes are depicted as boxes, each containing three compartments for the class name, attributes, and methods. Lines connecting classes illustrate associations, showing relationships such as one-to-one or one-to-many.</p>
+</div>
+<p>Class diagrams provide a high-level overview of a system’s design, helping to communicate and document the structure of the software. They are a fundamental tool in object-oriented design and play a crucial role in the software development lifecycle.</p>
+<img alt="../../_images/Class-Diagram-example.webp" src="../../_images/Class-Diagram-example.webp" />
+</section>
+<section id="what-is-a-class">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">What is a class?</a><a class="headerlink" href="#what-is-a-class" title="Permalink to this heading">¶</a></h2>
+<p>In object-oriented programming (OOP), a class is a blueprint or template for creating objects. Objects are instances of classes, and each class defines a set of attributes (data members) and methods (functions or procedures) that the objects created from that class will possess. The attributes represent the characteristics or properties of the object, while the methods define the behaviors or actions that the object can perform.</p>
+</section>
+<section id="uml-class-notation">
+<h2><a class="toc-backref" href="#id5" role="doc-backlink">UML Class Notation</a><a class="headerlink" href="#uml-class-notation" title="Permalink to this heading">¶</a></h2>
+<p>class notation is a graphical representation used to depict classes and their relationships in object-oriented modeling.</p>
+<img alt="../../_images/Class-Notation.webp" src="../../_images/Class-Notation.webp" />
+<ol class="arabic simple">
+<li><p>Class Name:</p>
+<ul class="simple">
+<li><p>The name of the class is typically written in the top compartment of the class box and is centered and bold.</p></li>
+</ul>
+</li>
+<li><p>Attributes:</p>
+<ul class="simple">
+<li><p>Attributes, also known as properties or fields, represent the data members of the class. They are listed in the second compartment of the class box and often include the visibility (e.g., public, private) and the data type of each attribute.</p></li>
+</ul>
+</li>
+<li><p>Methods:</p>
+<ul class="simple">
+<li><p>Methods, also known as functions or operations, represent the behavior or functionality of the class. They are listed in the third compartment of the class box and include the visibility (e.g., public, private), return type, and parameters of each method.</p></li>
+</ul>
+</li>
+<li><p>Visibility Notation:</p>
+<ul class="simple">
+<li><p>Visibility notations indicate the access level of attributes and methods. Common visibility notations include:</p>
+<ul>
+<li><p><strong>+</strong> for public (visible to all classes)</p></li>
+<li><p>– for private (visible only within the class)</p></li>
+<li><p># for protected (visible to subclasses)</p></li>
+<li><p>~ for package or default visibility (visible to classes in the same package)</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<section id="parameter-directionality">
+<h3><a class="toc-backref" href="#id6" role="doc-backlink">Parameter Directionality</a><a class="headerlink" href="#parameter-directionality" title="Permalink to this heading">¶</a></h3>
+<p>In class diagrams, parameter directionality refers to the indication of the flow of information between classes through method parameters. It helps to specify whether a parameter is an input, an output, or both. This information is crucial for understanding how data is passed between objects during method calls.</p>
+<img alt="../../_images/class-notation-with-parameter-directionality.jpg" src="../../_images/class-notation-with-parameter-directionality.jpg" />
+<p>There are three main parameter directionality notations used in class diagrams:</p>
+<ol class="arabic simple">
+<li><p>In (Input):</p>
+<ul class="simple">
+<li><p>An input parameter is a parameter passed from the calling object (client) to the called object (server) during a method invocation.</p></li>
+<li><p>It is represented by an arrow pointing towards the receiving class (the class that owns the method).</p></li>
+</ul>
+</li>
+<li><p>Out (Output):</p>
+<ul class="simple">
+<li><p>An output parameter is a parameter passed from the called object (server) back to the calling object (client) after the method execution.</p></li>
+<li><p>It is represented by an arrow pointing away from the receiving class.</p></li>
+</ul>
+</li>
+<li><p>InOut (Input and Output):</p>
+<ul class="simple">
+<li><p>An InOut parameter serves as both input and output. It carries information from the calling object to the called object and vice versa.</p></li>
+<li><p>It is represented by an arrow pointing towards and away from the receiving class.</p></li>
+</ul>
+</li>
+</ol>
+</section>
+</section>
+<section id="relationships-between-classes">
+<h2><a class="toc-backref" href="#id7" role="doc-backlink">Relationships between classes</a><a class="headerlink" href="#relationships-between-classes" title="Permalink to this heading">¶</a></h2>
+<p>In class diagrams, relationships between classes describe how classes are connected or interact with each other within a system. There are several types of relationships in object-oriented modeling, each serving a specific purpose. Here are some common types of relationships in class diagrams:</p>
+<img alt="../../_images/relationship.webp" src="../../_images/relationship.webp" />
+<section id="association">
+<h3><a class="toc-backref" href="#id8" role="doc-backlink">1. Association</a><a class="headerlink" href="#association" title="Permalink to this heading">¶</a></h3>
+<p>An association represents a bi-directional relationship between two classes. It indicates that instances of one class are connected to instances of another class. Associations are typically depicted as a solid line connecting the classes, with optional arrows indicating the direction of the relationship.</p>
+<p>Let’s understand association using an example:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Let’s consider a simple system for managing a library. In this system,</span>
+<span class="go">we have two main entities: Book and Library. Each Library contains multiple Books,</span>
+<span class="go">and each Book belongs to a specific Library. This relationship between Library</span>
+<span class="go">and Book represents an association.</span>
+</pre></div>
+</div>
+<p>The “Library” class can be considered the source class because it contains a reference to multiple instances of the “Book” class. The “Book” class would be considered the target class because it belongs to a specific library.</p>
+<img alt="../../_images/relationship-association.webp" src="../../_images/relationship-association.webp" />
+</section>
+<section id="directed-association">
+<h3><a class="toc-backref" href="#id9" role="doc-backlink">2. Directed Association</a><a class="headerlink" href="#directed-association" title="Permalink to this heading">¶</a></h3>
+<p>A directed association in a UML class diagram represents a relationship between two classes where the association has a direction, indicating that one class is associated with another in a specific way.</p>
+<ul class="simple">
+<li><p>In a directed association, an arrowhead is added to the association line to indicate the direction of the relationship. The arrow points from the class that initiates the association to the class that is being targeted or affected by the association.</p></li>
+<li><p>Directed associations are used when the association has a specific flow or directionality, such as indicating which class is responsible for initiating the association or which class has a dependency on another.</p></li>
+</ul>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Consider a scenario where a “Teacher” class is associated with a “Course” class in a</span>
+<span class="go">university system. The directed association arrow may point from the “Teacher” class</span>
+<span class="go">to the “Course” class, indicating that a teacher is associated with or teaches a</span>
+<span class="go">specific course.</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>The source class is the “Teacher” class. The “Teacher” class initiates the association by teaching a specific course.</p></li>
+<li><p>The target class is the “Course” class. The “Course” class is affected by the association as it is being taught by a specific teacher.</p></li>
+</ul>
+<img alt="../../_images/directed-association.webp" src="../../_images/directed-association.webp" />
+</section>
+<section id="aggregation">
+<h3><a class="toc-backref" href="#id10" role="doc-backlink">3. Aggregation</a><a class="headerlink" href="#aggregation" title="Permalink to this heading">¶</a></h3>
+<p>Aggregation is a specialized form of association that represents a “whole-part” relationship. It denotes a stronger relationship where one class (the whole) contains or is composed of another class (the part).</p>
+<p>Aggregation is represented by a diamond shape on the side of the whole class. In this kind of relationship, the child class can exist independently of its parent class.</p>
+<p>Let’s understand aggregation using an example:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">The company can be considered as the whole, while the employees are the parts.</span>
+<span class="go">Employees belong to the company, and the company can have multiple employees.</span>
+<span class="go">However, if the company ceases to exist, the employees can still exist independently.</span>
+</pre></div>
+</div>
+<img alt="../../_images/relationship-aggregation.webp" src="../../_images/relationship-aggregation.webp" />
+</section>
+<section id="composition">
+<h3><a class="toc-backref" href="#id11" role="doc-backlink">4. Composition</a><a class="headerlink" href="#composition" title="Permalink to this heading">¶</a></h3>
+<p>Composition is a stronger form of aggregation, indicating a more significant ownership or dependency relationship. In composition, the part class cannot exist independently of the whole class.</p>
+<p>Composition is represented by a filled diamond shape on the side of the whole class.</p>
+<p>Let’s understand Composition using an example:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Imagine a digital contact book application. The contact book is the</span>
+<span class="go">whole, and each contact entry is a part. Each contact entry is fully</span>
+<span class="go">owned and managed by the contact book. If the contact book is deleted</span>
+<span class="go">or destroyed, all associated contact entries are also removed.</span>
+</pre></div>
+</div>
+<p>This illustrates composition because the existence of the contact entries depends entirely on the presence of the contact book. Without the contact book, the individual contact entries lose their meaning and cannot exist on their own.</p>
+<img alt="../../_images/relationship-composition.webp" src="../../_images/relationship-composition.webp" />
+</section>
+<section id="generalization-inheritance">
+<h3><a class="toc-backref" href="#id12" role="doc-backlink">5. Generalization(Inheritance)</a><a class="headerlink" href="#generalization-inheritance" title="Permalink to this heading">¶</a></h3>
+<p>Inheritance represents an “is-a” relationship between classes, where one class (the subclass or child) inherits the properties and behaviors of another class (the superclass or parent).</p>
+<p>Inheritance is depicted by a solid line with a closed, hollow arrowhead pointing from the subclass to the superclass.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">In the example of bank accounts, we can use generalization to</span>
+<span class="go">represent different types of accounts such as current accounts,</span>
+<span class="go">savings accounts, and credit accounts.</span>
+</pre></div>
+</div>
+<p>The Bank Account class serves as the generalized representation of all types of bank accounts, while the subclasses (Current Account, Savings Account, Credit Account) represent specialized versions that inherit and extend the functionality of the base class.</p>
+<img alt="../../_images/relationship-generalization.webp" src="../../_images/relationship-generalization.webp" />
+</section>
+<section id="realization-interface-implementation">
+<h3><a class="toc-backref" href="#id13" role="doc-backlink">6. Realization (Interface Implementation)</a><a class="headerlink" href="#realization-interface-implementation" title="Permalink to this heading">¶</a></h3>
+<p>Realization indicates that a class implements the features of an interface. It is often used in cases where a class realizes the operations defined by an interface.</p>
+<p>Realization is depicted by a dashed line with an open arrowhead pointing from the implementing class to the interface.</p>
+<p>Let’s consider the scenario where a “Person” and a “Corporation” both realizing an “Owner” interface.</p>
+<ul class="simple">
+<li><p>Owner Interface: This interface now includes methods such as “acquire(property)” and “dispose(property)” to represent actions related to acquiring and disposing of property.</p></li>
+<li><p>Person Class (Realization): The Person class implements the Owner interface, providing concrete implementations for the “acquire(property)” and “dispose(property)” methods. For instance, a person can acquire ownership of a house or dispose of a car.</p></li>
+<li><p>Corporation Class (Realization): Similarly, the Corporation class also implements the Owner interface, offering specific implementations for the “acquire(property)” and “dispose(property)” methods. For example, a corporation can acquire ownership of real estate properties or dispose of company vehicles.</p></li>
+</ul>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Both the Person and Corporation classes realize the Owner interface,</span>
+<span class="go">meaning they provide concrete implementations for the “acquire(property)”</span>
+<span class="go">and “dispose(property)” methods defined in the interface.</span>
+</pre></div>
+</div>
+<img alt="../../_images/relationship-realization.webp" src="../../_images/relationship-realization.webp" />
+</section>
+<section id="dependency-relationship">
+<h3><a class="toc-backref" href="#id14" role="doc-backlink">7. Dependency Relationship</a><a class="headerlink" href="#dependency-relationship" title="Permalink to this heading">¶</a></h3>
+<p>A dependency exists between two classes when one class relies on another, but the relationship is not as strong as association or inheritance. It represents a more loosely coupled connection between classes. Dependencies are often depicted as a dashed arrow.</p>
+<p>Let’s consider a scenario where a Person depends on a Book.</p>
+<ul class="simple">
+<li><p>Person Class: Represents an individual who reads a book. The Person class depends on the Book class to access and read the content.</p></li>
+<li><p>Book Class: Represents a book that contains content to be read by a person. The Book class is independent and can exist without the Person class.</p></li>
+</ul>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">The Person class depends on the Book class because it requires</span>
+<span class="go">to a book to read its content. However, the Book class does not</span>
+<span class="go">depend on the Person class; it can exist independently and does</span>
+<span class="go">not rely on the Person class for its functionality.</span>
+</pre></div>
+</div>
+<img alt="../../_images/relationship-dependency.webp" src="../../_images/relationship-dependency.webp" />
+</section>
+<section id="usage-dependency-relationship">
+<h3><a class="toc-backref" href="#id15" role="doc-backlink">8. Usage(Dependency) Relationship</a><a class="headerlink" href="#usage-dependency-relationship" title="Permalink to this heading">¶</a></h3>
+<p>A usage dependency relationship in a UML class diagram indicates that one class (the client) utilizes or depends on another class (the supplier) to perform certain tasks or access certain functionality. The client class relies on the services provided by the supplier class but does not own or create instances of it.</p>
+<ul class="simple">
+<li><p>Usage dependencies represent a form of dependency where one class depends on another class to fulfill a specific need or requirement.</p></li>
+<li><p>The client class requires access to specific features or services provided by the supplier class.</p></li>
+<li><p>In UML class diagrams, usage dependencies are typically represented by a dashed arrowed line pointing from the client class to the supplier class.</p></li>
+<li><p>The arrow indicates the direction of the dependency, showing that the client class depends on the services provided by the supplier class.</p></li>
+</ul>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Consider a scenario where a “Car” class depends on a “FuelTank” class to manage fuel consumption.</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>The “Car” class may need to access methods or attributes of the “FuelTank” class to check the fuel level, refill fuel, or monitor fuel consumption.</p></li>
+<li><p>In this case, the “Car” class has a usage dependency on the “FuelTank” class because it utilizes its services to perform certain tasks related to fuel management.</p></li>
+</ul>
+<img alt="../../_images/relationship-usage.webp" src="../../_images/relationship-usage.webp" />
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cplus/index.html">Cplus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../debian/index.html">Debian</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Tools</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">UML</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Class Diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../gitlab/index.html">GitLab</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Tools</a><ul>
+  <li><a href="index.html">UML</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">UML</a></li>
+      <li>Next: <a href="../gitlab/index.html" title="next chapter">GitLab</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../../_sources/tools/uml/class_diagram.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

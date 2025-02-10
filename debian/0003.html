@@ -1,0 +1,172 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>How to Search for Debian package? &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="How to Check Debian package version?" href="0004.html" />
+    <link rel="prev" title="How to build deb package for libxfce4ui" href="0002.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="how-to-search-for-debian-package">
+<h1>How to Search for Debian package?<a class="headerlink" href="#how-to-search-for-debian-package" title="Permalink to this heading">¶</a></h1>
+<section id="use-apt-cache-available-since-debian-2-2">
+<h2>1. Use apt-cache (available since Debian 2.2)<a class="headerlink" href="#use-apt-cache-available-since-debian-2-2" title="Permalink to this heading">¶</a></h2>
+<p>apt-cache allows searching rapidly among the entire list of available Debian packages. The most current usage is to use the “search” option with a rational expression as a parameter.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">root@localhost:~# </span>apt-cache search xfce4-about
+<span class="go">libxfce4ui-utils - Utility files for libxfce4ui</span>
+<span class="gp">root@localhost:~# </span>whereis xfce4-about
+<span class="go">xfce4-about: /usr/bin/xfce4-about /usr/share/man/man1/xfce4-about.1.gz</span>
+<span class="gp">root@localhost:~# </span>apt-cache search xfce4-about
+<span class="go">libxfce4ui-utils - Utility files for libxfce4ui</span>
+<span class="gp">root@localhost:~#</span>
+</pre></div>
+</div>
+</section>
+<section id="using-apt">
+<h2>2. Using apt<a class="headerlink" href="#using-apt" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">root@32b81b5fc0ca:/usr/src/lsb-11.6# </span>apt search lsb-base
+<span class="go">Sorting... Done</span>
+<span class="go">Full Text Search... Done</span>
+<span class="go">lsb-base/stable,now 11.6 all [installed]</span>
+<span class="go">  transitional package for Linux Standard Base init script functionality</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cplus/index.html">Cplus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Debian</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="0005.html">Launch up Debian VM with Qemu</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debian-installer/index.html">Debian Installer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debian-command/index.html">Debian command</a></li>
+<li class="toctree-l2"><a class="reference internal" href="live-cd/index.html">Debian Live CD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="elxr_edge/index.html">eLxr Edge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="os-tree/index.html">OS tree</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0001.html">Ruck: build pablo with minimal ostree rootfs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0002.html">How to build deb package for libxfce4ui</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">How to Search for Debian package?</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#use-apt-cache-available-since-debian-2-2">1. Use apt-cache (available since Debian 2.2)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#using-apt">2. Using apt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="0004.html">How to Check Debian package version?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0006.html">How to download deb packages using apt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0007.html">E: You must put some ‘source’ URIs in your sources.list</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0008.html">How can I specify the repository from which a package will be installed?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0009.html">How to install build dependencies for packages ?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0010.html">Create orig tarballs from git</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0011.html">Debian: Building the package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pipeline/index.html">Debian Pipeline</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Debian</a><ul>
+      <li>Previous: <a href="0002.html" title="previous chapter">How to build deb package for libxfce4ui</a></li>
+      <li>Next: <a href="0004.html" title="next chapter">How to Check Debian package version?</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/debian/0003.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,22 @@
+======================
+Placement new operator
+======================
+
+
+
+Placement new is a variation new operator in C++
+
+Syntax
+-------
+
+.. code-block::
+
+   new (address) (type) initializer
+
+As it allows to construct an object on memory that is already allocated, 
+it is required for optimizations as it is faster not to re-allocate all the time. 
+
+There may be cases when it is required to re-construct an object multiple times so, 
+placement new operator might be more efficient in these cases. 
+
+

@@ -1,0 +1,8 @@
+===================
+Graphics stack
+===================
+
+
+.. image:: ../../_static/image/ape-fwk-graphics.png
+
+.. image:: ../../_static/image/image_10_001.png

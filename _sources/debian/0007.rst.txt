@@ -1,0 +1,39 @@
+=========================================================
+ E: You must put some 'source' URIs in your sources.list
+=========================================================
+
+
+.. code-block:: console
+
+   root@32b81b5fc0ca:/usr/src# apt-get source lsb-base                                    
+   Reading package lists... Done
+   E: You must put some 'deb-src' URIs in your sources.
+
+**Add deb-src to source.lists(deb822 style)**
+
+
+
+.. code-block:: console
+
+   root@32b81b5fc0ca:/# cat /etc/apt/sources.list.d/debian.sources
+   Types: deb deb-src
+   # http://snapshot.debian.org/archive/debian/20240722T000000Z
+   URIs: http://deb.debian.org/debian
+   Suites: bookworm bookworm-updates
+   Components: main
+   Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+   
+   Types: deb deb-src
+   # http://snapshot.debian.org/archive/debian-security/20240722T000000Z
+   URIs: http://deb.debian.org/debian-security
+   Suites: bookworm-security
+   Components: main
+   Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+   		
+
+
+
+		 
+See also:
+
+. https://wiki.debian.org/SourcesList

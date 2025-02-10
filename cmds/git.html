@@ -1,0 +1,167 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Git &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Docker" href="docker.html" />
+    <link rel="prev" title="Commands" href="index.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="git">
+<h1>Git<a class="headerlink" href="#git" title="Permalink to this heading">¶</a></h1>
+<section id="git-log">
+<h2>Git Log<a class="headerlink" href="#git-log" title="Permalink to this heading">¶</a></h2>
+<p><strong>1. simple</strong></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">git log --format=&quot;%h %ci %s&quot;</span>
+</pre></div>
+</div>
+<p><strong>2. Deleted file’s log</strong></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">git log --all --full-history --format=&quot;%h %ci %s&quot; --</span>
+</pre></div>
+</div>
+</section>
+<section id="push-an-existing-repository">
+<h2>Push an existing repository<a class="headerlink" href="#push-an-existing-repository" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">git remote add origin https://github.com/Haitaolau/meta-test.git</span>
+<span class="go">git branch -M main</span>
+<span class="go">git push -u origin main</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../corp.html">Corporation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Commands</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Git</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#git-log">Git Log</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#push-an-existing-repository">Push an existing repository</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="docker.html">Docker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ubuntu.html">Ubuntu</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kernel.html">Kernel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dhcp.html">Dhcp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ovs.html">OpenVswitch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lxc.html">Lxc container</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ip.html">Ip command</a></li>
+<li class="toctree-l2"><a class="reference internal" href="find.html">Find</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tcpdump.html">Tcpdump</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sed_awk.html">Sed and awk</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gcc.html">gcc/g++</a></li>
+<li class="toctree-l2"><a class="reference internal" href="virsh.html">Virsh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="numa.html">Numactl</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ps1.html">Linux Bash PS1 variable</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tmux.html">Tmux</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cplus/index.html">Cplus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Commands</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Commands</a></li>
+      <li>Next: <a href="docker.html" title="next chapter">Docker</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/cmds/git.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

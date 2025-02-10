@@ -1,0 +1,282 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Push heap &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Pop heap" href="pop_heap.html" />
+    <link rel="prev" title="Binary Heap" href="heap.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="push-heap">
+<h1>Push heap<a class="headerlink" href="#push-heap" title="Permalink to this heading">¶</a></h1>
+<section id="testing-case">
+<h2>Testing Case<a class="headerlink" href="#testing-case" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;algorithm&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;vector&gt;</span><span class="cp"></span>
+
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">std</span><span class="p">;</span><span class="w"></span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">print</span><span class="p">(</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">vc</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">vc</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">**</span><span class="n">argv</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// Initializing a vector</span>
+<span class="w">    </span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">v1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">13</span><span class="p">,</span><span class="mi">16</span><span class="p">,</span><span class="mi">19</span><span class="p">,</span><span class="mi">21</span><span class="p">,</span><span class="mi">24</span><span class="p">,</span><span class="mi">26</span><span class="p">,</span><span class="mi">31</span><span class="p">,</span><span class="mi">32</span><span class="p">,</span><span class="mi">65</span><span class="p">,</span><span class="mi">68</span><span class="p">};</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;vector     :&quot;</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">print</span><span class="p">(</span><span class="n">v1</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// Converting vector into a heap</span>
+<span class="w">    </span><span class="c1">// using make_heap()</span>
+<span class="w">    </span><span class="n">make_heap</span><span class="p">(</span><span class="n">v1</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span><span class="w"> </span><span class="n">v1</span><span class="p">.</span><span class="n">end</span><span class="p">());</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;make_heap  :&quot;</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">print</span><span class="p">(</span><span class="n">v1</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">v1</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mi">66</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;vector push:&quot;</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">print</span><span class="p">(</span><span class="n">v1</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">push_heap</span><span class="p">(</span><span class="n">v1</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span><span class="w"> </span><span class="n">v1</span><span class="p">.</span><span class="n">end</span><span class="p">());</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;push_heap  :&quot;</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">print</span><span class="p">(</span><span class="n">v1</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p><strong>output</strong></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">wrsadmin@pek-hliu4-d1:~/workspace/test$ </span>./heap
+<span class="go">vector     :13 16 19 21 24 26 31 32 65 68</span>
+<span class="go">make_heap  :68 65 31 32 24 26 19 13 21 16</span>
+<span class="go">vector push:68 65 31 32 24 26 19 13 21 16 66</span>
+<span class="go">push_heap  :68 66 31 32 65 26 19 13 21 16 24</span>
+<span class="gp">wrsadmin@pek-hliu4-d1:~/workspace/test$</span>
+</pre></div>
+</div>
+</section>
+<section id="id1">
+<h2>Push Heap<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// Heap-manipulation functions: push_heap, pop_heap, make_heap, sort_heap.</span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">_RandomAccessIterator</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">_Distance</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">_Tp</span><span class="o">&gt;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"></span>
+<span class="n">__push_heap</span><span class="p">(</span><span class="n">_RandomAccessIterator</span><span class="w"> </span><span class="n">__first</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="n">_Distance</span><span class="w"> </span><span class="n">__holeIndex</span><span class="p">,</span><span class="w"> </span><span class="n">_Distance</span><span class="w"> </span><span class="n">__topIndex</span><span class="p">,</span><span class="w"> </span><span class="n">_Tp</span><span class="w"> </span><span class="n">__value</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="n">_Distance</span><span class="w"> </span><span class="n">__parent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">__holeIndex</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">__holeIndex</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">__topIndex</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">*</span><span class="p">(</span><span class="n">__first</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">__parent</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">__value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="o">*</span><span class="p">(</span><span class="n">__first</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">__holeIndex</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="p">(</span><span class="n">__first</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">__parent</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">__holeIndex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__parent</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">__parent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">__holeIndex</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="o">*</span><span class="p">(</span><span class="n">__first</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">__holeIndex</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__value</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">_RandomAccessIterator</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">_Distance</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">_Tp</span><span class="o">&gt;</span><span class="w"></span>
+<span class="kr">inline</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
+<span class="n">__push_heap_aux</span><span class="p">(</span><span class="n">_RandomAccessIterator</span><span class="w"> </span><span class="n">__first</span><span class="p">,</span><span class="w"></span>
+<span class="w">                </span><span class="n">_RandomAccessIterator</span><span class="w"> </span><span class="n">__last</span><span class="p">,</span><span class="w"> </span><span class="n">_Distance</span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">_Tp</span><span class="o">*</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="n">__push_heap</span><span class="p">(</span><span class="n">__first</span><span class="p">,</span><span class="w"> </span><span class="n">_Distance</span><span class="p">((</span><span class="n">__last</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">__first</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="n">_Distance</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span><span class="w"></span>
+<span class="w">              </span><span class="n">_Tp</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">__last</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)));</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">_RandomAccessIterator</span><span class="o">&gt;</span><span class="w"></span>
+<span class="kr">inline</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
+<span class="n">push_heap</span><span class="p">(</span><span class="n">_RandomAccessIterator</span><span class="w"> </span><span class="n">__first</span><span class="p">,</span><span class="w"> </span><span class="n">_RandomAccessIterator</span><span class="w"> </span><span class="n">__last</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="n">__STL_REQUIRES</span><span class="p">(</span><span class="n">_RandomAccessIterator</span><span class="p">,</span><span class="w"> </span><span class="n">_Mutable_RandomAccessIterator</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">__STL_REQUIRES</span><span class="p">(</span><span class="k">typename</span><span class="w"> </span><span class="nc">iterator_traits</span><span class="o">&lt;</span><span class="n">_RandomAccessIterator</span><span class="o">&gt;::</span><span class="n">value_type</span><span class="p">,</span><span class="w"></span>
+<span class="w">                 </span><span class="n">_LessThanComparable</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">__push_heap_aux</span><span class="p">(</span><span class="n">__first</span><span class="p">,</span><span class="w"> </span><span class="n">__last</span><span class="p">,</span><span class="w"></span>
+<span class="w">                  </span><span class="n">__DISTANCE_TYPE</span><span class="p">(</span><span class="n">__first</span><span class="p">),</span><span class="w"> </span><span class="n">__VALUE_TYPE</span><span class="p">(</span><span class="n">__first</span><span class="p">));</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<img alt="../../../_images/push_heap01.jpg" src="../../../_images/push_heap01.jpg" />
+<section id="first-step">
+<h3>First Step<a class="headerlink" href="#first-step" title="Permalink to this heading">¶</a></h3>
+<p>此时 __holeIndex = (__last - __first) - 1</p>
+<p>则__first + __holeIndex = __first + (__last - __first) - 1 = __last - 1 就是最后一个元素66</p>
+<p>所以此时__holeIndex 就是最后一个元素</p>
+<p>判断*(__first + __parent) 与需要添加的元素__value 的大小，如果*(__first +
+__parent) &lt; __value 则将*(__first + __parent) 移动到*(__first + __holeIndex) 处</p>
+<img alt="../../../_images/push_heap02.jpg" src="../../../_images/push_heap02.jpg" />
+</section>
+<section id="second-step">
+<h3>Second Step<a class="headerlink" href="#second-step" title="Permalink to this heading">¶</a></h3>
+<p>重新计算__holeIndex和__parent的值</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">__holeIndex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__parent</span><span class="p">;</span><span class="w"></span>
+<span class="n">__parent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">__holeIndex</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+<p>此时__holeIndex = 4 __parent = 1</p>
+<img alt="../../../_images/push_heap03.jpg" src="../../../_images/push_heap03.jpg" />
+<p>此时__first + __parent(65) 依然小于 __value(66),所以再次将*(__first + __parent) 移动到*(__first + __holeIndex) 处</p>
+</section>
+<section id="third-step">
+<h3>Third Step<a class="headerlink" href="#third-step" title="Permalink to this heading">¶</a></h3>
+<p>重新计算__holeIndex和__parent的值</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">__holeIndex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__parent</span><span class="p">;</span><span class="w"></span>
+<span class="n">__parent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">__holeIndex</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+<p>此时__holeIndex = 1 __parent = 0</p>
+<p>此时__first + __parent(68) 不小于 __value(66),
+所以将vlaue赋值到*(__first + __holeIndex) 处</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="o">*</span><span class="p">(</span><span class="n">__first</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">__holeIndex</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__value</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+<img alt="../../../_images/push_heap04.jpg" src="../../../_images/push_heap04.jpg" />
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">Cplus</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">Libstd c++ 2.9.1</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../vector/index.html">Vector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../list/index.html">List</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../deque/index.html">Double Ended Queue</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Head</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tree/index.html">Tree</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../Operator_overloading/index.html">C++ Operator overloading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../access_modifiers.html">Access Modifiers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../references.html">References (or Aliases)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../const.html">const</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../functemplate.html">Function template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../passarguments.html">Pass arguments to function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../friend.html">Friend class and function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../abstract.html">Abstract Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../copyconstructor.html">Copy constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rvalue.html">Cplus Rvalue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../lvalue_and_rvalue.html">lvalue &amp;&amp; rvalue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../placement_new.html">Placement new operator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../template/index.html">Template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../cast/index.html">C++ Cast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../decltype.html">Decltype</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../explicit_implicit.html">Explicit and Implicit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../constructor.html">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../typedef_typename.html">typedef typename</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Cplus</a><ul>
+  <li><a href="../index.html">Libstd c++ 2.9.1</a><ul>
+  <li><a href="index.html">Head</a><ul>
+      <li>Previous: <a href="heap.html" title="previous chapter">Binary Heap</a></li>
+      <li>Next: <a href="pop_heap.html" title="next chapter">Pop heap</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../../../_sources/cplus/libstdc++_2_9_1/heap/push_heap.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

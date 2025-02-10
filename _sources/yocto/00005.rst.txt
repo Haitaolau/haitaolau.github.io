@@ -1,0 +1,54 @@
+==========================================================
+ How do I generate an ordered lists of the executed tasks
+==========================================================
+
+The order in which all tasks executes are generally stored in
+
+
+.. code-block:: console
+
+
+   poky/<build_directory>/tmp/work/<machine_toolchain>/<package_name>/<package_version>/temp/log.task_order
+
+
+
+For example:
+
+.. code-block:: console
+
+   hliu4@eeef568eba2c:build$cat /buildarea1/LIN1022-7283/build/tmp-glibc/work/xilinx_zynqmp-wrs-linux/linux-yocto/5.15.155+gitAUTOINC+1427f4d13f_ab8d149d3f-r0/temp/log.task_order
+   do_fetch (58117): log.do_fetch.58117
+   do_unpack (909259): log.do_unpack.909259
+   do_symlink_kernsrc (1021565): log.do_symlink_kernsrc.1021565
+   do_kernel_checkout (1021932): log.do_kernel_checkout.1021932
+   do_validate_branches (1028033): log.do_validate_branches.1028033
+   do_kernel_metadata (1028503): log.do_kernel_metadata.1028503
+   do_kernel_version_sanity_check (1032410): log.do_kernel_version_sanity_check.1032410
+   do_patch (1032409): log.do_patch.1032409
+   do_populate_lic (1033673): log.do_populate_lic.1033673
+   do_deploy_source_date_epoch (1033672): log.do_deploy_source_date_epoch.1033672
+   do_kernel_configme (1071668): log.do_kernel_configme.1071668
+   do_prepare_recipe_sysroot (1309723): log.do_prepare_recipe_sysroot.1309723
+   do_configure (1310066): log.do_configure.1310066
+   do_kernel_configcheck (1311236): log.do_kernel_configcheck.1311236
+   do_compile (1322452): log.do_compile.1322452
+   do_shared_workdir (1546598): log.do_shared_workdir.1546598
+   do_kernel_link_images (1546953): log.do_kernel_link_images.1546953
+   do_transform_kernel (1549831): log.do_transform_kernel.1549831
+   do_kernel_generate_rsa_keys (1549565): log.do_kernel_generate_rsa_keys.1549565
+   do_compile_kernelmodules (1557810): log.do_compile_kernelmodules.1557810
+   do_assemble_fitimage (1564545): log.do_assemble_fitimage.1564545
+   do_strip (1774575): log.do_strip.1774575
+   do_sizecheck (1785534): log.do_sizecheck.1785534
+   do_install (1799626): log.do_install.1799626
+   do_package (1852428): log.do_package.1852428
+   do_populate_sysroot (1918070): log.do_populate_sysroot.1918070
+   do_bundle_initramfs (1917937): log.do_bundle_initramfs.1917937
+   do_uboot_generate_rsa_keys (1921664): log.do_uboot_generate_rsa_keys.1921664
+   do_assemble_fitimage_initramfs (1927416): log.do_assemble_fitimage_initramfs.1927416
+   do_uboot_assemble_fitimage (1932067): log.do_uboot_assemble_fitimage.1932067
+   do_packagedata (2265483): log.do_packagedata.2265483
+   do_package_write_rpm (2281082): log.do_package_write_rpm.2281082
+   do_package_qa (2281545): log.do_package_qa.2281545
+   do_deploy (2281649): log.do_deploy.2281649
+   

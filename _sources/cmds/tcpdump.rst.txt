@@ -1,0 +1,35 @@
+===========
+Tcpdump
+===========
+
+
+How to capture DHCP network traffic ?
+==============================================
+
+.. code-block:: console
+
+  tcpdump -i eth0 port 67 or port 68 -e -n -vv
+
+  tcpdump -i eth0 port 67 or port 68 -w 1w.pcap
+
+
+How to capture SSH Traffic with Tcpdump?
+========================================
+
+We can filter tcp port 22 in tcpdump command to capture all the ssh traffic.
+
+
+.. code-block:: console
+
+   tcpdump -i eth0 tcp port 22
+
+   tcpdump -i eth0 'tcp[2:2] = 22'
+
+We can also save the captured packets into a file rather than printing them out by using the “-w” flag.
+
+.. code-block:: console
+
+   tcpdump -i eth0 -w /tmp/ssh.pcap tcp port 22
+
+This command captures SSH traffic on the eth0 interface and writes it to the file /tmp/ssh.pcap. The -w option specifies the output file to save the captured packets.
+

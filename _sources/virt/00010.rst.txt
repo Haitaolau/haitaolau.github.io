@@ -1,0 +1,16 @@
+=======================================
+WRLinux with wayland and weston
+=======================================
+
+.. code-block:: console 
+
+   qemu-system-x86_64 -enable-kvm -m 2048  wrlinux-image-std-sato-intel-x86-64.ext4 \
+                      -append 'console=ttyS1,115200 root=/dev/sda console=ttyS0' \
+                      -kernel bzImage -vnc :1 \
+                      -vga virtio -nographic \
+                      -usbdevice tablet -nodefaults
+
+Outlook:
+
+.. image:: ../_static/image/wayland-0001.png
+.. image:: ../_static/image/wayland-0002.png

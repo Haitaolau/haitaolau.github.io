@@ -1,0 +1,69 @@
+.. _allocation_rbtree:
+
+=====================
+ Allocation Function
+=====================
+
+
+.. contents:: Table of Contents
+
+
+Allocation
+==========
+	      
+.. code-block:: c++
+
+   public:
+                                   // allocation/deallocation
+     _Rb_tree()
+       : _Base(allocator_type()), _M_node_count(0), _M_key_compare()
+       { _M_empty_initialize(); }
+   
+     _Rb_tree(const _Compare& __comp)
+       : _Base(allocator_type()), _M_node_count(0), _M_key_compare(__comp) 
+       { _M_empty_initialize(); }
+   
+     _Rb_tree(const _Compare& __comp, const allocator_type& __a)
+       : _Base(__a), _M_node_count(0), _M_key_compare(__comp) 
+       { _M_empty_initialize(); }
+   
+     _Rb_tree(const _Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>& __x) 
+       : _Base(__x.get_allocator()),
+         _M_node_count(0), _M_key_compare(__x._M_key_compare)
+     { 
+       if (__x._M_root() == 0)
+         _M_empty_initialize();
+       else {
+         _S_color(_M_header) = _S_rb_tree_red;
+         _M_root() = _M_copy(__x._M_root(), _M_header);
+         _M_leftmost() = _S_minimum(_M_root());
+         _M_rightmost() = _S_maximum(_M_root());
+       }
+       _M_node_count = __x._M_node_count;
+     }
+     ~_Rb_tree() { clear(); }
+     _Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>& 
+     operator=(const _Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>& __x);
+   
+   private:
+     void _M_empty_initialize() {
+       _S_color(_M_header) = _S_rb_tree_red; // used to distinguish header from 
+                                             // __root, in iterator.operator++
+       _M_root() = 0;
+       _M_leftmost() = _M_header;
+       _M_rightmost() = _M_header;
+     }
+   
+
+
+.. image:: ../../../../_static/image/rbtree-stl-01.jpg
+
+	   
+
+
+
+
+
+
+
+		

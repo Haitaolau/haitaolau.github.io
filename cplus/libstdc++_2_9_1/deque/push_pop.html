@@ -1,0 +1,388 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>push and pop &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Allocation of _M_map and nodes" href="allocation.html" />
+    <link rel="prev" title="swap" href="swap.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="push-and-pop">
+<h1>push and pop<a class="headerlink" href="#push-and-pop" title="Permalink to this heading">¶</a></h1>
+<section id="push">
+<h2>Push<a class="headerlink" href="#push" title="Permalink to this heading">¶</a></h2>
+<section id="push-back-const-value-type">
+<h3>push_back(const value_type&amp;)<a class="headerlink" href="#push-back-const-value-type" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">push_back</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">value_type</span><span class="o">&amp;</span><span class="w"> </span><span class="n">__t</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="c1">//最后缓冲区有两个（或者以上）的元素空间</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_cur</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_last</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">construct</span><span class="p">(</span><span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_cur</span><span class="p">,</span><span class="w"> </span><span class="n">__t</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="o">++</span><span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_cur</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="k">else</span><span class="w"></span>
+<span class="w">    </span><span class="n">_M_push_back_aux</span><span class="p">(</span><span class="n">__t</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="push-back">
+<h3>push_back()<a class="headerlink" href="#push-back" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="w">   </span><span class="kt">void</span><span class="w"> </span><span class="nf">push_back</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_cur</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_last</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">construct</span><span class="p">(</span><span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_cur</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="o">++</span><span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_cur</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="k">else</span><span class="w"></span>
+<span class="w">    </span><span class="n">_M_push_back_aux</span><span class="p">();</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>首先判断当前node节点是否已经满了，_M_finish._M_cur != _M_finish._M_last - 1</p>
+<p>如果已经满了，则调用_M_push_back_aux 重新分配空间</p>
+</section>
+<section id="example-1">
+<h3>Example 1<a class="headerlink" href="#example-1" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">deque</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">ideq</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="mi">9</span><span class="p">);</span><span class="w"></span>
+
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="n">ideq</span><span class="p">.</span><span class="n">size</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">             </span><span class="n">ideq</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">             </span><span class="n">ideq</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">i</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">deque</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;::</span><span class="n">iterator</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ideq</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span><span class="w"> </span><span class="n">it</span><span class="o">!=</span><span class="n">ideq</span><span class="p">.</span><span class="n">end</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">it</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="sc">&#39; &#39;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="o">*</span><span class="n">it</span><span class="p">;</span><span class="w"></span>
+
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="output">
+<h3>output<a class="headerlink" href="#output" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">liuhaitaodeMBP2:test $ </span>./deque1
+<span class="go"> 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 0 1 2</span>
+<span class="gp">liuhaitaodeMBP2:test $</span>
+</pre></div>
+</div>
+<img alt="../../../_images/deque_ini2.jpg" src="../../../_images/deque_ini2.jpg" />
+<p>由于最后一个缓冲区里面仍然有4个备用元素空间，所以不会引起缓冲区的再分配。</p>
+</section>
+<section id="m-push-back-aux">
+<h3>_M_push_back_aux<a class="headerlink" href="#m-push-back-aux" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// Called only if _M_finish._M_cur == _M_finish._M_last - 1.</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">_Tp</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">_Alloc</span><span class="o">&gt;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="n">deque</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="n">_Alloc</span><span class="o">&gt;::</span><span class="n">_M_push_back_aux</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">value_type</span><span class="o">&amp;</span><span class="w"> </span><span class="n">__t</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="n">value_type</span><span class="w"> </span><span class="n">__t_copy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__t</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="n">_M_reserve_map_at_back</span><span class="p">();</span><span class="w"></span>
+<span class="w">  </span><span class="c1">//重新配置一个新的节点node，</span>
+<span class="w">  </span><span class="o">*</span><span class="p">(</span><span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_node</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_M_allocate_node</span><span class="p">();</span><span class="w"></span>
+<span class="w">  </span><span class="n">__STL_TRY</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="c1">//初始化新的元素</span>
+<span class="w">    </span><span class="n">construct</span><span class="p">(</span><span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_cur</span><span class="p">,</span><span class="w"> </span><span class="n">__t_copy</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="c1">//设置finish指向为新分配的node</span>
+<span class="w">    </span><span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_set_node</span><span class="p">(</span><span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_node</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="c1">//设置finish的状态</span>
+<span class="w">    </span><span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_cur</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_first</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="n">__STL_UNWIND</span><span class="p">(</span><span class="n">_M_deallocate_node</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_node</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)));</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>please refer to <a class="reference internal" href="allocation.html#m-reserve-map-at-back"><span class="std std-ref">_M_reserve_map_at_back</span></a></p>
+<p>_M_reserve_map_at_back 已经将需要的node节点在map中申请出来（预留），所以这里只需要调用</p>
+<p>_M_allocate_node() 创建所有的node节点就ok</p>
+<p>构建新的元素并填充__t</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>这里新构建的元素，并没有用新的node里面的空间，而是剩余的空间， _M_finish._M_cur, 这个时候_M_finish还没有更改.</p>
+</div>
+<p>将_M_finish._M_node + 1设置为新的结尾</p>
+</section>
+<section id="example-2">
+<h3>Example 2<a class="headerlink" href="#example-2" title="Permalink to this heading">¶</a></h3>
+<p>再增加一个元素3在尾端</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">ideq</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<img alt="../../../_images/deque_ini3.jpg" src="../../../_images/deque_ini3.jpg" />
+</section>
+<section id="push-front-const-value-type-t">
+<h3>push_front(const value_type&amp; __t)<a class="headerlink" href="#push-front-const-value-type-t" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">push_front</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">value_type</span><span class="o">&amp;</span><span class="w"> </span><span class="n">__t</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">_M_start</span><span class="p">.</span><span class="n">_M_cur</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">_M_start</span><span class="p">.</span><span class="n">_M_first</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="c1">//第一缓冲区尚有备用空间</span>
+<span class="w">   </span><span class="n">construct</span><span class="p">(</span><span class="n">_M_start</span><span class="p">.</span><span class="n">_M_cur</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">__t</span><span class="p">);</span><span class="w"> </span><span class="c1">//直接在备用空间上进行初始化元素</span>
+<span class="w">   </span><span class="o">--</span><span class="n">_M_start</span><span class="p">.</span><span class="n">_M_cur</span><span class="p">;</span><span class="w">  </span><span class="c1">//调整备用空间的使用状态</span>
+<span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="w"> </span><span class="k">else</span><span class="w"></span>
+<span class="w">  </span><span class="c1">// 第一缓冲区已经没有备用空间了</span>
+<span class="w">   </span><span class="n">_M_push_front_aux</span><span class="p">(</span><span class="n">__t</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="push-front">
+<h3>push_front<a class="headerlink" href="#push-front" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">push_front</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">_M_start</span><span class="p">.</span><span class="n">_M_cur</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">_M_start</span><span class="p">.</span><span class="n">_M_first</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="n">construct</span><span class="p">(</span><span class="n">_M_start</span><span class="p">.</span><span class="n">_M_cur</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w"></span>
+<span class="w">   </span><span class="o">--</span><span class="n">_M_start</span><span class="p">.</span><span class="n">_M_cur</span><span class="p">;</span><span class="w"></span>
+<span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="w"> </span><span class="k">else</span><span class="w"></span>
+<span class="w">   </span><span class="n">_M_push_front_aux</span><span class="p">();</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="m-push-front-aux">
+<h3>_M_push_front_aux<a class="headerlink" href="#m-push-front-aux" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// Called only if _M_start._M_cur == _M_start._M_first.</span>
+<span class="w">     </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">_Tp</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">_Alloc</span><span class="o">&gt;</span><span class="w"></span>
+<span class="w">     </span><span class="kt">void</span><span class="w">  </span><span class="n">deque</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="n">_Alloc</span><span class="o">&gt;::</span><span class="n">_M_push_front_aux</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">value_type</span><span class="o">&amp;</span><span class="w"> </span><span class="n">__t</span><span class="p">)</span><span class="w"></span>
+<span class="w">     </span><span class="p">{</span><span class="w"></span>
+<span class="w">       </span><span class="n">value_type</span><span class="w"> </span><span class="n">__t_copy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__t</span><span class="p">;</span><span class="w"></span>
+<span class="w">       </span><span class="n">_M_reserve_map_at_front</span><span class="p">();</span><span class="w"></span>
+<span class="w">       </span><span class="o">*</span><span class="p">(</span><span class="n">_M_start</span><span class="p">.</span><span class="n">_M_node</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_M_allocate_node</span><span class="p">();</span><span class="w"></span>
+<span class="w">       </span><span class="n">__STL_TRY</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">         </span><span class="n">_M_start</span><span class="p">.</span><span class="n">_M_set_node</span><span class="p">(</span><span class="n">_M_start</span><span class="p">.</span><span class="n">_M_node</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w"></span>
+<span class="w">         </span><span class="n">_M_start</span><span class="p">.</span><span class="n">_M_cur</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_M_start</span><span class="p">.</span><span class="n">_M_last</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"></span>
+<span class="w">         </span><span class="n">construct</span><span class="p">(</span><span class="n">_M_start</span><span class="p">.</span><span class="n">_M_cur</span><span class="p">,</span><span class="w"> </span><span class="n">__t_copy</span><span class="p">);</span><span class="w"></span>
+<span class="w">       </span><span class="p">}</span><span class="w"></span>
+<span class="w">       </span><span class="n">__STL_UNWIND</span><span class="p">((</span><span class="o">++</span><span class="n">_M_start</span><span class="p">,</span><span class="w"> </span><span class="n">_M_deallocate_node</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">_M_start</span><span class="p">.</span><span class="n">_M_node</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">))));</span><span class="w"></span>
+<span class="w">     </span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>请参考 <a class="reference internal" href="allocation.html#m-reserve-map-at-front"><span class="std std-ref">_M_reserve_map_at_front</span></a></p>
+</section>
+<section id="example-3">
+<h3>Example 3<a class="headerlink" href="#example-3" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">ideq</span><span class="p">.</span><span class="n">push_front</span><span class="p">(</span><span class="mi">99</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<img alt="../../../_images/deque_ini4.jpg" src="../../../_images/deque_ini4.jpg" />
+</section>
+<section id="example-4">
+<h3>Example 4<a class="headerlink" href="#example-4" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">ideq</span><span class="p">.</span><span class="n">push_front</span><span class="p">(</span><span class="mi">98</span><span class="p">);</span><span class="w"></span>
+<span class="n">ideq</span><span class="p">.</span><span class="n">push_front</span><span class="p">(</span><span class="mi">97</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<img alt="../../../_images/deque_ini5.jpg" src="../../../_images/deque_ini5.jpg" />
+</section>
+</section>
+<section id="pop">
+<h2>Pop<a class="headerlink" href="#pop" title="Permalink to this heading">¶</a></h2>
+<section id="pop-back">
+<h3>pop_back<a class="headerlink" href="#pop-back" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">pop_back</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_cur</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_first</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="c1">//最后缓冲区有一个或者更多的元素</span>
+<span class="w">    </span><span class="o">--</span><span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_cur</span><span class="p">;</span><span class="w"> </span><span class="c1">// 调整指针，M_cur所指向的空间没有存储元素</span>
+<span class="w">    </span><span class="n">destroy</span><span class="p">(</span><span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_cur</span><span class="p">);</span><span class="w"> </span><span class="c1">//析构掉M_cur所指向的元素</span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="k">else</span><span class="w"></span>
+<span class="w">  </span><span class="c1">//最后一个缓冲区（node节点）里面没有数据，</span>
+<span class="w">  </span><span class="c1">//调用_M_pop_back_aux 将缓冲区（node节点）释放掉</span>
+<span class="w">    </span><span class="n">_M_pop_back_aux</span><span class="p">();</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="m-pop-back-aux">
+<h3>_M_pop_back_aux<a class="headerlink" href="#m-pop-back-aux" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// Called only if _M_finish._M_cur == _M_finish._M_first.</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">_Tp</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">_Alloc</span><span class="o">&gt;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="n">deque</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="n">_Alloc</span><span class="o">&gt;::</span><span class="n">_M_pop_back_aux</span><span class="p">()</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="n">_M_deallocate_node</span><span class="p">(</span><span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_first</span><span class="p">);</span><span class="w"> </span><span class="c1">//释放掉最后一个缓冲区（node节点）</span>
+<span class="w">  </span><span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_set_node</span><span class="p">(</span><span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_node</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w"> </span><span class="c1">//将倒数第二缓冲区（node节点）设置为finish</span>
+<span class="w">  </span><span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_cur</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_last</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="c1">//将cur指向上一个缓冲区中的最后一个元素</span>
+<span class="w">  </span><span class="n">destroy</span><span class="p">(</span><span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_cur</span><span class="p">);</span><span class="w"> </span><span class="c1">//将改元素析构掉</span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="pop-front">
+<h3>pop_front<a class="headerlink" href="#pop-front" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">pop_front</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">_M_start</span><span class="p">.</span><span class="n">_M_cur</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">_M_start</span><span class="p">.</span><span class="n">_M_last</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="c1">// 第一个缓冲区（node节点）有两个（或者更多）的元素</span>
+<span class="w">    </span><span class="n">destroy</span><span class="p">(</span><span class="n">_M_start</span><span class="p">.</span><span class="n">_M_cur</span><span class="p">);</span><span class="c1">//析构</span>
+<span class="w">    </span><span class="o">++</span><span class="n">_M_start</span><span class="p">.</span><span class="n">_M_cur</span><span class="p">;</span><span class="w"> </span><span class="c1">//调整指针</span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="k">else</span><span class="w"></span>
+<span class="w">  </span><span class="c1">// 第一缓冲区（node）只有一个元素</span>
+<span class="w">    </span><span class="n">_M_pop_front_aux</span><span class="p">();</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="m-pop-front-aux">
+<h3>_M_pop_front_aux<a class="headerlink" href="#m-pop-front-aux" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// Called only if _M_start._M_cur == _M_start._M_last - 1.  Note that</span>
+<span class="c1">// if the deque has at least one element (a precondition for this member</span>
+<span class="c1">// function), and if _M_start._M_cur == _M_start._M_last, then the deque</span>
+<span class="c1">// must have at least two nodes.</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">_Tp</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">_Alloc</span><span class="o">&gt;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="n">deque</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="n">_Alloc</span><span class="o">&gt;::</span><span class="n">_M_pop_front_aux</span><span class="p">()</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="n">destroy</span><span class="p">(</span><span class="n">_M_start</span><span class="p">.</span><span class="n">_M_cur</span><span class="p">);</span><span class="w">  </span><span class="c1">//析构cur元素</span>
+<span class="w">  </span><span class="n">_M_deallocate_node</span><span class="p">(</span><span class="n">_M_start</span><span class="p">.</span><span class="n">_M_first</span><span class="p">);</span><span class="c1">//释放第一缓冲区</span>
+<span class="w">  </span><span class="n">_M_start</span><span class="p">.</span><span class="n">_M_set_node</span><span class="p">(</span><span class="n">_M_start</span><span class="p">.</span><span class="n">_M_node</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="c1">//将第二缓冲区设置成为first node</span>
+<span class="w">  </span><span class="n">_M_start</span><span class="p">.</span><span class="n">_M_cur</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_M_start</span><span class="p">.</span><span class="n">_M_first</span><span class="p">;</span><span class="c1">//cur指向第二缓冲区的first元素</span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">Cplus</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">Libstd c++ 2.9.1</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../vector/index.html">Vector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../list/index.html">List</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Double Ended Queue</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../heap/index.html">Head</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tree/index.html">Tree</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../Operator_overloading/index.html">C++ Operator overloading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../access_modifiers.html">Access Modifiers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../references.html">References (or Aliases)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../const.html">const</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../functemplate.html">Function template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../passarguments.html">Pass arguments to function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../friend.html">Friend class and function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../abstract.html">Abstract Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../copyconstructor.html">Copy constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rvalue.html">Cplus Rvalue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../lvalue_and_rvalue.html">lvalue &amp;&amp; rvalue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../placement_new.html">Placement new operator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../template/index.html">Template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../cast/index.html">C++ Cast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../decltype.html">Decltype</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../explicit_implicit.html">Explicit and Implicit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../constructor.html">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../typedef_typename.html">typedef typename</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Cplus</a><ul>
+  <li><a href="../index.html">Libstd c++ 2.9.1</a><ul>
+  <li><a href="index.html">Double Ended Queue</a><ul>
+      <li>Previous: <a href="swap.html" title="previous chapter">swap</a></li>
+      <li>Next: <a href="allocation.html" title="next chapter">Allocation of _M_map and nodes</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../../../_sources/cplus/libstdc++_2_9_1/deque/push_pop.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

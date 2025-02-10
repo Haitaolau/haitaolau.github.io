@@ -1,0 +1,19 @@
+.. _cplus_template_index:
+
+===============
+Template
+===============
+
+.. toctree::
+   
+   instantiation
+   parameter_deduction
+   overide
+   variadic_function
+   fold_expressions
+   universal_references
+   type_deduction
+   ref_and_cref
+   auto_type_deduction
+   perfect_forwarding
+   trait

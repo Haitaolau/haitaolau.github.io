@@ -1,0 +1,46 @@
+================================================
+Files/directories were installed but not shipped
+================================================
+
+
+QA Issue: lvgl: Files/directories were installed but not shipped in any package
+--------------------------------------------------------------------------------
+
+Question: 
+
+.. code-block:: console 
+
+   ERROR: lvgl-8.1.0-r0 do_package: QA Issue: lvgl: Files/directories were installed but not shipped in any package:
+   /usr/lib
+   /usr/lib/liblvgl.a
+   Please set FILES such that these items are packaged. Alternatively if they are unneeded, avoid installing them or delete them within do_install.
+   lvgl: 2 installed and not shipped files. [installed-vs-shipped]
+   ERROR: lvgl-8.1.0-r0 do_package: Fatal QA errors were found, failing task.
+   ERROR: Logfile of failure stored in: /buildarea1/LIN1022-graphics/build/tmp-glibc/work/corei7-64-wrs-linux/lvgl/8.1.0-r0/temp/log.do_package.3615826
+   ERROR: Task (/buildarea1/LIN1022-graphics/layers/meta-openembedded/meta-oe/recipes-graphics/lvgl/lvgl_8.1.0.bb:do_package) failed with exit code '1'
+
+
+Solution: 
+
+.. code-block:: console 
+
+   hliu4@218c9deecf36$git diff meta-oe/recipes-graphics/lvgl/lvgl_8.1.0.bb
+   diff --git a/meta-oe/recipes-graphics/lvgl/lvgl_8.1.0.bb b/meta-oe/recipes-graphics/lvgl/lvgl_8.1.0.bb
+   index 2005afa2f..6942d013d 100644
+   --- a/meta-oe/recipes-graphics/lvgl/lvgl_8.1.0.bb
+   +++ b/meta-oe/recipes-graphics/lvgl/lvgl_8.1.0.bb
+   @@ -35,3 +35,5 @@ FILES:${PN}-dev += "\
+     ${includedir}/${PN}/ \
+     ${includedir}/${PN}/lvgl/ \
+     "
+   +
+   +FILES:${PN}-staticdev = "${nonarch_libdir}/*.a"
+   hliu4@218c9deecf36$
+
+
+nonarch_libdir is "/usr/lib"
+
+libdir is /usr/lib64
+
+
+

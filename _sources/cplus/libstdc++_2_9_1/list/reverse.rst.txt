@@ -1,0 +1,29 @@
+=========
+reverse
+=========
+
+
+
+syntax:
+
+.. code-block:: c++
+
+   inline void __List_base_reverse(_List_node_base* __p)
+	{
+	  _List_node_base* __tmp = __p;
+	  do {
+	    __STD::swap(__tmp->_M_next, __tmp->_M_prev);
+	    __tmp = __tmp->_M_prev;     // Old next node is now prev.
+	  } while (__tmp != __p);
+	}
+	
+	template <class _Tp, class _Alloc>
+	inline void list<_Tp, _Alloc>::reverse() 
+	{
+	  __List_base_reverse(this->_M_node);
+	} 
+	
+	
+.. image:: ../../../_static/image/list_reverse.jpg
+
+

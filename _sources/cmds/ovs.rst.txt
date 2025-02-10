@@ -1,0 +1,146 @@
+=============
+OpenVswitch
+=============
+
+Show port status
+=================
+
+.. code-block:: console 
+
+   root@intel-x86-64:~# ovs-appctl dpif-netdev/pmd-rxq-show
+   pmd thread numa_id 0 core_id 1:
+   isolated : false
+   port: dpdk0             queue-id:  0  pmd usage:  0 %
+   port: dpdk1             queue-id:  0  pmd usage:  0 %
+   port: dpdk2             queue-id:  0  pmd usage:  0 %
+   port: dpdk3             queue-id:  0  pmd usage:  0 %
+   port: l3_h_ge_1_0_0     queue-id:  0  pmd usage:  0 %
+
+
+.. code-block:: console 
+   
+   root@intel-x86-64:~# ovs-appctl dpif-netdev/pmd-stats-show
+   pmd thread numa_id 0 core_id 1:
+     packets received: 160074
+     packet recirculations: 0
+     avg. datapath passes per packet: 1.00
+     emc hits: 160066
+     smc hits: 0
+     megaflow hits: 6
+     avg. subtable lookups per megaflow hit: 1.33
+     miss with success upcall: 2
+     miss with failed upcall: 0
+     avg. packets per output batch: 1.00
+     idle cycles: 704072931765432 (100.00%)
+     processing cycles: 1080008774 (0.00%)
+     avg cycles per packet: 4398428300.50 (704074011774206/160074)
+     avg processing cycles per packet: 6746.93 (1080008774/160074)
+   main thread:
+     packets received: 0
+     packet recirculations: 0
+     avg. datapath passes per packet: 0.00
+     emc hits: 0
+     smc hits: 0
+     megaflow hits: 0
+     avg. subtable lookups per megaflow hit: 0.00
+     miss with success upcall: 0
+     miss with failed upcall: 0
+     avg. packets per output batch: 0.00
+   root@intel-x86-64:~#
+   
+
+OpenVswith Example
+====================
+
+.. code-block:: console
+
+   #!/bin/bash
+   
+   if [ ! -d /dev/huge1G ]
+   then
+       mkdir /dev/huge1G
+   fi
+   
+   echo 15 > /sys/kernel/mm/hugepages/hugepages-1048576kB/nr_hugepages
+   mount -t hugetlbfs -o pagesize=1G none /dev/huge1G
+   
+   chmod a+w /dev/huge1G -R
+   
+   sysctl -w kernel.core_pattern=/core.%u.%e.%p
+   sysctl -w vm.nr_hugepages=4096
+   
+   
+   modprobe kvm
+   modprobe kvm-intel
+   modprobe igb_uio
+   modprobe vfio-pci
+   brctl addbr eth0br
+   
+   chmod a+x /dev/vfio
+   chmod 0666 /dev/vfio/*
+   
+   
+   # clean the environment
+   killall ovsdb-server ovs-vswitchd
+   rm -f /var/run/openvswitch/vhost-user*
+   rm -f /etc/openvswitch/conf.db
+   num=`mount | grep "huge1G" | wc -l`
+   
+   for(( i=0; i<$num; i++ ))
+   {
+           echo "umount /dev/huge1G"
+           umount /dev/huge1G
+   }
+   
+   
+   #start database server
+   
+   export DB_SOCK=/var/run/openvswitch/db.sock
+   ovsdb-tool create /etc/openvswitch/conf.db /usr/share/openvswitch/vswitch.ovsschema
+   ovsdb-server --remote=punix:$DB_SOCK --remote=db:Open_vSwitch,Open_vSwitch,manager_options --pidfile --detach
+   
+   #start ovs
+   ovs-vsctl --no-wait init
+   #ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-lcore-mask=0xf
+   #ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-socket-mem=1024,1024
+   
+   ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-lcore-mask=0x4
+   ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-socket-mem=4096,4096
+   ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-init=true
+   
+   #pin the pmd to core 2(numa 0) and core 18(numa 1)
+   #ovs-vsctl --no-wait set Open_vSwitch . other_config:pmd-cpu-mask=0x40004
+   ovs-vsctl --no-wait set Open_vSwitch . other_config:pmd-cpu-mask=0x40006
+   
+   ovs-vswitchd unix:$DB_SOCK --pidfile --detach --log-file=/var/log/openvswitch/ovs-vswitchd.log
+   
+   #Configure the bridge
+   ovs-vsctl add-br ovsbr0 -- set bridge ovsbr0 datapath_type=netdev
+   ovs-vsctl add-port ovsbr0 vhost-user1 -- set Interface vhost-user1 type=dpdkvhostuser
+   ovs-vsctl add-port ovsbr0 vhost-user2 -- set Interface vhost-user2 type=dpdkvhostuser
+   
+   #create dpdk port
+   /opt/dpdk/share/tools/dpdk-devbind.py --bind=igb_uio 0000:05:00.0
+   /opt/dpdk/share/tools/dpdk-devbind.py --bind=igb_uio 0000:05:00.1
+   ovs-vsctl add-port ovsbr0 dpdk0 -- set Interface dpdk0 type=dpdk options:dpdk-devargs=0000:05:00.0
+   ovs-vsctl add-port ovsbr0 dpdk1 -- set Interface dpdk1 type=dpdk options:dpdk-devargs=0000:05:00.1
+   
+   ovs-vsctl set port dpdk1 tag=100
+   ovs-vsctl set port dpdk0 tag=50
+   ovs-vsctl set port vhost-user1 tag=50
+   ovs-vsctl set port vhost-user2 tag=100
+   
+   #ovs-vsctl set Interface dpdk1 options:n_rxq=2
+   #ovs-vsctl set Interface dpdk0 options:n_rxq=2
+   #ovs-vsctl set Interface vhost-user1 options:n_rxq=2
+   #ovs-vsctl set Interface vhost-user2 options:n_rxq=2
+   ovs-vsctl set Interface dpdk0 other_config:pmd-rxq-affinity="0:1"
+   ovs-vsctl set Interface dpdk1 other_config:pmd-rxq-affinity="0:2"
+   ovs-vsctl set Interface vhost-user1 other_config:pmd-rxq-affinity="0:1"
+   ovs-vsctl set Interface vhost-user2 other_config:pmd-rxq-affinity="0:2"
+   
+   
+   chmod 777 /var/run/openvswitch/* -R
+   virtlogd -d
+   
+   

@@ -1,0 +1,60 @@
+==========================================
+ Complete Definition of mark-whole-buffer
+==========================================
+
+**c-h f mark-whole-buffer**
+
+.. code-block:: console
+
+   mark-whole-buffer is an interactive compiled Lisp function in ‘simple.el’.
+
+   It is bound to C-x h, <menu-bar> <edit> <mark-whole-buffer>.
+
+   (mark-whole-buffer)
+
+   This function is for interactive use only.
+   Probably introduced at or before Emacs version 26.1.
+
+   Put point at beginning and mark at end of buffer.
+   Also push mark at point before pushing mark at end of buffer.
+   If narrowing is in effect, uses only the accessible part of the buffer.
+   You probably should not use this function in Lisp programs;
+   it is usually a mistake for a Lisp function to use any subroutine
+   that uses or sets the mark.
+
+
+ **The complete definition**
+ 
+
+.. code-block:: console
+
+   (defun mark-whole-buffer ()
+     "Put point at beginning and mark at end of buffer.
+   Also push mark at point before pushing mark at end of buffer.
+   If narrowing is in effect, uses only the accessible part of the buffer.
+   You probably should not use this function in Lisp programs;
+   it is usually a mistake for a Lisp function to use any subroutine
+   that uses or sets the mark."
+     (declare (interactive-only t))
+     (interactive)
+     (push-mark)
+     (push-mark (point-max) nil t)
+     ;; This is really `point-min' in most cases, but if we're in the
+     ;; minibuffer, this is at the end of the prompt.
+     (goto-char (minibuffer-prompt-end)))
+   
+
+ 
+It marks a whole buffer as a region by putting point at the beginning and a mark at the end of the buffer. It is generally bound to C-x h.
+
+**push-mark**
+
+ - the Lisp interprete sets a mark at the current position of the cursor.
+
+**push-mark (point-max) nil t)**
+
+It sets a mark at the highest numbered place in the buffer that it can. However, in this version, push-mark has
+two additional arguments. The second argument to push-mark is nil. This tells the function it should display a
+message that says “Mark set” when it pushes the mark. The third argument is t. This tells push-mark to activate
+the mark when Transient Mark mode is turned on. Transient Mark mode highlights the currently active region. It
+is often turned of

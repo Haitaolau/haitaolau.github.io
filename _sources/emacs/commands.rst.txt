@@ -1,0 +1,89 @@
+===================
+Emacs Commands
+===================
+
+.. include:: <isonum.txt>
+
+C- means "control key", Hold down the control key while
+   pressing the next key
+M- means "meta key", (“Escape” in the lab, on other
+   computers sometimes “Alt”). For meta commands with the
+   Escape key, press the Escape key and then release it,
+   then press the other key. Thus M-f stands for the
+   keyboard sequence "press and release the Escape key", "
+   press f".
+
+
+**C-x C-s** |nbsp| |nbsp| |nbsp| |nbsp| Save file
+
+**C-x C-w** |nbsp| |nbsp| |nbsp| |nbsp| Write file out with new name (i.e. 'save as')
+
+**C-x C-f** |nbsp| |nbsp| |nbsp| |nbsp| Find (open) file. (If the file doesn't exist, it will be created.)
+
+**C-x C-c** |nbsp| |nbsp| |nbsp| |nbsp| Quit Emacs
+
+**C-z** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Leave Emacs temporarily (return with "fg" ("foreground"))
+
+**C-g** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Abort an Emacs command (get out of trouble)
+
+**C-_**  |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Undo
+
+**C-x 2** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Split Emacs screen into two horizontally
+
+**C-x 3** |nbsp| |nbsp| |nbsp| |nbsp|  |nbsp| |nbsp| Split Emacs screen into two vertically
+
+**C-x o** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| move from one half screen to another
+
+**C-x 1** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Return to only one screen (whichever your cursor is in)
+
+**c-x C-b** |nbsp| |nbsp| |nbsp| |nbsp| List the current buffers
+
+**C-x b** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Switch to a different active buffer
+
+**C-k** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Kill text from cursor to end of line (Cut text out)
+
+**C-y** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Yank back killed text. (Paste text in)
+
+**C-l** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Redisplay the screen if it is garbled
+
+
+Commands to move about the screen (can also use the arrow keys.)
+
+**C-f** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Move cursor forward one character
+
+**C-b**  Move cursor backwards one character
+
+**C-n** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Move cursor to next line
+
+**C-p** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Move cursor to previous line
+
+**C-a** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Move cursor to beginning of line
+
+**C-e** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Move cursor to end of line
+
+**C-v** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Go forward one screen
+
+**M-v** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Go backward one screen
+
+**M-f** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Move cursor forward one word
+
+**M-b** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Move cursor backwards one word
+
+**M->** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Move to end of file
+
+**M-<** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Move to beginning of file
+
+**C-u 7 C-n** |nbsp| |nbsp| Move forward 7 lines
+
+**C-u 10 C-p** |nbsp| |nbsp| Move back 10 lines
+
+To go to a specific line: Type M-x goto-line <Enter>, then
+type the line number followed by <Enter>. There are also
+shortcuts. Type the command "help -q emacs goto" in a local
+window to find out about it. (Local shortcut is M-x #).
+
+
+Emacs has an excellent on-line help tutorial. To use it,
+start up emacs. When you are in emacs, type C-h, then type
+the letter "t". Follow directions. When you wish to leave
+the tutorial, type C-x C-c.

@@ -1,0 +1,169 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>E: You must put some ‘source’ URIs in your sources.list &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="How can I specify the repository from which a package will be installed?" href="0008.html" />
+    <link rel="prev" title="How to download deb packages using apt" href="0006.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="e-you-must-put-some-source-uris-in-your-sources-list">
+<h1>E: You must put some ‘source’ URIs in your sources.list<a class="headerlink" href="#e-you-must-put-some-source-uris-in-your-sources-list" title="Permalink to this heading">¶</a></h1>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">root@32b81b5fc0ca:/usr/src# </span>apt-get <span class="nb">source</span> lsb-base
+<span class="go">Reading package lists... Done</span>
+<span class="go">E: You must put some &#39;deb-src&#39; URIs in your sources.</span>
+</pre></div>
+</div>
+<p><strong>Add deb-src to source.lists(deb822 style)</strong></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">root@32b81b5fc0ca:/# </span>cat /etc/apt/sources.list.d/debian.sources
+<span class="go">Types: deb deb-src</span>
+<span class="gp"># </span>http://snapshot.debian.org/archive/debian/20240722T000000Z
+<span class="go">URIs: http://deb.debian.org/debian</span>
+<span class="go">Suites: bookworm bookworm-updates</span>
+<span class="go">Components: main</span>
+<span class="go">Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg</span>
+
+<span class="go">Types: deb deb-src</span>
+<span class="gp"># </span>http://snapshot.debian.org/archive/debian-security/20240722T000000Z
+<span class="go">URIs: http://deb.debian.org/debian-security</span>
+<span class="go">Suites: bookworm-security</span>
+<span class="go">Components: main</span>
+<span class="go">Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg</span>
+</pre></div>
+</div>
+<p>See also:</p>
+<p>. <a class="reference external" href="https://wiki.debian.org/SourcesList">https://wiki.debian.org/SourcesList</a></p>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cplus/index.html">Cplus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Debian</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="0005.html">Launch up Debian VM with Qemu</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debian-installer/index.html">Debian Installer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debian-command/index.html">Debian command</a></li>
+<li class="toctree-l2"><a class="reference internal" href="live-cd/index.html">Debian Live CD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="elxr_edge/index.html">eLxr Edge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="os-tree/index.html">OS tree</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0001.html">Ruck: build pablo with minimal ostree rootfs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0002.html">How to build deb package for libxfce4ui</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0003.html">How to Search for Debian package?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0004.html">How to Check Debian package version?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0006.html">How to download deb packages using apt</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">E: You must put some ‘source’ URIs in your sources.list</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0008.html">How can I specify the repository from which a package will be installed?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0009.html">How to install build dependencies for packages ?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0010.html">Create orig tarballs from git</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0011.html">Debian: Building the package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pipeline/index.html">Debian Pipeline</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Debian</a><ul>
+      <li>Previous: <a href="0006.html" title="previous chapter">How to download deb packages using apt</a></li>
+      <li>Next: <a href="0008.html" title="next chapter">How can I specify the repository from which a package will be installed?</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/debian/0007.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

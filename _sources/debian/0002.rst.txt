@@ -1,0 +1,107 @@
+=========================================
+ How to build deb package for libxfce4ui
+=========================================
+
+
+
+Get the libxfce4ui project from debian
+======================================
+
+Clone the project from https://salsa.debian.org/xfce-team/desktop/libxfce4ui.git
+
+.. code-block:: console
+
+   git clone https://salsa.debian.org/xfce-team/desktop/libxfce4ui.git
+
+Change the branch to 4.18
+
+.. code-block:: console
+
+   root@c66f22051364:/usr/src/libxfce4ui/libxfce4ui# git checkout debian/4.18
+   branch 'debian/4.18' set up to track 'origin/debian/4.18'.
+   Switched to a new branch 'debian/4.18'
+   root@c66f22051364:/usr/src/libxfce4ui/libxfce4ui# 
+
+
+Get the source code for libxfce4ui
+==================================
+
+
+Download it from https://deb.debian.org/debian/pool/main/libx/libxfce4ui/libxfce4ui_4.18.6.orig.tar.bz2
+
+
+.. code-block:: console
+
+   root@c66f22051364:/usr/src/libxfce4ui# wget https://deb.debian.org/debian/pool/main/libx/libxfce4ui/libxfce4ui_4.18.6.orig.tar.bz2
+   --2024-08-05 06:59:03--  https://deb.debian.org/debian/pool/main/libx/libxfce4ui/libxfce4ui_4.18.6.orig.tar.bz2
+   Resolving deb.debian.org (deb.debian.org)... 151.101.50.132, 2a04:4e42:2f::644
+   Connecting to deb.debian.org (deb.debian.org)|151.101.50.132|:443... connected.
+   HTTP request sent, awaiting response... 200 OK
+   Length: 906477 (885K) [application/x-bzip2]
+   Saving to: 'libxfce4ui_4.18.6.orig.tar.bz2'
+
+   libxfce4ui_4.18.6.orig.tar.bz2              100%[========================================================================================>] 885.23K  --.-KB/s    in 0.02s   
+
+   2024-08-05 06:59:03 (45.5 MB/s) - 'libxfce4ui_4.18.6.orig.tar.bz2' saved [906477/906477]
+
+   root@c66f22051364:/usr/src/libxfce4ui# ls
+   libxfce4ui  libxfce4ui_4.18.6.orig.tar.bz2
+   root@c66f22051364:/usr/src/libxfce4ui# 
+
+Building with debuild
+=====================
+
+
+.. code-block:: console
+
+   root@c66f22051364:/usr/src/libxfce4ui/libxfce4ui# debuild 
+   dpkg-buildpackage -us -uc -ui
+   dpkg-buildpackage: info: source package libxfce4ui
+   dpkg-buildpackage: info: source version 4.18.6-1
+   dpkg-buildpackage: info: source distribution unstable
+   dpkg-buildpackage: info: source changed by Yves-Alexis Perez <corsac@debian.org>
+   dpkg-source --before-build .
+   dpkg-buildpackage: info: host architecture amd64
+   debian/rules clean
+
+   ...
+
+   Now signing changes and any dsc files...
+   signfile dsc libxfce4ui_4.18.6-1.dsc Yves-Alexis Perez <corsac@debian.org>
+   gpg: skipped "Yves-Alexis Perez <corsac@debian.org>": No secret key
+   gpg: /tmp/debsign.RqFL5JEC/libxfce4ui_4.18.6-1.dsc: clear-sign failed: No secret key
+   debsign: gpg error occurred!  Aborting....
+   debuild: fatal error at line 1112:
+   running debsign failed
+
+
+But we got a gpg error.Because the private key is not available.If you want to sign the package, you need to change the name and email in debian/changelog to match your name, for which a private key is available
+
+
+
+Buing with no-sign
+==================
+
+Using no-sign build directive using the command parameters -uc -us
+
+.. code-block:: console
+
+   debuild -uc -us
+
+   root@c66f22051364:/usr/src/libxfce4ui# ls -lh *.deb 
+   -rw-r--r-- 1 root root  22K Aug  5 07:07 gir1.2-libxfce4ui-2.0_4.18.6-1_amd64.deb
+   -rw-r--r-- 1 root root 180K Aug  5 07:07 libxfce4ui-2-0-dbgsym_4.18.6-1_amd64.deb
+   -rw-r--r-- 1 root root  72K Aug  5 07:07 libxfce4ui-2-0_4.18.6-1_amd64.deb
+   -rw-r--r-- 1 root root  43K Aug  5 07:07 libxfce4ui-2-dev_4.18.6-1_amd64.deb
+   -rw-r--r-- 1 root root 220K Aug  5 07:07 libxfce4ui-common_4.18.6-1_all.deb
+   -rw-r--r-- 1 root root 6.1K Aug  5 07:07 libxfce4ui-glade-dbgsym_4.18.6-1_amd64.deb
+   -rw-r--r-- 1 root root  21K Aug  5 07:07 libxfce4ui-glade_4.18.6-1_amd64.deb
+   -rw-r--r-- 1 root root  35K Aug  5 07:07 libxfce4ui-utils-dbgsym_4.18.6-1_amd64.deb
+   -rw-r--r-- 1 root root  87K Aug  5 07:07 libxfce4ui-utils_4.18.6-1_amd64.deb
+   root@c66f22051364:/usr/src/libxfce4ui# 
+
+
+
+
+You could also use `dpkg-buildpackage -us -uc -ui` directly.
+   

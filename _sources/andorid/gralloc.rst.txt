@@ -1,0 +1,14 @@
+=============
+Gralloc
+=============
+
+The graphics memory allocator (Gralloc) is needed to allocate memory requested by image producers.
+
+
+The Gralloc allocator HAL hardware/libhardware/include/hardware/gralloc.h performs buffer allocations through usage flags. Usage flags include attributes such as:
+
+*    How often the memory will be accessed from software (CPU)
+*    How often the memory will be accessed from hardware (GPU)
+*    Whether the memory will be used as an OpenGL ES (GLES) texture
+*    Whether the memory will be used by a video encoder
+

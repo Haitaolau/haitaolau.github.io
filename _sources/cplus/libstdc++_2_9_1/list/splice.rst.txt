@@ -1,0 +1,38 @@
+=========
+splice
+=========
+
+
+1. 将x接合于position所指的我i之之前，此时x必须不同于*this
+
+.. code-block:: cpp
+
+      void splice(iterator __position, list& __x) {
+	  if (!__x.empty()) 
+	      this->transfer(__position, __x.begin(), __x.end());
+	  }
+	  
+2. 将i所指元素结合于position所指位置之前，position和i可以指向同一个list
+
+.. code-block:: cpp
+	  
+	  void splice(iterator __position, list&, iterator __i) {
+	    iterator __j = __i;
+	    ++__j;
+	    if (__position == __i || __position == __j) return;
+	    this->transfer(__position, __i, __j);
+	  }
+	  
+3. 将[first, last)内的所有元素接合于position所指位置之前， 可以是同一个list，也可以是不同的list。 但是，position不能在[first,last)之内
+
+
+.. code-block:: cpp
+	  
+	  void splice(iterator __position, list&, iterator __first, iterator __last) {
+		if (__first != __last) 
+	      this->transfer(__position, __first, __last);
+	      
+
+	      
+	      
+Please refer to :doc:`transfer`

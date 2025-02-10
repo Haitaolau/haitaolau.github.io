@@ -1,0 +1,13 @@
+==========================
+IOMMU
+==========================
+
+
+The Input-Output Memory Management Unit (IOMMU) is a component in a memory controller
+that translates device virtual addresses (can be also called I/O addresses or device
+addresses) to physical addresses. 
+
+The concept of IOMMU is similar to Memory Management
+Unit (MMU). The difference between IOMMU and MMU is that IOMMU translates device
+virtual addresses to physical addresses while MMU translates CPU virtual addresses to
+physical addresses

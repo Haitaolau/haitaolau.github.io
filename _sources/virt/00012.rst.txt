@@ -1,0 +1,20 @@
+=========================
+ Start Qemu with monitor
+=========================
+
+.. code-block:: console 
+
+   #!/bin/bash
+
+   qemu-system-x86_64 -enable-kvm -m 4096 -smp 8 \
+    -chardev socket,id=char0,path=/var/run/openvswitch/vhost-user1 \
+    -netdev type=vhost-user,id=mynet1,chardev=char0,vhostforce \
+    -device virtio-net-pci,netdev=mynet1,mac=52:54:00:02:d9:0a \
+    -object memory-backend-file,id=mem,size=4096M,mem-path=/dev/hugepages1G,share=on \
+    -numa node,memdev=mem -mem-prealloc \
+    $1 -vnc :0 -monitor stdio
+
+    #-serial mon:stdio $1 --nographic -monitor stdio
+    #-monitor unix:qemu-monitor-socket,server,nowait $1
+
+

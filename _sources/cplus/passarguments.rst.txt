@@ -1,0 +1,39 @@
+===========================
+Pass arguments to function
+===========================
+
+take value as parameter
+------------------------
+
+.. code-block:: c
+
+  void mySwap(int a, int b) {
+  	int tmp = a;
+  	a = b;
+  	b = tmp;
+  }
+
+
+take pointer as parameter 
+-------------------------
+
+.. code-block:: c
+
+  void mySwap2(int* a, int* b) {
+  	int tmp = *a;
+  	*a = *b;
+  	*b = tmp;
+  
+  }
+
+take reference as parameter 
+---------------------------
+
+.. code-block:: c
+
+  void mySwap3(int& a, int& b) {
+  	int tmp = b;
+  	b = a;
+  	a = tmp;
+  }
+  

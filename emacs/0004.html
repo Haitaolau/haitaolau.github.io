@@ -1,0 +1,187 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Complete Definition of mark-whole-buffer &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Fundamental Functions" href="0005.html" />
+    <link rel="prev" title="Complete Definition of beginning-of-buffer" href="0003.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="complete-definition-of-mark-whole-buffer">
+<h1>Complete Definition of mark-whole-buffer<a class="headerlink" href="#complete-definition-of-mark-whole-buffer" title="Permalink to this heading">¶</a></h1>
+<p><strong>c-h f mark-whole-buffer</strong></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">  mark-whole-buffer is an interactive compiled Lisp function in ‘simple.el’.</span>
+
+<span class="go">  It is bound to C-x h, &lt;menu-bar&gt; &lt;edit&gt; &lt;mark-whole-buffer&gt;.</span>
+
+<span class="go">  (mark-whole-buffer)</span>
+
+<span class="go">  This function is for interactive use only.</span>
+<span class="go">  Probably introduced at or before Emacs version 26.1.</span>
+
+<span class="go">  Put point at beginning and mark at end of buffer.</span>
+<span class="go">  Also push mark at point before pushing mark at end of buffer.</span>
+<span class="go">  If narrowing is in effect, uses only the accessible part of the buffer.</span>
+<span class="go">  You probably should not use this function in Lisp programs;</span>
+<span class="go">  it is usually a mistake for a Lisp function to use any subroutine</span>
+<span class="go">  that uses or sets the mark.</span>
+
+
+<span class="go">**The complete definition**</span>
+</pre></div>
+</div>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(defun mark-whole-buffer ()</span>
+<span class="go">  &quot;Put point at beginning and mark at end of buffer.</span>
+<span class="go">Also push mark at point before pushing mark at end of buffer.</span>
+<span class="go">If narrowing is in effect, uses only the accessible part of the buffer.</span>
+<span class="go">You probably should not use this function in Lisp programs;</span>
+<span class="go">it is usually a mistake for a Lisp function to use any subroutine</span>
+<span class="go">that uses or sets the mark.&quot;</span>
+<span class="go">  (declare (interactive-only t))</span>
+<span class="go">  (interactive)</span>
+<span class="go">  (push-mark)</span>
+<span class="go">  (push-mark (point-max) nil t)</span>
+<span class="go">  ;; This is really `point-min&#39; in most cases, but if we&#39;re in the</span>
+<span class="go">  ;; minibuffer, this is at the end of the prompt.</span>
+<span class="go">  (goto-char (minibuffer-prompt-end)))</span>
+</pre></div>
+</div>
+<p>It marks a whole buffer as a region by putting point at the beginning and a mark at the end of the buffer. It is generally bound to C-x h.</p>
+<p><strong>push-mark</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>the Lisp interprete sets a mark at the current position of the cursor.</p></li>
+</ul>
+</div></blockquote>
+<p><strong>push-mark (point-max) nil t)</strong></p>
+<p>It sets a mark at the highest numbered place in the buffer that it can. However, in this version, push-mark has
+two additional arguments. The second argument to push-mark is nil. This tells the function it should display a
+message that says “Mark set” when it pushes the mark. The third argument is t. This tells push-mark to activate
+the mark when Transient Mark mode is turned on. Transient Mark mode highlights the currently active region. It
+is often turned of</p>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cplus/index.html">Cplus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Emacs</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="commands.html">Emacs Commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0007.html">Emacs Commands: Blank Lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0001.html">How do I insert &lt;some text&gt; at the beginning of every line?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0002.html">How do I find the function definition?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0003.html">Complete Definition of beginning-of-buffer</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Complete Definition of mark-whole-buffer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0005.html">Fundamental Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0006.html">How to delete the first few n chars of every line?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0008.html">jumps to the location of the mark - and M-&lt; sets the mark before jumping</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Emacs</a><ul>
+      <li>Previous: <a href="0003.html" title="previous chapter">Complete Definition of beginning-of-buffer</a></li>
+      <li>Next: <a href="0005.html" title="next chapter">Fundamental Functions</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/emacs/0004.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

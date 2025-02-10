@@ -1,0 +1,132 @@
+================================
+Friend class and function
+================================
+
+Friend function
+----------------
+
+* 可以将一个全局函数，某个类的成员函数，甚至整个类声明为友元函数
+
+* 类的友元函数是定义在类外部，但有权访问类的所有私有（private）成员和保护（protected）成员
+
+* 尽管友元函数的原型有在类的定义中出现过，但是友元函数并不是成员函数。
+
+.. code-block:: c
+
+   class Box
+   {
+    private:
+        double width;
+    public:
+        void setWidth(double w);
+        friend void showWidth(Box* box);
+   };
+    
+    void Box::setWidth(double w)
+    {
+        this->width = w;
+    }
+    
+    void showWidth(Box* box)
+    {
+        std::cout << "The width is : " << box->width << std::endl;
+    }
+    
+    int main()
+    {
+        Box* box = new Box;
+        box->setWidth(15.34);
+        showWidth(box);
+        delete box;
+    }
+  
+Friend Class
+--------------------
+
+
+一个类 A 可以将另一个类 B 声明为自己的友元，
+类 B 的所有成员函数就都可以访问类 A 对象的私有成员
+
+
+.. code-block:: c
+
+   class HRManager;
+   class Employee {
+   
+   private:
+       int e_age;
+       int e_sex;
+       std::string e_name;
+   public:
+   
+       friend class HRManager;
+       Employee() {
+           this->e_age = 10;
+           this->e_name = "";
+           this->e_sex = 1;
+       };
+       Employee(int age, int sex, std::string name)
+           :e_age(age), e_sex(sex), e_name(name){}
+   };
+   
+   class HRManager {
+   
+   private:
+       int hr_age;
+       int hr_sex;
+       std::string hr_name;
+   public:
+       HRManager() {
+           this->hr_age = 10;
+           this->hr_name = "";
+           this->hr_sex = 1;
+       };
+       HRManager(int age, int sex, std::string name)
+           :hr_age(age), hr_sex(sex), hr_name(name) {}
+   
+       void showStudentInfo(Employee& employee);
+   };
+   
+   int main()
+   {
+       HRManager* hr = new HRManager(38,1,"sherry");
+       Employee* e = new Employee(32, 2, "Terry");
+       hr->showStudentInfo(*e);
+   
+       delete e;
+       delete hr;
+   
+       return 0;
+       
+   }
+
+HRManager 可以访问员工的私有信息，但是员工不可以访问HR的私有信息
+
+.. note::
+
+    1. 友元关系是单向的，类A是类B的朋友，但类B不一定是类A的朋友
+    2. 友元关系不能被继承
+    3. 友元关系不具有传递性，类B是类A的朋友，类C是类B的朋友，但类C不一定是类A的朋友
+
+We can also use a friend Class in C++ using the friend keyword. For example,
+
+.. code-block::
+   
+   class ClassB;
+
+   class ClassA {
+      // ClassB is a friend class of ClassA
+      friend class ClassB;
+      ... .. ...
+   }
+   
+   class ClassB {
+      ... .. ...
+   }
+
+When a class is declared a friend class, all the member functions of the friend class become friend functions.
+
+Since ClassB is a friend class, we can access all members of ClassA from inside ClassB.
+
+However, we cannot access members of ClassB from inside ClassA. It is because friend relation in C++ is only granted, not taken.
+

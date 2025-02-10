@@ -1,0 +1,221 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Insert &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Head" href="../heap/index.html" />
+    <link rel="prev" title="erase" href="erase.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="insert">
+<h1>Insert<a class="headerlink" href="#insert" title="Permalink to this heading">¶</a></h1>
+<section id="insert-iterator-const-value-type">
+<h2>insert(iterator, const value_type&amp;)<a class="headerlink" href="#insert-iterator-const-value-type" title="Permalink to this heading">¶</a></h2>
+<p>在某个点之前插入一个元素</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">iterator</span><span class="w"> </span><span class="nf">insert</span><span class="p">(</span><span class="n">iterator</span><span class="w"> </span><span class="n">position</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">value_type</span><span class="o">&amp;</span><span class="w"> </span><span class="n">__x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">position</span><span class="p">.</span><span class="n">_M_cur</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">_M_start</span><span class="p">.</span><span class="n">_M_cur</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">//如果插入点是deque的最前端</span>
+<span class="w">    </span><span class="n">push_front</span><span class="p">(</span><span class="n">__x</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">_M_start</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">position</span><span class="p">.</span><span class="n">_M_cur</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_cur</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">//如果插入点是deque的最末端</span>
+<span class="w">    </span><span class="n">push_back</span><span class="p">(</span><span class="n">__x</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">iterator</span><span class="w"> </span><span class="n">__tmp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_M_finish</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="o">--</span><span class="n">__tmp</span><span class="p">;</span><span class="w"> </span><span class="c1">// --tmp._M_cur</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__tmp</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">_M_insert_aux</span><span class="p">(</span><span class="n">position</span><span class="p">,</span><span class="w"> </span><span class="n">__x</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">ref<span class="colon">:</span></dt>
+<dd class="field-odd"><p><cite>_M_insert_aux &lt;M_insert_aux&gt;</cite></p>
+</dd>
+</dl>
+</section>
+<section id="m-insert-aux">
+<span id="id1"></span><h2>_M_insert_aux<a class="headerlink" href="#m-insert-aux" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">_Tp</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">_Alloc</span><span class="o">&gt;</span><span class="w"></span>
+<span class="k">typename</span><span class="w"> </span><span class="nc">deque</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="w"> </span><span class="n">_Alloc</span><span class="o">&gt;::</span><span class="n">iterator</span><span class="w"></span>
+<span class="n">deque</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="n">_Alloc</span><span class="o">&gt;::</span><span class="n">_M_insert_aux</span><span class="p">(</span><span class="n">iterator</span><span class="w"> </span><span class="n">__pos</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">value_type</span><span class="o">&amp;</span><span class="w"> </span><span class="n">__x</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="c1">//获得插入点之前的元素个数</span>
+<span class="w">  </span><span class="n">difference_type</span><span class="w"> </span><span class="n">__index</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__pos</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">_M_start</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="n">value_type</span><span class="w"> </span><span class="n">__x_copy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__x</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="c1">//如果插入点之前的元素比较少，在deque的前半部分中</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">size_type</span><span class="o">&gt;</span><span class="p">(</span><span class="n">__index</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">size</span><span class="p">()</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">push_front</span><span class="p">(</span><span class="n">front</span><span class="p">());</span><span class="w"></span>
+<span class="w">    </span><span class="n">iterator</span><span class="w"> </span><span class="n">__front1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_M_start</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="o">++</span><span class="n">__front1</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">iterator</span><span class="w"> </span><span class="n">__front2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__front1</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="o">++</span><span class="n">__front2</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">__pos</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_M_start</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">__index</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">iterator</span><span class="w"> </span><span class="n">__pos1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__pos</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="o">++</span><span class="n">__pos1</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">copy</span><span class="p">(</span><span class="n">__front2</span><span class="p">,</span><span class="w"> </span><span class="n">__pos1</span><span class="p">,</span><span class="w"> </span><span class="n">__front1</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="c1">//如果插入点之后的元素比较少，在deque的后半部分中</span>
+<span class="w">    </span><span class="n">push_back</span><span class="p">(</span><span class="n">back</span><span class="p">());</span><span class="w"></span>
+<span class="w">    </span><span class="n">iterator</span><span class="w"> </span><span class="n">__back1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_M_finish</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="o">--</span><span class="n">__back1</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">iterator</span><span class="w"> </span><span class="n">__back2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__back1</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="o">--</span><span class="n">__back2</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">__pos</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_M_start</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">__index</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">copy_backward</span><span class="p">(</span><span class="n">__pos</span><span class="p">,</span><span class="w"> </span><span class="n">__back2</span><span class="p">,</span><span class="w"> </span><span class="n">__back1</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="o">*</span><span class="n">__pos</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__x_copy</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">__pos</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">Cplus</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">Libstd c++ 2.9.1</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../vector/index.html">Vector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../list/index.html">List</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Double Ended Queue</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../heap/index.html">Head</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tree/index.html">Tree</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../Operator_overloading/index.html">C++ Operator overloading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../access_modifiers.html">Access Modifiers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../references.html">References (or Aliases)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../const.html">const</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../functemplate.html">Function template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../passarguments.html">Pass arguments to function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../friend.html">Friend class and function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../abstract.html">Abstract Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../copyconstructor.html">Copy constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rvalue.html">Cplus Rvalue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../lvalue_and_rvalue.html">lvalue &amp;&amp; rvalue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../placement_new.html">Placement new operator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../template/index.html">Template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../cast/index.html">C++ Cast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../decltype.html">Decltype</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../explicit_implicit.html">Explicit and Implicit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../constructor.html">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../typedef_typename.html">typedef typename</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Cplus</a><ul>
+  <li><a href="../index.html">Libstd c++ 2.9.1</a><ul>
+  <li><a href="index.html">Double Ended Queue</a><ul>
+      <li>Previous: <a href="erase.html" title="previous chapter">erase</a></li>
+      <li>Next: <a href="../heap/index.html" title="next chapter">Head</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../../../_sources/cplus/libstdc++_2_9_1/deque/insert.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

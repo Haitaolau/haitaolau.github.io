@@ -1,0 +1,58 @@
+==================
+Function template
+==================
+
+
+C++提供了函数模板（function template）所谓函数模板，实际上是建立一个通用函数，
+其函数类型和形参类型不具体制定，用一个虚拟的类型来代表，这个调用函数就成为函数模板
+
+
+Definition
+-------------------
+
+.. code-block:: c
+   
+ template<typename T>
+ void mySwap(T& a, T& b) {
+    T tmp = a;
+    a = b;
+    b = tmp;
+ }
+
+Example
+-------------------
+
+.. code-block:: c
+
+ int main()
+ {
+    int a = 10;
+    int b = 20;
+    mySwap(a, b);
+    std::cout << "a = " << a << std::endl;
+    std::cout << "b = " << b << std::endl;
+
+    double c = 10.00;
+    double d = 20.00;
+    mySwap<double>(c, d);
+    std::cout << "c = " << c << std::endl;
+    std::cout << "d = " << d << std::endl;
+
+ }
+
+Calling a Function Template
+---------------------------
+
+* 自动类型推导，必须有参数类型才可以推到
+  
+.. code-block:: c
+
+   int a = 10;
+   int b = 20;
+   mySwap(a, b);
+
+* 显示指定类型
+
+.. code-block:: c
+   
+   mySwap<int>(a, b);

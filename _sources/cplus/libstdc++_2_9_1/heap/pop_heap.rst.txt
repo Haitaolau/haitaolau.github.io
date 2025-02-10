@@ -1,0 +1,134 @@
+=========
+Pop heap
+=========
+
+
+Example Code
+===============
+
+
+.. code-block:: cpp
+
+   #include <iostream>
+   #include <algorithm>
+   #include <vector>
+   
+   using namespace std;
+   
+   void print(vector<int>& vc)
+   {
+   	for (auto i : vc) {
+   		cout << i << " ";
+   	}
+   	cout << endl;
+   }
+   
+   int main(int argc, char **argv)
+   {
+   	// Initializing a vector
+       vector<int> v1 = { 13,16,19,21,24,26,31,32,65,68};
+   	cout << "vector     :";
+   	print(v1);
+   	// Converting vector into a heap
+   	// using make_heap()
+   	make_heap(v1.begin(), v1.end());
+   	cout << "make_heap  :";
+   	print(v1);
+   	pop_heap(v1.begin(), v1.end());
+   	cout << "pop_heap   :";
+   	print(v1);
+   
+   	return 0;
+   }
+
+
+
+The output:
+------------------
+
+.. code-block:: console 
+
+   wrsadmin@pek-hliu4-d1:~/workspace/test$ ./pop_heap
+   vector     :13 16 19 21 24 26 31 32 65 68
+   make_heap  :68 65 31 32 24 26 19 13 21 16
+   pop_heap   :65 32 31 21 24 26 19 13 16 68
+
+.. image:: ../../../_static/image/pop_heap01.jpg
+
+
+Source Code
+================
+
+pop_heap
+-----------
+
+
+.. code-block:: cpp
+
+   template <class _RandomAccessIterator>
+   inline void pop_heap(_RandomAccessIterator __first, 
+                        _RandomAccessIterator __last)
+   {
+     __STL_REQUIRES(_RandomAccessIterator, _Mutable_RandomAccessIterator);
+     __STL_REQUIRES(typename iterator_traits<_RandomAccessIterator>::value_type,
+                    _LessThanComparable);
+     __pop_heap_aux(__first, __last, __VALUE_TYPE(__first));
+   }
+
+__pop_heap_aux
+----------------
+
+.. code-block:: cpp
+
+   template <class _RandomAccessIterator, class _Tp>
+   inline void 
+   __pop_heap_aux(_RandomAccessIterator __first, _RandomAccessIterator __last,
+                  _Tp*)
+   {
+     __pop_heap(__first, __last - 1, __last - 1, 
+                _Tp(*(__last - 1)), __DISTANCE_TYPE(__first));
+   }
+
+
+__pop_heap
+-------------
+
+.. code-block:: cpp
+
+   template <class _RandomAccessIterator, class _Tp, class _Distance>
+   inline void 
+   __pop_heap(_RandomAccessIterator __first, _RandomAccessIterator __last,
+              _RandomAccessIterator __result, _Tp __value, _Distance*)
+   {
+     *__result = *__first;
+     __adjust_heap(__first, _Distance(0), _Distance(__last - __first), __value);
+   }
+
+__adjust_heap
+----------------
+
+.. code-block:: cpp
+
+   template <class _RandomAccessIterator, class _Distance, class _Tp>
+   void 
+   __adjust_heap(_RandomAccessIterator __first, _Distance __holeIndex,
+                 _Distance __len, _Tp __value)
+   {
+     _Distance __topIndex = __holeIndex;
+     _Distance __secondChild = 2 * __holeIndex + 2;
+     while (__secondChild < __len) {
+       if (*(__first + __secondChild) < *(__first + (__secondChild - 1)))
+         __secondChild--;
+       *(__first + __holeIndex) = *(__first + __secondChild);
+       __holeIndex = __secondChild;
+       __secondChild = 2 * (__secondChild + 1);
+     }
+     if (__secondChild == __len) {
+       *(__first + __holeIndex) = *(__first + (__secondChild - 1));
+       __holeIndex = __secondChild - 1;
+     }
+     __push_heap(__first, __holeIndex, __topIndex, __value);
+   }
+   
+      
+

@@ -1,0 +1,157 @@
+========================
+Explicit and Implicit
+========================
+
+
+
+Implicit
+=================
+
+
+.. code-block:: cpp 
+
+   #include <iostream>
+   
+   using namespace std;
+   
+   
+   class Time
+   {
+           int Hour;
+           int Minute;
+           int Second;
+           public:
+                   Time(int tmphour, int tmpmin, int tmpsec);
+                   Time(int tmphour);
+   
+   };
+   
+   Time::Time(int tmphour)
+   {
+           Hour = tmphour;
+           Minute = 59;
+           Second = 59;
+           cout << "Time(int tmphour):( "
+                << Hour <<","
+                << Minute << ","
+                << Second << ")" << endl;
+   
+   }
+   
+   Time::Time(int tmphour, int tmpmin, int tmpsec)
+   {
+           Hour = tmphour;
+           Minute = tmpmin;
+           Second = tmpsec;
+   
+           cout << "Time(int tmphour, int tmpmin, int tmpsec): "
+                << tmphour << ","
+                << tmpmin  << ","
+                << tmpsec
+                << endl;
+   }
+   
+   
+   void func(Time myt)
+   {
+           return;
+   }
+   
+   
+   int main(int argc, const char * argv[])
+   {
+      Time myTime6 = 16;
+      func(17);
+      return 0;
+   }
+   
+Output: 
+
+.. code-block:: console 
+
+   Time(int tmphour):( 16,59,59)
+   Time(int tmphour):( 17,59,59)
+
+把一个16给了myTime6，而myTime6是一个对象，16是一个数字，那么编译系统应该是有一个行为，把16这个参数类型转换成了Time类类型，这种转换被称为隐式转换或简称隐式类型转换
+
+
+
+对于func(17), 系统进行了一个从数字17到对象myt（func函数的形参）的一个转换，产生了一个myt对象（临时对象），函数调用完毕后，对象myt的生命周期结束，所占用的资源被系统回收
+
+
+Explic
+=================
+
+C++中的explicit关键字只能用于修饰只有一个参数的类构造函数, 它的作用是表明该构造函数是显示的, 而非隐式的, 跟它相对应的另一个关键字是implicit, 意思是隐藏的,类构造函数默认情况下即声明为implicit(隐式)
+
+如果构造函数声明中带有explicit（显式），则这个构造函数只能用于初始化和显式类型转换
+
+.. code-block:: cpp
+
+   #include <iostream>
+
+   using namespace std;
+   
+   
+   class Time
+   {
+           int Hour;
+           int Minute;
+           int Second;
+           public:
+                   Time(int tmphour, int tmpmin, int tmpsec);
+                   explicit Time(int tmphour);
+   
+   };
+   
+   Time::Time(int tmphour)
+   {
+           Hour = tmphour;
+           Minute = 59;
+           Second = 59;
+   
+   }
+   
+   Time::Time(int tmphour, int tmpmin, int tmpsec)
+   {
+           Hour = tmphour;
+           Minute = tmpmin;
+           Second = tmpsec;
+   
+           cout << "Time(int tmphour, int tmpmin, int tmpsec): "
+                << tmphour << ","
+                << tmpmin  << ","
+                << tmpsec
+                << endl;
+   }
+   
+   
+   void func(Time myt)
+   {
+           return;
+   }
+   
+   
+   int main(int argc, const char * argv[])
+   {
+      Time myTime6 = 16;
+      func(17);
+      return 0;
+   }
+   
+   
+
+Output: 
+
+.. code-block:: console 
+
+   0013.cpp: In function ‘int main(int, const char**)’:
+   0013.cpp:47:19: error: conversion from ‘int’ to non-scalar type ‘Time’ requested
+      47 |    Time myTime6 = 16;
+         |                   ^~
+   0013.cpp:48:9: error: could not convert ‘17’ from ‘int’ to ‘Time’
+      48 |    func(17);
+         |         ^~
+         |         |
+         |         int
+   

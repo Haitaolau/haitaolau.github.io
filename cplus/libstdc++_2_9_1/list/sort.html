@@ -1,0 +1,384 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>sort &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Double Ended Queue" href="../deque/index.html" />
+    <link rel="prev" title="reverse" href="reverse.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="sort">
+<h1>sort<a class="headerlink" href="#sort" title="Permalink to this heading">¶</a></h1>
+<section id="syntax">
+<h2>Syntax<a class="headerlink" href="#syntax" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">_Tp</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">_Alloc</span><span class="o">&gt;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="n">list</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="w"> </span><span class="n">_Alloc</span><span class="o">&gt;::</span><span class="n">sort</span><span class="p">()</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="c1">// Do nothing if the list has length 0 or 1.</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">_M_node</span><span class="o">-&gt;</span><span class="n">_M_next</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">_M_node</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">_M_node</span><span class="o">-&gt;</span><span class="n">_M_next</span><span class="o">-&gt;</span><span class="n">_M_next</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">_M_node</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">list</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="w"> </span><span class="n">_Alloc</span><span class="o">&gt;</span><span class="w"> </span><span class="n">__carry</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="n">list</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="w"> </span><span class="n">_Alloc</span><span class="o">&gt;</span><span class="w"> </span><span class="n">__counter</span><span class="p">[</span><span class="mi">64</span><span class="p">];</span><span class="w"></span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">__fill</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">empty</span><span class="p">())</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">           </span><span class="n">__carry</span><span class="p">.</span><span class="n">splice</span><span class="p">(</span><span class="n">__carry</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span><span class="w"> </span><span class="o">*</span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="n">begin</span><span class="p">());</span><span class="w"></span>
+<span class="w">           </span><span class="kt">int</span><span class="w"> </span><span class="n">__i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">           </span><span class="k">while</span><span class="p">(</span><span class="n">__i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">__fill</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">__counter</span><span class="p">[</span><span class="n">__i</span><span class="p">].</span><span class="n">empty</span><span class="p">())</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">             </span><span class="n">__counter</span><span class="p">[</span><span class="n">__i</span><span class="p">].</span><span class="n">merge</span><span class="p">(</span><span class="n">__carry</span><span class="p">);</span><span class="w"></span>
+<span class="w">             </span><span class="n">__carry</span><span class="p">.</span><span class="n">swap</span><span class="p">(</span><span class="n">__counter</span><span class="p">[</span><span class="n">__i</span><span class="o">++</span><span class="p">]);</span><span class="w"></span>
+<span class="w">           </span><span class="p">}</span><span class="w"></span>
+<span class="w">           </span><span class="n">__carry</span><span class="p">.</span><span class="n">swap</span><span class="p">(</span><span class="n">__counter</span><span class="p">[</span><span class="n">__i</span><span class="p">]);</span><span class="w"></span>
+<span class="w">           </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">__i</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">__fill</span><span class="p">)</span><span class="w"> </span><span class="o">++</span><span class="n">__fill</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">__i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">__i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">__fill</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">__i</span><span class="p">)</span><span class="w"></span>
+<span class="w">          </span><span class="n">__counter</span><span class="p">[</span><span class="n">__i</span><span class="p">].</span><span class="n">merge</span><span class="p">(</span><span class="n">__counter</span><span class="p">[</span><span class="n">__i</span><span class="mi">-1</span><span class="p">]);</span><span class="w"></span>
+<span class="w">        </span><span class="n">swap</span><span class="p">(</span><span class="n">__counter</span><span class="p">[</span><span class="n">__fill</span><span class="mi">-1</span><span class="p">]);</span><span class="w"></span>
+<span class="w">     </span><span class="p">}</span><span class="w"></span>
+<span class="w"> </span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this heading">¶</a></h2>
+<img alt="../../../_images/list_sort1.jpg" src="../../../_images/list_sort1.jpg" />
+<section id="get-4">
+<h3>1. get 4<a class="headerlink" href="#get-4" title="Permalink to this heading">¶</a></h3>
+<p>调用 __carry.splice(__carry.begin(), *this, begin()) 将元素4挂在到carry上</p>
+<img alt="../../../_images/list_sort01.jpg" src="../../../_images/list_sort01.jpg" />
+<p>由于i=0 and _fill=0,所以不会进入while循环，不会走2，3. 但是会直接调用4</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">__carry</span><span class="p">.</span><span class="n">swap</span><span class="p">(</span><span class="n">__counter</span><span class="p">[</span><span class="n">__i</span><span class="p">])</span><span class="w"></span>
+</pre></div>
+</div>
+<p>将元素4 从__carry移动到__counter[0]上</p>
+<img alt="../../../_images/list_sort02.jpg" src="../../../_images/list_sort02.jpg" />
+<p>由于i=0 and _fill=0, _fill ++</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">__i</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">__fill</span><span class="p">)</span><span class="w"> </span><span class="o">++</span><span class="n">__fill</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+<img alt="../../../_images/list_sort04.jpg" src="../../../_images/list_sort04.jpg" />
+</section>
+<section id="get-2">
+<h3>2. get 2<a class="headerlink" href="#get-2" title="Permalink to this heading">¶</a></h3>
+<p>调用 __carry.splice(__carry.begin(), *this, begin()) 将元素2挂在到carry上</p>
+<img alt="../../../_images/list_sort03.jpg" src="../../../_images/list_sort03.jpg" />
+<p>此时i=0，_fill =1, 并且__counter[0]不为空,所以进入while循环执行2,3</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">__counter</span><span class="p">[</span><span class="n">__i</span><span class="p">].</span><span class="n">merge</span><span class="p">(</span><span class="n">__carry</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<img alt="../../../_images/list_sort05.jpg" src="../../../_images/list_sort05.jpg" />
+<p>将_counter[0]的内容交换到_carry上</p>
+<p>同时i++</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">__carry</span><span class="p">.</span><span class="n">swap</span><span class="p">(</span><span class="n">__counter</span><span class="p">[</span><span class="n">__i</span><span class="o">++</span><span class="p">]);</span><span class="w"></span>
+</pre></div>
+</div>
+<img alt="../../../_images/list_sort06.jpg" src="../../../_images/list_sort06.jpg" />
+<p>此时i=1
+fill=1,不满足进入while的条件，所以直接执行4,将__carry的内容move到__counter[1]上，并且将fill加</p>
+<p>所以此时_fill point to __counter[2]</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">__carry</span><span class="p">.</span><span class="n">swap</span><span class="p">(</span><span class="n">__counter</span><span class="p">[</span><span class="n">__i</span><span class="p">]);</span><span class="w"></span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">__i</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">__fill</span><span class="p">)</span><span class="w"> </span><span class="o">++</span><span class="n">__fill</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+<img alt="../../../_images/list_sort07.jpg" src="../../../_images/list_sort07.jpg" />
+</section>
+<section id="get-1">
+<h3>3. get 1<a class="headerlink" href="#get-1" title="Permalink to this heading">¶</a></h3>
+<p>调用 __carry.splice(__carry.begin(), *this, begin()) 将元素1挂在到carry上</p>
+<img alt="../../../_images/list_sort08.jpg" src="../../../_images/list_sort08.jpg" />
+<p>此时i=0 fill=2,但是__counter[0] 为空，不满足进入while的条件，所以直接执行4,将__carry的内容move到__counter[0]</p>
+<img alt="../../../_images/list_sort09.jpg" src="../../../_images/list_sort09.jpg" />
+</section>
+<section id="get-5">
+<h3>4. get 5<a class="headerlink" href="#get-5" title="Permalink to this heading">¶</a></h3>
+<p>调用 __carry.splice(__carry.begin(), *this, begin()) 将元素5挂在到carry上</p>
+<img alt="../../../_images/list_sort10.jpg" src="../../../_images/list_sort10.jpg" />
+<p>此时i=0 fill=2,但是__counter[0] 不为空，满足进入while的条件，所以执行2,3</p>
+<p>将__carry的内容merge到__counter[0]</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">__counter</span><span class="p">[</span><span class="n">__i</span><span class="p">].</span><span class="n">merge</span><span class="p">(</span><span class="n">__carry</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<img alt="../../../_images/list_sort11.jpg" src="../../../_images/list_sort11.jpg" />
+<p>将_counter[0]的内容交换到_carry上</p>
+<p>同时i++</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">__carry</span><span class="p">.</span><span class="n">swap</span><span class="p">(</span><span class="n">__counter</span><span class="p">[</span><span class="n">__i</span><span class="o">++</span><span class="p">]);</span><span class="w"></span>
+</pre></div>
+</div>
+<img alt="../../../_images/list_sort12.jpg" src="../../../_images/list_sort12.jpg" />
+<p>此时i=1 fill=2,但是__counter[1] 不为空，满足进入while的条件，所以执行2,3</p>
+<p>将__carry的内容merge到__counter[1]</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">__counter</span><span class="p">[</span><span class="n">__i</span><span class="p">].</span><span class="n">merge</span><span class="p">(</span><span class="n">__carry</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<img alt="../../../_images/list_sort13.jpg" src="../../../_images/list_sort13.jpg" />
+<p>将_counter[1]的内容交换到_carry上</p>
+<p>同时i++</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">__carry</span><span class="p">.</span><span class="n">swap</span><span class="p">(</span><span class="n">__counter</span><span class="p">[</span><span class="n">__i</span><span class="o">++</span><span class="p">]);</span><span class="w"></span>
+</pre></div>
+</div>
+<img alt="../../../_images/list_sort14.jpg" src="../../../_images/list_sort14.jpg" />
+<p>此时i=2 fill=2,，不满足进入while的条件，所以直接执行4,将__carry的内容move到__counter[2]
+由于i=fill，所以_fill ++ 则_fill的值为3</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">__carry</span><span class="p">.</span><span class="n">swap</span><span class="p">(</span><span class="n">__counter</span><span class="p">[</span><span class="n">__i</span><span class="p">]);</span><span class="w"></span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">__i</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">__fill</span><span class="p">)</span><span class="w"> </span><span class="o">++</span><span class="n">__fill</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+<img alt="../../../_images/list_sort15.jpg" src="../../../_images/list_sort15.jpg" />
+</section>
+<section id="get-7">
+<h3>5. get 7<a class="headerlink" href="#get-7" title="Permalink to this heading">¶</a></h3>
+<p>调用 __carry.splice(__carry.begin(), *this, begin()) 将元素7挂在到carry上</p>
+<img alt="../../../_images/list_sort16.jpg" src="../../../_images/list_sort16.jpg" />
+<p>此时i=0 fill=3,但是__counter[0] 为空，不满足进入while的条件，所以直接执行4,将__carry的内容move到__counter[0]</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">__carry</span><span class="p">.</span><span class="n">swap</span><span class="p">(</span><span class="n">__counter</span><span class="p">[</span><span class="n">__i</span><span class="p">]);</span><span class="w"></span>
+</pre></div>
+</div>
+<img alt="../../../_images/list_sort17.jpg" src="../../../_images/list_sort17.jpg" />
+</section>
+<section id="get-6">
+<h3>6. get 6<a class="headerlink" href="#get-6" title="Permalink to this heading">¶</a></h3>
+<p>调用 __carry.splice(__carry.begin(), *this, begin()) 将元素6挂在到carry上</p>
+<img alt="../../../_images/list_sort18.jpg" src="../../../_images/list_sort18.jpg" />
+<p>此时i=0 fill=3,但是__counter[0] 不为空，满足进入while的条件，所以执行2,3</p>
+<p>将__carry的内容merge到__counter[0]</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">__counter</span><span class="p">[</span><span class="n">__i</span><span class="p">].</span><span class="n">merge</span><span class="p">(</span><span class="n">__carry</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<img alt="../../../_images/list_sort19.jpg" src="../../../_images/list_sort19.jpg" />
+<p>将_counter[0]的内容交换到_carry上</p>
+<p>同时i++</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">__carry</span><span class="p">.</span><span class="n">swap</span><span class="p">(</span><span class="n">__counter</span><span class="p">[</span><span class="n">__i</span><span class="o">++</span><span class="p">]);</span><span class="w"></span>
+</pre></div>
+</div>
+<img alt="../../../_images/list_sort20.jpg" src="../../../_images/list_sort20.jpg" />
+<p>此时i=1 fill=3,但是__counter[1] 为空，不满足进入while的条件，所以直接执行4,将__carry的内容move到__counter[1]</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">__carry</span><span class="p">.</span><span class="n">swap</span><span class="p">(</span><span class="n">__counter</span><span class="p">[</span><span class="n">__i</span><span class="p">]);</span><span class="w"></span>
+</pre></div>
+</div>
+<img alt="../../../_images/list_sort21.jpg" src="../../../_images/list_sort21.jpg" />
+</section>
+<section id="get-9">
+<h3>7. get 9<a class="headerlink" href="#get-9" title="Permalink to this heading">¶</a></h3>
+<p>调用 __carry.splice(__carry.begin(), *this, begin()) 将元素9挂在到carry上</p>
+<img alt="../../../_images/list_sort22.jpg" src="../../../_images/list_sort22.jpg" />
+<p>此时i=0 fill=3,但是__counter[0] 为空，不满足进入while的条件，所以直接执行4,将__carry的内容move到__counter[0]</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">__carry</span><span class="p">.</span><span class="n">swap</span><span class="p">(</span><span class="n">__counter</span><span class="p">[</span><span class="n">__i</span><span class="p">]);</span><span class="w"></span>
+</pre></div>
+</div>
+<img alt="../../../_images/list_sort23.jpg" src="../../../_images/list_sort23.jpg" />
+</section>
+<section id="get-10">
+<h3>8. get 10<a class="headerlink" href="#get-10" title="Permalink to this heading">¶</a></h3>
+<p>调用 __carry.splice(__carry.begin(), *this, begin()) 将元素10挂在到carry上</p>
+<img alt="../../../_images/list_sort24.jpg" src="../../../_images/list_sort24.jpg" />
+<p>此时i=0 fill=3,但是__counter[0] 不为空，满足进入while的条件，所以执行2,3</p>
+<p>将__carry的内容merge到__counter[0]</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">__counter</span><span class="p">[</span><span class="n">__i</span><span class="p">].</span><span class="n">merge</span><span class="p">(</span><span class="n">__carry</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<img alt="../../../_images/list_sort25.jpg" src="../../../_images/list_sort25.jpg" />
+<p>将_counter[0]的内容交换到_carry上</p>
+<p>同时i++</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">__carry</span><span class="p">.</span><span class="n">swap</span><span class="p">(</span><span class="n">__counter</span><span class="p">[</span><span class="n">__i</span><span class="o">++</span><span class="p">]);</span><span class="w"></span>
+</pre></div>
+</div>
+<img alt="../../../_images/list_sort26.jpg" src="../../../_images/list_sort26.jpg" />
+<p>此时i=1 fill=3,但是__counter[1] 不为空，满足进入while的条件，所以执行2,3</p>
+<p>将__carry的内容merge到__counter[1]</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">__counter</span><span class="p">[</span><span class="n">__i</span><span class="p">].</span><span class="n">merge</span><span class="p">(</span><span class="n">__carry</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<img alt="../../../_images/list_sort27.jpg" src="../../../_images/list_sort27.jpg" />
+<p>将_counter[1]的内容交换到_carry上</p>
+<p>同时i++</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">__carry</span><span class="p">.</span><span class="n">swap</span><span class="p">(</span><span class="n">__counter</span><span class="p">[</span><span class="n">__i</span><span class="o">++</span><span class="p">]);</span><span class="w"></span>
+</pre></div>
+</div>
+<img alt="../../../_images/list_sort28.jpg" src="../../../_images/list_sort28.jpg" />
+<p>此时i=2 fill=3,但是__counter[2] 不为空，满足进入while的条件，所以执行2,3</p>
+<p>将__carry的内容merge到__counter[2]</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">__counter</span><span class="p">[</span><span class="n">__i</span><span class="p">].</span><span class="n">merge</span><span class="p">(</span><span class="n">__carry</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<img alt="../../../_images/list_sort29.jpg" src="../../../_images/list_sort29.jpg" />
+<p>将_counter[2]的内容交换到_carry上</p>
+<p>同时i++</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">__carry</span><span class="p">.</span><span class="n">swap</span><span class="p">(</span><span class="n">__counter</span><span class="p">[</span><span class="n">__i</span><span class="o">++</span><span class="p">]);</span><span class="w"></span>
+</pre></div>
+</div>
+<img alt="../../../_images/list_sort30.jpg" src="../../../_images/list_sort30.jpg" />
+<p>此时i=3 fill=3,，不满足进入while的条件，所以直接执行4,将__carry的内容move到__counter[3]</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">__carry</span><span class="p">.</span><span class="n">swap</span><span class="p">(</span><span class="n">__counter</span><span class="p">[</span><span class="n">__i</span><span class="p">]);</span><span class="w"></span>
+</pre></div>
+</div>
+<img alt="../../../_images/list_sort31.jpg" src="../../../_images/list_sort31.jpg" />
+</section>
+<section id="get-8">
+<h3>9. get 8<a class="headerlink" href="#get-8" title="Permalink to this heading">¶</a></h3>
+<p>调用 __carry.splice(__carry.begin(), *this, begin()) 将元素8挂在到carry上</p>
+<img alt="../../../_images/list_sort32.jpg" src="../../../_images/list_sort32.jpg" />
+<p>此时i=0 fill=4,但是__counter[0] 为空，不满足进入while的条件，所以直接执行4,将__carry的内容move到__counter[0]</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">__carry</span><span class="p">.</span><span class="n">swap</span><span class="p">(</span><span class="n">__counter</span><span class="p">[</span><span class="n">__i</span><span class="p">]);</span><span class="w"></span>
+</pre></div>
+</div>
+<img alt="../../../_images/list_sort33.jpg" src="../../../_images/list_sort33.jpg" />
+</section>
+<section id="end">
+<h3>10. end<a class="headerlink" href="#end" title="Permalink to this heading">¶</a></h3>
+<p>链表这个时候已经遍历完了，程序会直接执行5，6的步骤，将所有的counter合并，此时只要counter0和counter3存在数据</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">__i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">__i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">__fill</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">__i</span><span class="p">)</span><span class="w"></span>
+<span class="w">      </span><span class="n">__counter</span><span class="p">[</span><span class="n">__i</span><span class="p">].</span><span class="n">merge</span><span class="p">(</span><span class="n">__counter</span><span class="p">[</span><span class="n">__i</span><span class="mi">-1</span><span class="p">]);</span><span class="w"></span>
+<span class="n">swap</span><span class="p">(</span><span class="n">__counter</span><span class="p">[</span><span class="n">__fill</span><span class="mi">-1</span><span class="p">]);</span><span class="w"></span>
+</pre></div>
+</div>
+<img alt="../../../_images/list_sort34.jpg" src="../../../_images/list_sort34.jpg" />
+<img alt="../../../_images/list_sort35.jpg" src="../../../_images/list_sort35.jpg" />
+<img alt="../../../_images/list_sort36.jpg" src="../../../_images/list_sort36.jpg" />
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">Cplus</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">Libstd c++ 2.9.1</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../vector/index.html">Vector</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">List</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../deque/index.html">Double Ended Queue</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../heap/index.html">Head</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tree/index.html">Tree</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../Operator_overloading/index.html">C++ Operator overloading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../access_modifiers.html">Access Modifiers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../references.html">References (or Aliases)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../const.html">const</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../functemplate.html">Function template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../passarguments.html">Pass arguments to function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../friend.html">Friend class and function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../abstract.html">Abstract Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../copyconstructor.html">Copy constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rvalue.html">Cplus Rvalue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../lvalue_and_rvalue.html">lvalue &amp;&amp; rvalue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../placement_new.html">Placement new operator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../template/index.html">Template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../cast/index.html">C++ Cast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../decltype.html">Decltype</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../explicit_implicit.html">Explicit and Implicit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../constructor.html">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../typedef_typename.html">typedef typename</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Cplus</a><ul>
+  <li><a href="../index.html">Libstd c++ 2.9.1</a><ul>
+  <li><a href="index.html">List</a><ul>
+      <li>Previous: <a href="reverse.html" title="previous chapter">reverse</a></li>
+      <li>Next: <a href="../deque/index.html" title="next chapter">Double Ended Queue</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../../../_sources/cplus/libstdc++_2_9_1/list/sort.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

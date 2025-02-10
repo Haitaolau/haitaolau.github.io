@@ -1,0 +1,151 @@
+======================
+intel socfpga agilex
+======================
+
+
+Configure and build 
+-------------------------
+
+.. code-block:: console
+   
+   git clone --branch WRLINUX_10_21_LTS git://pek-git.wrs.com/wrlinux-x
+
+   ./wrlinux-x/setup.sh --machines intel-socfpga-64 --distros wrlinux --dl-layers --accept-eula=yes
+
+
+Deployment
+------------------
+
+Copy kernel and dtb
+++++++++++++++++++++++
+
+.. code-block:: console 
+
+   hliu4@pek-lpd-susbld:intel-socfpga-64$pwd
+   /buildarea3/hliu4/LIN1021-7233/build/tmp-glibc/deploy/images/intel-socfpga-64
+   hliu4@pek-lpd-susbld:intel-socfpga-64$scp Image wrsadmin@pek-hliu4-d1:~/workspace/rootfs/rootfs-29244/kernel
+   hliu4@pek-lpd-susbld:intel-socfpga-64$scp socfpga_agilex_socdk_nand_sgmii.dtb wrsadmin@pek-hliu4-d1:~/workspace/rootfs/rootfs-29244/dtb
+
+
+
+
+Boot up
+----------
+
+
+
+.. code-block:: console 
+    
+    SOCFPGA_AGILEX # run fpgaload
+    SOCFPGA_AGILEX # tftpboot 0x2000000 128.224.178.20:vlm-boards/29244/kernel;tftpboot 0x8000000 128.224.178.20:vlm-boards/29244/dtb;
+    SOCFPGA_AGILEX # run linux_qspi_enable 
+    SOCFPGA_AGILEX # setenv bootargs console=ttyS0,115200n8 root=/dev/nfs rw nfsroot=128.224.178.20:/export/pxeboot/vlm-boards/29244/rootfs,nolock,tcp,v3 ip=128.224.178.148:128.224.178.20:128.224.178.1:255.255.254.0::eth0:off
+    SOCFPGA_AGILEX # booti 0x2000000 - 0x8000000
+
+OutPut
+++++++++
+
+
+.. code-block:: console 
+
+   U-Boot SPL 2022.10 (Mar 20 2023 - 03:03:15 +0000)
+    Reset state: Cold
+    MPU          1200000 kHz
+    L4 Main       400000 kHz
+    L4 sys free   100000 kHz
+    L4 MP         200000 kHz
+    L4 SP         100000 kHz
+    SDMMC          50000 kHz
+    DDR: 8192 MiB
+    SDRAM-ECC: Initialized success with 1737 ms
+    QSPI: Reference clock at 400000 kHz
+    WDT:   Started watchdog@ffd00200 with servicing (30s timeout)
+    Trying to boot from SPI
+    Trying to boot from NAND
+    ## Checking hash(es) for config board-1 ... OK
+    ## Checking hash(es) for Image atf ... crc32+ OK
+    ## Checking hash(es) for Image uboot ... crc32+ OK
+    ## Checking hash(es) for Image fdt-1 ... crc32+ OK
+    NOTICE:  BL31: v2.8.0(release):rel_socfpga_v2.8.0_23.03.03_pr-3-gb9fd880f2cd8-dirty
+    NOTICE:  BL31: Built : 13:29:30, Apr  4 2023
+    
+    
+    U-Boot 2022.10 (Mar 20 2023 - 03:03:15 +0000)socfpga_agilex
+    
+    CPU:   Intel FPGA SoCFPGA Platform (ARMv8 64bit Cortex-A53)
+    Model: SoCFPGA Agilex SoCDK
+    DRAM:  8 GiB
+    Core:  25 devices, 22 uclasses, devicetree: separate
+    WDT:   Started watchdog@ffd00200 with servicing (30s timeout)
+    NAND:  1024 MiB
+    MMC:
+    Loading Environment from UBI... Read 131072 bytes from volume env to 000000007fab9900
+    OK
+    In:    serial0@ffc02000
+    Out:   serial0@ffc02000
+    Err:   serial0@ffc02000
+    Net:   eth2: ethernet@ff804000
+    Hit any key to stop autoboot:  0
+    SOCFPGA_AGILEX #
+    SOCFPGA_AGILEX #
+    SOCFPGA_AGILEX #
+    SOCFPGA_AGILEX #
+    SOCFPGA_AGILEX #
+    SOCFPGA_AGILEX # run fpgaload
+    UBI partition 'root' already selected
+    SOCFPGA_AGILEX # tftpboot 0x2000000 128.224.178.20:vlm-boards/29244/kernel;tftpboot 0x8000000 128.224.178.20:vlm-boards/29244/dtb;
+    Speed: 1000, full duplex
+    Using ethernet@ff804000 device
+    TFTP from server 128.224.178.20; our IP address is 128.224.179.148
+    Filename 'vlm-boards/29244/kernel'.
+    Load address: 0x2000000
+    Loading: #################################################################
+             #################################################################
+             #################################################################
+             #################################################################
+             #################################################################
+             #################################################################
+             #################################################################
+             #################################################################
+             #################################################################
+             #################################################################
+             #################################################################
+             #################################################################
+             #################################################################
+             #################################################################
+             #################################################################
+             #################################################################
+             #################################################################
+             #################################################################
+             #################################################################
+             #################################################################
+             #################################################################
+             #################################################################
+             #################################################################
+             ################################################
+             11 MiB/s
+    done
+    Bytes transferred = 22649344 (1599a00 hex)
+    Speed: 1000, full duplex
+    Using ethernet@ff804000 device
+    TFTP from server 128.224.178.20; our IP address is 128.224.179.148
+    Filename 'vlm-boards/29244/dtb'.
+    Load address: 0x8000000
+    Loading: ##
+             5.8 MiB/s
+    done
+    Bytes transferred = 18135 (46d7 hex)
+    SOCFPGA_AGILEX # run linux_qspi_enable
+    SF: Detected mt25qu02g with page size 256 Bytes, erase size 4 KiB, total 256 MiB
+    Enabling QSPI at Linux DTB...
+    QSPI clock frequency updated
+    SOCFPGA_AGILEX # setenv bootargs console=ttyS0,115200n8 root=/dev/nfs rw nfsroot=128.224.178.20:/export/pxeboot/vlm-boards/29244/rootfs,nolock,tcp,v3 ip=128.224.178.148:128.224.178.20:128.224.178.1:255.255.254.0::eth0:off
+    SOCFPGA_AGILEX # booti 0x2000000 - 0x8000000
+    ## Flattened Device Tree blob at 08000000
+       Booting using the fdt blob at 0x8000000
+       Loading Device Tree to 000000007facd000, end 000000007fad4fff ... OK
+    
+    Starting kernel ...
+    
+    
+

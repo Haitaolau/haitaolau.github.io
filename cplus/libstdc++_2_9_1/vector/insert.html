@@ -1,0 +1,313 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Insert function &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="List" href="../list/index.html" />
+    <link rel="prev" title="Vector" href="index.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="insert-function">
+<h1>Insert function<a class="headerlink" href="#insert-function" title="Permalink to this heading">¶</a></h1>
+<p>Last change: Feb 10 25 at 11:30</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">_Tp</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">_Alloc</span><span class="o">&gt;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="n">vector</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="w"> </span><span class="n">_Alloc</span><span class="o">&gt;::</span><span class="n">_M_fill_insert</span><span class="p">(</span><span class="n">iterator</span><span class="w"> </span><span class="n">__position</span><span class="p">,</span><span class="w"> </span><span class="n">size_type</span><span class="w"> </span><span class="n">__n</span><span class="p">,</span><span class="w"></span>
+<span class="w">                                         </span><span class="k">const</span><span class="w"> </span><span class="n">_Tp</span><span class="o">&amp;</span><span class="w"> </span><span class="n">__x</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">__n</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">size_type</span><span class="p">(</span><span class="n">_M_end_of_storage</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">_M_finish</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">__n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="n">_Tp</span><span class="w"> </span><span class="n">__x_copy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__x</span><span class="p">;</span><span class="w"></span>
+<span class="w">      </span><span class="k">const</span><span class="w"> </span><span class="n">size_type</span><span class="w"> </span><span class="n">__elems_after</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">end</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">__position</span><span class="p">;</span><span class="w"></span>
+<span class="w">      </span><span class="n">iterator</span><span class="w"> </span><span class="nf">__old_finish</span><span class="p">(</span><span class="n">_M_finish</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">__elems_after</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">__n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">uninitialized_copy</span><span class="p">(</span><span class="n">_M_finish</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">__n</span><span class="p">,</span><span class="w"> </span><span class="n">_M_finish</span><span class="p">,</span><span class="w"> </span><span class="n">_M_finish</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">_M_finish</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">__n</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="n">copy_backward</span><span class="p">(</span><span class="n">__position</span><span class="p">,</span><span class="w"> </span><span class="n">__old_finish</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">__n</span><span class="p">,</span><span class="w"> </span><span class="n">__old_finish</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">fill</span><span class="p">(</span><span class="n">__position</span><span class="p">,</span><span class="w"> </span><span class="n">__position</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">__n</span><span class="p">,</span><span class="w"> </span><span class="n">__x_copy</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="p">}</span><span class="w"></span>
+<span class="w">      </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">uninitialized_fill_n</span><span class="p">(</span><span class="n">_M_finish</span><span class="p">,</span><span class="w"> </span><span class="n">__n</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">__elems_after</span><span class="p">,</span><span class="w"> </span><span class="n">__x_copy</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">_M_finish</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">__n</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">__elems_after</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="n">uninitialized_copy</span><span class="p">(</span><span class="n">__position</span><span class="p">,</span><span class="w"> </span><span class="n">__old_finish</span><span class="p">,</span><span class="w"> </span><span class="n">_M_finish</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">_M_finish</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">__elems_after</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="n">fill</span><span class="p">(</span><span class="n">__position</span><span class="p">,</span><span class="w"> </span><span class="n">__old_finish</span><span class="p">,</span><span class="w"> </span><span class="n">__x_copy</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="k">const</span><span class="w"> </span><span class="n">size_type</span><span class="w"> </span><span class="n">__old_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">size</span><span class="p">();</span><span class="w"></span>
+<span class="w">      </span><span class="k">const</span><span class="w"> </span><span class="n">size_type</span><span class="w"> </span><span class="n">__len</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__old_size</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">max</span><span class="p">(</span><span class="n">__old_size</span><span class="p">,</span><span class="w"> </span><span class="n">__n</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="n">iterator</span><span class="w"> </span><span class="nf">__new_start</span><span class="p">(</span><span class="n">_M_allocate</span><span class="p">(</span><span class="n">__len</span><span class="p">));</span><span class="w"></span>
+<span class="w">      </span><span class="n">iterator</span><span class="w"> </span><span class="nf">__new_finish</span><span class="p">(</span><span class="n">__new_start</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="n">__STL_TRY</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">__new_finish</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uninitialized_copy</span><span class="p">(</span><span class="n">begin</span><span class="p">(),</span><span class="w"> </span><span class="n">__position</span><span class="p">,</span><span class="w"> </span><span class="n">__new_start</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">__new_finish</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uninitialized_fill_n</span><span class="p">(</span><span class="n">__new_finish</span><span class="p">,</span><span class="w"> </span><span class="n">__n</span><span class="p">,</span><span class="w"> </span><span class="n">__x</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">__new_finish</span><span class="w"></span>
+<span class="w">          </span><span class="o">=</span><span class="w"> </span><span class="n">uninitialized_copy</span><span class="p">(</span><span class="n">__position</span><span class="p">,</span><span class="w"> </span><span class="n">end</span><span class="p">(),</span><span class="w"> </span><span class="n">__new_finish</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="p">}</span><span class="w"></span>
+<span class="w">      </span><span class="n">__STL_UNWIND</span><span class="p">((</span><span class="n">destroy</span><span class="p">(</span><span class="n">__new_start</span><span class="p">,</span><span class="n">__new_finish</span><span class="p">),</span><span class="w"></span>
+<span class="w">                    </span><span class="n">_M_deallocate</span><span class="p">(</span><span class="n">__new_start</span><span class="p">.</span><span class="n">base</span><span class="p">(),</span><span class="n">__len</span><span class="p">)));</span><span class="w"></span>
+<span class="w">      </span><span class="n">destroy</span><span class="p">(</span><span class="n">_M_start</span><span class="p">,</span><span class="w"> </span><span class="n">_M_finish</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="n">_M_deallocate</span><span class="p">(</span><span class="n">_M_start</span><span class="p">,</span><span class="w"> </span><span class="n">_M_end_of_storage</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">_M_start</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="n">_M_start</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__new_start</span><span class="p">.</span><span class="n">base</span><span class="p">();</span><span class="w"></span>
+<span class="w">      </span><span class="n">_M_finish</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__new_finish</span><span class="p">.</span><span class="n">base</span><span class="p">();</span><span class="w"></span>
+<span class="w">      </span><span class="n">_M_end_of_storage</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__new_start</span><span class="p">.</span><span class="n">base</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">__len</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<section id="m-end-of-storage-m-finish-n">
+<h2>(_M_end_of_storage - _M_finish) &gt;= __n<a class="headerlink" href="#m-end-of-storage-m-finish-n" title="Permalink to this heading">¶</a></h2>
+<p>备用空间大于等于”新增元素个数”</p>
+<section id="elems-after-n">
+<h3>1. __elems_after &gt; __n<a class="headerlink" href="#elems-after-n" title="Permalink to this heading">¶</a></h3>
+<p><strong>“插入点之后的现有元素个数”大于”新增元素个数”</strong></p>
+<p>如下图所示：</p>
+<ol class="arabic simple">
+<li><p>新增元素个数n: 4</p></li>
+<li><p>插入点之后的现有元素个数elems_after:6</p></li>
+</ol>
+<img alt="../../../_images/vector_insert2.jpg" src="../../../_images/vector_insert2.jpg" />
+<p>算法：</p>
+<ol class="arabic simple">
+<li><p>把从finish-n 到finish的数据move 到 finish后边</p></li>
+</ol>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">uninitialized_copy</span><span class="p">(</span><span class="n">_M_finish</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">__n</span><span class="p">,</span><span class="w"> </span><span class="n">_M_finish</span><span class="p">,</span><span class="w"> </span><span class="n">_M_finish</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>将finish向后移动n</p></li>
+</ol>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">_M_finish</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">__n</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>将剩下的2个数据copy 到old_finish位置，</p></li>
+</ol>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">copy_backward</span><span class="p">(</span><span class="n">__position</span><span class="p">,</span><span class="w"> </span><span class="n">__old_finish</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">__n</span><span class="p">,</span><span class="w"> </span><span class="n">__old_finish</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li><p>初始化数据</p></li>
+</ol>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">fill</span><span class="p">(</span><span class="n">__position</span><span class="p">,</span><span class="w"> </span><span class="n">__position</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">__n</span><span class="p">,</span><span class="w"> </span><span class="n">__x_copy</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="id1">
+<h3>2. __elems_after &lt;= __n<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<p><strong>“插入点之后的现有元素个数”小于等于”新增元素个数”</strong></p>
+<p>如下图所示：</p>
+<ol class="arabic simple">
+<li><p>新增元素个数n: 6</p></li>
+<li><p>插入点之后的现有元素个数elems_after:4</p></li>
+</ol>
+<p>算法：</p>
+<ol class="arabic simple">
+<li><p>首先申请2元素并初始化为x：</p></li>
+</ol>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">uninitialized_fill_n</span><span class="p">(</span><span class="n">_M_finish</span><span class="p">,</span><span class="w"> </span><span class="n">__n</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">__elems_after</span><span class="p">,</span><span class="w"> </span><span class="n">__x_copy</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>finish 向后移动2个</p></li>
+</ol>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">M_finish</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">__n</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">__elems_after</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+<p>3.copy 从pos到old_finish之间的元素到finish后边</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">uninitialized_copy</span><span class="p">(</span><span class="n">__position</span><span class="p">,</span><span class="w"> </span><span class="n">__old_finish</span><span class="p">,</span><span class="w"> </span><span class="n">_M_finish</span><span class="p">);</span><span class="w"></span>
+<span class="n">_M_finish</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">__elems_after</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+<p>4.填充pos到old_finish之间的元素为x</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">fill</span><span class="p">(</span><span class="n">__position</span><span class="p">,</span><span class="w"> </span><span class="n">__old_finish</span><span class="p">,</span><span class="w"> </span><span class="n">__x_copy</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<img alt="../../../_images/vector_insert.jpg" src="../../../_images/vector_insert.jpg" />
+</section>
+</section>
+<section id="id2">
+<h2>(_M_end_of_storage - _M_finish) &lt; __n<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<p>备用空间小于”新增元素个数”,此时必须分配额外的空间</p>
+<img alt="../../../_images/vector_insert3.jpg" src="../../../_images/vector_insert3.jpg" />
+<ol class="arabic simple">
+<li><p>首先决定新长度： 旧长度的两倍或者旧长度+新增元素个数</p></li>
+</ol>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="n">size_type</span><span class="w"> </span><span class="n">__old_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">size</span><span class="p">();</span><span class="w"></span>
+<span class="k">const</span><span class="w"> </span><span class="n">size_type</span><span class="w"> </span><span class="n">__len</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__old_size</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">max</span><span class="p">(</span><span class="n">__old_size</span><span class="p">,</span><span class="w"> </span><span class="n">__n</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>配置新的vector空间，并配置指针(new_start, new_finish)</p></li>
+</ol>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">iterator</span><span class="w"> </span><span class="nf">__new_start</span><span class="p">(</span><span class="n">_M_allocate</span><span class="p">(</span><span class="n">__len</span><span class="p">));</span><span class="w"></span>
+<span class="n">iterator</span><span class="w"> </span><span class="nf">__new_finish</span><span class="p">(</span><span class="n">__new_start</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>将旧vector的插入点之前的元素复制到新空间中</p></li>
+</ol>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">__new_finish</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uninitialized_copy</span><span class="p">(</span><span class="n">begin</span><span class="p">(),</span><span class="w"> </span><span class="n">__position</span><span class="p">,</span><span class="w"> </span><span class="n">__new_start</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li><p>将需要添加的元素插入到新vector的pos处</p></li>
+</ol>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">new_finish</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uninitialized_fill_n</span><span class="p">(</span><span class="n">__new_finish</span><span class="p">,</span><span class="w"> </span><span class="n">__n</span><span class="p">,</span><span class="w"> </span><span class="n">__x</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="5">
+<li><p>将就vector插入点之后的元素copy到新的vector</p></li>
+</ol>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">uninitialized_copy</span><span class="p">(</span><span class="n">__position</span><span class="p">,</span><span class="w"> </span><span class="n">end</span><span class="p">(),</span><span class="w"> </span><span class="n">__new_finish</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">Cplus</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">Libstd c++ 2.9.1</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Vector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../list/index.html">List</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../deque/index.html">Double Ended Queue</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../heap/index.html">Head</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tree/index.html">Tree</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../Operator_overloading/index.html">C++ Operator overloading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../access_modifiers.html">Access Modifiers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../references.html">References (or Aliases)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../const.html">const</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../functemplate.html">Function template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../passarguments.html">Pass arguments to function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../friend.html">Friend class and function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../abstract.html">Abstract Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../copyconstructor.html">Copy constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rvalue.html">Cplus Rvalue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../lvalue_and_rvalue.html">lvalue &amp;&amp; rvalue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../placement_new.html">Placement new operator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../template/index.html">Template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../cast/index.html">C++ Cast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../decltype.html">Decltype</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../explicit_implicit.html">Explicit and Implicit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../constructor.html">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../typedef_typename.html">typedef typename</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Cplus</a><ul>
+  <li><a href="../index.html">Libstd c++ 2.9.1</a><ul>
+  <li><a href="index.html">Vector</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Vector</a></li>
+      <li>Next: <a href="../list/index.html" title="next chapter">List</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../../../_sources/cplus/libstdc++_2_9_1/vector/insert.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

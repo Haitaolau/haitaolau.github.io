@@ -1,0 +1,162 @@
+==============================================
+ Ruck: build pablo with minimal ostree rootfs
+==============================================
+
+
+
+Ruck is a tool to make the creation of various Debian-based OS images simpler
+
+.. code-block:: console
+
+   ruck --debug build --config pablo-config/vm/minimal/image-ostree.yaml
+
+.. code-block:: console
+
+   INFO ruck.cmd.shell: Loading
+   INFO ruck.build: Running ruck.
+   INFO ruck.build: Loading configuration file: pablo-config/vm/minimal/image-ostree.yaml
+   DEBUG pasha.utils: Running losetup /dev/loop1
+   DEBUG pasha.utils: /dev/loop1: [2050]:13762599 (/var/lib/snapd/snaps/snapd_21465.snap)
+   INFO ruck.build: Loopback device /dev/loop1 is in use
+   DEBUG pasha.utils: Running losetup -f
+   DEBUG pasha.utils: /dev/loop11
+   INFO ruck.build: Using unused device /dev/loop11 to instead
+   INFO ruck.build: Creating temporary  workspace: /var/tmp/ruck/pablo-minimal-ostree-amd64
+
+
+
+Build()->build()
+
+.. code-block:: python
+
+       def build(self):
+        """Build an artifact from a given configuration file."""
+        self.logging.info("Running ruck.")
+
+        if not self.state.config.exists():
+            raise exceptions.ConfigError(
+                f"Failed to load configuration: {self.state.config}"
+            )
+
+
+
+**1. Load Configuration**
+--------------------------
+
+.. code-block:: python
+
+           config = load_config(self.state.config)
+        self.logging.info(f"Loading configuration file: {self.state.config}")
+
+Using OmegaConf to parse the yaml. 
+
+ <ruck/config.py>
+
+ .. code-block:: python
+
+   def load_config(config):
+    """Load the manifest.yaml"""
+
+    # Set CURRENT_DIR before changing
+    if not os.environ.get("CURRENT_DIR"):
+        os.environ["CURRENT_DIR"] = os.getcwd()
+
+    # Change cwd to manifest.yaml's dir
+    os.chdir(config.parent)
+    # Remove dir prefix: a/b/image.yaml -> image.yaml
+    config = config.name
+    config = pathlib.Path(config)
+    try:
+        with open(config, "r") as f:
+            try:
+                return OmegaConf.create(yaml.safe_load(f))
+            except yaml.YAMLError as error:
+                raise exceptions.ConfigError(f"{config} failed validation: {error}.")
+    except OSError:
+        raise exceptions.ConfigError(f"Configuration not found: {config}")
+
+
+**2. integrity checking**
+
+.. code-block:: python
+
+
+        if config.name is None:
+            raise exceptions.ConfigError("Manifest name is not specified.")
+        if config.architecture is None:
+            raise exceptions.ConfigError("Manifest architecture is not specified.")
+        if config.architecture not in self.arch:
+            raise exceptions.ConfigError(f"{config.architecture} is not supported.")
+
+        if config.version is None:
+            raise exceptions.ConfigError("Version si not specified..")
+        if config.schemaVersion is None:
+            raise exceptions.ConfigError("Schema version is not specified.")
+        if config.schemaVersion != 1:
+            raise exceptions.ConfigError(f"{config.schemaVersion} is not supported.")
+
+**3. look for available loopback device**
+
+
+.. code-block:: python
+
+
+        if config.params.get("disk") is None:
+            self.logging.info("Disk is not specified.")
+        elif not config.params.disk.startswith("/dev/loop"):
+            raise exceptions.ConfigError(
+                f"{config.params.disk} is not a loopback device"
+            )
+        else:
+            cmd = f"losetup {config.params.disk}"
+            ret, _t = utils.run_command(cmd, check=False, shell=True)
+            if ret == 0:
+                self.logging.info(f"Loopback device {config.params.disk} is in use")
+                cmd = "losetup -f"
+                _, unused_loop = utils.run_command(cmd, shell=True)
+                self.logging.info(f"Using unused device {unused_loop} to instead")
+                config.params.disk = unused_loop
+
+
+
+
+.. code-block:: python
+
+        # Prepare workspace for building.
+        self.workspace = self.state.workspace.joinpath(config.name)
+        self.logging.info(f"Creating temporary  workspace: {self.workspace}")
+        if self.workspace.exists():
+            self.logging.info("Found previous workspace, removing.")
+            rootfs = self.workspace.joinpath("rootfs")
+            if os.path.ismount(rootfs):
+                self.logging.info("Found previously mounted filesystem. Unmounting.")
+                umount(rootfs)
+            shutil.rmtree(self.workspace)
+        self.workspace.mkdir(parents=True, exist_ok=True)
+
+
+
+.. code-block:: python
+		
+        if config.stages:
+            for stages in config.stages:
+                if stages in self.stages:
+                    self.logging.info(f"Running {stages} stage.")
+                    stage = OmegaConf.select(config.stages, stages)
+                    for step in stage:
+                        self.logging.info(step.name)
+                        try:
+                            mgr = driver.DriverManager(
+                                namespace="pasha.modules",
+                                name=step.module,
+                                invoke_on_load=True,
+                                invoke_args=(self.state, config, step.get("options")),
+                            )
+                            mgr.driver.run()
+                        except RuntimeError as exc:
+                            self.logging.exception(exc)
+                else:
+                    raise Exception(f"{stage} is not a valid stage.")
+
+
+

@@ -1,0 +1,39 @@
+==========================================================================
+ How can I specify the repository from which a package will be installed?
+==========================================================================
+
+
+You can specify a repository with **-t** option.
+
+
+From apt-get manual page:
+
+::
+
+      -t, --target-release, --default-release
+           This option controls the default input to the policy engine; it creates a default pin at priority 990 using the specified release string. This overrides the
+           general settings in /etc/apt/preferences. Specifically pinned packages are not affected by the value of this option. In short, this option lets you have
+           simple control over which distribution packages will be retrieved from. Some common examples might be -t '2.1*', -t unstable or -t sid. Configuration Item:
+           APT::Default-Release; see also the apt_preferences(5) manual page.
+
+
+
+For example:
+
+I have added the following repository to /etc/apt/sources.list and I would like to install **debootstrap** from elxr repository. 
+
+.. code-block:: bash
+
+   root@a59889bb1f5a:/usr/src/data/config# cat /etc/apt/sources.list.d/elxr.list 
+   deb [trusted=yes] http://mirror.elxr.dev/elxr aria main
+
+
+As you know there is a same package debootstrap in the official Debian repository. If I want install debootstrap from this specific repo. I should issue:
+
+.. code-block:: bash
+
+   apt-get install -t aria debootstrap
+
+
+   
+		

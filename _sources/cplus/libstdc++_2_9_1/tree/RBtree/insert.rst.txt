@@ -1,0 +1,32 @@
+
+.. _inseart_rbtree:
+
+==================
+ Inseart Function
+==================
+
+.. contents:: Table of Contents
+
+
+insert_equal(const value_type& __x)
+===================================
+
+
+.. code-block:: c++
+
+   template <class _Key, class _Value, class _KeyOfValue, 
+             class _Compare, class _Alloc>
+   typename _Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>::iterator
+   _Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>
+     ::insert_equal(const _Value& __v)
+   {
+     _Link_type __y = _M_header;
+     _Link_type __x = _M_root();
+     while (__x != 0) {
+       __y = __x;
+       __x = _M_key_compare(_KeyOfValue()(__v), _S_key(__x)) ? 
+               _S_left(__x) : _S_right(__x);
+     }
+     return _M_insert(__x, __y, __v);
+   }
+   		

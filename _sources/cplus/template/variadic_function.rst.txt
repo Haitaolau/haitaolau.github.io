@@ -1,0 +1,54 @@
+=============================
+Variadic function templates
+=============================
+
+Variadic templates can take any variable(zero or more) number of arguments
+
+
+
+
+.. code-block:: cpp
+   
+   #include <iostream>
+   
+   template <typename T, typename...U>
+   void myvtfunct(T firstarg, U ...otherargs)
+   {
+       std::cout << "Firstargs: " << firstarg << std::endl;
+       if constexpr(sizeof...(otherargs) > 0)
+       {
+           myvtfunct(otherargs...);
+       }
+       else
+       {
+   
+       }
+   }
+   
+   int main(int argc, char **argv)
+   {
+       myvtfunct(10, 25.8, "abc", 68);
+       return 0;
+   }
+
+
+
+
+Output:
+
+.. code-block:: console
+
+   wrsadmin@PEK-HLIU4-D1$./a.out
+   Firstargs: 10
+   Firstargs: 25.8
+   Firstargs: abc
+   Firstargs: 68
+
+
+- 注意template行的写法，尖括号中的typename后面带3个点（代表参数包），然后才修饰T
+
+- args一般称为一包或一堆参数，而且每个参数的类型可以各不相同。这包参数（函数模板的形参）中可以容纳0到多个参数，而且这些参数可以为任意类型
+
+- 代码中的sizeof...属于固定语法，是C++ 11在标准引入的，用于可变参函数模板或可变参类模板内部，用来表示收到的模板参数个数或类型数量，针对的只能是这种...的可变参，它后面的圆括号中可以是函数模板的形参（args），也可以是类型模板参数（T）
+
+

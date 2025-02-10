@@ -1,0 +1,177 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>BinaryAnalysis &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Cplus" href="cplus/index.html" />
+    <link rel="prev" title="Compare kernel commits" href="python/example/00002.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="binaryanalysis">
+<span id="binary-analysis-index"></span><h1>BinaryAnalysis<a class="headerlink" href="#binaryanalysis" title="Permalink to this heading">¶</a></h1>
+<section id="elf">
+<h2>ELF<a class="headerlink" href="#elf" title="Permalink to this heading">¶</a></h2>
+<p><a class="reference external" href="https://refspecs.linuxfoundation.org/elf/elf.pdf">Executable and Linking Format (ELF) Specification</a></p>
+</section>
+<section id="get-the-sections-with-readelf">
+<h2>Get the sections with readelf<a class="headerlink" href="#get-the-sections-with-readelf" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">root@intel-x86-64:/usr/lib64/git/ptest/tests/t# </span>readelf --sections --wide /bin/ls
+<span class="go">There are 29 section headers, starting at offset 0x273a0:</span>
+
+<span class="go">Section Headers:</span>
+<span class="go">  [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al</span>
+<span class="go">  [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0</span>
+<span class="go">  [ 1] .interp           PROGBITS        0000000000000318 000318 00001c 00   A  0   0  1</span>
+<span class="go">  [ 2] .note.gnu.property NOTE            0000000000000338 000338 000030 00   A  0   0  8</span>
+<span class="go">  [ 3] .note.gnu.build-id NOTE            0000000000000368 000368 000024 00   A  0   0  4</span>
+<span class="go">  [ 4] .note.ABI-tag     NOTE            000000000000038c 00038c 000020 00   A  0   0  4</span>
+<span class="go">  [ 5] .gnu.hash         GNU_HASH        00000000000003b0 0003b0 0000d0 00   A  6   0  8</span>
+<span class="go">  [ 6] .dynsym           DYNSYM          0000000000000480 000480 000cc0 18   A  7   1  8</span>
+<span class="go">  [ 7] .dynstr           STRTAB          0000000000001140 001140 0005e2 00   A  0   0  1</span>
+<span class="go">  [ 8] .gnu.version      VERSYM          0000000000001722 001722 000110 02   A  6   0  2</span>
+<span class="go">  [ 9] .gnu.version_r    VERNEED         0000000000001838 001838 000090 00   A  7   1  8</span>
+<span class="go">  [10] .rela.dyn         RELA            00000000000018c8 0018c8 001410 18   A  6   0  8</span>
+<span class="go">  [11] .rela.plt         RELA            0000000000002cd8 002cd8 000ac8 18  AI  6  24  8</span>
+<span class="go">  [12] .init             PROGBITS        0000000000004000 004000 00001b 00  AX  0   0  4</span>
+<span class="go">  [13] .plt              PROGBITS        0000000000004020 004020 000740 10  AX  0   0 16</span>
+<span class="go">  [14] .plt.got          PROGBITS        0000000000004760 004760 000018 08  AX  0   0  8</span>
+<span class="go">  [15] .text             PROGBITS        0000000000004780 004780 016d82 00  AX  0   0 16</span>
+<span class="go">  [16] .fini             PROGBITS        000000000001b504 01b504 00000d 00  AX  0   0  4</span>
+<span class="go">  [17] .rodata           PROGBITS        000000000001c000 01c000 0057f7 00   A  0   0 32</span>
+<span class="go">  [18] .eh_frame_hdr     PROGBITS        00000000000217f8 0217f8 0009b4 00   A  0   0  4</span>
+<span class="go">  [19] .eh_frame         PROGBITS        00000000000221b0 0221b0 0035b8 00   A  0   0  8</span>
+<span class="go">  [20] .init_array       INIT_ARRAY      0000000000026f90 025f90 000008 08  WA  0   0  8</span>
+<span class="go">  [21] .fini_array       FINI_ARRAY      0000000000026f98 025f98 000008 08  WA  0   0  8</span>
+<span class="go">  [22] .data.rel.ro      PROGBITS        0000000000026fa0 025fa0 000a78 00  WA  0   0 32</span>
+<span class="go">  [23] .dynamic          DYNAMIC         0000000000027a18 026a18 000200 10  WA  7   0  8</span>
+<span class="go">  [24] .got              PROGBITS        0000000000027c18 026c18 0003e8 08  WA  0   0  8</span>
+<span class="go">  [25] .data             PROGBITS        0000000000028000 027000 000278 00  WA  0   0 32</span>
+<span class="go">  [26] .bss              NOBITS          0000000000028280 027278 001318 00  WA  0   0 32</span>
+<span class="go">  [27] .gnu_debuglink    PROGBITS        0000000000000000 027278 000014 00      0   0  4</span>
+<span class="go">  [28] .shstrtab         STRTAB          0000000000000000 02728c 000114 00      0   0  1</span>
+<span class="go">Key to Flags:</span>
+<span class="go">  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),</span>
+<span class="go">  L (link order), O (extra OS processing required), G (group), T (TLS),</span>
+<span class="go">  C (compressed), x (unknown), o (OS specific), E (exclude),</span>
+<span class="go">  l (large), p (processor specific)</span>
+<span class="gp">root@intel-x86-64:/usr/lib64/git/ptest/tests/t#</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="python/index.html">Python</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">BinaryAnalysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#elf">ELF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#get-the-sections-with-readelf">Get the sections with readelf</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cplus/index.html">Cplus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="python/example/00002.html" title="previous chapter">Compare kernel commits</a></li>
+      <li>Next: <a href="cplus/index.html" title="next chapter">Cplus</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/binaryAnalysis.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

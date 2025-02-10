@@ -1,0 +1,515 @@
+===================
+Type Deduction
+===================
+
+.. note:: 
+
+    T是类型模板参数，tmprv是函数模板myfunc()的形参
+
+How to find out what the type the compiler deducted? 
+=====================================================
+
+Using Boost Library 
+
+.. code-block:: cpp 
+
+    #include <iostream>
+    #include <boost/type_index.hpp>
+
+    template <typename T>
+    void myfunc(T&& tmprv)
+    {
+        using boost::typeindex::type_id_with_cvr;
+        std::cout << "T=" <<type_id_with_cvr<T>().pretty_name() << std::endl;
+        std::cout << "tmprv=" <<type_id_with_cvr<decltype(tmprv)>().pretty_name() << std::endl;
+    }
+
+    int main(int argc, char const *argv[])
+    {
+        /* code */
+        int i = 100;
+        myfunc(i);
+        myfunc(100);
+        return 0;
+    }
+
+Output
+
+.. code-block:: console 
+
+    wrsadmin@PEK-HLIU4-D1$./a.out 
+    T=int&
+    tmprv=int&
+    T=int
+    tmprv=int&&
+    wrsadmin@PEK-HLIU4-D1$
+
+
+函数模板会被初始化为下面的两个函数：
+
+.. code-block:: cpp 
+
+    template<>
+    void myfunc<int &>(int & tmprv)
+    {
+     ...
+    }
+    void myfunc<int>(int && tmprv)
+    {
+     ...
+    }
+
+可以参考 `insight <https://cppinsights.io/>`_
+
+Reference 
+====================
+
+
+1) 若实参是引用类型，则引用部分会被忽略掉，T不会被推导为引用类型
+
+.. code-block:: cpp 
+
+    #include <iostream>
+    #include <boost/type_index.hpp>
+
+    template <typename T>
+    void myfunc(T& tmprv)
+    {
+        using boost::typeindex::type_id_with_cvr;
+        std::cout << "T=" <<type_id_with_cvr<T>().pretty_name() << std::endl;
+        std::cout << "tmprv=" <<type_id_with_cvr<decltype(tmprv)>().pretty_name() << std::endl;
+    }
+
+    int main(int argc, char const *argv[])
+    {
+        /* code */
+        int i = 100;
+        const int & k = i;
+        myfunc(k);
+        return 0;
+    }
+
+The Output: 
+
+.. code-block:: console 
+
+    wrsadmin@PEK-HLIU4-D1$./a.out 
+    T=int const
+    tmprv=int const&
+    wrsadmin@PEK-HLIU4-D1$
+
+
+.. code-block:: cpp 
+
+    #include <iostream>
+    #include <boost/type_index.hpp>
+
+    template <typename T>
+    void myfunc(T tmprv)
+    {
+        using boost::typeindex::type_id_with_cvr;
+        std::cout << "T=" <<type_id_with_cvr<T>().pretty_name() << std::endl;
+        std::cout << "tmprv=" <<type_id_with_cvr<decltype(tmprv)>().pretty_name() << std::endl;
+    }
+
+    int main(int argc, char const *argv[])
+    {
+        /* code */
+        int i = 100;
+        const int & k = i;
+        myfunc(k);
+        return 0;
+    }
+
+Output:
+
+.. code-block:: console 
+
+    wrsadmin@PEK-HLIU4-D1$./a.out 
+    T=int
+    tmprv=int
+    wrsadmin@PEK-HLIU4-D1$
+
+k的类型是const int &,而 myfu中的T被推导为int,所以引用被丢弃了
+
+2) 当向引用类型的形参tmprv传入const类型实参时，形参就会成为const引用（原来是一个引用）
+
+
+.. code-block:: cpp 
+
+    #include <iostream>
+    #include <boost/type_index.hpp>
+
+    template <typename T>
+    void myfunc(T& tmprv)
+    {
+        using boost::typeindex::type_id_with_cvr;
+        std::cout << "T=" <<type_id_with_cvr<T>().pretty_name() << std::endl;
+        std::cout << "tmprv=" <<type_id_with_cvr<decltype(tmprv)>().pretty_name() << std::endl;
+    }
+
+    int main(int argc, char const *argv[])
+    {
+        /* code */
+        int i = 18;
+        const int j = i;
+        myfunc(j);
+        return 0;
+    }
+
+
+.. code-block:: console 
+
+    wrsadmin@PEK-HLIU4-D1$./a.out 
+    T=int const
+    tmprv=int const&
+    wrsadmin@PEK-HLIU4-D1$
+
+Point
+===================
+
+- 如果函数模板参数中没有被const修饰,则实参中的const会被代入T类型;如果有const修饰,则T类型中不会带const
+
+1) **template <typename T>void myfunc(T* tmprv){...}**
+   
+.. code-block:: cpp 
+
+    #include <iostream>
+    #include <boost/type_index.hpp>
+
+    template <typename T>
+    void myfunc(T* tmprv)
+    {
+        using boost::typeindex::type_id_with_cvr;
+        std::cout << "T=" <<type_id_with_cvr<T>().pretty_name() << std::endl;
+        std::cout << "tmprv=" <<type_id_with_cvr<decltype(tmprv)>().pretty_name() << std::endl;
+    }
+
+    int main(int argc, char const *argv[])
+    {
+        /* code */
+        int i = 18; 
+        const int* pi = &i; 
+        myfunc(&i); 
+        //看实际执行结果：T=int, tmprv=int * 
+        myfunc(pi);
+        //看实际执行结果：T=int const, tmprv =int const *
+        return 0;
+    }
+
+
+Output
+
+.. code-block:: console
+
+    wrsadmin@PEK-HLIU4-D1$./a.out 
+    T=int
+    tmprv=int*
+    T=int const
+    tmprv=int const*
+    wrsadmin@PEK-HLIU4-D1$
+
+
+
+====================       =========       ============
+k                          T               tmprv
+====================       =========       ============
+int i = 18;                int             int*
+const int* pi = &i         int const       int const*                                 
+====================       =========       ============
+
+
+2) **template <typename T>void myfunc(const T* tmprv){...}**
+
+
+.. code-block:: cpp 
+
+    #include <iostream>
+    #include <boost/type_index.hpp>
+
+    template <typename T>
+    void myfunc(const T* tmprv)
+    {
+        using boost::typeindex::type_id_with_cvr;
+        std::cout << "T=" <<type_id_with_cvr<T>().pretty_name() << std::endl;
+        std::cout << "tmprv=" <<type_id_with_cvr<decltype(tmprv)>().pretty_name() << std::endl;
+    }
+
+    int main(int argc, char const *argv[])
+    {
+        /* code */
+        int i = 18; 
+        const int* pi = &i; 
+        myfunc(&i); 
+        //看实际执行结果：T=int, tmprv=int * 
+        myfunc(pi);
+        //看实际执行结果：T=int const, tmprv =int const *
+        return 0;
+    }
+
+Output
+
+.. code-block:: console 
+
+    wrsadmin@PEK-HLIU4-D1$./a.out 
+    T=int
+    tmprv=int const*
+    T=int
+    tmprv=int const*
+
+
+====================       =========       ============
+k                          T               tmprv
+====================       =========       ============
+int i = 18;                int             int const*
+const int* pi = &i         int             int const*                                 
+====================       =========       ============
+
+
+Universal References
+===========================
+
+
+.. code-block:: cpp 
+
+    #include <iostream>
+    #include <boost/type_index.hpp>
+
+    template <typename T>
+    void myfunc(T&& tmprv)
+    {
+        using boost::typeindex::type_id_with_cvr;
+        std::cout << "T=" <<type_id_with_cvr<T>().pretty_name() << std::endl;
+        std::cout << "tmprv=" <<type_id_with_cvr<decltype(tmprv)>().pretty_name() << std::endl;
+    }
+
+    int main(int argc, char const *argv[])
+    {
+        int i = 18; //i的类型为int 
+        const int j = i; //j的类型为const int 
+        const int& k = i; //k的类型为const int & 
+        myfunc(i); //i是左值，看实际执行结果：T=int &，tmprv=int & 
+        myfunc(j); //j是左值，看实际执行结果：T=int const &，tmprv=int const & 
+        myfunc(k); /*k是左值(只要能往等号左边放的都是左值，就算是右值引用，也是一个左值）, 
+                    看实际执行结果：T=int const &，tmprv=int const &*/ 
+        myfunc(100); //100是右值，看实际执行结果：T=int，tmprv=int &&
+        return 0;
+    }
+
+Output
+
+.. code-block:: console
+
+    wrsadmin@PEK-HLIU4-D1$./a.out 
+    T=int&
+    tmprv=int&
+    T=int const&
+    tmprv=int const&
+    T=int const&
+    tmprv=int const&
+    T=int
+    tmprv=int&&
+    wrsadmin@PEK-HLIU4-D1$
+
+
+
+pass by value
+================
+
+常规的传值方式，将对象作为实参传递到函数中，传递进去的是一个 **对象副本（全新的对象）**
+
+.. code-block:: cpp 
+
+    #include <iostream>
+    #include <boost/type_index.hpp>
+
+    template <typename T>
+    void myfunc(T tmprv)
+    {
+        using boost::typeindex::type_id_with_cvr;
+        std::cout << "T=" <<type_id_with_cvr<T>().pretty_name() << std::endl;
+        std::cout << "tmprv=" <<type_id_with_cvr<decltype(tmprv)>().pretty_name() << std::endl;
+    }
+
+    int main(int argc, char const *argv[])
+    {
+        int i = 18; //i的类型为int 
+        const int j = i; //j的类型为const int 
+        const int& k = i; //k的类型为const int & 
+        myfunc(i); //看实际执行结果：T=int,tmprv=int 
+        myfunc(j); //看实际执行结果：T=int,tmprv=int，const属性没有传递，因为对方是新副本 
+        myfunc(k); //看实际执行结果：T=int,tmprv=int，const属性没有传递，因为对方是新副本
+        char mystr[] = "I Love China!"; 
+        const char* const p = mystr; 
+        myfunc(p);//看实际执行结果：T=char const *,tmprv=char const *
+        return 0;
+    }
+
+总结:
+
+- **若实参是引用类型，则引用部分会被忽略,T不会被推导为引用类型**
+  
+- **若实参是const类型,则const部分会被忽略掉,T不会被推导为const类型(毕竟产生的是新副本)**
+  
+- **如果传递的是const char *或const char[]数组(const和char的位置可互换),那么这个const会被保留**
+
+
+Array
+==========
+
+数组名代表数组首地址
+
+1) pass by value 
+
+.. code-block:: cpp 
+
+    #include <iostream>
+    #include <boost/type_index.hpp>
+
+    template <typename T>
+    void myfunc(T tmprv)
+    {
+        using boost::typeindex::type_id_with_cvr;
+        std::cout << "T=" <<type_id_with_cvr<T>().pretty_name() << std::endl;
+        std::cout << "tmprv=" <<type_id_with_cvr<decltype(tmprv)>().pretty_name() << std::endl;
+    }
+
+    int main(int argc, char const *argv[])
+    {
+        const char mystr[] = "I Love China!"; 
+        myfunc(mystr); /*看实际执行结果：T=char const *,tmprv=char const *，按指针方式处理数组*/
+        return 0;
+    }
+
+2) pass by reference 
+
+.. code-block:: cpp 
+
+    #include <iostream>
+    #include <boost/type_index.hpp>
+
+    template <typename T>
+    void myfunc(T& tmprv)
+    {
+        using boost::typeindex::type_id_with_cvr;
+        std::cout << "T=" <<type_id_with_cvr<T>().pretty_name() << std::endl;
+        std::cout << "tmprv=" <<type_id_with_cvr<decltype(tmprv)>().pretty_name() << std::endl;
+    }
+
+    int main(int argc, char const *argv[])
+    {
+        const char mystr[] = "I Love China!"; 
+        myfunc(mystr); 
+        return 0;
+    }
+
+Output
+
+.. code-block:: console 
+
+    wrsadmin@PEK-HLIU4-D1$./a.out 
+    T=char const [14]
+    tmprv=char const (&) [14]
+    wrsadmin@PEK-HLIU4-D1$
+
+
+
+Function name 
+====================
+
+函数名相当于函数的首地址
+
+
+.. code-block:: cpp 
+
+    #include <iostream>
+    #include <boost/type_index.hpp>
+
+    template <typename T>
+    void myfunc(T tmprv)
+    {
+        using boost::typeindex::type_id_with_cvr;
+        std::cout << "T=" <<type_id_with_cvr<T>().pretty_name() << std::endl;
+        std::cout << "tmprv=" <<type_id_with_cvr<decltype(tmprv)>().pretty_name() << std::endl;
+    }
+    template <typename T>
+    void myfunc2(T& tmprv)
+    {
+        using boost::typeindex::type_id_with_cvr;
+        std::cout << "T=" <<type_id_with_cvr<T>().pretty_name() << std::endl;
+        std::cout << "tmprv=" <<type_id_with_cvr<decltype(tmprv)>().pretty_name() << std::endl;
+    }
+    void testFunc() {}
+    int main(int argc, char const *argv[])
+    {
+        myfunc(testFunc); 
+        myfunc2(testFunc); 
+        return 0;
+    }
+
+Output:
+
+.. code-block:: console 
+
+    wrsadmin@PEK-HLIU4-D1$./a.out 
+    T=void (*)()
+    tmprv=void (*)()
+    T=void ()
+    tmprv=void (&)()
+
+
+initializer lists
+===================
+
+要使用初始化列表(initializer_list),在MyProject.cpp的开头包含头文件:
+
+.. code-block:: cpp
+    
+    #include <initializer_list>
+
+
+Example:
+
+.. code-block:: cpp 
+
+    #include <iostream>
+    #include <initializer_list>
+    #include <boost/type_index.hpp>
+
+    template <typename T>
+    void myfunc(std::initializer_list<T> tmprv)
+    {
+        using boost::typeindex::type_id_with_cvr;
+        std::cout << "T=" <<type_id_with_cvr<T>().pretty_name() << std::endl;
+        std::cout << "tmprv=" <<type_id_with_cvr<decltype(tmprv)>().pretty_name() << std::endl;
+    }
+
+    int main(int argc, char const *argv[])
+    {
+        myfunc({1,2,3}); 
+        return 0;
+    }
+
+Output: 
+
+.. code-block:: console 
+
+    wrsadmin@PEK-HLIU4-D1$./a.out 
+    T=int
+    tmprv=std::initializer_list<int>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+

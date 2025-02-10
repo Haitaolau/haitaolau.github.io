@@ -1,0 +1,382 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>IP Testing &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Open Source: GNU Public License" href="0003.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="ip-testing">
+<h1><a class="toc-backref" href="#id1" role="doc-backlink">IP Testing</a><a class="headerlink" href="#ip-testing" title="Permalink to this heading">¶</a></h1>
+<nav class="contents" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#ip-testing" id="id1">IP Testing</a></p>
+<ul>
+<li><p><a class="reference internal" href="#who-are-the-stakeholders-that-depend-upon-the-successful-completion-of-a-product-ip-review" id="id2">Who are the stakeholders that depend upon the successful completion of a product IP review ?</a></p></li>
+<li><p><a class="reference internal" href="#rd-party-ip-someone-else-s-ip-can-be-check-all-that-apply" id="id3">3rd party IP(someone else’s IP) can be (check all that apply)?</a></p></li>
+<li><p><a class="reference internal" href="#software-can-be-protected-by" id="id4">Software can be protected by</a></p></li>
+<li><p><a class="reference internal" href="#whenever-an-engineer-encounters-an-ip-problem-issue-he-she-sould" id="id5">Whenever an engineer encounters an Ip problem/issue, he/she sould</a></p></li>
+<li><p><a class="reference internal" href="#a-copyright-holder-of-software-can-check-all-that-apply" id="id6">A copyright holder of software can (check all that apply):</a></p></li>
+<li><p><a class="reference internal" href="#if-one-downloads-software-found-on-the-internet-that-has-no-specified-license-it-means-that" id="id7">If one downloads software found on the internet that has no specified license, it means that:</a></p></li>
+<li><p><a class="reference internal" href="#what-are-the-obligations-normally-imposed-by-an-attribution-style-open-sosurce-license" id="id8">What are the obligations normally imposed by an attribution-style open sosurce license?</a></p></li>
+<li><p><a class="reference internal" href="#copyrights-always-require-special-registration-with-the-government" id="id9">Copyrights always require special registration with the government</a></p></li>
+<li><p><a class="reference internal" href="#who-at-wind-river-is-responsible-for-submitting-an-ip-disclosure-for-a-piece-of-3rd-partly-ip" id="id10">Who at Wind River is responsible for submitting an IP disclosure for a piece of 3rd partly IP</a></p></li>
+<li><p><a class="reference internal" href="#which-open-source-licenses-below-are-considered-to-be-attriibution-style-licenses" id="id11">Which open source licenses below are considered to be attriibution-style licenses?</a></p></li>
+<li><p><a class="reference internal" href="#which-open-source-licenses-below-are-considered-to-be-copyleft-licenses" id="id12">Which open source licenses below are considered to be copyleft licenses?</a></p></li>
+<li><p><a class="reference internal" href="#example-s-of-a-derivative-work-is" id="id13">Example(s) of a derivative work is</a></p></li>
+<li><p><a class="reference internal" href="#what-can-happen-if-you-fail-to-submit-a-disclosure-for-the-use-of-3rd-party-ip" id="id14">What can happen if you fail to submit a disclosure for the use of 3rd party IP</a></p></li>
+<li><p><a class="reference internal" href="#what-is-one-criterion-that-determines-whether-software-is-open-source-software" id="id15">What is one criterion that determines whether software is open source software?</a></p></li>
+<li><p><a class="reference internal" href="#which-open-source-license-requires-to-provide-source-code-for-the-distribution-of-the-binary" id="id16">Which open source license requires to provide source code for the distribution of the binary</a></p></li>
+<li><p><a class="reference internal" href="#why-is-the-developer-sign-off-acknowledging-all-the-3rd-party-ip-has-been-disclosed-required-for-ip-review-process" id="id17">Why is the developer sign-off acknowledging all the 3rd party IP has been disclosed required for IP review process?</a></p></li>
+<li><p><a class="reference internal" href="#a-wind-river-engineer-may" id="id18">A Wind River engineer may:</a></p></li>
+<li><p><a class="reference internal" href="#intellectual-property-ip-can-exist-in-the-form-of" id="id19">Intellectual property(IP) can exist in the form of</a></p></li>
+<li><p><a class="reference internal" href="#when-are-you-required-to-disclose-third-party-software-using-the-ip-portal" id="id20">When are you required to disclose third party software(using the ip portal)</a></p></li>
+<li><p><a class="reference internal" href="#what-can-happen-if-a-wind-river-engineer-combines-gpl-licensed-code-with-wind-river-proprietary-code" id="id21">What can happen if a Wind River engineer combines GPL licensed code with Wind River proprietary code?</a></p></li>
+<li><p><a class="reference internal" href="#according-to-the-company-s-global-ip-policy-wind-river-employees" id="id22">According to the company’s global IP policy, Wind River employees</a></p></li>
+<li><p><a class="reference internal" href="#who-is-responsible-for-providing-a-sign-off-to-acknowledge-that-he-she-has-disclosed-all-the-3rd-party-ip-in-a-given-release" id="id23">Who is responsible for providing a sign off to acknowledge that he/she has disclosed all the 3rd party Ip in a given release?</a></p></li>
+<li><p><a class="reference internal" href="#you-have-third-party-software-that-you-would-like-to-integrate-into-vxworks-what-do-you-need-to-do" id="id24">You have third party software that you would like to integrate into VxWorks. What do you need to do ?</a></p></li>
+<li><p><a class="reference internal" href="#what-are-the-potential-consequences-of-the-misuse-of-3rd-party-ip" id="id25">What are the potential consequences of the misuse of 3rd party IP?</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<section id="who-are-the-stakeholders-that-depend-upon-the-successful-completion-of-a-product-ip-review">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">Who are the stakeholders that depend upon the successful completion of a product IP review ?</a><a class="headerlink" href="#who-are-the-stakeholders-that-depend-upon-the-successful-completion-of-a-product-ip-review" title="Permalink to this heading">¶</a></h2>
+<p>☑ A) Product marketing and Sales</p>
+<p>☐ B) Human Resources</p>
+<p>☑ C) Engineering Program manager(EPM)</p>
+<p>☑ D) Legal</p>
+</section>
+<section id="rd-party-ip-someone-else-s-ip-can-be-check-all-that-apply">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">3rd party IP(someone else’s IP) can be (check all that apply)?</a><a class="headerlink" href="#rd-party-ip-someone-else-s-ip-can-be-check-all-that-apply" title="Permalink to this heading">¶</a></h2>
+<p>☑ A) commercial IP</p>
+<p>☑ B) open source IP</p>
+<p>☐ C) Wind River IP</p>
+<p>☑ D) Intel IP</p>
+<p>☐ E) all of the above</p>
+</section>
+<section id="software-can-be-protected-by">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">Software can be protected by</a><a class="headerlink" href="#software-can-be-protected-by" title="Permalink to this heading">¶</a></h2>
+<p>☐ A) copyright</p>
+<p>☐ B) patent</p>
+<p>☑ C) all of the above</p>
+<p>☐ D) none of the above</p>
+</section>
+<section id="whenever-an-engineer-encounters-an-ip-problem-issue-he-she-sould">
+<h2><a class="toc-backref" href="#id5" role="doc-backlink">Whenever an engineer encounters an Ip problem/issue, he/she sould</a><a class="headerlink" href="#whenever-an-engineer-encounters-an-ip-problem-issue-he-she-sould" title="Permalink to this heading">¶</a></h2>
+<p>☐ A) Send a detailed e-mail to ghe engineering manager describing all the specifics of the IP issue and alerting other colleagues as well</p>
+<p>☐ B) Send a request to Export Compliance team and wait for their guidance</p>
+<p>☑ C) Call IP manager or IP Analyst to request the quidance on the issue</p>
+<p>☐ D) No action required, IP Analyst or EPM will take care of this</p>
+</section>
+<section id="a-copyright-holder-of-software-can-check-all-that-apply">
+<h2><a class="toc-backref" href="#id6" role="doc-backlink">A copyright holder of software can (check all that apply):</a><a class="headerlink" href="#a-copyright-holder-of-software-can-check-all-that-apply" title="Permalink to this heading">¶</a></h2>
+<p>☐ A) change the license of third party code the author added to his/her software</p>
+<p>☑ B) change the license of the software</p>
+<p>☑ C) give the same software to two different people under two different license</p>
+</section>
+<hr class="docutils" />
+<section id="if-one-downloads-software-found-on-the-internet-that-has-no-specified-license-it-means-that">
+<h2><a class="toc-backref" href="#id7" role="doc-backlink">If one downloads software found on the internet that has no specified license, it means that:</a><a class="headerlink" href="#if-one-downloads-software-found-on-the-internet-that-has-no-specified-license-it-means-that" title="Permalink to this heading">¶</a></h2>
+<p>☐ A) such software is in public domain, freely available to useN</p>
+<p>☐ B) permission to copy, modify and distribute such software is available under open source license termsNN</p>
+<p>☑ C) permission to copy, modify and distribute such software has not been obtained</p>
+<p>☐ D) none of the above</p>
+</section>
+<hr class="docutils" />
+<section id="what-are-the-obligations-normally-imposed-by-an-attribution-style-open-sosurce-license">
+<h2><a class="toc-backref" href="#id8" role="doc-backlink">What are the obligations normally imposed by an attribution-style open sosurce license?</a><a class="headerlink" href="#what-are-the-obligations-normally-imposed-by-an-attribution-style-open-sosurce-license" title="Permalink to this heading">¶</a></h2>
+<p>☑ A) copyright and license notices must be preseved unchanged in the source code</p>
+<p>☑ B) copyright and license notices must be provided to the end user</p>
+<p>☐ C) source code must be provided</p>
+<p>☐ D) all ofthe above</p>
+</section>
+<hr class="docutils" />
+<section id="copyrights-always-require-special-registration-with-the-government">
+<h2><a class="toc-backref" href="#id9" role="doc-backlink">Copyrights always require special registration with the government</a><a class="headerlink" href="#copyrights-always-require-special-registration-with-the-government" title="Permalink to this heading">¶</a></h2>
+<p>☐ A) True</p>
+<p>☑ B) False</p>
+</section>
+<hr class="docutils" />
+<section id="who-at-wind-river-is-responsible-for-submitting-an-ip-disclosure-for-a-piece-of-3rd-partly-ip">
+<h2><a class="toc-backref" href="#id10" role="doc-backlink">Who at Wind River is responsible for submitting an IP disclosure for a piece of 3rd partly IP</a><a class="headerlink" href="#who-at-wind-river-is-responsible-for-submitting-an-ip-disclosure-for-a-piece-of-3rd-partly-ip" title="Permalink to this heading">¶</a></h2>
+<p>☐ A) IP analyst conducting IP review of a respective Wind River product</p>
+<p>☑ B) Engineer integrating that piece of IP into a respective Wind River product</p>
+<p>☐ C) Product manager responsible for the product release</p>
+<p>☐ D) none of the above</p>
+</section>
+<hr class="docutils" />
+<section id="which-open-source-licenses-below-are-considered-to-be-attriibution-style-licenses">
+<h2><a class="toc-backref" href="#id11" role="doc-backlink">Which open source licenses below are considered to be attriibution-style licenses?</a><a class="headerlink" href="#which-open-source-licenses-below-are-considered-to-be-attriibution-style-licenses" title="Permalink to this heading">¶</a></h2>
+<p>☑ A) Apache license</p>
+<p>☐ B) GNU General Public License(GPL)</p>
+<p>☑ C) BSD license</p>
+<p>☐ D) GNU Library(or lesser) Public license(LGPL)</p>
+<p>☐ E) Eclipse Public License(EPL)</p>
+<p>☑ F) MIT license</p>
+</section>
+<hr class="docutils" />
+<section id="which-open-source-licenses-below-are-considered-to-be-copyleft-licenses">
+<h2><a class="toc-backref" href="#id12" role="doc-backlink">Which open source licenses below are considered to be copyleft licenses?</a><a class="headerlink" href="#which-open-source-licenses-below-are-considered-to-be-copyleft-licenses" title="Permalink to this heading">¶</a></h2>
+<p>☐ A) Apache license</p>
+<p>☑ B) GNU General Public License(GPL)</p>
+<p>☐ C) BSD license</p>
+<p>☑ D) GNU Library(or lesser) Public license(LGPL)</p>
+<p>☑ E) Eclipse Public License(EPL)</p>
+<p>☐ F) MIT license</p>
+</section>
+<hr class="docutils" />
+<section id="example-s-of-a-derivative-work-is">
+<h2><a class="toc-backref" href="#id13" role="doc-backlink">Example(s) of a derivative work is</a><a class="headerlink" href="#example-s-of-a-derivative-work-is" title="Permalink to this heading">¶</a></h2>
+<p>☑ A) a movie based on a book</p>
+<p>☑ B) modified source code file</p>
+<p>☑ C) linked binaries to create new work</p>
+<p>☑ D) binary file</p>
+</section>
+<hr class="docutils" />
+<section id="what-can-happen-if-you-fail-to-submit-a-disclosure-for-the-use-of-3rd-party-ip">
+<h2><a class="toc-backref" href="#id14" role="doc-backlink">What can happen if you fail to submit a disclosure for the use of 3rd party IP</a><a class="headerlink" href="#what-can-happen-if-you-fail-to-submit-a-disclosure-for-the-use-of-3rd-party-ip" title="Permalink to this heading">¶</a></h2>
+<p>☑ A) A potential IP issue might be missed</p>
+<p>☑ B) Wind River may incur legal damages and unpaid royalties</p>
+<p>☑ C) A product might end up with 3rd party software without the proper license</p>
+<p>☐ D) You will lose your birthday as a day-off(vacation)</p>
+<p>☑ E) Our customers may face legal issues for distributing our product without a 3rd party license</p>
+</section>
+<hr class="docutils" />
+<section id="what-is-one-criterion-that-determines-whether-software-is-open-source-software">
+<h2><a class="toc-backref" href="#id15" role="doc-backlink">What is one criterion that determines whether software is open source software?</a><a class="headerlink" href="#what-is-one-criterion-that-determines-whether-software-is-open-source-software" title="Permalink to this heading">¶</a></h2>
+<p>☐ A) Code was developed by a group of people collaborating on the internet</p>
+<p>☐ B) Code is freely downloadable from Github</p>
+<p>☑ C) Code is available under an open source license</p>
+<p>☐ D) Code is in public domain</p>
+</section>
+<hr class="docutils" />
+<section id="which-open-source-license-requires-to-provide-source-code-for-the-distribution-of-the-binary">
+<h2><a class="toc-backref" href="#id16" role="doc-backlink">Which open source license requires to provide source code for the distribution of the binary</a><a class="headerlink" href="#which-open-source-license-requires-to-provide-source-code-for-the-distribution-of-the-binary" title="Permalink to this heading">¶</a></h2>
+<p>☐ A) MIT</p>
+<p>☐ B) public domain</p>
+<p>☐ C) BSD-3-Clause</p>
+<p>☐ D) Apache-2.0</p>
+<p>☑ E) GPL-2.0</p>
+</section>
+<hr class="docutils" />
+<section id="why-is-the-developer-sign-off-acknowledging-all-the-3rd-party-ip-has-been-disclosed-required-for-ip-review-process">
+<h2><a class="toc-backref" href="#id17" role="doc-backlink">Why is the developer sign-off acknowledging all the 3rd party IP has been disclosed required for IP review process?</a><a class="headerlink" href="#why-is-the-developer-sign-off-acknowledging-all-the-3rd-party-ip-has-been-disclosed-required-for-ip-review-process" title="Permalink to this heading">¶</a></h2>
+<p>☐ A) to ensure all 3rd party Ip has been accounted for in the release</p>
+<p>☐ B) to ensure potential IP issues are not missed</p>
+<p>☑ C) all of the above</p>
+<p>☐ D) none of the above</p>
+</section>
+<hr class="docutils" />
+<section id="a-wind-river-engineer-may">
+<h2><a class="toc-backref" href="#id18" role="doc-backlink">A Wind River engineer may:</a><a class="headerlink" href="#a-wind-river-engineer-may" title="Permalink to this heading">¶</a></h2>
+<p>☐ A) remove some else’s copyright notice from 3rd party IP</p>
+<p>☐ B) copy open source software and mark the code his/her own</p>
+<p>☐ C) perform patent searches on his/her own prior to discussing with Wind River Legal</p>
+<p>☐ D) if aware of potential IP issue, send an e-emal with all the detailed information about the issue to the rest of engineering team</p>
+<p>☑ E) none of the above</p>
+</section>
+<hr class="docutils" />
+<section id="intellectual-property-ip-can-exist-in-the-form-of">
+<h2><a class="toc-backref" href="#id19" role="doc-backlink">Intellectual property(IP) can exist in the form of</a><a class="headerlink" href="#intellectual-property-ip-can-exist-in-the-form-of" title="Permalink to this heading">¶</a></h2>
+<p>☑ A) documentation</p>
+<p>☑ B) software</p>
+<p>☐ C) land</p>
+<p>☑ D) images</p>
+</section>
+<hr class="docutils" />
+<section id="when-are-you-required-to-disclose-third-party-software-using-the-ip-portal">
+<h2><a class="toc-backref" href="#id20" role="doc-backlink">When are you required to disclose third party software(using the ip portal)</a><a class="headerlink" href="#when-are-you-required-to-disclose-third-party-software-using-the-ip-portal" title="Permalink to this heading">¶</a></h2>
+<p>☐ A) Disclose after GA date when the product ships</p>
+<p>☐ B) No need to disclose, if unsure whether that piece of software will eventually make it into the release</p>
+<p>☐ C) Wait unti the code/feautre freeze date</p>
+<p>☑ D) Disclose as soon as you are considering to integrate that piece of software into the code base.</p>
+</section>
+<hr class="docutils" />
+<section id="what-can-happen-if-a-wind-river-engineer-combines-gpl-licensed-code-with-wind-river-proprietary-code">
+<h2><a class="toc-backref" href="#id21" role="doc-backlink">What can happen if a Wind River engineer combines GPL licensed code with Wind River proprietary code?</a><a class="headerlink" href="#what-can-happen-if-a-wind-river-engineer-combines-gpl-licensed-code-with-wind-river-proprietary-code" title="Permalink to this heading">¶</a></h2>
+<p>☑ A) the new work(combination of GPL code and WR code) must be licensed under the GPL license</p>
+<p>☑ B) Wind River will be obligated to release its proprietary source code under the terms of GPL license</p>
+<p>☐ C) you can remove GPL license notice and substitute it with Wind River copyright and license notice</p>
+<p>☐ D) the new work(combination of GPL code and WR code) can be licensed under Wind RIver proprietary license</p>
+</section>
+<hr class="docutils" />
+<section id="according-to-the-company-s-global-ip-policy-wind-river-employees">
+<h2><a class="toc-backref" href="#id22" role="doc-backlink">According to the company’s global IP policy, Wind River employees</a><a class="headerlink" href="#according-to-the-company-s-global-ip-policy-wind-river-employees" title="Permalink to this heading">¶</a></h2>
+<p>☑ A) Shall avoid conducting any patent searches or expressing opinion about potential patent infringements, unless authorized by Wind River Legal</p>
+<p>☐ B) Are encouraged to perform patent searches and express an opinion about patent infringement of 3rd party technology, if they feel there are might be such an infringement</p>
+<p>☐ C) May download software from the internet and integrate into the product, without disclosing it to IP group</p>
+<p>☐ D) May forego Ip test if being confident about his/here own knoledge of IP review.</p>
+</section>
+<hr class="docutils" />
+<section id="who-is-responsible-for-providing-a-sign-off-to-acknowledge-that-he-she-has-disclosed-all-the-3rd-party-ip-in-a-given-release">
+<h2><a class="toc-backref" href="#id23" role="doc-backlink">Who is responsible for providing a sign off to acknowledge that he/she has disclosed all the 3rd party Ip in a given release?</a><a class="headerlink" href="#who-is-responsible-for-providing-a-sign-off-to-acknowledge-that-he-she-has-disclosed-all-the-3rd-party-ip-in-a-given-release" title="Permalink to this heading">¶</a></h2>
+<p>☐ A) Product manager responsible for a release</p>
+<p>☑ B) Engineer working with the code for a respenctive release</p>
+<p>☐ C) IP analyst conducting IP review on a respective release</p>
+</section>
+<hr class="docutils" />
+<section id="you-have-third-party-software-that-you-would-like-to-integrate-into-vxworks-what-do-you-need-to-do">
+<h2><a class="toc-backref" href="#id24" role="doc-backlink">You have third party software that you would like to integrate into VxWorks. What do you need to do ?</a><a class="headerlink" href="#you-have-third-party-software-that-you-would-like-to-integrate-into-vxworks-what-do-you-need-to-do" title="Permalink to this heading">¶</a></h2>
+<p>☐ A) check whether such software is acceptable per VxWorks IP policy</p>
+<p>☐ B) submit IP disclosure from at ip.wrs.com</p>
+<p>☑ C) all of the above</p>
+<p>☐ D) none of the above</p>
+</section>
+<hr class="docutils" />
+<section id="what-are-the-potential-consequences-of-the-misuse-of-3rd-party-ip">
+<h2><a class="toc-backref" href="#id25" role="doc-backlink">What are the potential consequences of the misuse of 3rd party IP?</a><a class="headerlink" href="#what-are-the-potential-consequences-of-the-misuse-of-3rd-party-ip" title="Permalink to this heading">¶</a></h2>
+<p>☑ A) damaged reputation as a trusted software vendor</p>
+<p>☑ B) distraction and loss of productivity</p>
+<p>☑ C) millions in legal damages and fees</p>
+<p>☑ D) revenue loss from a court halting a product distribution</p>
+<p>☐ E) employee loses all yearly vocation time</p>
+<p>☑ F) loss of IP</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cplus/index.html">Cplus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tools/index.html">Tools</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">OpenSource License</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="0001.html">Opensource &amp; IP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0002.html">Open Source: Attribution Licenses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0003.html">Open Source: GNU Public License</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">IP Testing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#who-are-the-stakeholders-that-depend-upon-the-successful-completion-of-a-product-ip-review">Who are the stakeholders that depend upon the successful completion of a product IP review ?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rd-party-ip-someone-else-s-ip-can-be-check-all-that-apply">3rd party IP(someone else’s IP) can be (check all that apply)?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#software-can-be-protected-by">Software can be protected by</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#whenever-an-engineer-encounters-an-ip-problem-issue-he-she-sould">Whenever an engineer encounters an Ip problem/issue, he/she sould</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#a-copyright-holder-of-software-can-check-all-that-apply">A copyright holder of software can (check all that apply):</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#if-one-downloads-software-found-on-the-internet-that-has-no-specified-license-it-means-that">If one downloads software found on the internet that has no specified license, it means that:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#what-are-the-obligations-normally-imposed-by-an-attribution-style-open-sosurce-license">What are the obligations normally imposed by an attribution-style open sosurce license?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#copyrights-always-require-special-registration-with-the-government">Copyrights always require special registration with the government</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#who-at-wind-river-is-responsible-for-submitting-an-ip-disclosure-for-a-piece-of-3rd-partly-ip">Who at Wind River is responsible for submitting an IP disclosure for a piece of 3rd partly IP</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#which-open-source-licenses-below-are-considered-to-be-attriibution-style-licenses">Which open source licenses below are considered to be attriibution-style licenses?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#which-open-source-licenses-below-are-considered-to-be-copyleft-licenses">Which open source licenses below are considered to be copyleft licenses?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example-s-of-a-derivative-work-is">Example(s) of a derivative work is</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#what-can-happen-if-you-fail-to-submit-a-disclosure-for-the-use-of-3rd-party-ip">What can happen if you fail to submit a disclosure for the use of 3rd party IP</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#what-is-one-criterion-that-determines-whether-software-is-open-source-software">What is one criterion that determines whether software is open source software?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#which-open-source-license-requires-to-provide-source-code-for-the-distribution-of-the-binary">Which open source license requires to provide source code for the distribution of the binary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#why-is-the-developer-sign-off-acknowledging-all-the-3rd-party-ip-has-been-disclosed-required-for-ip-review-process">Why is the developer sign-off acknowledging all the 3rd party IP has been disclosed required for IP review process?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#a-wind-river-engineer-may">A Wind River engineer may:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#intellectual-property-ip-can-exist-in-the-form-of">Intellectual property(IP) can exist in the form of</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#when-are-you-required-to-disclose-third-party-software-using-the-ip-portal">When are you required to disclose third party software(using the ip portal)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#what-can-happen-if-a-wind-river-engineer-combines-gpl-licensed-code-with-wind-river-proprietary-code">What can happen if a Wind River engineer combines GPL licensed code with Wind River proprietary code?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#according-to-the-company-s-global-ip-policy-wind-river-employees">According to the company’s global IP policy, Wind River employees</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#who-is-responsible-for-providing-a-sign-off-to-acknowledge-that-he-she-has-disclosed-all-the-3rd-party-ip-in-a-given-release">Who is responsible for providing a sign off to acknowledge that he/she has disclosed all the 3rd party Ip in a given release?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#you-have-third-party-software-that-you-would-like-to-integrate-into-vxworks-what-do-you-need-to-do">You have third party software that you would like to integrate into VxWorks. What do you need to do ?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#what-are-the-potential-consequences-of-the-misuse-of-3rd-party-ip">What are the potential consequences of the misuse of 3rd party IP?</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">OpenSource License</a><ul>
+      <li>Previous: <a href="0003.html" title="previous chapter">Open Source: GNU Public License</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/licence/iptest.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,37 @@
+===============================
+std::ref and std::cref
+===============================
+
+
+**std::ref  进行引用传递后,函数内部可以修改所传递进去的对象的值并直接影响该对象原值（简称为可修改，影响）**
+
+**std::cref 进行引用传递后,相当于进行的是const引用传递,函数内部不可以修改对象的值（简称为不可修改，更谈不到影响）**
+
+How it works
+===============
+
+.. code-block:: cpp 
+
+    int m = 180; myfunc(std::ref(m)); cout << "m=" << m << endl;
+
+
+std::ref和std::cref好像一个对象包装器, 
+
+它们通过创建一个class std::reference_wrapper<T>类型的
+
+对象（这里的T，对于std::ref代表的是int，对于std::cref代表的是const int
+
+这个对象内部引用的是原始main()主函数中的m变量，调用myfunc()时按值传递的其实是这个
+
+std::reference_wrapper<T>类型的对象
+
+std::reference_wrapper内部能够把std::reference_wrapper<T>类型隐式转换为它所包
+
+装的类型（这里它所包装的是int类型或const int类型）
+
+
+总结: 
+
+- **通过传值的方式传递模板参数，虽然代码书写简单，但是效率可能不是很高。当函数模板（必须是函数模板，普通函数不行)定义中使用传值方式时,可以通过std::ref和std::cref以引用的方式传递参数**
+
+

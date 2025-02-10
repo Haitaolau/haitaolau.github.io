@@ -1,0 +1,30 @@
+.. Gdocs documentation master file, created by
+   sphinx-quickstart on Wed Dec  7 11:31:54 2022.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+Welcome to Gdocs's documentation!
+=================================
+
+.. toctree::
+   :maxdepth: 3
+
+   corp
+   cmds/index
+   kernel/index
+   python/index
+   binaryAnalysis
+   cplus/index
+   els/index
+   andorid/index
+   yocto/index
+   emacs/index
+   virt/index
+   debian/index
+   tools/index
+   licence/index
+   
+.. * :ref:`corp_index`
+   * :ref:`python_index`
+   * :ref:`binary_analysis_index`
+   * :ref:`cplus_index`

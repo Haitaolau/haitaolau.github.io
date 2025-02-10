@@ -1,0 +1,973 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Chapter 4. Simple Example &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="apt-cache: policy" href="../001.html" />
+    <link rel="prev" title="Debmake Document" href="index.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="chapter-4-simple-example">
+<h1><a class="toc-backref" href="#id3" role="doc-backlink">Chapter 4. Simple Example</a><a class="headerlink" href="#chapter-4-simple-example" title="Permalink to this heading">¶</a></h1>
+<nav class="contents" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#chapter-4-simple-example" id="id3">Chapter 4. Simple Example</a></p>
+<ul>
+<li><p><a class="reference internal" href="#packaging-tarball" id="id4">Packaging tarball</a></p></li>
+<li><p><a class="reference internal" href="#big-picture" id="id5">Big picture</a></p></li>
+<li><p><a class="reference internal" href="#what-is-debmake" id="id6">What is debmake?</a></p></li>
+<li><p><a class="reference internal" href="#what-is-debuild" id="id7">What is debuild?</a></p></li>
+<li><p><a class="reference internal" href="#step-1-get-the-upstream-source" id="id8">Step 1: Get the upstream source</a></p></li>
+<li><p><a class="reference internal" href="#step-2-generate-template-files-with-debmake" id="id9">Step 2: Generate template files with debmake</a></p></li>
+<li><p><a class="reference internal" href="#step-3-modification-to-the-template-files" id="id10">Step 3: Modification to the template files</a></p></li>
+<li><p><a class="reference internal" href="#step-4-building-package-with-debuild" id="id11">Step 4: Building package with debuild</a></p></li>
+<li><p><a class="reference internal" href="#step-3-alternative-modification-to-the-upstream-source" id="id12">Step 3 (alternative): Modification to the upstream source</a></p></li>
+<li><p><a class="reference internal" href="#patch-by-diff-u" id="id13">Patch by diff -u</a></p></li>
+<li><p><a class="reference internal" href="#patch-by-dquilt" id="id14">Patch by dquilt</a></p></li>
+<li><p><a class="reference internal" href="#patch-by-dpkg-source-commit" id="id15">Patch by dpkg-source –commit</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<section id="packaging-tarball">
+<span id="id1"></span><h2><a class="toc-backref" href="#id4" role="doc-backlink">Packaging tarball</a><a class="headerlink" href="#packaging-tarball" title="Permalink to this heading">¶</a></h2>
+<p>Here is an example of creating a simple Debian package from a simple C source using the <strong>Makefile</strong> as its build system.</p>
+<p>Let’s assume this upstream tarball to be <a class="reference download internal" download="" href="../../../_downloads/7dc755bf3471f6a9e58e3cdda3fd62cd/debhello-0.0.tar.gz"><code class="xref download docutils literal notranslate"><span class="pre">debhello-0.0.tar.gz</span></code></a>.</p>
+<p>This type of source is meant to be installed as a non-system file as:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>tar -xzmf debhello-0.0.tar.gz
+<span class="gp">$ </span><span class="nb">cd</span> debhello-0.0
+<span class="gp">$ </span>make
+<span class="gp">$ </span>make install
+</pre></div>
+</div>
+<p>Debian packaging requires changing this <cite>make install</cite> process to install files to the target system image
+location instead of the normal location under <cite>/usr/local</cite>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Examples of creating a Debian package from other complicated build systems are described in &lt;&lt;more&gt;&gt;.</p>
+</div>
+</section>
+<section id="big-picture">
+<span id="id2"></span><h2><a class="toc-backref" href="#id5" role="doc-backlink">Big picture</a><a class="headerlink" href="#big-picture" title="Permalink to this heading">¶</a></h2>
+<p>The big picture for building a single non-native Debian package from the upstream tarball <cite>debhello-0.0.tar.gz</cite> can be summarized as:</p>
+<ul class="simple">
+<li><p>The maintainer obtains the upstream tarball <cite>debhello-0.0.tar.gz</cite> and untars its contents to the <cite>debhello-0.0</cite> directory.</p></li>
+<li><p>The <cite>debmake</cite> command debianizes the upstream source tree by adding template files only in the <cite>debian</cite> directory.
+* The <cite>debhello_0.0.orig.tar.gz</cite> symlink is created pointing to the <cite>debhello-0.0.tar.gz</cite> file.
+* The maintainer customizes template files.</p></li>
+<li><p>The <cite>debuild</cite> command builds the binary package from the debianized source tree.
+* <cite>debhello-0.0-1.debian.tar.xz</cite> is created containing the <cite>debian</cite> directory.</p></li>
+</ul>
+<p>Big picture of package building</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>tar -xzmf debhello-0.0.tar.gz
+<span class="gp">$ </span><span class="nb">cd</span> debhello-0.0
+<span class="gp">$ </span>debmake
+<span class="go">  ... manual customization</span>
+<span class="gp">$ </span>debuild
+<span class="go">  ...</span>
+</pre></div>
+</div>
+<p>TIP: The <cite>debuild</cite> command in this and following examples may be substituted by equivalent commands such as the <cite>sbuild</cite> command.</p>
+<p>TIP: If the upstream tarball in the <cite>.tar.xz</cite> format is available, use it instead of the one in the <cite>.tar.gz</cite> and <cite>.tar.bz2</cite> formats. The <cite>xz</cite> compression format offers the better compression than the <cite>gzip</cite> and <cite>bzip2</cite> compressions.</p>
+</section>
+<section id="what-is-debmake">
+<span id="what-debmake"></span><h2><a class="toc-backref" href="#id6" role="doc-backlink">What is debmake?</a><a class="headerlink" href="#what-is-debmake" title="Permalink to this heading">¶</a></h2>
+<p>The <cite>debmake</cite> command is the helper script for the Debian packaging.</p>
+<ul class="simple">
+<li><p>It always sets most of the obvious option states and values to reasonable defaults.</p></li>
+<li><p>It generates the upstream tarball and its required symlink if they are missing.</p></li>
+<li><p>It doesn’t overwrite the existing configuration files in the <em>debian/</em> directory.</p></li>
+<li><p>It supports the <cite>multiarch</cite> package.</p></li>
+<li><p>It creates good template files such as the <cite>debian/copyright</cite> file compliant with <cite>DEP-5</cite>.</p></li>
+</ul>
+<p>These features make Debian packaging with <cite>debmake</cite> simple and modern.</p>
+<p>In retrospective, I created <cite>debmake</cite> to simplify this documentation.  I consider <cite>debmake</cite> to be more-or-less a demonstration session generator for tutorial purpose.</p>
+<p>NOTE: Many packages are packaged using only a text editor while imitating how other similar packages are packaged and consulting how the Debian policy requires us to do.  This seems to me the most popular method for the real-life packaging activity.</p>
+<p>The <cite>debmake</cite> command isn’t the only helper script to make a Debian package.  If you are interested in alternative packaging helper tools, please see:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://wiki.debian.org/AutomaticPackagingTools[Debian">https://wiki.debian.org/AutomaticPackagingTools[Debian</a> wiki: AutomaticPackagingTools] – Extensive comparison of packaging helper scripts</p></li>
+<li><p><a class="reference external" href="https://wiki.debian.org/CopyrightReviewTools[Debian">https://wiki.debian.org/CopyrightReviewTools[Debian</a> wiki: CopyrightReviewTools] – Extensive comparison of copyright review helper scripts</p></li>
+</ul>
+</section>
+<section id="what-is-debuild">
+<span id="what-debuild"></span><h2><a class="toc-backref" href="#id7" role="doc-backlink">What is debuild?</a><a class="headerlink" href="#what-is-debuild" title="Permalink to this heading">¶</a></h2>
+<p>Here is a summary of commands similar to the <cite>debuild</cite> command.</p>
+<ul class="simple">
+<li><p>The <cite>debian/rules</cite> file defines how the Debian binary package is built.</p></li>
+<li><p>The <cite>dpkg-buildpackage</cite> command is the official command to build the Debian binary package.  For normal binary build, it executes roughly:
+* <cite>dpkg-source –before-build</cite> (apply Debian patches, unless they are already applied)
+* <cite>fakeroot debian/rules clean</cite>
+* <cite>dpkg-source –build</cite> (build the Debian source package)
+* <cite>fakeroot debian/rules build</cite>
+* <cite>fakeroot debian/rules binary</cite>
+* <cite>dpkg-genbuildinfo</cite> (generate a <cite>.buildinfo</cite> file)
+* <cite>dpkg-genchanges</cite> (generate a <cite>.changes</cite> file)
+* <cite>fakeroot debian/rules clean</cite>
+* <cite>dpkg-source –after-build</cite> (unapply Debian patches, if they are applied during <cite>–before-build</cite>)
+* <cite>debsign</cite> (sign the <cite>*.dsc</cite> and <cite>*.changes</cite> files)</p>
+<ul>
+<li><p>The <cite>debuild</cite> command is a wrapper script of the <cite>dpkg-buildpackage</cite> command to build the Debian binary package under the proper environment variables.</p></li>
+<li><p>The <cite>sbuild</cite> command is a wrapper script to build the Debian binary package under the proper chroot environment with the proper environment variables.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="step-1-get-the-upstream-source">
+<span id="step-upstream"></span><h2><a class="toc-backref" href="#id8" role="doc-backlink">Step 1: Get the upstream source</a><a class="headerlink" href="#step-1-get-the-upstream-source" title="Permalink to this heading">¶</a></h2>
+<p>Let’s get the upstream source.</p>
+<p>Download <cite>debhello-0.0.tar.gz</cite></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>wget http://www.example.org/download/debhello-0.0.tar.gz
+<span class="go">...</span>
+<span class="gp">$ </span>tar -xzf debhello-0.0.tar.gz
+<span class="gp">$ </span>tree
+<span class="go">.</span>
+<span class="go">├── debhello-0.0</span>
+<span class="go">│   ├── LICENSE</span>
+<span class="go">│   ├── Makefile</span>
+<span class="go">│   └── src</span>
+<span class="go">│       └── hello.c</span>
+<span class="go">└── debhello-0.0.tar.gz</span>
+
+<span class="go">2 directories, 4 files</span>
+</pre></div>
+</div>
+<p>Here, the C source <cite>hello.c</cite> is a very simple one.</p>
+<p><cite>hello.c</cite></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>cat debhello-0.0/src/hello.c
+<span class="gp">#</span>include &lt;stdio.h&gt;
+<span class="go">int</span>
+<span class="go">main()</span>
+<span class="go">{</span>
+<span class="go">        printf(&quot;Hello, world!\n&quot;);</span>
+<span class="go">        return 0;</span>
+<span class="go">}</span>
+</pre></div>
+</div>
+<p>Here, the <cite>Makefile</cite> supports <a class="reference external" href="https://www.gnu.org/prep/standards/[GNU">https://www.gnu.org/prep/standards/[GNU</a> Coding Standards] and <a class="reference external" href="https://en.wikipedia.org/wiki/Filesystem_Hierarchy_Standard[FHS">https://en.wikipedia.org/wiki/Filesystem_Hierarchy_Standard[FHS</a>]. Notably:</p>
+<p>` build binaries honoring <cite>$(CPPFLAGS)</cite>, <cite>$(CFLAGS)</cite>, <cite>$(LDFLAGS)</cite>, etc.
+` install files with <cite>$(DESTDIR)</cite> defined to the target system image
+` install files with <cite>$(prefix)</cite> defined, which can be overridden to be <cite>/usr</cite></p>
+<p><cite>Makefile</cite></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp"> $ </span>cat debhello-0.0/Makefile
+<span class="go">prefix = /usr/local</span>
+
+<span class="go">all: src/hello</span>
+
+<span class="go">src/hello: src/hello.c</span>
+<span class="go">        @echo &quot;CFLAGS=$(CFLAGS)&quot; | \</span>
+<span class="go">                fold -s -w 70 | \</span>
+<span class="go">                sed -e &#39;s/^/# /&#39;</span>
+<span class="gp">        $</span><span class="o">(</span>CC<span class="o">)</span> <span class="k">$(</span>CPPFLAGS<span class="k">)</span> <span class="k">$(</span>CFLAGS<span class="k">)</span> <span class="k">$(</span>LDCFLAGS<span class="k">)</span> -o <span class="nv">$@</span> $^
+
+<span class="go">install: src/hello</span>
+<span class="go">        install -D src/hello \</span>
+<span class="gp">                $</span><span class="o">(</span>DESTDIR<span class="o">)</span><span class="k">$(</span>prefix<span class="k">)</span>/bin/hello
+
+<span class="go">clean:</span>
+<span class="go">        -rm -f src/hello</span>
+
+<span class="go">distclean: clean</span>
+
+<span class="go">uninstall:</span>
+<span class="go">        -rm -f $(DESTDIR)$(prefix)/bin/hello</span>
+
+<span class="go">.PHONY: all install clean distclean uninstall</span>
+</pre></div>
+</div>
+</section>
+<section id="step-2-generate-template-files-with-debmake">
+<span id="step-debmake"></span><h2><a class="toc-backref" href="#id9" role="doc-backlink">Step 2: Generate template files with debmake</a><a class="headerlink" href="#step-2-generate-template-files-with-debmake" title="Permalink to this heading">¶</a></h2>
+<p>The output from the <cite>debmake</cite> command is very verbose and explains what it does as follows.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nb">cd</span> debhello-0.0
+<span class="gp">$ </span>debmake
+<span class="go">I: set parameters</span>
+<span class="go">I: =================================================================</span>
+<span class="go">I: package_dir     = /usr/lib/python3/dist-packages</span>
+<span class="go">I: base_path       = /usr</span>
+<span class="go">I: base_lib_path   = /usr/lib/debmake</span>
+<span class="go">I: base_share_path = /usr/share/debmake</span>
+<span class="go">I: =================================================================</span>
+<span class="go">I: sanity check of parameters</span>
+<span class="go">I: pkg=&quot;debhello&quot;, ver=&quot;0.0&quot;, rev=&quot;1&quot;</span>
+<span class="go">I: *** start packaging in &quot;debhello-0.0&quot;. ***</span>
+<span class="go">I: provide debhello_0.0.orig.tar.gz for non-native Debian package</span>
+<span class="go">I: pwd = &quot;/path/to&quot;</span>
+<span class="go">I: $ ln -sf debhello-0.0.tar.gz debhello_0.0.orig.tar.gz</span>
+<span class="go">I: pwd = &quot;/path/to/debhello-0.0&quot;</span>
+<span class="go">I: parse binary package settings:</span>
+<span class="go">I: binary package=debhello Type=bin / Arch=any M-A=foreign</span>
+<span class="go">I: analyze the source tree</span>
+<span class="go">I: build_type = make</span>
+<span class="go">I: scan source for copyright+license text and file extensions</span>
+<span class="go">I: 100 %, ext = c</span>
+<span class="go">I: check_all_licenses</span>
+<span class="go">I: ..</span>
+<span class="go">I: check_all_licenses completed for 2 files.</span>
+<span class="go">I: bunch_all_licenses</span>
+<span class="go">I: format_all_licenses</span>
+<span class="go">I: make debian/* template files</span>
+<span class="go">I: single binary package</span>
+<span class="go">I: debmake -x &quot;1&quot; ...</span>
+<span class="go">I: creating =&gt; debian/control</span>
+<span class="go">I: creating =&gt; debian/copyright</span>
+<span class="go">I: substituting =&gt; /usr/share/debmake/extra0/changelog</span>
+<span class="go">I: creating =&gt; debian/changelog</span>
+<span class="go">I: substituting =&gt; /usr/share/debmake/extra0/rules</span>
+<span class="go">I: creating =&gt; debian/rules</span>
+<span class="go">I: substituting =&gt; /usr/share/debmake/extra1/README.Debian</span>
+<span class="go">I: creating =&gt; debian/README.Debian</span>
+<span class="go">I: substituting =&gt; /usr/share/debmake/extra1/watch</span>
+<span class="go">I: creating =&gt; debian/watch</span>
+<span class="go">I: substituting =&gt; /usr/share/debmake/extra1source/format</span>
+<span class="go">I: creating =&gt; debian/source/format</span>
+<span class="go">I: substituting =&gt; /usr/share/debmake/extra1tests/control</span>
+<span class="go">I: creating =&gt; debian/source/control</span>
+<span class="go">I: substituting =&gt; /usr/share/debmake/extra1upstream/metadata</span>
+<span class="go">I: creating =&gt; debian/upstream/metadata</span>
+<span class="go">I: substituting =&gt; /usr/share/debmake/extra1tests/control</span>
+<span class="go">I: creating =&gt; debian/tests/control</span>
+<span class="go">I: substituting =&gt; /usr/share/debmake/extra1patches/series</span>
+<span class="go">I: creating =&gt; debian/patches/series</span>
+<span class="go">I: substituting =&gt; /usr/share/debmake/extra1sourcex/local-options</span>
+<span class="go">I: creating =&gt; debian/source/local-options</span>
+<span class="go">I: substituting =&gt; /usr/share/debmake/extra1sourcex/options</span>
+<span class="go">I: creating =&gt; debian/source/options</span>
+<span class="go">I: substituting =&gt; /usr/share/debmake/extra1sourcex/patch-header</span>
+<span class="go">I: creating =&gt; debian/source/patch-header</span>
+<span class="go">I: run &quot;debmake -x2&quot; to get more template files</span>
+<span class="go">I: $ wrap-and-sort</span>
+</pre></div>
+</div>
+<p>The <cite>debmake</cite> command generates all these template files based on command line options.  Since no options are specified, the <cite>debmake</cite> command chooses reasonable default values for you:</p>
+<ul class="simple">
+<li><p>The source package name: <cite>debhello</cite></p></li>
+<li><p>The upstream version: <cite>0.0</cite></p></li>
+<li><p>The binary package name: <cite>debhello</cite></p></li>
+<li><p>The Debian revision: <cite>1</cite></p></li>
+<li><p>The package type: <cite>bin</cite> (the ELF binary executable package)</p></li>
+<li><p>The <cite>-x</cite> option: <cite>-x1</cite> (default for the single binary package)</p></li>
+</ul>
+<p>Let’s inspect generated template files.</p>
+<p>The source tree after the basic <cite>debmake</cite> execution.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nb">cd</span> ..
+<span class="gp">$ </span>tree
+<span class="go">.</span>
+<span class="go">├── debhello-0.0</span>
+<span class="go">│   ├── LICENSE</span>
+<span class="go">│   ├── Makefile</span>
+<span class="go">│   ├── debian</span>
+<span class="go">│   │   ├── README.Debian</span>
+<span class="go">│   │   ├── changelog</span>
+<span class="go">│   │   ├── control</span>
+<span class="go">│   │   ├── copyright</span>
+<span class="go">│   │   ├── patches</span>
+<span class="go">│   │   │   └── series</span>
+<span class="go">│   │   ├── rules</span>
+<span class="go">│   │   ├── source</span>
+<span class="go">│   │   │   ├── control</span>
+<span class="go">│   │   │   ├── format</span>
+<span class="go">│   │   │   ├── local-options</span>
+<span class="go">│   │   │   ├── options</span>
+<span class="go">│   │   │   └── patch-header</span>
+<span class="go">│   │   ├── tests</span>
+<span class="go">│   │   │   └── control</span>
+<span class="go">│   │   ├── upstream</span>
+<span class="go">│   │   │   └── metadata</span>
+<span class="go">│   │   └── watch</span>
+<span class="go">│   └── src</span>
+<span class="go">│       └── hello.c</span>
+<span class="go">├── debhello-0.0.tar.gz</span>
+<span class="go">└── debhello_0.0.orig.tar.gz -&gt; debhello-0.0.tar.gz</span>
+
+<span class="go">7 directories, 19 files</span>
+</pre></div>
+</div>
+<p>The <cite>debian/rules</cite> file is the build script provided by the package maintainer.  Here is its template file generated by the <cite>debmake</cite> command.</p>
+<p><cite>debian/rules</cite> (template file):</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>cat debhello-0.0/debian/rules
+<span class="gp">#</span>!/usr/bin/make -f
+<span class="gp"># </span>You must remove unused comment lines <span class="k">for</span> the released package.
+<span class="gp">#</span><span class="nb">export</span> <span class="nv">DH_VERBOSE</span> <span class="o">=</span> <span class="m">1</span>
+<span class="gp">#</span><span class="nb">export</span> <span class="nv">DEB_BUILD_MAINT_OPTIONS</span> <span class="o">=</span> <span class="nv">hardening</span><span class="o">=</span>+all
+<span class="gp">#</span><span class="nb">export</span> <span class="nv">DEB_CFLAGS_MAINT_APPEND</span>  <span class="o">=</span> -Wall -pedantic
+<span class="gp">#</span><span class="nb">export</span> <span class="nv">DEB_LDFLAGS_MAINT_APPEND</span> <span class="o">=</span> -Wl,--as-needed
+
+<span class="gp">%</span>:
+<span class="go">        dh $@</span>
+
+<span class="gp">#</span>override_dh_auto_install:
+<span class="gp">#       </span>dh_auto_install -- <span class="nv">prefix</span><span class="o">=</span>/usr
+
+<span class="gp">#</span>override_dh_install:
+<span class="gp">#       </span>dh_install --list-missing -X.pyc -X.pyo
+</pre></div>
+</div>
+<p>This is essentially the standard <cite>debian/rules</cite> file with the <cite>dh</cite> command. (There are some commented out contents for you to customize it.)</p>
+<p>The <cite>debian/control</cite> file provides the main meta data for the Debian package.  Here is its template file generated by the <cite>debmake</cite> command.</p>
+<p><cite>debian/control</cite> (template file):</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>cat debhello-0.0/debian/control
+<span class="go">Source: debhello</span>
+<span class="go">Section: unknown</span>
+<span class="go">Priority: optional</span>
+<span class="go">Maintainer: &quot;Firstname Lastname&quot; &lt;email.address@example.org&gt;</span>
+<span class="go">Build-Depends: debhelper-compat (= 13)</span>
+<span class="go">Standards-Version: 4.5.1</span>
+<span class="go">Homepage: &lt;insert the upstream URL, if relevant&gt;</span>
+<span class="go">Rules-Requires-Root: no</span>
+
+<span class="go">Package: debhello</span>
+<span class="go">Architecture: any</span>
+<span class="go">Multi-Arch: foreign</span>
+<span class="go">Depends: ${misc:Depends}, ${shlibs:Depends}</span>
+<span class="go">Description: auto-generated package by debmake</span>
+<span class="go"> This Debian binary package was auto-generated by the</span>
+<span class="go"> debmake(1) command provided by the debmake package.</span>
+</pre></div>
+</div>
+<p>Since this is the ELF binary executable package, the <cite>debmake</cite> command sets <cite>Architecture: any</cite> and <cite>Multi-Arch: foreign</cite>.
+Also, it sets required <cite>substvar</cite> parameters as <cite>Depends: ${shlibs:Depends}, ${misc:Depends}</cite>.  These are explained in &lt;&lt;basics&gt;&gt;.</p>
+<p>The <cite>debian/copyright</cite> file provides the copyright summary data of the Debian package.  Here is its template file generated by the <cite>debmake</cite> command.</p>
+<p><cite>debian/copyright</cite> (template file):</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>cat debhello-0.0/debian/copyright
+<span class="go">Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/</span>
+<span class="go">Upstream-Name: debhello</span>
+<span class="go">Upstream-Contact: &lt;preferred name and address to reach the upstream project&gt;</span>
+<span class="go">Source: &lt;url://example.com&gt;</span>
+<span class="gp">#</span>
+<span class="gp"># </span>Please double check copyright with the licensecheck<span class="o">(</span><span class="m">1</span><span class="o">)</span> command.
+
+<span class="go">Files:     Makefile</span>
+<span class="go">           src/hello.c</span>
+<span class="go">Copyright: __NO_COPYRIGHT_NOR_LICENSE__</span>
+<span class="go">License:   __NO_COPYRIGHT_NOR_LICENSE__</span>
+
+<span class="gp">#</span>----------------------------------------------------------------------------...
+<span class="gp"># </span>Files marked as NO_LICENSE_TEXT_FOUND may be covered by the following
+<span class="gp"># </span>license/copyright files.
+
+<span class="gp">#</span>----------------------------------------------------------------------------...
+<span class="gp"># </span>License file: LICENSE
+<span class="go"> License:</span>
+<span class="go"> .</span>
+<span class="go"> All files in this archive are licensed under the MIT License as below.</span>
+<span class="go"> .</span>
+<span class="go"> Copyright 2015 Osamu Aoki &lt;osamu@debian.org&gt;</span>
+<span class="go"> .</span>
+<span class="go"> Permission is hereby granted, free of charge, to any person obtaining a</span>
+<span class="go"> copy of this software and associated documentation files (the &quot;Software&quot;),</span>
+<span class="go"> to deal in the Software without restriction, including without limitation</span>
+<span class="go"> the rights to use, copy, modify, merge, publish, distribute, sublicense,</span>
+<span class="go"> and/or sell copies of the Software, and to permit persons to whom the</span>
+<span class="go"> Software is furnished to do so, subject to the following conditions:</span>
+<span class="go"> .</span>
+<span class="go"> The above copyright notice and this permission notice shall be included</span>
+<span class="go"> in all copies or substantial portions of the Software.</span>
+<span class="go"> .</span>
+<span class="go"> THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS</span>
+<span class="go"> OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF</span>
+<span class="go"> MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.</span>
+<span class="go"> IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY</span>
+<span class="go"> CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,</span>
+<span class="go"> TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE</span>
+<span class="go"> SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</span>
+</pre></div>
+</div>
+</section>
+<section id="step-3-modification-to-the-template-files">
+<span id="step-maintainer"></span><h2><a class="toc-backref" href="#id10" role="doc-backlink">Step 3: Modification to the template files</a><a class="headerlink" href="#step-3-modification-to-the-template-files" title="Permalink to this heading">¶</a></h2>
+<p>Some manual modification is required to make the proper Debian package as a maintainer.</p>
+<p>In order to install files as a part of the system files, the <cite>$(prefix)</cite> value of <cite>/usr/local</cite> in the <cite>Makefile</cite> should be</p>
+<p>overridden to be <cite>/usr</cite>.  This can be accommodated by the</p>
+<p>following the <cite>debian/rules</cite> file with the <cite>override_dh_auto_install</cite> target setting <cite>prefix=/usr</cite>.</p>
+<p><cite>debian/rules</cite> (maintainer version):</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>vim debhello-0.0/debian/
+<span class="go">... hack, hack, hack, ...</span>
+<span class="gp">$ </span>cat debhello-0.0/debian/rules
+<span class="gp">#</span>!/usr/bin/make -f
+<span class="go">export DH_VERBOSE = 1</span>
+<span class="go">export DEB_BUILD_MAINT_OPTIONS = hardening=+all</span>
+<span class="go">export DEB_CFLAGS_MAINT_APPEND  = -Wall -pedantic</span>
+<span class="go">export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed</span>
+
+<span class="gp">%</span>:
+<span class="go">        dh $@</span>
+
+<span class="go">override_dh_auto_install:</span>
+<span class="go">        dh_auto_install -- prefix=/usr</span>
+</pre></div>
+</div>
+<p>Exporting the <cite>DH_VERBOSE</cite> environment variable in the <cite>debian/rules</cite> file as above forces the <cite>debhelper</cite> tool to make a fine grained build report.</p>
+<p>Exporting <cite>DEB_BUILD_MAINT_OPTION</cite> as above sets the hardening options as described in the <cite>FEATURE AREAS/ENVIRONMENT</cite> in <cite>dpkg-buildflags(1)</cite>.</p>
+<p>Exporting <cite>DEB_CFLAGS_MAINT_APPEND</cite> as above forces the C compiler to emit all the warnings.</p>
+<p>Exporting <cite>DEB_LDFLAGS_MAINT_APPEND</cite> as above forces the linker to link only when the library is actually needed.</p>
+<p>The <cite>dh_auto_install</cite> command for the Makefile based build system essentially runs <cite>$(MAKE) install DESTDIR=debian/debhello</cite>.</p>
+<p>The creation of this <cite>override_dh_auto_install</cite> target changes its behavior to <cite>$(MAKE) install DESTDIR=debian/debhello prefix=/usr</cite>.</p>
+<p>Here are the maintainer versions of the <cite>debian/control</cite> and <cite>debian/copyright</cite> files.</p>
+<p><cite>debian/control</cite> (maintainer version):</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>vim debhello-0.0/debian/control
+<span class="go">... hack, hack, hack, ...</span>
+<span class="gp">$ </span>cat debhello-0.0/debian/control
+<span class="go">Source: debhello</span>
+<span class="go">Section: devel</span>
+<span class="go">Priority: optional</span>
+<span class="go">Maintainer: Osamu Aoki &lt;osamu@debian.org&gt;</span>
+<span class="go">Build-Depends: debhelper-compat (= 13)</span>
+<span class="go">Standards-Version: 4.5.1</span>
+<span class="go">Homepage: https://salsa.debian.org/debian/debmake-doc</span>
+<span class="go">Rules-Requires-Root: no</span>
+
+<span class="go">Package: debhello</span>
+<span class="go">Architecture: any</span>
+<span class="go">Multi-Arch: foreign</span>
+<span class="go">Depends: ${misc:Depends}, ${shlibs:Depends}</span>
+<span class="go">Description: Simple packaging example for debmake</span>
+<span class="go"> This Debian binary package is an example package.</span>
+<span class="go"> (This is an example only)</span>
+</pre></div>
+</div>
+<p><cite>debian/copyright</cite> (maintainer version):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ vim debhello-0.0/debian/copyright
+... hack, hack, hack, ...
+$ cat debhello-0.0/debian/copyright
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: debhello
+Upstream-Contact: Osamu Aoki &lt;osamu@debian.org&gt;
+Source: https://salsa.debian.org/debian/debmake-doc
+
+Files:     *
+Copyright: 2015-2021 Osamu Aoki &lt;osamu@debian.org&gt;
+License:   Expat
+ Permission is hereby granted, free of charge, to any person obtaining a
+ copy of this software and associated documentation files (the &quot;Software&quot;),
+ to deal in the Software without restriction, including without limitation
+ the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ and/or sell copies of the Software, and to permit persons to whom the
+ Software is furnished to do so, subject to the following conditions:
+ .
+ The above copyright notice and this permission notice shall be included
+ in all copies or substantial portions of the Software.
+ .
+ THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+</pre></div>
+</div>
+<p>There are several other template files under the <cite>debian/</cite> directory.  These also need to be updated.</p>
+<p>Template files under <cite>debian/</cite>. (v=0.0):</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>tree debhello-0.0/debian
+<span class="go">debhello-0.0/debian</span>
+<span class="go">├── README.Debian</span>
+<span class="go">├── changelog</span>
+<span class="go">├── control</span>
+<span class="go">├── copyright</span>
+<span class="go">├── patches</span>
+<span class="go">│   └── series</span>
+<span class="go">├── rules</span>
+<span class="go">├── source</span>
+<span class="go">│   ├── control</span>
+<span class="go">│   ├── format</span>
+<span class="go">│   ├── local-options</span>
+<span class="go">│   ├── options</span>
+<span class="go">│   └── patch-header</span>
+<span class="go">├── tests</span>
+<span class="go">│   └── control</span>
+<span class="go">├── upstream</span>
+<span class="go">│   └── metadata</span>
+<span class="go">└── watch</span>
+
+<span class="go">4 directories, 14 files</span>
+</pre></div>
+</div>
+</section>
+<section id="step-4-building-package-with-debuild">
+<span id="step-debuild"></span><h2><a class="toc-backref" href="#id11" role="doc-backlink">Step 4: Building package with debuild</a><a class="headerlink" href="#step-4-building-package-with-debuild" title="Permalink to this heading">¶</a></h2>
+<p>You can create a non-native Debian package using the <cite>debuild</cite> command or its equivalents (see &lt;&lt;what-debuild&gt;&gt;) in this source tree.  The command output is very verbose and explains what it does as follows.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nb">cd</span> debhello-0.
+<span class="gp">$ </span>debuild
+<span class="go">dpkg-buildpackage -us -uc -ui -i -i</span>
+<span class="go">...</span>
+<span class="go">debian/rules clean</span>
+<span class="go">dh clean</span>
+<span class="go">...</span>
+<span class="go">debian/rules binary</span>
+<span class="go">dh binary</span>
+<span class="go">   dh_update_autotools_config</span>
+<span class="go">   dh_autoreconf</span>
+<span class="go">   dh_auto_configure</span>
+<span class="go">        install -d /path/to/debhello-0.0/debian/.debhelper/generated/_source/...</span>
+<span class="go">   dh_auto_build</span>
+<span class="go">        make -j12 &quot;INSTALL=install --strip-program=true&quot;</span>
+<span class="go">make[1]: Entering directory &#39;/path/to/debhello-0.0&#39;</span>
+<span class="gp"># </span><span class="nv">CFLAGS</span><span class="o">=</span>-g -O2
+<span class="gp"># </span>-ffile-prefix-map<span class="o">=</span>/home/osamu/src/public/debmake-doc/debmake-doc/examp
+<span class="go"> ...</span>
+<span class="go">Now running lintian -i -I --show-overrides debhello_0.0-1_amd64.changes ...</span>
+<span class="go"> ...</span>
+<span class="go">N:   Renamed from: binary-without-manpage</span>
+<span class="go">N:</span>
+<span class="go">W: debhello: readme-debian-contains-debmake-template</span>
+<span class="go">N:</span>
+<span class="go"> ...</span>
+</pre></div>
+</div>
+<p>You can verify that <cite>CFLAGS</cite> is updated properly with <cite>-Wall</cite> and <cite>-pedantic</cite> by the <cite>DEB_CFLAGS_MAINT_APPEND</cite> variable.</p>
+<p>The manpage should be added to the package as reported by the <cite>lintian</cite> package, as shown in later examples (see &lt;&lt;more&gt;&gt;).  Let’s move on for now.</p>
+<p>Let’s inspect the result.</p>
+<p>The generated files of <cite>debhello</cite> version <cite>0.0</cite> by the <cite>debuild</cite> command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nb">cd</span> ..
+<span class="gp">$ </span>tree -FL <span class="m">1</span>
+<span class="go">.</span>
+<span class="go">├── debhello-0.0/</span>
+<span class="go">├── debhello-0.0.tar.gz</span>
+<span class="go">├── debhello-dbgsym_0.0-1_amd64.deb</span>
+<span class="go">├── debhello_0.0-1.debian.tar.xz</span>
+<span class="go">├── debhello_0.0-1.dsc</span>
+<span class="go">├── debhello_0.0-1_amd64.build</span>
+<span class="go">├── debhello_0.0-1_amd64.buildinfo</span>
+<span class="go">├── debhello_0.0-1_amd64.changes</span>
+<span class="go">├── debhello_0.0-1_amd64.deb</span>
+<span class="go">└── debhello_0.0.orig.tar.gz -&gt; debhello-0.0.tar.gz</span>
+
+<span class="go">1 directory, 9 files</span>
+</pre></div>
+</div>
+<p>You see all the generated files.</p>
+<p>` The <cite>debhello_0.0.orig.tar.gz</cite> is a symlink to the upstream tarball.
+` The <cite>debhello_0.0-1.debian.tar.xz</cite> contains the maintainer generated contents.
+` The <cite>debhello_0.0-1.dsc</cite> is the meta data file for the Debian source package.
+` The <cite>debhello_0.0-1_amd64.deb</cite> is the Debian binary package.
+` The <cite>debhello-dbgsym_0.0-1_amd64.deb</cite> is the Debian debug symbol binary package. See &lt;&lt;dbgsym&gt;&gt;.
+` The <cite>debhello_0.0-1_amd64.build</cite> file is the build log file.
+` The <cite>debhello_0.0-1_amd64.buildinfo</cite> file is the meta data file generated by <cite>dpkg-genbuildinfo`(1).
+` The `debhello_0.0-1_amd64.changes</cite> is the meta data file for the Debian binary package.</p>
+<p>The <cite>debhello_0.0-1.debian.tar.xz</cite> contains the Debian changes to the upstream source as follows.</p>
+<p>The compressed archive contents of <cite>debhello_0.0-1.debian.tar.xz</cite>:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>tar -tzf debhello-0.0.tar.gz
+<span class="go">debhello-0.0/</span>
+<span class="go">debhello-0.0/src/</span>
+<span class="go">debhello-0.0/src/hello.c</span>
+<span class="go">debhello-0.0/LICENSE</span>
+<span class="go">debhello-0.0/Makefile</span>
+<span class="gp">$ </span>tar --xz -tf debhello_0.0-1.debian.tar.xz
+<span class="go">debian/</span>
+<span class="go">debian/README.Debian</span>
+<span class="go">debian/changelog</span>
+<span class="go">debian/control</span>
+<span class="go">debian/copyright</span>
+<span class="go">debian/patches/</span>
+<span class="go">debian/patches/series</span>
+<span class="go">debian/rules</span>
+<span class="go">debian/source/</span>
+<span class="go">debian/source/control</span>
+<span class="go">debian/source/format</span>
+<span class="go">debian/source/options</span>
+<span class="go">debian/source/patch-header</span>
+<span class="go">debian/tests/</span>
+<span class="go">debian/tests/control</span>
+<span class="go">debian/upstream/</span>
+<span class="go">debian/upstream/metadata</span>
+<span class="go">debian/watch</span>
+</pre></div>
+</div>
+<p>The <cite>debhello_0.0-1_amd64.deb</cite> contains the binary files to be installed to the target system.</p>
+<p>The <cite>debhello-debsym_0.0-1_amd64.deb</cite> contains the debug symbol files to be installed to the target system..</p>
+<p>The binary package contents of all binary packages:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>dpkg -c debhello-dbgsym_0.0-1_amd64.deb
+<span class="go">drwxr-xr-x root/root ...  ./</span>
+<span class="go">drwxr-xr-x root/root ...  ./usr/</span>
+<span class="go">drwxr-xr-x root/root ...  ./usr/lib/</span>
+<span class="go">drwxr-xr-x root/root ...  ./usr/lib/debug/</span>
+<span class="go">drwxr-xr-x root/root ...  ./usr/lib/debug/.build-id/</span>
+<span class="go">drwxr-xr-x root/root ...  ./usr/lib/debug/.build-id/be/</span>
+<span class="go">-rw-r--r-- root/root ...  ./usr/lib/debug/.build-id/be/11292eded3fc22396a0b62...</span>
+<span class="go">drwxr-xr-x root/root ...  ./usr/share/</span>
+<span class="go">drwxr-xr-x root/root ...  ./usr/share/doc/</span>
+<span class="go">lrwxrwxrwx root/root ...  ./usr/share/doc/debhello-dbgsym -&gt; debhello</span>
+<span class="gp"> $ </span>dpkg -c debhello_0.0-1_amd64.deb
+<span class="go">drwxr-xr-x root/root ...  ./</span>
+<span class="go">drwxr-xr-x root/root ...  ./usr/</span>
+<span class="go">drwxr-xr-x root/root ...  ./usr/bin/</span>
+<span class="go">-rwxr-xr-x root/root ...  ./usr/bin/hello</span>
+<span class="go">drwxr-xr-x root/root ...  ./usr/share/</span>
+<span class="go">drwxr-xr-x root/root ...  ./usr/share/doc/</span>
+<span class="go">drwxr-xr-x root/root ...  ./usr/share/doc/debhello/</span>
+<span class="go">-rw-r--r-- root/root ...  ./usr/share/doc/debhello/README.Debian</span>
+<span class="go">-rw-r--r-- root/root ...  ./usr/share/doc/debhello/changelog.Debian.gz</span>
+<span class="go">-rw-r--r-- root/root ...  ./usr/share/doc/debhello/copyright</span>
+</pre></div>
+</div>
+<p>The generated dependency list of all binary packages.</p>
+<p>The generated dependency list of all binary packages (v=0.0):</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp"> $ </span>dpkg -f debhello-dbgsym_0.0-1_amd64.deb pre-depends <span class="se">\</span>
+            depends recommends conflicts breaks
+<span class="go">Depends: debhello (= 0.0-1)</span>
+<span class="gp"> $ </span>dpkg -f debhello_0.0-1_amd64.deb pre-depends <span class="se">\</span>
+            depends recommends conflicts breaks
+<span class="go">Depends: libc6 (&gt;= 2.2.5)</span>
+</pre></div>
+</div>
+<p>CAUTION: Many more details need to be addressed before uploading the package to the Debian archive.</p>
+</section>
+<section id="step-3-alternative-modification-to-the-upstream-source">
+<span id="alt-patch"></span><h2><a class="toc-backref" href="#id12" role="doc-backlink">Step 3 (alternative): Modification to the upstream source</a><a class="headerlink" href="#step-3-alternative-modification-to-the-upstream-source" title="Permalink to this heading">¶</a></h2>
+<p>The above example did not touch the upstream source to make the proper Debian package.</p>
+<p>An alternative approach as the maintainer is to change the upstream source by modifying the upstream <cite>Makefile</cite> to set the $(prefix) value to <cite>/usr</cite>.</p>
+<p>The packaging is practically the same as the above step-by-step example except for two points in &lt;&lt;step-maintainer&gt;&gt;:</p>
+<p>` Store the maintainer modifications to the upstream source as the corresponding patch files in the <cite>debian/patches/</cite> directory and list their filenames in the <cite>debian/patches/series</cite> file as indicated in &lt;&lt;patches&gt;&gt;.
+There are several ways to generate patch files.  A few examples are given in these sections:
+** &lt;&lt;diff-u&gt;&gt;
+** &lt;&lt;dquilt&gt;&gt;
+** &lt;&lt;dpkg-source-commit&gt;&gt;
+` The maintainer modification to the <cite>debian/rules</cite> file doesn’t have the <cite>override_dh_auto_install</cite> target as follows:</p>
+<p><cite>debian/rules</cite> (alternative maintainer version):</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>vim debhello-0.0/debian/rules
+<span class="go">... hack, hack, hack, ...</span>
+<span class="gp">$ </span>cat debhello-0.0/debian/rules
+<span class="gp">#</span>!/usr/bin/make -f
+<span class="go">export DH_VERBOSE = 1</span>
+<span class="go">export DEB_BUILD_MAINT_OPTIONS = hardening=+all</span>
+<span class="go">export DEB_CFLAGS_MAINT_APPEND  = -Wall -pedantic</span>
+<span class="go">export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed</span>
+
+<span class="gp">%</span>:
+<span class="go">        dh $@</span>
+
+<span class="go">override_dh_auto_install:</span>
+<span class="go">        dh_auto_install -- prefix=/usr</span>
+</pre></div>
+</div>
+<p>This alternative approach to Debian packaging using a series of patch files may be less robust for future upstream changes but more flexible coping with the difficult upstream source.  (See &lt;&lt;deb3&gt;&gt;.)</p>
+<p>NOTE: For this particular packaging case, the above &lt;&lt;step-maintainer&gt;&gt; using the <cite>debian/rules</cite> file is the better approach.  But let’s keep on with this approach as a learning process.</p>
+<p>TIP: For more complicated packaging cases, both &lt;&lt;step-maintainer&gt;&gt; and &lt;&lt;alt-patch&gt;&gt; approaches need to be deployed.</p>
+</section>
+<section id="patch-by-diff-u">
+<span id="diff-u"></span><h2><a class="toc-backref" href="#id13" role="doc-backlink">Patch by diff -u</a><a class="headerlink" href="#patch-by-diff-u" title="Permalink to this heading">¶</a></h2>
+<p>Here is an example to create <cite>000-prefix-usr.patch</cite> by the <cite>diff</cite> command.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp"> $ </span>cp -a debhello-0.0 debhello-0.0.orig
+<span class="gp"> $ </span>vim debhello-0.0/Makefile
+<span class="go"> ... hack, hack, hack, ...</span>
+<span class="gp"> $ </span>diff -Nru debhello-0.0.orig debhello-0.0 &gt;000-prefix-usr.patch
+<span class="gp"> $ </span>cat <span class="m">000</span>-prefix-usr.patch
+<span class="go">diff -Nru debhello-0.0.orig/Makefile debhello-0.0/Makefile</span>
+<span class="go">--- debhello-0.0.orig/Makefile  2021-07-02 16:26:38.734722687 +0900</span>
+<span class="go">+++ debhello-0.0/Makefile       2021-07-02 16:26:38.802723496 +0900</span>
+<span class="go">@@ -1,4 +1,4 @@</span>
+<span class="go">-prefix = /usr/local</span>
+<span class="go">+prefix = /usr</span>
+
+<span class="go"> all: src/hello</span>
+
+<span class="gp"> $ </span>rm -rf debhello-0.0
+<span class="gp"> $ </span>mv -f debhello-0.0.orig debhello-0.0
+</pre></div>
+</div>
+<p>Please note that the upstream source tree is restored to the original state and the patch file is available as <cite>000-prefix-usr.patch</cite>.</p>
+<p>This <cite>000-prefix-usr.patch</cite> is edited to be <a class="reference external" href="https://dep-team.pages.debian.net/deps/dep3/[DEP-3">https://dep-team.pages.debian.net/deps/dep3/[DEP-3</a>] conformant and moved to the right location as below.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp"> $ </span><span class="nb">cd</span> debhello-0.0
+<span class="gp"> $ </span><span class="nb">echo</span> <span class="s1">&#39;000-prefix-usr.patch&#39;</span> &gt;debian/patches/series
+<span class="gp"> $ </span>vim ../000-prefix-usr.patch
+<span class="go"> ... hack, hack, hack, ...</span>
+<span class="gp"> $ </span>mv -f ../000-prefix-usr.patch debian/patches/000-prefix-usr.patch
+<span class="gp"> $ </span>cat debian/patches/000-prefix-usr.patch
+<span class="go">From: Osamu Aoki &lt;osamu@debian.org&gt;</span>
+<span class="go">Description: set prefix=/usr patch</span>
+<span class="go">diff -Nru debhello-0.0.orig/Makefile debhello-0.0/Makefile</span>
+<span class="go">--- debhello-0.0.orig/Makefile</span>
+<span class="go">+++ debhello-0.0/Makefile</span>
+<span class="go">@@ -1,4 +1,4 @@</span>
+<span class="go">-prefix = /usr/local</span>
+<span class="go">+prefix = /usr</span>
+
+<span class="go"> all: src/hello</span>
+</pre></div>
+</div>
+</section>
+<section id="patch-by-dquilt">
+<span id="dquilt"></span><h2><a class="toc-backref" href="#id14" role="doc-backlink">Patch by dquilt</a><a class="headerlink" href="#patch-by-dquilt" title="Permalink to this heading">¶</a></h2>
+<p>Here is an example to create <cite>000-prefix-usr.patch</cite> by the <cite>dquilt</cite> command which is a simple wrapper of the <cite>quilt</cite> program.  The syntax and function of the <cite>dquilt</cite> command  is the same as the <cite>quilt`(1) command, except for the fact that the patch is stored in the `debian/patches/</cite> directory.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp"> $ </span><span class="nb">cd</span> debhello-0.0
+<span class="gp"> $ </span>dquilt new <span class="m">000</span>-prefix-usr.patch
+<span class="go">Patch debian/patches/000-prefix-usr.patch is now on top</span>
+<span class="gp"> $ </span>dquilt add Makefile
+<span class="go">File Makefile added to patch debian/patches/000-prefix-usr.patch</span>
+<span class="go"> ... hack, hack, hack, ...</span>
+<span class="gp"> $ </span>head -1 Makefile
+<span class="go">prefix = /usr</span>
+<span class="gp"> $ </span>dquilt refresh
+<span class="go">Refreshed patch debian/patches/000-prefix-usr.patch</span>
+<span class="gp"> $ </span>dquilt header -e --dep3
+<span class="go"> ... edit the DEP-3 patch header with editor</span>
+<span class="gp"> $ </span>tree -a
+<span class="go">.</span>
+<span class="go">├── .pc</span>
+<span class="go">│   ├── .quilt_patches</span>
+<span class="go">│   ├── .quilt_series</span>
+<span class="go">│   ├── .version</span>
+<span class="go">│   ├── 000-prefix-usr.patch</span>
+<span class="go">│   │   ├── .timestamp</span>
+<span class="go">│   │   └── Makefile</span>
+<span class="go">│   └── applied-patches</span>
+<span class="go">├── LICENSE</span>
+<span class="go">├── Makefile</span>
+<span class="go">├── debian</span>
+<span class="go">│   ├── README.Debian</span>
+<span class="go">│   ├── changelog</span>
+<span class="go">│   ├── control</span>
+<span class="go">│   ├── copyright</span>
+<span class="go">│   ├── patches</span>
+<span class="go">│   │   ├── 000-prefix-usr.patch</span>
+<span class="go">│   │   └── series</span>
+<span class="go">│   ├── rules</span>
+<span class="go">│   ├── source</span>
+<span class="go">│   │   ├── control</span>
+<span class="go">│   │   ├── format</span>
+<span class="go">│   │   ├── local-options</span>
+<span class="go">│   │   ├── options</span>
+<span class="go">│   │   └── patch-header</span>
+<span class="go">│   ├── tests</span>
+<span class="go">│   │   └── control</span>
+<span class="go">│   ├── upstream</span>
+<span class="go">│   │   └── metadata</span>
+<span class="go">│   └── watch</span>
+<span class="go">└── src</span>
+<span class="go">    └── hello.c</span>
+
+<span class="go">8 directories, 24 files</span>
+<span class="gp"> $ </span>cat debian/patches/series
+<span class="go">000-prefix-usr.patch</span>
+<span class="gp"> $ </span>cat debian/patches/000-prefix-usr.patch
+<span class="go">Description: set prefix=/usr patch</span>
+<span class="go">Author: Osamu Aoki &lt;osamu@debian.org&gt;</span>
+<span class="go">Index: debhello-0.0/Makefile</span>
+<span class="go">===================================================================</span>
+<span class="go">--- debhello-0.0.orig/Makefile</span>
+<span class="go">+++ debhello-0.0/Makefile</span>
+<span class="go">@@ -1,4 +1,4 @@</span>
+<span class="go">-prefix = /usr/local</span>
+<span class="go">+prefix = /usr</span>
+
+<span class="go"> all: src/hello</span>
+</pre></div>
+</div>
+<p>Here, <cite>Makefile</cite> in the upstream source tree doesn’t need to be restored to the original state. The <cite>dpkg-source</cite> command invoked by the Debian packaging procedure in &lt;&lt;step-debuild&gt;&gt;, understands the patch application state recorded by the <cite>dquilt</cite> program in the <cite>.pc/</cite> directory.  As long as all the changes are committed by the <cite>dquilt</cite> command, the Debian source package can be built from the modified source tree.</p>
+</section>
+<section id="patch-by-dpkg-source-commit">
+<span id="dpkg-source-commit"></span><h2><a class="toc-backref" href="#id15" role="doc-backlink">Patch by dpkg-source –commit</a><a class="headerlink" href="#patch-by-dpkg-source-commit" title="Permalink to this heading">¶</a></h2>
+<p>Here is an example to create <cite>000-prefix-usr.patch</cite> by the <cite>dpkg-source –commit</cite> command.</p>
+<p>Let’s edit the upstream source.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp"> $ </span><span class="nb">cd</span> debhello-0.0
+<span class="gp"> $ </span>vim Makefile
+<span class="go"> ... hack, hack, hack, ...</span>
+<span class="gp"> $ </span>head -n1 Makefile
+<span class="go">prefix = /usr</span>
+</pre></div>
+</div>
+<p>Let’s commit it.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp"> $ </span>dpkg-source --commit . <span class="m">000</span>-prefix-usr.patch
+<span class="go">... editor to edit the DEP-3 patch header</span>
+<span class="go">...</span>
+</pre></div>
+</div>
+<p>Let’s see the result.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>cat debian/patches/series
+<span class="go">000-prefix-usr.patch</span>
+<span class="gp">$ </span>cat debian/patches/000-prefix-usr.patch
+<span class="go">Description: set prefix=/usr patch</span>
+<span class="go">Author: Osamu Aoki &lt;osamu@debian.org&gt;</span>
+<span class="go">Index: debhello-0.0/Makefile</span>
+
+<span class="go">--- debhello-0.0.orig/Makefile</span>
+<span class="go">+++ debhello-0.0/Makefile</span>
+<span class="go">@@ -1,4 +1,4 @@</span>
+<span class="go">-prefix = /usr/local</span>
+<span class="go">+prefix = /usr</span>
+
+<span class="go"> all: src/hello</span>
+
+<span class="gp"> $ </span>tree -a
+<span class="go">.</span>
+<span class="go">├── .pc</span>
+<span class="go">│   ├── .quilt_patches</span>
+<span class="go">│   ├── .quilt_series</span>
+<span class="go">│   ├── .version</span>
+<span class="go">│   ├── 000-prefix-usr.patch</span>
+<span class="go">│   │   ├── .timestamp</span>
+<span class="go">│   │   └── Makefile</span>
+<span class="go">│   └── applied-patches</span>
+<span class="go">├── LICENSE</span>
+<span class="go">├── Makefile</span>
+<span class="go">├── debian</span>
+<span class="go">│   ├── README.Debian</span>
+<span class="go">│   ├── changelog</span>
+<span class="go">│   ├── control</span>
+<span class="go">│   ├── copyright</span>
+<span class="go">│   ├── patches</span>
+<span class="go">│   │   ├── 000-prefix-usr.patch</span>
+<span class="go">│   │   └── series</span>
+<span class="go">│   ├── rules</span>
+<span class="go">│   ├── source</span>
+<span class="go">│   │   ├── control</span>
+<span class="go">│   │   ├── format</span>
+<span class="go">│   │   ├── local-options</span>
+<span class="go">│   │   ├── options</span>
+<span class="go">│   │   └── patch-header</span>
+<span class="go">│   ├── tests</span>
+<span class="go">│   │   └── control</span>
+<span class="go">│   ├── upstream</span>
+<span class="go">│   │   └── metadata</span>
+<span class="go">│   └── watch</span>
+<span class="go">└── src</span>
+<span class="go">    └── hello.c</span>
+
+<span class="go">8 directories, 24 files</span>
+</pre></div>
+</div>
+<p>Here, the <cite>dpkg-source</cite> command performs exactly the same as what the sequences of the <cite>dquilt</cite> command did in &lt;&lt;dquilt&gt;&gt;.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cplus/index.html">Cplus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">Debian</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../0005.html">Launch up Debian VM with Qemu</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../debian-installer/index.html">Debian Installer</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">Debian command</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Debmake Document</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../001.html">apt-cache: policy</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../live-cd/index.html">Debian Live CD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../elxr_edge/index.html">eLxr Edge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../os-tree/index.html">OS tree</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../0001.html">Ruck: build pablo with minimal ostree rootfs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../0002.html">How to build deb package for libxfce4ui</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../0003.html">How to Search for Debian package?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../0004.html">How to Check Debian package version?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../0006.html">How to download deb packages using apt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../0007.html">E: You must put some ‘source’ URIs in your sources.list</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../0008.html">How can I specify the repository from which a package will be installed?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../0009.html">How to install build dependencies for packages ?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../0010.html">Create orig tarballs from git</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../0011.html">Debian: Building the package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../pipeline/index.html">Debian Pipeline</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Debian</a><ul>
+  <li><a href="../index.html">Debian command</a><ul>
+  <li><a href="index.html">Debmake Document</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Debmake Document</a></li>
+      <li>Next: <a href="../001.html" title="next chapter">apt-cache: policy</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../../../_sources/debian/debian-command/debmake/14-simpledeb.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

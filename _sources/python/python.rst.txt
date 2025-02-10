@@ -1,0 +1,25 @@
+=================
+Python
+=================
+
+
+Convert Hex to ASCII
+====================
+
+.. code-block:: python
+
+  root@intel-x86-64:/usr/lib64/git/ptest/t# python3
+  Python 3.9.9 (main, Sep  9 2022, 09:30:26)
+  [GCC 10.3.0] on linux
+  Type "help", "copyright", "credits" or "license" for more information.
+  >>> import codecs
+  >>> string = "68656c6c6f"
+  >>> string = "68656c6c6f"
+  >>> binary_str = codecs.decode(string, "hex")
+  >>> print(str(binary_str,'utf-8'))
+  hello
+  >>> string = "454c46"
+  >>> binary_str = codecs.decode(string, "hex")
+  >>> print(str(binary_str,'utf-8'))
+  ELF
+  >>>

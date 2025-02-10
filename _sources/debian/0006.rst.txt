@@ -1,0 +1,81 @@
+========================================
+ How to download deb packages using apt
+========================================
+
+
+.. contents:: Table of contents
+
+
+The Advanced Packaging Tool (APT) and its predecessor, apt-get, are essential for managing packages in Debian-based systems like Ubuntu. These tools simplify the process of searching, downloading, and installing .deb packages and their dependencies from official repositories. APT ensures that all necessary dependencies are resolved and installed, making software management seamless for system administrators.	      
+
+
+One of APT's useful features is its ability to download packages without installing them. This feature is valuable for downloading .deb files for purposes other than immediate installation, such as offline installations or inclusion in custom scripts.
+
+With the download-only option, APT will download the .deb packages of the specified program and all its dependencies to the cache directory without installing them. You can then view and use the downloaded packages as needed.	      
+
+
+
+Download the package and its dependencies using apt
+===================================================
+
+
+Issuing **sudo apt --download-only --assume-yes install**
+
+.. code-block:: console
+
+   root@32b81b5fc0ca:/# apt --download-only --assume-yes install lsb-base
+   Reading package lists... Done
+   Building dependency tree... Done
+   Reading state information... Done
+   lsb-base is already the newest version (11.6).
+   0 upgraded, 0 newly installed, 0 to remove and 25 not upgraded.
+   root@32b81b5fc0ca:/# ls /var/cache/apt/archives/
+   lock  partial
+   		
+   
+
+As the lsb-base has been installed already, so we should reinstall it again
+
+
+Issuing **sudo apt --download-only --assume-yes reinstall**
+
+.. code-block:: console
+
+   root@32b81b5fc0ca:/# apt --download-only --assume-yes reinstall lsb-base
+   Reading package lists... Done
+   Building dependency tree... Done
+   Reading state information... Done
+   0 upgraded, 0 newly installed, 1 reinstalled, 0 to remove and 25 not upgraded.
+   Need to get 4584 B of archives.
+   After this operation, 0 B of additional disk space will be used.
+   Get:1 http://deb.debian.org/debian bookworm/main amd64 lsb-base all 11.6 [4584 B]
+   Fetched 4584 B in 0s (103 kB/s)   
+   Download complete and in download only mode
+   root@32b81b5fc0ca:/# ls /var/cache/apt/archives/
+   lock  lsb-base_11.6_all.deb  partial
+   root@32b81b5fc0ca:/# 
+      		
+   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

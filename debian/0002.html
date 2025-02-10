@@ -1,0 +1,231 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>How to build deb package for libxfce4ui &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="How to Search for Debian package?" href="0003.html" />
+    <link rel="prev" title="Ruck: build pablo with minimal ostree rootfs" href="0001.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="how-to-build-deb-package-for-libxfce4ui">
+<h1>How to build deb package for libxfce4ui<a class="headerlink" href="#how-to-build-deb-package-for-libxfce4ui" title="Permalink to this heading">¶</a></h1>
+<section id="get-the-libxfce4ui-project-from-debian">
+<h2>Get the libxfce4ui project from debian<a class="headerlink" href="#get-the-libxfce4ui-project-from-debian" title="Permalink to this heading">¶</a></h2>
+<p>Clone the project from <a class="reference external" href="https://salsa.debian.org/xfce-team/desktop/libxfce4ui.git">https://salsa.debian.org/xfce-team/desktop/libxfce4ui.git</a></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">git clone https://salsa.debian.org/xfce-team/desktop/libxfce4ui.git</span>
+</pre></div>
+</div>
+<p>Change the branch to 4.18</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">root@c66f22051364:/usr/src/libxfce4ui/libxfce4ui# </span>git checkout debian/4.18
+<span class="go">branch &#39;debian/4.18&#39; set up to track &#39;origin/debian/4.18&#39;.</span>
+<span class="go">Switched to a new branch &#39;debian/4.18&#39;</span>
+<span class="gp">root@c66f22051364:/usr/src/libxfce4ui/libxfce4ui#</span>
+</pre></div>
+</div>
+</section>
+<section id="get-the-source-code-for-libxfce4ui">
+<h2>Get the source code for libxfce4ui<a class="headerlink" href="#get-the-source-code-for-libxfce4ui" title="Permalink to this heading">¶</a></h2>
+<p>Download it from <a class="reference external" href="https://deb.debian.org/debian/pool/main/libx/libxfce4ui/libxfce4ui_4.18.6.orig.tar.bz2">https://deb.debian.org/debian/pool/main/libx/libxfce4ui/libxfce4ui_4.18.6.orig.tar.bz2</a></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">root@c66f22051364:/usr/src/libxfce4ui# </span>wget https://deb.debian.org/debian/pool/main/libx/libxfce4ui/libxfce4ui_4.18.6.orig.tar.bz2
+<span class="go">--2024-08-05 06:59:03--  https://deb.debian.org/debian/pool/main/libx/libxfce4ui/libxfce4ui_4.18.6.orig.tar.bz2</span>
+<span class="go">Resolving deb.debian.org (deb.debian.org)... 151.101.50.132, 2a04:4e42:2f::644</span>
+<span class="go">Connecting to deb.debian.org (deb.debian.org)|151.101.50.132|:443... connected.</span>
+<span class="go">HTTP request sent, awaiting response... 200 OK</span>
+<span class="go">Length: 906477 (885K) [application/x-bzip2]</span>
+<span class="go">Saving to: &#39;libxfce4ui_4.18.6.orig.tar.bz2&#39;</span>
+
+<span class="go">libxfce4ui_4.18.6.orig.tar.bz2              100%[========================================================================================&gt;] 885.23K  --.-KB/s    in 0.02s</span>
+
+<span class="go">2024-08-05 06:59:03 (45.5 MB/s) - &#39;libxfce4ui_4.18.6.orig.tar.bz2&#39; saved [906477/906477]</span>
+
+<span class="gp">root@c66f22051364:/usr/src/libxfce4ui# </span>ls
+<span class="go">libxfce4ui  libxfce4ui_4.18.6.orig.tar.bz2</span>
+<span class="gp">root@c66f22051364:/usr/src/libxfce4ui#</span>
+</pre></div>
+</div>
+</section>
+<section id="building-with-debuild">
+<h2>Building with debuild<a class="headerlink" href="#building-with-debuild" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">root@c66f22051364:/usr/src/libxfce4ui/libxfce4ui# </span>debuild
+<span class="go">dpkg-buildpackage -us -uc -ui</span>
+<span class="go">dpkg-buildpackage: info: source package libxfce4ui</span>
+<span class="go">dpkg-buildpackage: info: source version 4.18.6-1</span>
+<span class="go">dpkg-buildpackage: info: source distribution unstable</span>
+<span class="go">dpkg-buildpackage: info: source changed by Yves-Alexis Perez &lt;corsac@debian.org&gt;</span>
+<span class="go">dpkg-source --before-build .</span>
+<span class="go">dpkg-buildpackage: info: host architecture amd64</span>
+<span class="go">debian/rules clean</span>
+
+<span class="go">...</span>
+
+<span class="go">Now signing changes and any dsc files...</span>
+<span class="go">signfile dsc libxfce4ui_4.18.6-1.dsc Yves-Alexis Perez &lt;corsac@debian.org&gt;</span>
+<span class="go">gpg: skipped &quot;Yves-Alexis Perez &lt;corsac@debian.org&gt;&quot;: No secret key</span>
+<span class="go">gpg: /tmp/debsign.RqFL5JEC/libxfce4ui_4.18.6-1.dsc: clear-sign failed: No secret key</span>
+<span class="go">debsign: gpg error occurred!  Aborting....</span>
+<span class="go">debuild: fatal error at line 1112:</span>
+<span class="go">running debsign failed</span>
+</pre></div>
+</div>
+<p>But we got a gpg error.Because the private key is not available.If you want to sign the package, you need to change the name and email in debian/changelog to match your name, for which a private key is available</p>
+</section>
+<section id="buing-with-no-sign">
+<h2>Buing with no-sign<a class="headerlink" href="#buing-with-no-sign" title="Permalink to this heading">¶</a></h2>
+<p>Using no-sign build directive using the command parameters -uc -us</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">debuild -uc -us</span>
+
+<span class="gp">root@c66f22051364:/usr/src/libxfce4ui# </span>ls -lh *.deb
+<span class="go">-rw-r--r-- 1 root root  22K Aug  5 07:07 gir1.2-libxfce4ui-2.0_4.18.6-1_amd64.deb</span>
+<span class="go">-rw-r--r-- 1 root root 180K Aug  5 07:07 libxfce4ui-2-0-dbgsym_4.18.6-1_amd64.deb</span>
+<span class="go">-rw-r--r-- 1 root root  72K Aug  5 07:07 libxfce4ui-2-0_4.18.6-1_amd64.deb</span>
+<span class="go">-rw-r--r-- 1 root root  43K Aug  5 07:07 libxfce4ui-2-dev_4.18.6-1_amd64.deb</span>
+<span class="go">-rw-r--r-- 1 root root 220K Aug  5 07:07 libxfce4ui-common_4.18.6-1_all.deb</span>
+<span class="go">-rw-r--r-- 1 root root 6.1K Aug  5 07:07 libxfce4ui-glade-dbgsym_4.18.6-1_amd64.deb</span>
+<span class="go">-rw-r--r-- 1 root root  21K Aug  5 07:07 libxfce4ui-glade_4.18.6-1_amd64.deb</span>
+<span class="go">-rw-r--r-- 1 root root  35K Aug  5 07:07 libxfce4ui-utils-dbgsym_4.18.6-1_amd64.deb</span>
+<span class="go">-rw-r--r-- 1 root root  87K Aug  5 07:07 libxfce4ui-utils_4.18.6-1_amd64.deb</span>
+<span class="gp">root@c66f22051364:/usr/src/libxfce4ui#</span>
+</pre></div>
+</div>
+<p>You could also use <cite>dpkg-buildpackage -us -uc -ui</cite> directly.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cplus/index.html">Cplus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Debian</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="0005.html">Launch up Debian VM with Qemu</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debian-installer/index.html">Debian Installer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debian-command/index.html">Debian command</a></li>
+<li class="toctree-l2"><a class="reference internal" href="live-cd/index.html">Debian Live CD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="elxr_edge/index.html">eLxr Edge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="os-tree/index.html">OS tree</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0001.html">Ruck: build pablo with minimal ostree rootfs</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">How to build deb package for libxfce4ui</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#get-the-libxfce4ui-project-from-debian">Get the libxfce4ui project from debian</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get-the-source-code-for-libxfce4ui">Get the source code for libxfce4ui</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#building-with-debuild">Building with debuild</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#buing-with-no-sign">Buing with no-sign</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="0003.html">How to Search for Debian package?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0004.html">How to Check Debian package version?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0006.html">How to download deb packages using apt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0007.html">E: You must put some ‘source’ URIs in your sources.list</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0008.html">How can I specify the repository from which a package will be installed?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0009.html">How to install build dependencies for packages ?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0010.html">Create orig tarballs from git</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0011.html">Debian: Building the package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pipeline/index.html">Debian Pipeline</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Debian</a><ul>
+      <li>Previous: <a href="0001.html" title="previous chapter">Ruck: build pablo with minimal ostree rootfs</a></li>
+      <li>Next: <a href="0003.html" title="next chapter">How to Search for Debian package?</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/debian/0002.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

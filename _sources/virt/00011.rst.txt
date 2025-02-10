@@ -1,0 +1,36 @@
+===================================
+ Enable the support console for VM
+===================================
+
+configruate the xml with
+--------------------------------
+
+.. code-block:: console 
+
+   <console type='pty'>
+         <target type='serial' port='0'/>
+   </console>
+
+
+start vm and modify the configuration of grub
+------------------------------------------------------
+
+Edit “/etc/sysconfig/grub” Add to end of GRUB_CMD_LINELINUX, “console=ttyS0”
+like:
+GRUB_CMDLINE_LINUX="rd.lvm.lv=centos/root rd.lvm.lv=centos/swap crashkernel=auto rhgb quiet console=ttyS0"
+Run the following commands as root:
+
+.. code-block:: console 
+
+   stty -F /dev/ttyS0 speed 9600
+
+   grub2-mkconfig -o /boot/grub2/grub.cfg
+
+
+   systemctl start getty@ttyS0
+
+
+Reboot the VM.
+
+Try to run virsh console VMNAME
+

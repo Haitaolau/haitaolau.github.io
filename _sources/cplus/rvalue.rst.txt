@@ -1,0 +1,219 @@
+===================
+Cplus Rvalue
+===================
+
+`Value categories <https://en.cppreference.com/w/cpp/language/value_category>`_
+
+
+
+
+Introduction
+------------------
+
+Rvalue references are a feature of C++ that was added with the C++11 standard
+Rvalue references solve at least two problems:
+
+*  Implementing move semantics
+*  Perfect forwarding  
+
+The original definition of lvalues and rvalues from the earliest days of C is as follows: 
+An lvalue is an expression e that may appear on the left or on the right hand side of 
+an assignment, 
+whereas an rvalue is an expression that can only appear on the right hand side of an assignment
+
+.. code-block:: cpp
+ 
+  int a = 42;
+  int b = 43;
+
+  // a and b are both l-values:
+  a = b; // ok
+  b = a; // ok
+  a = a * b; // ok
+
+  // a * b is an rvalue:
+  int c = a * b; // ok, rvalue on right hand side of assignment
+  a * b = 42; // error, rvalue on left hand side of assignment
+
+
+Here is an alternate definition which, although it can still be argued with, will put you 
+in a position to tackle rvalue references: An lvalue is an expression that refers to a memory 
+location and allows us to take the address of that memory location via the & operator. An 
+rvalue is an expression that is not an lvalue.
+
+.. code-block:: cpp
+  
+  // lvalues:
+  //
+  int i = 42;
+  i = 43; // ok, i is an lvalue
+  int* p = &i; // ok, i is an lvalue
+  int& foo();
+  foo() = 42; // ok, foo() is an lvalue
+  int* p1 = &foo(); // ok, foo() is an lvalue
+
+  // rvalues:
+  //
+  int foobar();
+  int j = 0;
+  j = foobar(); // ok, foobar() is an rvalue
+  int* p2 = &foobar(); // error, cannot take the address of an rvalue
+  j = 42; // ok, 42 is an rvalue
+
+
+
+
+Rvalue References 
+------------------
+
+Prior to C++11, if you had a temporary object, you could use a "regular" or "lvalue reference" to bind it, but only if it was const:
+
+.. code-block:: cpp
+
+   const string& name = getName(); // ok
+   string& name = getName(); // NOT ok
+
+The intuition here is that you cannot use a "mutable" reference because, if you did, you'd be able to modify some object that is about to disappear, and that would be dangerous. Notice, by the way, that holding on to a const reference to a temporary object ensures that the temporary object isn't immediately destructed. This is a nice guarantee of C++, but it is still a temporary object, so you don't want to modify it.
+
+In C++11, however, there's a new kind of reference, an "rvalue reference", that will let you bind a mutable reference to an rvalue, but not an lvalue. In other words, rvalue references are perfect for detecting if a value is temporary object or not. Rvalue references use the && syntax instead of just &, and can be const and non-const, just like lvalue references, although you'll rarely see a const rvalue reference (as we'll see, mutable references are kind of the point):
+
+
+.. code-block:: cpp
+   
+   const string&& name = getName(); // ok
+   string&& name = getName(); // also ok - praise be!
+
+
+So far this is all well and good, but how does it help? The most important thing about lvalue references vs rvalue references is what happens when you write functions that take lvalue or rvalue references as arguments. Let's say we have two functions:
+
+.. code-block:: cpp
+
+	printReference (const String& str)
+	{
+	        cout << str;
+	}
+	 
+	printReference (String&& str)
+	{
+	        cout << str;
+	}
+
+Now the behavior gets interesting--the printReference function taking a const lvalue reference will accept any argument that it's given, whether it be an lvalue or an rvalue, and regardless of whether the lvalue or rvalue is mutable or not. However, in the presence of the second overload, printReference taking an rvalue reference, it will be given all values except mutable rvalue-references. In other words, if you write:
+	
+..code-block:: 
+
+	string me( "alex" );
+	printReference(  me ); // calls the first printReference function, taking an lvalue reference
+	 
+	printReference( getName() ); // calls the second printReference function, taking a mutable rvalue reference
+	
+
+
+Move constructor
+----------------
+
+The most common pattern you'll see when working with rvalue references is to create a move constructor and move assignment operator (which follows the same principles). A move constructor, like a copy constructor, takes an instance of an object as its argument and creates a new instance based on the original object. However, the move constructor can avoid memory reallocation because we know it has been provided a temporary object, so rather than copy the fields of the object, we will move them.
+
+What does it mean to move a field of the object? If the field is a primitive type, like int, we just copy it. It gets more interesting if the field is a pointer: here, rather than allocate and initialize new memory, we can simply steal the pointer and null out the pointer in the temporary object! We know the temporary object will no longer be needed, so we can take its pointer out from under it.
+
+Imagine that we have a simple ArrayWrapper class, like this:
+
+.. code-block:: cpp
+
+	class ArrayWrapper
+	{
+	    public:
+	        ArrayWrapper (int n)
+	            : _p_vals( new int[ n ] )
+	            , _size( n )
+	        {}
+	        // copy constructor
+	        ArrayWrapper (const ArrayWrapper& other)
+	            : _p_vals( new int[ other._size  ] )
+	            , _size( other._size )
+	        {
+	            for ( int i = 0; i < _size; ++i )
+	            {
+	                _p_vals[ i ] = other._p_vals[ i ];
+	            }
+	        }
+	        ~ArrayWrapper ()
+	        {
+	            delete [] _p_vals;
+	        }
+	    private:
+	    int *_p_vals;
+	    int _size;
+	};
+
+Notice that the copy constructor has to both allocate memory and copy every value from the array, one at a time! That's a lot of work for a copy. Let's add a move constructor and gain some massive efficiency.
+
+
+.. code-block:: cpp
+
+    class ArrayWrapper
+    {
+	public:
+	    // default constructor produces a moderately sized array
+	    ArrayWrapper ()
+	        : _p_vals( new int[ 64 ] )
+	        , _size( 64 )
+	    {}
+	 
+	    ArrayWrapper (int n)
+	        : _p_vals( new int[ n ] )
+	        , _size( n )
+	    {}
+	 
+	    // move constructor
+	    ArrayWrapper (ArrayWrapper&& other)
+	        : _p_vals( other._p_vals  )
+	        , _size( other._size )
+	    {
+	        other._p_vals = NULL;
+	        other._size = 0;
+	    }
+	 
+	    // copy constructor
+	    ArrayWrapper (const ArrayWrapper& other)
+	        : _p_vals( new int[ other._size  ] )
+	        , _size( other._size )
+	    {
+	        for ( int i = 0; i < _size; ++i )
+	        {
+	            _p_vals[ i ] = other._p_vals[ i ];
+	        }
+	    }
+	    ~ArrayWrapper ()
+	    {
+	        delete [] _p_vals;
+	    }
+	 
+	private:
+	    int *_p_vals;
+	    int _size;
+	};
+
+
+Wow, the move constructor is actually simpler than the copy constructor! That's quite a feat. The main things to notice are:
+
+    The parameter is a non-const rvalue reference
+    other._p_vals is set to NULL
+
+The second observation explains the first--we couldn't set other._p_vals to NULL if we'd taken a const rvalue reference. 
+
+But why do we need to set other._p_vals = NULL? The reason is the destructor--when the temporary object goes out of scope, just like all other C++ objects, its destructor will run. 
+
+When its destructor runs, it will free _p_vals. The same _p_vals that we just copied! If we don't set other._p_vals to NULL, the move would not really be a move--it would just be a copy that introduces a crash later on once we start using freed memory. 
+
+This is the whole point of a move constructor: to avoid a copy by changing the original, temporary object!
+
+Again, the overload rules work such that the move constructor is called only for a temporary object--and only a temporary object that can be modified. One thing this means is that if you have a function that returns a const object, it will cause the copy constructor to run instead of the move constructor--so don't write code like this:
+
+
+.. code-block:: cpp
+   
+   const ArrayWrapper getArrayWrapper (); // makes the move constructor 
+                                          // useless, the temporary is const!
+
+   

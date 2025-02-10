@@ -1,0 +1,23 @@
+===========
+Sed and awk
+===========
+
+print specific lines from a file
+===================================
+
+.. code-block:: console 
+
+   abhishek@handbook:~$ awk 'NR==5' lines.txt 
+   This is line number 5
+
+   abhishek@handbook:~$ sed -n '5p' lines.txt
+   This is line number 5
+
+
+Remove empty lines 
+======================================
+
+
+.. code-block:: console 
+
+   sed -i '/^[[:space:]]*$/d'

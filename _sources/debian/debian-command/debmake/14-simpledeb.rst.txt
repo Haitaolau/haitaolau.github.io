@@ -1,0 +1,1001 @@
+===========================
+ Chapter 4. Simple Example
+===========================
+
+
+.. contents:: Table of Contents
+
+
+.. _packaging-tarball:
+
+Packaging tarball
+=================
+
+Here is an example of creating a simple Debian package from a simple C source using the **Makefile** as its build system.
+
+Let's assume this upstream tarball to be :download:`debhello-0.0.tar.gz <src/debhello-0.0.tar.gz>`.
+
+This type of source is meant to be installed as a non-system file as:
+
+.. code-block:: console
+		
+   $ tar -xzmf debhello-0.0.tar.gz
+   $ cd debhello-0.0
+   $ make
+   $ make install
+  
+
+Debian packaging requires changing this `make install` process to install files to the target system image 
+location instead of the normal location under `/usr/local`.
+
+.. note::
+ 
+   Examples of creating a Debian package from other complicated build systems are described in <<more>>.
+
+.. _big-picture:
+
+Big picture
+===========
+
+The big picture for building a single non-native Debian package from the upstream tarball `debhello-0.0.tar.gz` can be summarized as:
+
+* The maintainer obtains the upstream tarball `debhello-0.0.tar.gz` and untars its contents to the `debhello-0.0` directory.
+* The `debmake` command debianizes the upstream source tree by adding template files only in the `debian` directory.
+  * The `debhello_0.0.orig.tar.gz` symlink is created pointing to the `debhello-0.0.tar.gz` file.
+  * The maintainer customizes template files.
+* The `debuild` command builds the binary package from the debianized source tree.
+  * `debhello-0.0-1.debian.tar.xz` is created containing the `debian` directory.
+
+Big picture of package building
+
+.. code-block:: console
+		
+   $ tar -xzmf debhello-0.0.tar.gz
+   $ cd debhello-0.0
+   $ debmake
+     ... manual customization
+   $ debuild
+     ...
+  
+   
+TIP: The `debuild` command in this and following examples may be substituted by equivalent commands such as the `sbuild` command.
+
+TIP: If the upstream tarball in the `.tar.xz` format is available, use it instead of the one in the `.tar.gz` and `.tar.bz2` formats. The `xz` compression format offers the better compression than the `gzip` and `bzip2` compressions.
+
+.. _what-debmake:
+
+What is debmake?
+================
+
+The `debmake` command is the helper script for the Debian packaging.
+
+* It always sets most of the obvious option states and values to reasonable defaults.
+* It generates the upstream tarball and its required symlink if they are missing.
+* It doesn't overwrite the existing configuration files in the *debian/* directory.
+* It supports the `multiarch` package.
+* It creates good template files such as the `debian/copyright` file compliant with `DEP-5`.
+
+These features make Debian packaging with `debmake` simple and modern.
+
+In retrospective, I created `debmake` to simplify this documentation.  I consider `debmake` to be more-or-less a demonstration session generator for tutorial purpose.
+
+NOTE: Many packages are packaged using only a text editor while imitating how other similar packages are packaged and consulting how the Debian policy requires us to do.  This seems to me the most popular method for the real-life packaging activity.
+
+The `debmake` command isn't the only helper script to make a Debian package.  If you are interested in alternative packaging helper tools, please see:
+
+* https://wiki.debian.org/AutomaticPackagingTools[Debian wiki: AutomaticPackagingTools] -- Extensive comparison of packaging helper scripts
+* https://wiki.debian.org/CopyrightReviewTools[Debian wiki: CopyrightReviewTools] -- Extensive comparison of copyright review helper scripts
+
+.. _what-debuild:
+
+What is debuild?
+================
+
+Here is a summary of commands similar to the `debuild` command.
+
+* The `debian/rules` file defines how the Debian binary package is built.
+* The `dpkg-buildpackage` command is the official command to build the Debian binary package.  For normal binary build, it executes roughly:
+  * `dpkg-source --before-build` (apply Debian patches, unless they are already applied)
+  * `fakeroot debian/rules clean`
+  * `dpkg-source --build` (build the Debian source package)
+  * `fakeroot debian/rules build`
+  * `fakeroot debian/rules binary`
+  * `dpkg-genbuildinfo` (generate a `.buildinfo` file)
+  * `dpkg-genchanges` (generate a `.changes` file)
+  * `fakeroot debian/rules clean`
+  * `dpkg-source --after-build` (unapply Debian patches, if they are applied during `--before-build`)
+  * `debsign` (sign the `*.dsc` and `*.changes` files)
+  
+  .. note:
+
+     If you followed :ref:`devscripts-setup <devscripts-setup>` to set the `-us` and `-uc` options,this step is skipped and you must run the `debsign` command manually.
+
+  * The `debuild` command is a wrapper script of the `dpkg-buildpackage` command to build the Debian binary package under the proper environment variables.
+  * The `sbuild` command is a wrapper script to build the Debian binary package under the proper chroot environment with the proper environment variables.
+
+
+.. note:
+
+   NOTE: See `dpkg-buildpackage`(1) for exact details.
+
+.. _step-upstream:
+
+Step 1: Get the upstream source
+===============================
+
+Let's get the upstream source.
+
+Download `debhello-0.0.tar.gz`
+
+.. code-block:: console
+
+   $ wget http://www.example.org/download/debhello-0.0.tar.gz
+   ...
+   $ tar -xzf debhello-0.0.tar.gz
+   $ tree
+   .
+   ├── debhello-0.0
+   │   ├── LICENSE
+   │   ├── Makefile
+   │   └── src
+   │       └── hello.c
+   └── debhello-0.0.tar.gz
+   
+   2 directories, 4 files
+   
+Here, the C source `hello.c` is a very simple one.
+
+`hello.c`
+
+.. code-block:: console
+
+   $ cat debhello-0.0/src/hello.c
+   #include <stdio.h>
+   int
+   main()
+   {
+           printf("Hello, world!\n");
+           return 0;
+   }
+   
+   
+
+Here, the `Makefile` supports https://www.gnu.org/prep/standards/[GNU Coding Standards] and https://en.wikipedia.org/wiki/Filesystem_Hierarchy_Standard[FHS]. Notably:
+
+` build binaries honoring `$(CPPFLAGS)`, `$(CFLAGS)`, `$(LDFLAGS)`, etc.
+` install files with `$(DESTDIR)` defined to the target system image
+` install files with `$(prefix)` defined, which can be overridden to be `/usr`
+
+`Makefile`
+
+.. code-block:: console
+
+    $ cat debhello-0.0/Makefile
+   prefix = /usr/local
+   
+   all: src/hello
+   
+   src/hello: src/hello.c
+           @echo "CFLAGS=$(CFLAGS)" | \
+                   fold -s -w 70 | \
+                   sed -e 's/^/# /'
+           $(CC) $(CPPFLAGS) $(CFLAGS) $(LDCFLAGS) -o $@ $^
+   
+   install: src/hello
+           install -D src/hello \
+                   $(DESTDIR)$(prefix)/bin/hello
+   
+   clean:
+           -rm -f src/hello
+   
+   distclean: clean
+   
+   uninstall:
+           -rm -f $(DESTDIR)$(prefix)/bin/hello
+   
+   .PHONY: all install clean distclean uninstall
+
+   
+
+.. note:
+
+   The `echo` of the `$(CFLAGS)` variable is used to verify the proper setting of the build flag in the following example.
+
+.. _step-debmake:
+
+Step 2: Generate template files with debmake
+============================================
+
+.. note:
+   
+   If the `debmake` command is invoked with the `-T` option, more verbose comments are generated for the template files.
+
+The output from the `debmake` command is very verbose and explains what it does as follows.
+
+.. code-block:: console
+		
+   $ cd debhello-0.0
+   $ debmake
+   I: set parameters
+   I: =================================================================
+   I: package_dir     = /usr/lib/python3/dist-packages
+   I: base_path       = /usr
+   I: base_lib_path   = /usr/lib/debmake
+   I: base_share_path = /usr/share/debmake
+   I: =================================================================
+   I: sanity check of parameters
+   I: pkg="debhello", ver="0.0", rev="1"
+   I: *** start packaging in "debhello-0.0". ***
+   I: provide debhello_0.0.orig.tar.gz for non-native Debian package
+   I: pwd = "/path/to"
+   I: $ ln -sf debhello-0.0.tar.gz debhello_0.0.orig.tar.gz
+   I: pwd = "/path/to/debhello-0.0"
+   I: parse binary package settings:
+   I: binary package=debhello Type=bin / Arch=any M-A=foreign
+   I: analyze the source tree
+   I: build_type = make
+   I: scan source for copyright+license text and file extensions
+   I: 100 %, ext = c
+   I: check_all_licenses
+   I: ..
+   I: check_all_licenses completed for 2 files.
+   I: bunch_all_licenses
+   I: format_all_licenses
+   I: make debian/* template files
+   I: single binary package
+   I: debmake -x "1" ...
+   I: creating => debian/control
+   I: creating => debian/copyright
+   I: substituting => /usr/share/debmake/extra0/changelog
+   I: creating => debian/changelog
+   I: substituting => /usr/share/debmake/extra0/rules
+   I: creating => debian/rules
+   I: substituting => /usr/share/debmake/extra1/README.Debian
+   I: creating => debian/README.Debian
+   I: substituting => /usr/share/debmake/extra1/watch
+   I: creating => debian/watch
+   I: substituting => /usr/share/debmake/extra1source/format
+   I: creating => debian/source/format
+   I: substituting => /usr/share/debmake/extra1tests/control
+   I: creating => debian/source/control
+   I: substituting => /usr/share/debmake/extra1upstream/metadata
+   I: creating => debian/upstream/metadata
+   I: substituting => /usr/share/debmake/extra1tests/control
+   I: creating => debian/tests/control
+   I: substituting => /usr/share/debmake/extra1patches/series
+   I: creating => debian/patches/series
+   I: substituting => /usr/share/debmake/extra1sourcex/local-options
+   I: creating => debian/source/local-options
+   I: substituting => /usr/share/debmake/extra1sourcex/options
+   I: creating => debian/source/options
+   I: substituting => /usr/share/debmake/extra1sourcex/patch-header
+   I: creating => debian/source/patch-header
+   I: run "debmake -x2" to get more template files
+   I: $ wrap-and-sort
+
+   
+		
+The `debmake` command generates all these template files based on command line options.  Since no options are specified, the `debmake` command chooses reasonable default values for you:
+
+* The source package name: `debhello`
+* The upstream version: `0.0`
+* The binary package name: `debhello`
+* The Debian revision: `1`
+* The package type: `bin` (the ELF binary executable package)
+* The `-x` option: `-x1` (default for the single binary package)
+
+Let's inspect generated template files.
+
+The source tree after the basic `debmake` execution.
+
+.. code-block:: console
+
+   $ cd ..
+   $ tree
+   .
+   ├── debhello-0.0
+   │   ├── LICENSE
+   │   ├── Makefile
+   │   ├── debian
+   │   │   ├── README.Debian
+   │   │   ├── changelog
+   │   │   ├── control
+   │   │   ├── copyright
+   │   │   ├── patches
+   │   │   │   └── series
+   │   │   ├── rules
+   │   │   ├── source
+   │   │   │   ├── control
+   │   │   │   ├── format
+   │   │   │   ├── local-options
+   │   │   │   ├── options
+   │   │   │   └── patch-header
+   │   │   ├── tests
+   │   │   │   └── control
+   │   │   ├── upstream
+   │   │   │   └── metadata
+   │   │   └── watch
+   │   └── src
+   │       └── hello.c
+   ├── debhello-0.0.tar.gz
+   └── debhello_0.0.orig.tar.gz -> debhello-0.0.tar.gz
+   
+   7 directories, 19 files
+   
+
+The `debian/rules` file is the build script provided by the package maintainer.  Here is its template file generated by the `debmake` command.
+
+`debian/rules` (template file):
+
+.. code-block:: console
+
+   $ cat debhello-0.0/debian/rules
+   #!/usr/bin/make -f
+   # You must remove unused comment lines for the released package.
+   #export DH_VERBOSE = 1
+   #export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+   #export DEB_CFLAGS_MAINT_APPEND  = -Wall -pedantic
+   #export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
+   
+   %:
+           dh $@
+   
+   #override_dh_auto_install:
+   #       dh_auto_install -- prefix=/usr
+   
+   #override_dh_install:
+   #       dh_install --list-missing -X.pyc -X.pyo
+   
+		
+
+This is essentially the standard `debian/rules` file with the `dh` command. (There are some commented out contents for you to customize it.)
+
+The `debian/control` file provides the main meta data for the Debian package.  Here is its template file generated by the `debmake` command.
+
+`debian/control` (template file):
+
+.. code-block:: console
+
+   $ cat debhello-0.0/debian/control
+   Source: debhello
+   Section: unknown
+   Priority: optional
+   Maintainer: "Firstname Lastname" <email.address@example.org>
+   Build-Depends: debhelper-compat (= 13)
+   Standards-Version: 4.5.1
+   Homepage: <insert the upstream URL, if relevant>
+   Rules-Requires-Root: no
+   
+   Package: debhello
+   Architecture: any
+   Multi-Arch: foreign
+   Depends: ${misc:Depends}, ${shlibs:Depends}
+   Description: auto-generated package by debmake
+    This Debian binary package was auto-generated by the
+    debmake(1) command provided by the debmake package.
+   
+.. note:
+   
+   WARNING: If you leave `Section: unknown' in the template `debian/control` file unchanged, the `lintian` error may cause the build to fail.
+
+Since this is the ELF binary executable package, the `debmake` command sets `Architecture: any` and `Multi-Arch: foreign`.  
+Also, it sets required `substvar` parameters as `Depends: $\{shlibs:Depends}, $\{misc:Depends}`.  These are explained in <<basics>>.
+
+.. note:
+   
+   NOTE: Please note this `debian/control` file uses the RFC-822 style as documented in https://www.debian.org/doc/debian-policy/ch-controlfields.html#source-package-control-files-debian-control[5.2 Source package control files -- debian/control] of the ``Debian Policy Manual''. The use of the empty line and the leading space are significant.
+
+The `debian/copyright` file provides the copyright summary data of the Debian package.  Here is its template file generated by the `debmake` command.
+
+`debian/copyright` (template file):
+
+.. code-block:: console
+
+   $ cat debhello-0.0/debian/copyright
+   Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+   Upstream-Name: debhello
+   Upstream-Contact: <preferred name and address to reach the upstream project>
+   Source: <url://example.com>
+   #
+   # Please double check copyright with the licensecheck(1) command.
+   
+   Files:     Makefile
+              src/hello.c
+   Copyright: __NO_COPYRIGHT_NOR_LICENSE__
+   License:   __NO_COPYRIGHT_NOR_LICENSE__
+   
+   #----------------------------------------------------------------------------...
+   # Files marked as NO_LICENSE_TEXT_FOUND may be covered by the following
+   # license/copyright files.
+   
+   #----------------------------------------------------------------------------...
+   # License file: LICENSE
+    License:
+    .
+    All files in this archive are licensed under the MIT License as below.
+    .
+    Copyright 2015 Osamu Aoki <osamu@debian.org>
+    .
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+    .
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+    .
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+    OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+    IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+    CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+    TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+    SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+   
+		
+
+
+
+.. _step-maintainer:
+
+Step 3: Modification to the template files
+==========================================
+
+Some manual modification is required to make the proper Debian package as a maintainer.
+
+In order to install files as a part of the system files, the `$(prefix)` value of `/usr/local` in the `Makefile` should be 
+
+overridden to be `/usr`.  This can be accommodated by the 
+
+following the `debian/rules` file with the `override_dh_auto_install` target setting `prefix=/usr`.
+
+`debian/rules` (maintainer version):
+
+.. code-block:: console
+
+   $ vim debhello-0.0/debian/
+   ... hack, hack, hack, ...
+   $ cat debhello-0.0/debian/rules
+   #!/usr/bin/make -f
+   export DH_VERBOSE = 1
+   export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+   export DEB_CFLAGS_MAINT_APPEND  = -Wall -pedantic
+   export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
+   
+   %:
+           dh $@
+   
+   override_dh_auto_install:
+           dh_auto_install -- prefix=/usr
+   
+
+Exporting the `DH_VERBOSE` environment variable in the `debian/rules` file as above forces the `debhelper` tool to make a fine grained build report.
+
+Exporting `DEB_BUILD_MAINT_OPTION` as above sets the hardening options as described in the `FEATURE AREAS/ENVIRONMENT` in `dpkg-buildflags(1)`.  
+
+Exporting `DEB_CFLAGS_MAINT_APPEND` as above forces the C compiler to emit all the warnings.
+
+Exporting `DEB_LDFLAGS_MAINT_APPEND` as above forces the linker to link only when the library is actually needed.  
+
+The `dh_auto_install` command for the Makefile based build system essentially runs `$(MAKE) install DESTDIR=debian/debhello`.  
+
+The creation of this `override_dh_auto_install` target changes its behavior to `$(MAKE) install DESTDIR=debian/debhello prefix=/usr`.
+
+Here are the maintainer versions of the `debian/control` and `debian/copyright` files.
+
+`debian/control` (maintainer version):
+
+.. code-block:: console
+
+
+   $ vim debhello-0.0/debian/control
+   ... hack, hack, hack, ...
+   $ cat debhello-0.0/debian/control
+   Source: debhello
+   Section: devel
+   Priority: optional
+   Maintainer: Osamu Aoki <osamu@debian.org>
+   Build-Depends: debhelper-compat (= 13)
+   Standards-Version: 4.5.1
+   Homepage: https://salsa.debian.org/debian/debmake-doc
+   Rules-Requires-Root: no
+   
+   Package: debhello
+   Architecture: any
+   Multi-Arch: foreign
+   Depends: ${misc:Depends}, ${shlibs:Depends}
+   Description: Simple packaging example for debmake
+    This Debian binary package is an example package.
+    (This is an example only)
+
+		
+
+`debian/copyright` (maintainer version):
+
+.. code-block::
+
+   $ vim debhello-0.0/debian/copyright
+   ... hack, hack, hack, ...
+   $ cat debhello-0.0/debian/copyright
+   Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+   Upstream-Name: debhello
+   Upstream-Contact: Osamu Aoki <osamu@debian.org>
+   Source: https://salsa.debian.org/debian/debmake-doc
+   
+   Files:     *
+   Copyright: 2015-2021 Osamu Aoki <osamu@debian.org>
+   License:   Expat
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+    .
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+    .
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+    OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+    IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+    CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+    TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+    SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+   
+		
+There are several other template files under the `debian/` directory.  These also need to be updated.
+
+Template files under `debian/`. (v=0.0):
+
+.. code-block:: console
+   
+   $ tree debhello-0.0/debian
+   debhello-0.0/debian
+   ├── README.Debian
+   ├── changelog
+   ├── control
+   ├── copyright
+   ├── patches
+   │   └── series
+   ├── rules
+   ├── source
+   │   ├── control
+   │   ├── format
+   │   ├── local-options
+   │   ├── options
+   │   └── patch-header
+   ├── tests
+   │   └── control
+   ├── upstream
+   │   └── metadata
+   └── watch
+   
+   4 directories, 14 files
+   
+.. note:
+   
+   TIP: Configuration files used by the `dh_` commands from the `debhelper` package usually treat `#` as the start of a comment line.
+
+.. _step-debuild:
+
+Step 4: Building package with debuild
+=====================================
+
+You can create a non-native Debian package using the `debuild` command or its equivalents (see <<what-debuild>>) in this source tree.  The command output is very verbose and explains what it does as follows.
+
+
+.. code-block:: console
+
+   
+   $ cd debhello-0.
+   $ debuild
+   dpkg-buildpackage -us -uc -ui -i -i
+   ...
+   debian/rules clean
+   dh clean
+   ...
+   debian/rules binary
+   dh binary
+      dh_update_autotools_config
+      dh_autoreconf
+      dh_auto_configure
+           install -d /path/to/debhello-0.0/debian/.debhelper/generated/_source/...
+      dh_auto_build
+           make -j12 "INSTALL=install --strip-program=true"
+   make[1]: Entering directory '/path/to/debhello-0.0'
+   # CFLAGS=-g -O2
+   # -ffile-prefix-map=/home/osamu/src/public/debmake-doc/debmake-doc/examp
+    ...
+   Now running lintian -i -I --show-overrides debhello_0.0-1_amd64.changes ...
+    ...
+   N:   Renamed from: binary-without-manpage
+   N:
+   W: debhello: readme-debian-contains-debmake-template
+   N:
+    ...
+      
+
+You can verify that `CFLAGS` is updated properly with `-Wall` and `-pedantic` by the `DEB_CFLAGS_MAINT_APPEND` variable.
+
+The manpage should be added to the package as reported by the `lintian` package, as shown in later examples (see <<more>>).  Let's move on for now.
+
+Let's inspect the result.
+
+The generated files of `debhello` version `0.0` by the `debuild` command:
+
+.. code-block:: console
+
+   $ cd ..
+   $ tree -FL 1
+   .
+   ├── debhello-0.0/
+   ├── debhello-0.0.tar.gz
+   ├── debhello-dbgsym_0.0-1_amd64.deb
+   ├── debhello_0.0-1.debian.tar.xz
+   ├── debhello_0.0-1.dsc
+   ├── debhello_0.0-1_amd64.build
+   ├── debhello_0.0-1_amd64.buildinfo
+   ├── debhello_0.0-1_amd64.changes
+   ├── debhello_0.0-1_amd64.deb
+   └── debhello_0.0.orig.tar.gz -> debhello-0.0.tar.gz
+   
+   1 directory, 9 files		
+
+
+You see all the generated files.
+
+` The `debhello_0.0.orig.tar.gz` is a symlink to the upstream tarball.
+` The `debhello_0.0-1.debian.tar.xz` contains the maintainer generated contents.
+` The `debhello_0.0-1.dsc` is the meta data file for the Debian source package.
+` The `debhello_0.0-1_amd64.deb` is the Debian binary package.
+` The `debhello-dbgsym_0.0-1_amd64.deb` is the Debian debug symbol binary package. See <<dbgsym>>.
+` The `debhello_0.0-1_amd64.build` file is the build log file.
+` The `debhello_0.0-1_amd64.buildinfo` file is the meta data file generated by `dpkg-genbuildinfo`(1).
+` The `debhello_0.0-1_amd64.changes` is the meta data file for the Debian binary package.
+
+The `debhello_0.0-1.debian.tar.xz` contains the Debian changes to the upstream source as follows.
+
+The compressed archive contents of `debhello_0.0-1.debian.tar.xz`:
+
+.. code-block:: console
+
+   $ tar -tzf debhello-0.0.tar.gz
+   debhello-0.0/
+   debhello-0.0/src/
+   debhello-0.0/src/hello.c
+   debhello-0.0/LICENSE
+   debhello-0.0/Makefile
+   $ tar --xz -tf debhello_0.0-1.debian.tar.xz
+   debian/
+   debian/README.Debian
+   debian/changelog
+   debian/control
+   debian/copyright
+   debian/patches/
+   debian/patches/series
+   debian/rules
+   debian/source/
+   debian/source/control
+   debian/source/format
+   debian/source/options
+   debian/source/patch-header
+   debian/tests/
+   debian/tests/control
+   debian/upstream/
+   debian/upstream/metadata
+   debian/watch
+   		
+The `debhello_0.0-1_amd64.deb` contains the binary files to be installed to the target system.
+
+The `debhello-debsym_0.0-1_amd64.deb` contains the debug symbol files to be installed to the target system..
+
+The binary package contents of all binary packages:
+
+.. code-block:: console
+
+   $ dpkg -c debhello-dbgsym_0.0-1_amd64.deb
+   drwxr-xr-x root/root ...  ./
+   drwxr-xr-x root/root ...  ./usr/
+   drwxr-xr-x root/root ...  ./usr/lib/
+   drwxr-xr-x root/root ...  ./usr/lib/debug/
+   drwxr-xr-x root/root ...  ./usr/lib/debug/.build-id/
+   drwxr-xr-x root/root ...  ./usr/lib/debug/.build-id/be/
+   -rw-r--r-- root/root ...  ./usr/lib/debug/.build-id/be/11292eded3fc22396a0b62...
+   drwxr-xr-x root/root ...  ./usr/share/
+   drwxr-xr-x root/root ...  ./usr/share/doc/
+   lrwxrwxrwx root/root ...  ./usr/share/doc/debhello-dbgsym -> debhello
+    $ dpkg -c debhello_0.0-1_amd64.deb
+   drwxr-xr-x root/root ...  ./
+   drwxr-xr-x root/root ...  ./usr/
+   drwxr-xr-x root/root ...  ./usr/bin/
+   -rwxr-xr-x root/root ...  ./usr/bin/hello
+   drwxr-xr-x root/root ...  ./usr/share/
+   drwxr-xr-x root/root ...  ./usr/share/doc/
+   drwxr-xr-x root/root ...  ./usr/share/doc/debhello/
+   -rw-r--r-- root/root ...  ./usr/share/doc/debhello/README.Debian
+   -rw-r--r-- root/root ...  ./usr/share/doc/debhello/changelog.Debian.gz
+   -rw-r--r-- root/root ...  ./usr/share/doc/debhello/copyright
+   		
+
+The generated dependency list of all binary packages.
+
+The generated dependency list of all binary packages (v=0.0):
+
+.. code-block:: console
+
+    $ dpkg -f debhello-dbgsym_0.0-1_amd64.deb pre-depends \
+               depends recommends conflicts breaks
+   Depends: debhello (= 0.0-1)
+    $ dpkg -f debhello_0.0-1_amd64.deb pre-depends \
+               depends recommends conflicts breaks
+   Depends: libc6 (>= 2.2.5)
+   	
+   
+CAUTION: Many more details need to be addressed before uploading the package to the Debian archive.
+
+.. note:
+   
+   NOTE: If manual adjustments of auto-generated configuration files by the `debmake` command are skipped, the generated binary package may lack meaningful package description and some of the policy requirements may be missed.  This sloppy package functions well under the `dpkg` command, and may be good enough for your local deployment.
+
+.. _alt-patch:
+
+Step 3 (alternative): Modification to the upstream source
+=========================================================
+
+The above example did not touch the upstream source to make the proper Debian package.
+
+An alternative approach as the maintainer is to change the upstream source by modifying the upstream `Makefile` to set the $(prefix) value to `/usr`.
+
+The packaging is practically the same as the above step-by-step example except for two points in <<step-maintainer>>:
+
+` Store the maintainer modifications to the upstream source as the corresponding patch files in the `debian/patches/` directory and list their filenames in the `debian/patches/series` file as indicated in <<patches>>.
+There are several ways to generate patch files.  A few examples are given in these sections:
+** <<diff-u>>
+** <<dquilt>>
+** <<dpkg-source-commit>>
+` The maintainer modification to the `debian/rules` file doesn't have the `override_dh_auto_install` target as follows:
+
+`debian/rules` (alternative maintainer version):
+
+.. code-block:: console
+
+   $ vim debhello-0.0/debian/rules
+   ... hack, hack, hack, ...
+   $ cat debhello-0.0/debian/rules
+   #!/usr/bin/make -f
+   export DH_VERBOSE = 1
+   export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+   export DEB_CFLAGS_MAINT_APPEND  = -Wall -pedantic
+   export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
+   
+   %:
+           dh $@
+   
+   override_dh_auto_install:
+           dh_auto_install -- prefix=/usr
+   		
+   
+This alternative approach to Debian packaging using a series of patch files may be less robust for future upstream changes but more flexible coping with the difficult upstream source.  (See <<deb3>>.)
+
+NOTE: For this particular packaging case, the above <<step-maintainer>> using the `debian/rules` file is the better approach.  But let's keep on with this approach as a learning process.
+
+TIP: For more complicated packaging cases, both <<step-maintainer>> and <<alt-patch>> approaches need to be deployed.
+
+.. _diff-u:
+
+Patch by diff -u
+================
+
+Here is an example to create `000-prefix-usr.patch` by the `diff` command.
+
+.. code-block:: console
+   
+    $ cp -a debhello-0.0 debhello-0.0.orig
+    $ vim debhello-0.0/Makefile
+    ... hack, hack, hack, ...
+    $ diff -Nru debhello-0.0.orig debhello-0.0 >000-prefix-usr.patch
+    $ cat 000-prefix-usr.patch
+   diff -Nru debhello-0.0.orig/Makefile debhello-0.0/Makefile
+   --- debhello-0.0.orig/Makefile  2021-07-02 16:26:38.734722687 +0900
+   +++ debhello-0.0/Makefile       2021-07-02 16:26:38.802723496 +0900
+   @@ -1,4 +1,4 @@
+   -prefix = /usr/local
+   +prefix = /usr
+   
+    all: src/hello
+   
+    $ rm -rf debhello-0.0
+    $ mv -f debhello-0.0.orig debhello-0.0
+   
+Please note that the upstream source tree is restored to the original state and the patch file is available as `000-prefix-usr.patch`.
+
+This `000-prefix-usr.patch` is edited to be https://dep-team.pages.debian.net/deps/dep3/[DEP-3] conformant and moved to the right location as below.
+
+.. code-block:: console
+   
+    $ cd debhello-0.0
+    $ echo '000-prefix-usr.patch' >debian/patches/series
+    $ vim ../000-prefix-usr.patch
+    ... hack, hack, hack, ...
+    $ mv -f ../000-prefix-usr.patch debian/patches/000-prefix-usr.patch
+    $ cat debian/patches/000-prefix-usr.patch
+   From: Osamu Aoki <osamu@debian.org>
+   Description: set prefix=/usr patch
+   diff -Nru debhello-0.0.orig/Makefile debhello-0.0/Makefile
+   --- debhello-0.0.orig/Makefile
+   +++ debhello-0.0/Makefile
+   @@ -1,4 +1,4 @@
+   -prefix = /usr/local
+   +prefix = /usr
+   
+    all: src/hello
+
+
+.. _dquilt:
+
+Patch by dquilt
+===============
+
+Here is an example to create `000-prefix-usr.patch` by the `dquilt` command which is a simple wrapper of the `quilt` program.  The syntax and function of the `dquilt` command  is the same as the `quilt`(1) command, except for the fact that the patch is stored in the `debian/patches/` directory.
+
+.. code-block:: console
+		
+    $ cd debhello-0.0
+    $ dquilt new 000-prefix-usr.patch
+   Patch debian/patches/000-prefix-usr.patch is now on top
+    $ dquilt add Makefile
+   File Makefile added to patch debian/patches/000-prefix-usr.patch
+    ... hack, hack, hack, ...
+    $ head -1 Makefile
+   prefix = /usr
+    $ dquilt refresh
+   Refreshed patch debian/patches/000-prefix-usr.patch
+    $ dquilt header -e --dep3
+    ... edit the DEP-3 patch header with editor
+    $ tree -a
+   .
+   ├── .pc
+   │   ├── .quilt_patches
+   │   ├── .quilt_series
+   │   ├── .version
+   │   ├── 000-prefix-usr.patch
+   │   │   ├── .timestamp
+   │   │   └── Makefile
+   │   └── applied-patches
+   ├── LICENSE
+   ├── Makefile
+   ├── debian
+   │   ├── README.Debian
+   │   ├── changelog
+   │   ├── control
+   │   ├── copyright
+   │   ├── patches
+   │   │   ├── 000-prefix-usr.patch
+   │   │   └── series
+   │   ├── rules
+   │   ├── source
+   │   │   ├── control
+   │   │   ├── format
+   │   │   ├── local-options
+   │   │   ├── options
+   │   │   └── patch-header
+   │   ├── tests
+   │   │   └── control
+   │   ├── upstream
+   │   │   └── metadata
+   │   └── watch
+   └── src
+       └── hello.c
+   
+   8 directories, 24 files
+    $ cat debian/patches/series
+   000-prefix-usr.patch
+    $ cat debian/patches/000-prefix-usr.patch
+   Description: set prefix=/usr patch
+   Author: Osamu Aoki <osamu@debian.org>
+   Index: debhello-0.0/Makefile
+   ===================================================================
+   --- debhello-0.0.orig/Makefile
+   +++ debhello-0.0/Makefile
+   @@ -1,4 +1,4 @@
+   -prefix = /usr/local
+   +prefix = /usr
+   
+    all: src/hello
+   
+   
+
+Here, `Makefile` in the upstream source tree doesn't need to be restored to the original state. The `dpkg-source` command invoked by the Debian packaging procedure in <<step-debuild>>, understands the patch application state recorded by the `dquilt` program in the `.pc/` directory.  As long as all the changes are committed by the `dquilt` command, the Debian source package can be built from the modified source tree.
+
+.. note:
+   
+   NOTE: If the `.pc/` directory is missing, the `dpkg-source` command assumes that no patch was applied.  That's why the more primitive patch generation methods like in <<diff-u>> without generating the `.pc/` directory require the upstream source tree to be restored.
+
+.. _dpkg-source-commit:
+
+Patch by dpkg-source --commit
+=============================
+
+Here is an example to create `000-prefix-usr.patch` by the `dpkg-source --commit` command.
+
+Let's edit the upstream source.
+
+.. code-block:: console
+
+    $ cd debhello-0.0
+    $ vim Makefile
+    ... hack, hack, hack, ...
+    $ head -n1 Makefile
+   prefix = /usr
+   
+		
+Let's commit it.
+
+
+.. code-block:: console
+
+    $ dpkg-source --commit . 000-prefix-usr.patch
+   ... editor to edit the DEP-3 patch header
+   ...
+   
+
+Let's see the result.
+
+.. code-block:: console
+
+   $ cat debian/patches/series
+   000-prefix-usr.patch
+   $ cat debian/patches/000-prefix-usr.patch
+   Description: set prefix=/usr patch
+   Author: Osamu Aoki <osamu@debian.org>
+   Index: debhello-0.0/Makefile
+   
+   --- debhello-0.0.orig/Makefile
+   +++ debhello-0.0/Makefile
+   @@ -1,4 +1,4 @@
+   -prefix = /usr/local
+   +prefix = /usr
+   
+    all: src/hello
+   
+    $ tree -a
+   .
+   ├── .pc
+   │   ├── .quilt_patches
+   │   ├── .quilt_series
+   │   ├── .version
+   │   ├── 000-prefix-usr.patch
+   │   │   ├── .timestamp
+   │   │   └── Makefile
+   │   └── applied-patches
+   ├── LICENSE
+   ├── Makefile
+   ├── debian
+   │   ├── README.Debian
+   │   ├── changelog
+   │   ├── control
+   │   ├── copyright
+   │   ├── patches
+   │   │   ├── 000-prefix-usr.patch
+   │   │   └── series
+   │   ├── rules
+   │   ├── source
+   │   │   ├── control
+   │   │   ├── format
+   │   │   ├── local-options
+   │   │   ├── options
+   │   │   └── patch-header
+   │   ├── tests
+   │   │   └── control
+   │   ├── upstream
+   │   │   └── metadata
+   │   └── watch
+   └── src
+       └── hello.c
+   
+   8 directories, 24 files
+   
+Here, the `dpkg-source` command performs exactly the same as what the sequences of the `dquilt` command did in <<dquilt>>.

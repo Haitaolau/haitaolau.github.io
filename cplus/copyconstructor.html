@@ -1,0 +1,210 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Copy constructor &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Cplus Rvalue" href="rvalue.html" />
+    <link rel="prev" title="Abstract Class" href="abstract.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="copy-constructor">
+<h1>Copy constructor<a class="headerlink" href="#copy-constructor" title="Permalink to this heading">¶</a></h1>
+<p>A copy constructor is a member function that initializes an object using another object of the same class. In simple terms, a constructor which creates an object by initializing it with an object of the same class, which has been created previously is known as a copy constructor.</p>
+<p>Copy constructor is used to initialize the members of a newly created object by copying the members of an already existing object.</p>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Myarray</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">     </span><span class="n">Myarray</span><span class="p">();</span><span class="w"></span>
+<span class="w">     </span><span class="n">Myarray</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">capacity</span><span class="p">);</span><span class="w"></span>
+<span class="w">     </span><span class="n">Myarray</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Myarray</span><span class="o">&amp;</span><span class="w"> </span><span class="n">array</span><span class="p">);</span><span class="w"></span>
+<span class="w">     </span><span class="o">~</span><span class="n">Myarray</span><span class="p">();</span><span class="w"></span>
+
+<span class="w">     </span><span class="kt">void</span><span class="w"> </span><span class="nf">Push_Back</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">val</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">     </span><span class="kt">int</span><span class="w"> </span><span class="nf">getData</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">index</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">     </span><span class="kt">void</span><span class="w"> </span><span class="nf">setData</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">index</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">val</span><span class="p">);</span><span class="w"></span>
+
+<span class="k">private</span><span class="o">:</span><span class="w"></span>
+<span class="w">     </span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">pAddress</span><span class="p">;</span><span class="w"></span>
+<span class="w">     </span><span class="kt">int</span><span class="w"> </span><span class="n">m_Size</span><span class="p">;</span><span class="w"></span>
+<span class="w">     </span><span class="kt">int</span><span class="w"> </span><span class="n">m_Capacity</span><span class="p">;</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">test2</span><span class="p">(){</span><span class="w"></span>
+<span class="w">    </span><span class="n">Myarray</span><span class="o">*</span><span class="w"> </span><span class="n">array</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Myarray</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">array</span><span class="o">-&gt;</span><span class="n">Push_Back</span><span class="p">(</span><span class="n">i</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="n">Myarray</span><span class="o">*</span><span class="w"> </span><span class="n">array2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Myarray</span><span class="p">(</span><span class="o">*</span><span class="n">array</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>output:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">main.cpp(34,38): error C2440: &#39;initializing&#39;: cannot convert from &#39;Myarray&#39; to &#39;Myarray *&#39;</span>
+<span class="go">main.cpp(34,21): message : No user-defined-conversion operator</span>
+<span class="go">available that can perform this conversion, or the operator cannot be called</span>
+</pre></div>
+</div>
+<p>应该更改为：</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">Myarray</span><span class="o">*</span><span class="w"> </span><span class="n">array2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Myarray</span><span class="p">(</span><span class="o">*</span><span class="n">array</span><span class="p">);</span><span class="w"></span>
+
+<span class="n">or</span><span class="w"></span>
+<span class="n">Myarray</span><span class="o">*</span><span class="w"> </span><span class="n">array2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="n">array</span><span class="w"></span>
+
+<span class="n">or</span><span class="w"></span>
+<span class="n">Myarray</span><span class="w"> </span><span class="n">array2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Myarray</span><span class="p">(</span><span class="o">*</span><span class="n">array</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<p>new会调用构造函数,但是返回是对象指针,如new Marray(*array)直接调用构造函数，返回的是对象如Marray(*array)</p>
+</section>
+<section id="id1">
+<h2>拷贝构造函数调用时机<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<p>以下情况都会调用拷贝构造函数：</p>
+<ol class="arabic simple">
+<li><p>一个对象以值传递的方式传入函数体。</p></li>
+<li><p>一个对象以值传递的方式从函数返回。</p></li>
+<li><p>一个对象需要通过另外一个对象进行初始化。</p></li>
+</ol>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Cplus</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="libstdc%2B%2B_2_9_1/index.html">Libstd c++ 2.9.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Operator_overloading/index.html">C++ Operator overloading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="access_modifiers.html">Access Modifiers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="references.html">References (or Aliases)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="const.html">const</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functemplate.html">Function template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="passarguments.html">Pass arguments to function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="friend.html">Friend class and function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="abstract.html">Abstract Class</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Copy constructor</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#example">Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">拷贝构造函数调用时机</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="rvalue.html">Cplus Rvalue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lvalue_and_rvalue.html">lvalue &amp;&amp; rvalue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="placement_new.html">Placement new operator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="template/index.html">Template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cast/index.html">C++ Cast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="decltype.html">Decltype</a></li>
+<li class="toctree-l2"><a class="reference internal" href="explicit_implicit.html">Explicit and Implicit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="constructor.html">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="typedef_typename.html">typedef typename</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Cplus</a><ul>
+      <li>Previous: <a href="abstract.html" title="previous chapter">Abstract Class</a></li>
+      <li>Next: <a href="rvalue.html" title="next chapter">Cplus Rvalue</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/cplus/copyconstructor.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

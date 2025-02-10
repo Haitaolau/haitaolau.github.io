@@ -1,0 +1,101 @@
+==================
+Fold Expressions
+==================
+
+
+`fold expression from cppreference.com <https://en.cppreference.com/w/cpp/language/fold>`_
+
+C++ 17标准引入的，引入折叠表达式的主要目的是计算某个值（表达式的结果当然是一个值）。
+
+这个值的特殊性在于：它与所有可变参有关，而不是与单独某个可变参有关。
+
+换句话说，需要所有的可变参都参与计算，才能求出该值（如求所有可变参的和
+
+折叠表达式一般有4种格式:
+
+* Unary Left Fold 一元左折
+* Unary Right Fold 一元右折
+* Binary Left Fold 二元左折
+* Binary Right Fold 二元左折
+
+
+所谓 **左折** 就是参数从 **左侧** 开始计算；所谓 **右折** 就是参数从 **右侧** 开始计算
+
+
+.. code-block:: cpp
+
+   #include <iostream>
+   template<typename... T> 
+   auto sub_val_left(T... args) 
+   { 
+       return (... - args);//形式1，一元左折 
+   } 
+   
+   template<typename... T> 
+   auto sub_val_right(T...args) 
+   { 
+       return (args - ...); //形式2，一元右折 
+   }
+   
+   int main(int argc, char const *argv[])
+   {
+       std::cout << sub_val_left(10, 20, 30, 40) << std::endl; 
+       std::cout << sub_val_right(10,20, 30, 40) << std::endl;
+       return 0;
+   }
+
+
+The output: 
+
+.. code-block:: console 
+
+   wrsadmin@PEK-HLIU4-D1$g++ -std=c++17  template5.cpp  -o template5
+   wrsadmin@PEK-HLIU4-D1$./template5 
+   -80
+   -20
+   wrsadmin@PEK-HLIU4-D1$
+
+sub_val_left(10, 20, 30, 40) ==> **((10-20)-30)-40** = -80
+
+sub_val_right(10,20, 30, 40) ==> **10-(20-(30-40))** = -20
+
+
+.. code-block:: cpp 
+
+   #include <iostream>
+   using namespace std;
+   
+   template <typename... T>
+   auto sub_val_left_b(T... args) { return (220 - ... - args); }
+   
+   template <typename... T>
+   auto sub_val_right_b(T... args) { return (args - ... - 220); }
+   
+   int main(int argc, char const *argv[])
+   {
+       cout << sub_val_left_b(10, 20, 30, 40) << endl;
+       cout << sub_val_right_b(10, 20, 30, 40) << endl;
+       return 0;
+   }
+
+The output: 
+
+.. code-block:: console 
+
+   wrsadmin@PEK-HLIU4-D1$g++ -std=c++17  template6.cpp  -o template6
+   wrsadmin@PEK-HLIU4-D1$./template6 
+   120
+   200
+   wrsadmin@PEK-HLIU4-D1$
+
+
+
+sub_val_left_b(10, 20, 30, 40)  ==> **(((220-10)-20)-30)-40** = 120
+
+sub_val_right_b(10, 20, 30, 40) ==> **10-(20-(30-(40-220)))** = 200
+
+
+
+
+
+

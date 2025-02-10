@@ -1,0 +1,7 @@
+============
+Boot Up
+============
+
+
+
+.. image:: ../_static/image/andorid-bootup.jpg

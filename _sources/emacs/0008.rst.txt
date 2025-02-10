@@ -1,0 +1,15 @@
+==========================================================================
+ jumps to the location of the mark - and M-< sets the mark before jumping
+==========================================================================
+
+
+
+.. code-block:: console
+
+   C-u C-SPC
+
+
+**C-u C-SPC** seems to do what you want. It jumps to the location of the mark - and M-< sets the mark before jumping, so you get back to where you were before. (C-SPC is bound to set-mark-command, but when invoked with a prefix argument it jumps to the mark instead of setting it.)
+
+This would work when searching as well: C-s and C-r set the mark to the place where you started the search, so you can get back there quickly.   
+

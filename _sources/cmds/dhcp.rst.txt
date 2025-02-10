@@ -1,0 +1,146 @@
+==========
+Dhcp
+==========
+
+1. create the bridge
+====================
+
+.. code-block:: console 
+   
+   ip link add br0 type bridge ; ifconfig br0 up
+
+
+2. Modify the dhcpd configure file
+==================================
+
+.. code-block:: console 
+
+   subnet 10.5.5.0 netmask 255.255.255.0 {
+     range 10.5.5.2 10.5.5.253;
+     option domain-name-servers ns1.internal.example.org;
+     option domain-name "internal.example.org";
+     option routers 10.5.5.1;
+     option broadcast-address 10.5.5.31;
+     default-lease-time 600;
+     max-lease-time 7200;
+   }
+
+3. set the ip address for br0
+==============================
+
+.. code-block:: console 
+   
+   ifconfig br0 10.5.5.1 up
+
+
+4. Start the DHCP server for br0
+==================================
+
+.. code-block:: console 
+
+   /usr/sbin/dhcpd -f -cf /etc/dhcp/dhcpd.conf -pf /var/run/dhcpd.pid br0&
+
+
+
+5. Generate the Mac address for qemu client
+==============================================
+
+generateMac.sh
+
+.. code-block:: console 
+   
+   #!/bin/sh
+   # generate a random mac address for the qemu nic
+   printf 'DE:AD:BE:EF:%02X:%02X\n' $((RANDOM%256)) $((RANDOM%256))
+
+6. Create the qemu-ifup.sh for qemue client to initiate the interface
+=====================================================================
+
+qemu-ifup.sh
+
+.. code-block:: console 
+
+   #!/bin/sh
+   set -x
+   
+   switch=br0
+   
+   if [ -n "$1" ];then
+           #tunctl -u `whoami` -t $1
+           ip tuntap add $1 mode tap user `whoami`
+           ip link set $1 up
+           sleep 0.5s
+           #brctl addif $switch $1
+           ip link set $1 master $switch
+           exit 0
+   else
+           echo "Error: no interface specified"
+           exit 1
+   fi
+   
+
+7. Create and start a qemu client
+==================================
+
+.. code-block:: console 
+
+   qemu-system-x86_64 -enable-kvm -m 4096 -smp 8 -device e1000,netdev=net0,mac=DE:AD:BE:EF:1C:B6 -netdev tap,id=net0,script=/run/media/sda2/dhcp/qemu-ifup.sh wrl1018.qcow2 -serial pty&
+
+
+
+8. access the VM client with screen
+====================================
+
+.. code-block:: console 
+
+   screen /dev/pty/1
+
+By default, the pty name would be presented after the VM client booting up. We could get it from the terminal screen.
+
+9. exit the current pty and enter other's pty
+=============================================
+
+In screen mode, you could press "ctrl + a" then press 'd' key could exit the current pty.
+
+you could use "screen -ls" to show all opened screen sessions
+
+
+screen -ls
+
+.. code-block:: console 
+
+   root@intel-x86-64:/run/media/sda2/dhcp# screen -ls
+   There are screens on:
+           5462.pts-0.intel-x86-64 (Detached)
+           5269.pts-0.intel-x86-64 (Detached)
+   
+Then you could connect whichever you want to.
+
+screen -r 5462 or screen -r 5269
+
+
+10. resolv.conf 
+===============
+
+.. code-block:: console 
+
+   hliu4@ala-lpggp2$cat resolv.conf
+   search wrs.com. corp.ad.wrs.com.
+   nameserver 128.224.160.11
+   nameserver 128.224.160.12
+   nameserver 147.11.57.128
+   nameserver 147.11.57.133
+
+
+
+
+
+
+
+
+
+
+
+
+
+

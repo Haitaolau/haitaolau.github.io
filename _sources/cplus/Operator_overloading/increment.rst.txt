@@ -1,0 +1,40 @@
+=======================
+Increment(++)
+=======================
+
+
+prefix(++i)  前置递增函数返回的是引用
+
+postfix(i++) 后置递增函数返回的对象
+
+**Pre-increment and Post-Increment overloading example**
+
+.. code-block:: cpp
+
+   class MyInteger {
+   
+       int m_Num;
+   public:
+   
+       friend std::ostream& operator<<(std::ostream& cout, MyInteger myInt);
+       MyInteger() {
+           this->m_Num = 0;
+       }
+       //前置++
+       MyInteger& operator++() {
+           this->m_Num++;
+           return *this;
+       }
+       //后置++
+       MyInteger operator++(int) {
+           MyInteger tmp = *this;
+           this->m_Num++;
+           return tmp;
+       }
+   };
+   
+   std::ostream& operator<<(std::ostream& cout, MyInteger myInt)
+   {
+       cout << myInt.m_Num;
+       return cout;
+   }

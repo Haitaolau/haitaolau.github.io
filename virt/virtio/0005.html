@@ -1,0 +1,594 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Introduction to VirtIO &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Qemu: Virtio-net Envrionment" href="0006.html" />
+    <link rel="prev" title="A journey to the vhost-users realm" href="0004.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="introduction-to-virtio">
+<h1><a class="toc-backref" href="#id1" role="doc-backlink">Introduction to VirtIO</a><a class="headerlink" href="#introduction-to-virtio" title="Permalink to this heading">¶</a></h1>
+<nav class="contents" id="table-of-contents">
+<p class="topic-title">Table of contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#introduction-to-virtio" id="id1">Introduction to VirtIO</a></p>
+<ul>
+<li><p><a class="reference internal" href="#overview" id="id2">Overview</a></p></li>
+<li><p><a class="reference internal" href="#what-is-virtio" id="id3">What is VirtIO?</a></p></li>
+<li><p><a class="reference internal" href="#why-or-why-not-virtio" id="id4">Why (or why not) VirtIO?</a></p>
+<ul>
+<li><p><a class="reference internal" href="#virtualization-vs-emulation" id="id5">Virtualization vs. Emulation:</a></p></li>
+<li><p><a class="reference internal" href="#why-or-why-not-virtio-cont" id="id6">Why (or why not) VirtIO? (Cont.)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#virtio-architecture" id="id7">VirtIO Architecture</a></p>
+<ul>
+<li><p><a class="reference internal" href="#virtio-drivers-front-end" id="id8">VirtIO Drivers (Front-End)</a></p></li>
+<li><p><a class="reference internal" href="#virtio-devices-back-end" id="id9">VirtIO Devices (Back-End)</a></p></li>
+<li><p><a class="reference internal" href="#virtqueues" id="id10">VirtQueues</a></p></li>
+<li><p><a class="reference internal" href="#vrings" id="id11">VRings</a></p></li>
+<li><p><a class="reference internal" href="#descriptor-ring-descriptor-area" id="id12">Descriptor Ring (Descriptor Area)</a></p></li>
+<li><p><a class="reference internal" href="#available-ring-driver-area" id="id13">Available Ring (Driver Area)</a></p></li>
+<li><p><a class="reference internal" href="#used-ring-device-area" id="id14">Used Ring (Device Area)</a></p></li>
+<li><p><a class="reference internal" href="#vrings-summary" id="id15">VRings Summary</a></p></li>
+<li><p><a class="reference internal" href="#honorable-mention-vhost" id="id16">Honorable Mention: VHost</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#virtio-in-qemu" id="id17">VirtIO in Qemu</a></p>
+<ul>
+<li><p><a class="reference internal" href="#virtio-scsi" id="id18">Virtio-SCSI</a></p></li>
+<li><p><a class="reference internal" href="#the-command-virtqueue" id="id19">The Command VirtQueue</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#virtio-summary" id="id20">VirtIO Summary</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<p>Copy from <a class="reference external" href="https://blogs.oracle.com/linux/post/introduction-to-virtio">https://blogs.oracle.com/linux/post/introduction-to-virtio</a></p>
+<section id="overview">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">Overview</a><a class="headerlink" href="#overview" title="Permalink to this heading">¶</a></h2>
+<p>In this document, we will be taking a look at the fundamentals of VirtIO from a technical standpoint as well as a deep dive into some of its key areas. This introduction to VirtIO is written assuming the reader has little to no working knowledge of VirtIO, but should also be a helpful refresher to those who are already familiar.</p>
+<p>We’ll start with going over what VirtIO actually is and why we use it. Then we’ll get more technical and provide further detail about key areas of VirtIO, i.e. VirtIO devices &amp; drivers, VirtQueues, and VRings (or “areas”). Lastly, to bring it all full circle, we’ll look at a working example of a VirtIO device’s VirtQueue in Qemu (with some code) and see how everything fits together in the VirtIO world.</p>
+</section>
+<section id="what-is-virtio">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">What is VirtIO?</a><a class="headerlink" href="#what-is-virtio" title="Permalink to this heading">¶</a></h2>
+<p>Formally, VirtIO, or virtual input &amp; output, is an abstraction layer over a host’s devices for virtual machines. But what does that even mean? Essentially, it’s an interface that allows a virtual machine to use its host’s devices via minimized virtual devices called VirtIO devices. These VirtIO devices are minimal because they’re implemented with only the bare necessities to be able to send and receive data. This is because, with VirtIO, we let the host handle the majority of the setup, maintenance, and processing on its actual physical hardware devices. A VirtIO device’s role is more or less getting data to and from the host’s actual physical hardware.</p>
+<p>For example, let’s say we have a VM (virtual machine) running on a host and the VM wants to access the internet. The VM doesn’t have its own NIC to access the internet, but the host does. For the VM to access the host’s NIC, and therefore access the internet, a VirtIO device called virtio-net can be created. In a nutshell, it’s main purpose is to send and receive network data to and from the host. In other words, let virtio-net be a liaison for network data between the host and the guest.</p>
+<img alt="../../_images/Medium.avif" src="../../_images/Medium.avif" />
+<p>Figure 1 above represents, at a high level, the process of a VM requesting and receiving network data from the host. The high level interaction would be something like the following:</p>
+<ol class="arabic simple">
+<li><p>VM: I want to go to google.com. Hey virtio-net, can you tell the host to retrieve this webpage for me?</p></li>
+<li><p>Virtio-net: Ok. Hey host, can you pull up this webpage for us?</p></li>
+<li><p>Host: Ok. I’m grabbing the webpage data now.</p></li>
+<li><p>Host: Here’s the requested webpage data.</p></li>
+<li><p>Virtio-net: Thanks. Hey VM, here’s that webpage you requested.</p></li>
+</ol>
+<p>Although this is an oversimplified example, the core idea remains intact. That is, make the host’s hardware do as much of the work as possible and let VirtIO handle sending and receiving data. Offloading the bulk of the work to the host makes execution on the VM faster and more efficient as compared to if it were emulating a device, for example.</p>
+<p>Another important aspect of VirtIO is that its core framework is standardized to an official VirtIO specification. The VirtIO spec defines standard requirements that VirtIO devices and drivers must meet (e.g. feature bits, statuses, configuration, general operations, etc.). This is important as this means that, regardless of the environment or operating system using VirtIO, the core framework of its implementation must be the same.</p>
+<p>While there is conformance for VirtIO implementations, there’s also some leeway in how things are organized and set up. For example, the virtqueue structure in the Linux kernel is organized differently compared to Qemu’s VirtQueue structure. However, once you understand one implementation of VirtIO (e.g. in Qemu) it’s much easier to understand other implementations.</p>
+</section>
+<section id="why-or-why-not-virtio">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">Why (or why not) VirtIO?</a><a class="headerlink" href="#why-or-why-not-virtio" title="Permalink to this heading">¶</a></h2>
+<p>In the example above, we used the host’s network device for our VM to access the internet, but what about emulating a network device for our VM instead? With emulation we can imitate any device, even one that wouldn’t have been physically supported on our host’s hardware. So, why bother limiting ourselves to the host’s devices and capabilities if we can just emulate any device for our VM? To answer this, let’s first understand the difference between virtualization and emulation.</p>
+<section id="virtualization-vs-emulation">
+<h3><a class="toc-backref" href="#id5" role="doc-backlink">Virtualization vs. Emulation:</a><a class="headerlink" href="#virtualization-vs-emulation" title="Permalink to this heading">¶</a></h3>
+<p>In emulation, software fills in for hardware and acts as if it were real hardware. Recall that in our previous example our VM used a virtio-net device to communicate with the host’s NIC. What if we wanted our VM to use a NIC that our host didn’t have and doesn’t support, i.e. some legacy device. In this case, we can use emulation and get software to fill in for the missing hardware support. We can also use emulation to have our VM run on a completely different operating system meant for other hardware (e.g. MacOS on a Windows PC).</p>
+<p>Emulation is preferred when you need to use a device or software that your host’s hardware doesn’t have or doesn’t support. However, emulation doesn’t come without costs as the software filling in for the missing hardware is extra code that the host’s CPU will have to process. Having dedicated hardware will always be faster!</p>
+<p>In virtualization, software splits the host’s physical hardware for guest VMs to use. This splitting of the host’s hardware to each guest VM essentially “dedicates” that portion of hardware to that VM, making that VM think it has its own hardware (when really it’s just “borrowing” it from the host). The key idea for virtualization here is that each guest has dedicated direct access to that portion of the host’s hardware. Note that “dedicated” here does not mean that the host would be deprived of said device. It’s more like sharing rather than giving total ownership of specific hardware.</p>
+<p>Of course, since virtualization splits up the host’s resources, naturally, our guests are limited to what the host’s hardware supports. With regards to VirtIO devices, this is it’s input / output (NIC, block, memory, etc.) virtualization. In other words, it’s the communication framework between the host and guest for I/O devices.</p>
+</section>
+<section id="why-or-why-not-virtio-cont">
+<h3><a class="toc-backref" href="#id6" role="doc-backlink">Why (or why not) VirtIO? (Cont.)</a><a class="headerlink" href="#why-or-why-not-virtio-cont" title="Permalink to this heading">¶</a></h3>
+<p>It’s clear that both virtualization and emulation are techniques that imitate hardware via software. However, these techniques are used to meet a different set of expectations. In short, you would choose emulation over virtualization if you need to:</p>
+<ul class="simple">
+<li><p>Run an OS meant for different hardware (e.g. MacOS on PC, console-based games on PC, etc.)</p></li>
+<li><p>Run software meant for another OS (e.g. Microsoft Word on MacOS)</p></li>
+<li><p>Run legacy devices on unsupported hardware</p></li>
+</ul>
+<p>Comparatively, you would choose virtualization over emulation if you:</p>
+<ul class="simple">
+<li><p>Care about host and guest performance (dedicated hardware)</p></li>
+<li><p>Don’t need support for legacy software or hardware</p></li>
+<li><p>Need to run multiple guest instances with efficient utilization of the host’s resources</p></li>
+</ul>
+</section>
+</section>
+<section id="virtio-architecture">
+<h2><a class="toc-backref" href="#id7" role="doc-backlink">VirtIO Architecture</a><a class="headerlink" href="#virtio-architecture" title="Permalink to this heading">¶</a></h2>
+<p>The architecture of VirtIO has three key parts: front-end drivers, back-end devices, and its VirtQueues &amp; VRings. In the diagram below, we can see where each part is in a typical host and guest setup with VirtIO (e.g. no VHost, SR-IOV, etc.).</p>
+<img alt="../../_images/Medium2.avif" src="../../_images/Medium2.avif" />
+<p>In figure 2 we can see that the front-end VirtIO drivers exist in the guest’s kernel, back-end VirtIO devices exist in the hypervisor (Qemu), and communication between them is handled in the data plane via VirtQueues &amp; VRings. We can also see notifications (e.g. VMExits, vCPU IRQs) from VirtIO drivers and devices which are routed to KVM interruptions. We won’t go into detail about these notifications in this document, but it’s sufficient for now to know they exist.</p>
+<section id="virtio-drivers-front-end">
+<h3><a class="toc-backref" href="#id8" role="doc-backlink">VirtIO Drivers (Front-End)</a><a class="headerlink" href="#virtio-drivers-front-end" title="Permalink to this heading">¶</a></h3>
+<p>In a typical host and guest setup with VirtIO, VirtIO drivers exist in the guest’s kernel. In the guest’s OS, each VirtIO driver is considered a kernel module. A VirtIO driver’s core responsibilities are:</p>
+<ul class="simple">
+<li><p>accept I/O requests from user processes</p></li>
+<li><p>transfer those I/O requests to the corresponding back-end VirtIO</p></li>
+<li><p>retrieve completed requests from its VirtIO device counterpart</p></li>
+</ul>
+<p>For example, an I/O request from virtio-scsi might be a user wanting to retrieve a document from storage. The virtio-scsi driver accepts the request to retrieve said document and sends the request to the virtio-scsi device (back-end). Once the VirtIO device has completed the request, the document is then made available to the VirtIO driver. The VirtIO driver retrieves the document and makes it available to the user.</p>
+</section>
+<section id="virtio-devices-back-end">
+<h3><a class="toc-backref" href="#id9" role="doc-backlink">VirtIO Devices (Back-End)</a><a class="headerlink" href="#virtio-devices-back-end" title="Permalink to this heading">¶</a></h3>
+<p>Also in a typical host and guest setup with VirtIO, VirtIO devices exist in the hypervisor. In figure 2 above and for this document, we’ll be using Qemu as our (type 2) hypervisor. This means that our VirtIO devices will exist inside the Qemu process. A VirtIO device’s core responsibilities are:</p>
+<ul class="simple">
+<li><p>accept I/O requests from the corresponding front-end VirtIO driver</p></li>
+<li><p>handle the request by offloading the I/O operations to the host’s physical hardware</p></li>
+<li><p>make the processed requested data available to the VirtIO driver</p></li>
+</ul>
+<p>Returning to the virtio-scsi example; the virtio-scsi driver notifies its device counterpart, letting the device know that it needs to go and retrieve the requested document in storage on actual physical hardware. The virtio-scsi device accepts this request and performs the necessary calls to retrieve the data from the physical hardware. Lastly, the device makes the data available to the driver by putting the retrieved data onto its shared VirtQueue.</p>
+</section>
+<section id="virtqueues">
+<h3><a class="toc-backref" href="#id10" role="doc-backlink">VirtQueues</a><a class="headerlink" href="#virtqueues" title="Permalink to this heading">¶</a></h3>
+<p>The last key part to the VirtIO architecture is VirtQueues, which are data structures that essentially assist devices and drivers in performing various VRing operations. VirtQueues are shared in guest physical memory, meaning that each VirtIO driver &amp; device pair access the same page in RAM. In other words, a driver and device’s VirtQueues are not two different regions that are synchronized.</p>
+<p>There is a lot of inconsistency online when it comes to the description of a VirtQueue. Some use it synonymously with VRings (or virtio-rings) whereas others describe them separately. This is due to the fact that VRings are the main feature of VirtQueues, as VRings are the actual data structures that facilitate the transfer of data between a VirtIO device and driver. We’ll describe them separately here since there’s a bit more to a VirtQueue than just its VRings alone.</p>
+<p>Figure 3 below shows Qemu’s version of the VirtQueue and VRing data structures.</p>
+<img alt="../../_images/Medium3.avif" src="../../_images/Medium3.avif" />
+<p>In Qemu’s VirtIO framework, we can clearly see the difference and relationship between a VirtQueue data structure and its VRing’s data structures (e.g. VRing, VRingDesc, VRingAvail, VRingUsed).</p>
+<p>Other than the VRings themselves, a VirtQueue also facilitates the use of various flags, indices, and handlers (or callback functions), all of which are used for VRing operations in one way or another. One caveat to this, though, is that a VirtQueue’s organization is specific to the guest’s OS and whether we’re talking about userspace (e.g. Qemu) or kernel VirtIO framework. Also, the operations of VirtQueues are specific to the VirtIO configuration (e.g. split vs. packed VirtQueues).</p>
+<p>For example, figure 4 below shows the Linux kernel’s version of its VirtQueue and VRing data structures.</p>
+<img alt="../../_images/Medium4.avif" src="../../_images/Medium4.avif" />
+<p>Comparing the Linux kernel’s VirtIO framework to Qemu’s in figure 3, we can clearly see the differences in their organization. However, we can also see similarities in their VRing structures (desc, avail, used), thanks to the VirtIO spec.</p>
+<p>For now it’s not important to understand how each struct’s field contributes to VirtQueue and VRing operations. The takeaway here is to know that VirtQueues and VRings are two different data structures and that a VirtQueue’s organization will vary depending on the operating system and whether we’re talking about userland or kernel VirtIO framework.</p>
+</section>
+<section id="vrings">
+<h3><a class="toc-backref" href="#id11" role="doc-backlink">VRings</a><a class="headerlink" href="#vrings" title="Permalink to this heading">¶</a></h3>
+<p>As we just mentioned, VRings are the main feature of VirtQueues and are the core data structures that hold the actual data being transferred. The reason they’re referred to as “rings” is because it’s essentially an array that wraps back around to the beginning of itself once the last entry was written to. These VRings are now starting to be referred to as “areas”, but since Qemu still uses the VRing term in its source code we’ll stick with that name here.</p>
+<p>Each VirtQueue can have up to, and usually does, three types of VRings (or areas):</p>
+<ul class="simple">
+<li><p>Descriptor ring (descriptor area)</p></li>
+<li><p>Available ring (driver area)</p></li>
+<li><p>Used ring (device area)</p></li>
+</ul>
+</section>
+<section id="descriptor-ring-descriptor-area">
+<h3><a class="toc-backref" href="#id12" role="doc-backlink">Descriptor Ring (Descriptor Area)</a><a class="headerlink" href="#descriptor-ring-descriptor-area" title="Permalink to this heading">¶</a></h3>
+<p>The descriptor ring (or descriptor table, descriptor area) is essentially a circular array of descriptors, where a descriptor is a data structure that describes a data buffer. A descriptor holds the following info about its data buffer:</p>
+<ul class="simple">
+<li><p>addr: guest-physical address</p></li>
+<li><p>len: length of the data buffer</p></li>
+<li><p>flags: flags (NEXT, WRITE, INDIRECT)</p></li>
+<li><p>next: index (in desc. ring) of next chained descriptor</p></li>
+</ul>
+<p>Flags inform the device or driver (a) is there more related data in the next descriptor (NEXT), (b) is this buffer write-only (device-writable) (WRITE), and (c) does the buffer contain an indirect descriptor table (INDIRECT)? We won’t talk about indirect descriptor tables here for the sake of simplicity.</p>
+<p>With regards to the NEXT flag, this is set when data in the current descriptor’s buffer continues into the “next” descriptor’s buffer. When one or more descriptors are linked together in this way, this is known as “descriptor chaining”. The next field refers to the index (in the descriptor ring) of the next chained descriptor. One thing worth noting about descriptor chains is that they can consist of both write-only and read-only descriptors.</p>
+<p>Lastly, only the driver can add (write) descriptors to the descriptor ring and a device can only write to a device-writable buffer if the descriptor’s flag says the buffer is writable. A buffer can either be write-only or read-only, but never both.</p>
+<img alt="../../_images/Medium5.avif" src="../../_images/Medium5.avif" />
+<p>n figure 5 above we can see a descriptor ring with four descriptor entries, two of which are chained together. The first descriptor entry at index [0] tells us that the data buffer is at the GPA (guest-physical address) of 0x600, it’s data buffer is 0x100 bytes in length, and it’s flagged as device-writable (W). We know this entry isn’t the head of a descriptor chain because of no next (N) flag and the next field is set to 0.</p>
+<p>The second descriptor entry ([1]) tells us that its data buffer is at GPA 0x810, with a data buffer length of 0x200 bytes, and flagged as device-writable and next. We know this descriptor is the head of a descriptor chain due to the next flag being raised. The next field tells us that the next descriptor in this chain is at descriptor ring index [2].</p>
+<p>The third descriptor entry’s ([2]) data buffer continues at GPA 0xA10 for another 0x200 bytes, and the buffer is also device-writable. The descriptor chain ends here as there isn’t a next flag raised.</p>
+<p>Finally, the fourth descriptor entry ([3]) tells us that its data buffer is at GPA 0x525, with a data buffer length of 0x50 bytes, and has no flags (device read-only, no descriptor chain).</p>
+<p>Note that in the descriptor ring, a buffer’s GPA and length must not overlap another entry’s memory range and that the GPA to the start of the next buffer doesn’t necessarily have to be higher than the previous one (e.g. descriptor entry [3]).</p>
+</section>
+<section id="available-ring-driver-area">
+<h3><a class="toc-backref" href="#id13" role="doc-backlink">Available Ring (Driver Area)</a><a class="headerlink" href="#available-ring-driver-area" title="Permalink to this heading">¶</a></h3>
+<p>The available ring (or avail ring, driver area) is a circular array of references to available descriptors in the descriptor ring. In other words, each entry in the available ring points to a descriptor (or the head of a descriptor chain) in the descriptor ring.</p>
+<p>Including the available ring array, the available ring also has the following fields:</p>
+<ul class="simple">
+<li><p>flags: configuration flags</p></li>
+<li><p>idx: index of the next available avail ring entry</p></li>
+<li><p>ring[]: the actual available ring array</p></li>
+</ul>
+<p>The flags field represents the configuration of the available ring and some of its operations. The index field represents the next available entry in the available ring where the driver would put the next reference to a descriptor (or head of a descriptor chain). Lastly, the ring field represents the actual available ring array where descriptor ring references are stored by the driver.</p>
+<p>Only the driver may configure and add an entry to the available ring while the corresponding device can only read from it. Initially, before the driver adds its first entry to the available ring, the available ring, with no flags, would look something like Figure 6 below:</p>
+<img alt="../../_images/Medium6.avif" src="../../_images/Medium6.avif" />
+<p>In figure 6 we can see an available ring with no entries and no flags set. The index (idx) is 0 since the next available entry of the available ring’s array is ring[0].</p>
+<p>Now, using figure 5 as our descriptor ring, let’s say the driver adds (or makes available) the first descriptor entry on the descriptor ring. The available ring would then look like figure 7 below:</p>
+<img alt="../../_images/Medium7.avif" src="../../_images/Medium7.avif" />
+<p>Here we can see that the driver made the first descriptor entry available to the device by adding the index of the descriptor table to the first available entry in the available ring (ring[0]). We can also see that idx is now 1 as ring[1] is now the next available entry on the ring. In this state, only the first entry of the descriptor ring is readable by the device and has no access to the other descriptors.</p>
+<p>Now lets say the driver adds the next descriptor entry to its available ring. Note that the next descriptor entry is the head of a descriptor chain. The available ring would then look like figure 8:</p>
+<img alt="../../_images/Medium8.avif" src="../../_images/Medium8.avif" />
+<p>Here we see the driver made the second and third descriptor entries available (chained descriptors). Now ring[1] points to the head of a descriptor chain, giving the device access to all of its chained descriptors. idx is set to 2 since ring[2] is now the next available entry on the available ring.</p>
+<p>Finally, say the driver adds the next descriptor entry to the available ring. Now the available ring looks like figure 9 below:</p>
+<img alt="../../_images/Medium9.avif" src="../../_images/Medium9.avif" />
+<p>Here we see the driver has made the fourth descriptor entry available to the device by adding its descriptor ring’s index to the next available entry on the available ring (ring[2]). Note that in ring[2] the descriptor ring’s index is 3. This was because ring[1] includes both descriptor ring indices 1 &amp; 2 (chained). Lastly, the available ring’s idx is now 3, since the next available entry on the available ring is ring[3].</p>
+<p>In summary, the driver is the only one who can add descriptor entries and available ring entries to the descriptor and available rings respectively. The device, however, cannot access this data until the driver adds the corresponding descriptor ring index into the available ring.</p>
+</section>
+<section id="used-ring-device-area">
+<h3><a class="toc-backref" href="#id14" role="doc-backlink">Used Ring (Device Area)</a><a class="headerlink" href="#used-ring-device-area" title="Permalink to this heading">¶</a></h3>
+<p>The used ring (or device area) is similar to the available ring except that it’s a circular array of references to used descriptor entries on the descriptor ring (i.e. the device wrote to or read a descriptor’s data buffer).</p>
+<p>The following fields make up the used ring:</p>
+<ul class="simple">
+<li><p>flags: configuration flags</p></li>
+<li><p>idx: index of next available used ring entry</p></li>
+<li><p>ring[]: the actual used ring array (of data pair structs)</p>
+<ul>
+<li><p>id: index of descriptor ring this element refers to</p></li>
+<li><p>len: length of data written to descriptor(s) buffer(s)</p></li>
+</ul>
+</li>
+</ul>
+<p>Unlike the available ring array, each entry on the used ring are pairs of data (represented as a “used element” structure) that describe (1) the index (id) of a descriptor (or head of chained descriptors) in the descriptor ring that references used (read or written to) buffer(s) and (2) the total written length (len) into a descriptor’s buffer (or the total written length of all buffers in a descriptor chain).</p>
+<p>Similar to the available ring, the used ring also makes use of the flags and idx fields. The index field is the same as the index field for the available ring except, for the used ring, this represents the next available entry in the used ring array.</p>
+<p>Opposite to the available ring, only the device can configure and add entries to the used ring while the corresponding driver can only read from it.</p>
+<p>Initially, before the device starts processing data from the available ring, the used ring (with no flags) would look like figure 10 below:</p>
+<img alt="../../_images/Medium10.avif" src="../../_images/Medium10.avif" />
+<p>Here we see an empty used ring with the next available used ring index (idx) set to 0 for ring[0], nothing too special here.</p>
+<p>Now let’s see what happens when the device finishes processing the first available ring entry and adds an entry to its used ring (using figure 10 above). Recall that the first descriptor’s data buffer was marked as device-writable, so let’s say the device wrote 0x50 bytes to the descrptor’s device-writable buffer. The resulting used ring would look like the following:</p>
+<img alt="../../_images/Medium11.avif" src="../../_images/Medium11.avif" />
+<p>In figure 11 above we can see the used ring entry’s data pair present: 0 | 0x50. 0 (id) represents the index on the descriptor ring where the device used (in this case, wrote to) the descriptor’s data buffer and 0x50 (len) is the total number of bytes written into the descriptor’s data buffer. Lastly, the used ring’s idx was set to 1 as that is now the next available entry on the used ring.</p>
+<p>Let’s see how the next entry on the used ring looks after the device processes the second available ring entry. Recall that the second entry of the available ring points to a descriptor chain where both descriptors are device-writable. Let’s also say that the device wrote 0x200 bytes in the first descriptor’s data buffer and 0x150 in the second descriptor’s data buffer. The resulting used ring is shown below in figure 12:</p>
+<img alt="../../_images/Medium12.avif" src="../../_images/Medium12.avif" />
+<p>Here we can see how a used ring entry would look like given a descriptor chain with multiple data buffers written to. The index of a used ring entry always points either to a single descriptor or a head of a descriptor chain. In this case used ring[1] points to the head of the descriptor chain at descriptor ring index 1.</p>
+<p>The length in the used ring entry for a descriptor chain represents the total number of bytes written into each of the chained descriptor’s data buffers. Since the device wrote 0x200 bytes into the first chained descriptor’s data buffer and 0x150 bytes into the second chained descriptor’s data buffer, this would mean that the total written length across all of the chained descriptors would be 0x350.</p>
+<p>Finally, let’s have the device process the third entry of the available ring and add its corresponding used ring entry. Note that the third entry of the available ring points to a descriptor with no flags, meaning it’s a single descriptor and its data buffer is read-only for the device. The used ring would look like figure 13 below:</p>
+<img alt="../../_images/Medium13.avif" src="../../_images/Medium13.avif" />
+<p>Here we can see how a used ring entry would look like given a single read-only descriptor. What’s worth noting here is the length 0x0 in the used ring entry’s data pair. It has a value of zero here simply because nothing was written to this buffer (being read-only for the device). Lastly, as expected, the index in the used ring entry is 3 here since index 2 of the descriptor ring was part of a descriptor chain.</p>
+</section>
+<section id="vrings-summary">
+<h3><a class="toc-backref" href="#id15" role="doc-backlink">VRings Summary</a><a class="headerlink" href="#vrings-summary" title="Permalink to this heading">¶</a></h3>
+<p>In this section we covered the descriptor, available, and used rings with an example descriptor ring data set. It should be emphasized here that the examples above are very simple and don’t show the role of notifications nor does it show other VRing configurations (e.g. indirect descriptors, used buffer notification suppression, packed VirtQueues, etc.). However, it does show the general purpose behind each of the three rings and how they work together with devices and drivers.</p>
+<p>In summary, VRings are a way in which data is exchanged between a guest and its host. In the above examples we saw how the VirtIO driver makes requests to the device in the form of descriptor references on the available ring, the device accessing the requests via the available ring, and the device making the processed request available to the driver via the used ring.</p>
+<p>In the next section we’ll look at an example VirtIO device in Qemu to see how it uses its VirtQueues and how its VirtQueues use its VRings.</p>
+</section>
+<section id="honorable-mention-vhost">
+<h3><a class="toc-backref" href="#id16" role="doc-backlink">Honorable Mention: VHost</a><a class="headerlink" href="#honorable-mention-vhost" title="Permalink to this heading">¶</a></h3>
+<p>In this article we’re not going to go in depth about VHost but anyone starting to learn about VirtIO has likely already seen the “VHost” term being mentioned. Thus it’s worth briefly describing here for those who’re still unfamiliar with it.</p>
+<p>Unlike VirtIO drivers &amp; devices, whose data plane exists in the Qemu process, VHost can offload the data plane to either another host user process (VHost-User) or to the host’s kernel (VHost, as a kernel module). The motivation behind doing this is performance. That is, in a pure VirtIO solution like figure 2, everytime the driver requests the host to do some processing on its physical hardware, a context switch occurs. These context switches are expensive operations that add a significant amount of latency between requests. By offloading the data plane to another host user process or to its kernel, we essentially bypass the Qemu process, thus increasing performance by reducing latency.</p>
+<p>However, while it does increase performance it also adds a level of security concern given the fact that the data path is now going directly into the host’s kernel.</p>
+<p>Figure 14 below shows the general layout of an example VHost (VHost-SCSI):</p>
+<img alt="../../_images/Medium14.avif" src="../../_images/Medium14.avif" />
+<p>If we compare the general framework of VHost in figure 14 to the pure VirtIO framework in figure 2, we see a few key differences:</p>
+<ul class="simple">
+<li><p>The transport layer (or data plane) is now from the guest’s kernel to the host’s kernel</p></li>
+<li><p>A VirtIO device model is present, but its capabilities are reduced to handling control plane tasks</p></li>
+<li><p>A VHost-SCSI kernel module exists in the host’s kernel</p></li>
+</ul>
+<p>This is only a generalization of the organization between a VHost configuration and a pure VirtIO configuration. There’s more that can be said about VHost &amp; VHost-User and the capabilities they bring. However, for this article, we will focus only on a pure VirtIO implementation similar to figure 2.</p>
+</section>
+</section>
+<section id="virtio-in-qemu">
+<h2><a class="toc-backref" href="#id17" role="doc-backlink">VirtIO in Qemu</a><a class="headerlink" href="#virtio-in-qemu" title="Permalink to this heading">¶</a></h2>
+<p>In this section we’re going to take a look at an example VirtIO device in Qemu and see how one of its VirtQueues works. The goal here is to see not only how a VirtIO device roughly works, but to also see the role of VirtQueues and VRings in a standard VirtIO device. For our example device, let’s take a look at virtio-SCSI using a split VirtQueue configuration and the VIRTIO_VRING_F_EVENT_IDX feature bit negotiated.</p>
+<section id="virtio-scsi">
+<h3><a class="toc-backref" href="#id18" role="doc-backlink">Virtio-SCSI</a><a class="headerlink" href="#virtio-scsi" title="Permalink to this heading">¶</a></h3>
+<p>The virtio-SCSI device is used to group virtual logical units (e.g. hard disk drives) together and enables communication to them via the SCSI protocol. For our example, let’s assume we’re only using the device to connect to a hard disk drive. Qemu invocation parameters for this device (using a HDD) might include something like below:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">-device virtio-scsi-pci</span>
+<span class="go">-device scsi-hd,drive=hd0,bootindex=0</span>
+<span class="go">-drive file=/home/qemu-imgs/test.img,if=none,id=hd0</span>
+</pre></div>
+</div>
+<p>In the Qemu source code, if we take a look at hw/scsi/virtio-scsi.c, we can see various functions related to the device’s operations. Let’s take a look at how this device is set up, specifically its VirtQueues.</p>
+<p>In Qemu, the term “realize” is used to represent the initial setup and configuration of a VirtIO device (and “unrealize” to tear down a device). In the function virtio_scsi_common_realize(), we can see three different types of VirtQueues being set up for the virtio-SCSI device:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// In hw/scsi/virtio-scsi.c</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">virtio_scsi_common_realize</span><span class="p">(</span><span class="n">DeviceState</span><span class="w"> </span><span class="o">*</span><span class="n">dev</span><span class="p">,</span><span class="w"></span>
+<span class="w">                                </span><span class="n">VirtIOHandleOutput</span><span class="w"> </span><span class="n">ctrl</span><span class="p">,</span><span class="w"></span>
+<span class="w">                                </span><span class="n">VirtIOHandleOutput</span><span class="w"> </span><span class="n">evt</span><span class="p">,</span><span class="w"></span>
+<span class="w">                                </span><span class="n">VirtIOHandleOutput</span><span class="w"> </span><span class="n">cmd</span><span class="p">,</span><span class="w"></span>
+<span class="w">                                </span><span class="n">Error</span><span class="w"> </span><span class="o">**</span><span class="n">errp</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="p">...</span><span class="w"></span>
+<span class="w">    </span><span class="n">s</span><span class="o">-&gt;</span><span class="n">ctrl_vq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">virtio_add_queue</span><span class="p">(</span><span class="n">vdev</span><span class="p">,</span><span class="w"> </span><span class="n">s</span><span class="o">-&gt;</span><span class="n">conf</span><span class="p">.</span><span class="n">virtqueue_size</span><span class="p">,</span><span class="w"> </span><span class="n">ctrl</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">s</span><span class="o">-&gt;</span><span class="n">event_vq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">virtio_add_queue</span><span class="p">(</span><span class="n">vdev</span><span class="p">,</span><span class="w"> </span><span class="n">s</span><span class="o">-&gt;</span><span class="n">conf</span><span class="p">.</span><span class="n">virtqueue_size</span><span class="p">,</span><span class="w"> </span><span class="n">evt</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">s</span><span class="o">-&gt;</span><span class="n">conf</span><span class="p">.</span><span class="n">num_queues</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">s</span><span class="o">-&gt;</span><span class="n">cmd_vqs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">virtio_add_queue</span><span class="p">(</span><span class="n">vdev</span><span class="p">,</span><span class="w"> </span><span class="n">s</span><span class="o">-&gt;</span><span class="n">conf</span><span class="p">.</span><span class="n">virtqueue_size</span><span class="p">,</span><span class="w"> </span><span class="n">cmd</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Most VirtIO devices will have multiple VirtQueues, with each VirtQueue having their own unique functionality. In the virtio-SCSI case, we have a control VirtQueue (ctrl_vq), an event VirtQueue (event_vq), and one or more command (or request) VirtQueues (cmd_vqs).</p>
+<p>The control VirtQueue is used for task management functions (TMFs) such as starting up, shutting down, resetting, etc. the virtio-SCSI device. It is also used for subscribing to and querying asynchronous notifications.</p>
+<p>The event VirtQueue is used for reporting information (events) from the host on logical units attached to virtio-SCSI. These events include transport events (e.g device resets, rescans, hot-plug, hot-unplug, etc.), asynchronous notifications, and logical unit number (LUN) parameter changes.</p>
+<p>Lastly, the command or request VirtQueues are used for typical SCSI transport commands (e.g. reading and writing to and from files). In this section we’ll focus on the operations of the command VirtQueue as it’s more interesting and used more compared to the other two.</p>
+</section>
+<section id="the-command-virtqueue">
+<h3><a class="toc-backref" href="#id19" role="doc-backlink">The Command VirtQueue</a><a class="headerlink" href="#the-command-virtqueue" title="Permalink to this heading">¶</a></h3>
+<p>The command (or request) VirtQueue is the VirtQueue we’ll be focusing on in this section. It is the VirtQueue that is used to transfer information regarding typical SCSI transport commands like reading and writing to files. Virtio-SCSI can have one or more of these command VirtQueues.</p>
+<p>As mentioned before, VirtQueues structures in Qemu have a callback function field for handling output called VirtIOHandleOutput handle_output. In the case of virtio-SCSI’s command VirtQueue, this callback function field will point to virtio-SCSI’s command VirtQueue handler function virtio_scsi_handle_cmd():</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// In hw/scsi/virtio-scsi.c</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">virtio_scsi_device_realize</span><span class="p">(</span><span class="n">DeviceState</span><span class="w"> </span><span class="o">*</span><span class="n">dev</span><span class="p">,</span><span class="w"></span>
+<span class="w">                                       </span><span class="n">Error</span><span class="w"> </span><span class="o">**</span><span class="n">errp</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">VirtIODevice</span><span class="w"> </span><span class="o">*</span><span class="n">vdev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">VIRTIO_DEVICE</span><span class="p">(</span><span class="n">dev</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">VirtIOSCSI</span><span class="w"> </span><span class="o">*</span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">VIRTIO_SCSI</span><span class="p">(</span><span class="n">dev</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">Error</span><span class="w"> </span><span class="o">*</span><span class="n">err</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">virtio_scsi_common_realize</span><span class="p">(</span><span class="n">dev</span><span class="p">,</span><span class="w"></span>
+<span class="w">                               </span><span class="n">virtio_scsi_handle_ctrl</span><span class="p">,</span><span class="w"></span>
+<span class="w">                               </span><span class="n">virtio_scsi_handle_event</span><span class="p">,</span><span class="w"></span>
+<span class="w">                               </span><span class="n">virtio_scsi_handle_cmd</span><span class="p">,</span><span class="w"></span>
+<span class="w">                               </span><span class="o">&amp;</span><span class="n">err</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">...</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+<span class="c1">// In hw/virtio/virtio.c</span>
+<span class="n">VirtQueue</span><span class="w"> </span><span class="o">*</span><span class="nf">virtio_add_queue</span><span class="p">(</span><span class="n">VirtIODevice</span><span class="w"> </span><span class="o">*</span><span class="n">vdev</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">queue_size</span><span class="p">,</span><span class="w"></span>
+<span class="w">                            </span><span class="n">VirtIOHandleOutput</span><span class="w"> </span><span class="n">handle_output</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="p">...</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">vq</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">vring</span><span class="p">.</span><span class="n">num</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">queue_size</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">vq</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">vring</span><span class="p">.</span><span class="n">num_default</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">queue_size</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">vq</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">vring</span><span class="p">.</span><span class="n">align</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">VIRTIO_PCI_VRING_ALIGN</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">vq</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">handle_output</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">handle_output</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">vq</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">used_elems</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">g_malloc0</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">VirtQueueElement</span><span class="p">)</span><span class="w"></span>
+<span class="w">                                       </span><span class="o">*</span><span class="w"> </span><span class="n">queue_size</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="n">vdev</span><span class="o">-&gt;</span><span class="n">vq</span><span class="p">[</span><span class="n">i</span><span class="p">];</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>The way this output handler function of a VirtQueue is called depends on the VirtIO device and that VirtQueue’s role for the device. In the case of virtio-SCSI’s command VirtQueue, it’s output handler function is called when a notification is sent from the virtio-SCSI driver to Qemu, telling Qemu to notify its device counterpart that there’s SCSI command data ready for processing on it’s available VRing.</p>
+<p>Recall figure 2 and that we’re looking at Qemu’s source code, more specifically VirtIO device code. Also recall from the VRings section earlier that VirtIO devices don’t start getting involved in VRing operations until its corresponding VirtIO driver has (1) added new descriptors to the descriptor ring, (2) made those descriptors available to the device by adding descriptor reference entries to the available ring, and (3) notified its device that the available ring is ready for processing.</p>
+<p>In other words, when execution reaches the virtio_scsi_handle_cmd() function, it means that the virtio-SCSI device has received a notification from its driver and is beginning to start processing data from its command VirtQueue’s available ring. You can think of the current state of the available and descriptor rings being similar to figure 9.</p>
+<p>The virtio_scsi_handle_cmd() function is more or less a wrapper for the virtio_scsi_handle_cmd_vq() function below:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// In hw/scsi/virtio-scsi.c</span>
+<span class="kt">bool</span><span class="w"> </span><span class="nf">virtio_scsi_handle_cmd_vq</span><span class="p">(</span><span class="n">VirtIOSCSI</span><span class="w"> </span><span class="o">*</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">VirtQueue</span><span class="w"> </span><span class="o">*</span><span class="n">vq</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">VirtIOSCSIReq</span><span class="w"> </span><span class="o">*</span><span class="n">req</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">next</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">suppress_notifications</span><span class="w"> </span><span class="o">=</span><span class="w"></span>
+<span class="w">            </span><span class="n">virtio_queue_get_notification</span><span class="p">(</span><span class="n">vq</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">progress</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">QTAILQ_HEAD</span><span class="p">(,</span><span class="w"> </span><span class="n">VirtIOSCSIReq</span><span class="p">)</span><span class="w"> </span><span class="n">reqs</span><span class="w"> </span><span class="o">=</span><span class="w"></span>
+<span class="w">            </span><span class="n">QTAILQ_HEAD_INITIALIZER</span><span class="p">(</span><span class="n">reqs</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">do</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">suppress_notifications</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">virtio_queue_set_notification</span><span class="p">(</span><span class="n">vq</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="k">while</span><span class="w"> </span><span class="p">((</span><span class="n">req</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">virtio_scsi_pop_req</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">vq</span><span class="p">)))</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">progress</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">virtio_scsi_handle_cmd_req_prepare</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">req</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">ret</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="n">QTAILQ_INSERT_TAIL</span><span class="p">(</span><span class="o">&amp;</span><span class="n">reqs</span><span class="p">,</span><span class="w"> </span><span class="n">req</span><span class="p">,</span><span class="w"> </span><span class="n">next</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ret</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="o">-</span><span class="n">EINVAL</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="cm">/* The device is broken and shouldn&#39;t</span>
+<span class="cm">                   process any request */</span><span class="w"></span>
+<span class="w">                </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">QTAILQ_EMPTY</span><span class="p">(</span><span class="o">&amp;</span><span class="n">reqs</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                    </span><span class="p">...</span><span class="w"></span>
+<span class="w">                </span><span class="p">}</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">suppress_notifications</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">virtio_queue_set_notification</span><span class="p">(</span><span class="n">vq</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">ret</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="o">-</span><span class="n">EINVAL</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">virtio_queue_empty</span><span class="p">(</span><span class="n">vq</span><span class="p">));</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">QTAILQ_FOREACH_SAFE</span><span class="p">(</span><span class="n">req</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">reqs</span><span class="p">,</span><span class="w"> </span><span class="n">next</span><span class="p">,</span><span class="w"> </span><span class="n">next</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">virtio_scsi_handle_cmd_req_submit</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">req</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">progress</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>This function here tells us how virtio-SCSI’s command VirtQueue will handle and process the data on its available ring.</p>
+<p>For the following scenario, recall that the VIRTIO_VRING_F_EVENT_IDX feature bit was negotiated. For the device, this means that it will only notify its driver if the idx in the used ring is equal to the idx in the available ring.</p>
+<p>In other words, if the driver makes available 20 entries on the available ring from indices 0 to 19, the available ring’s idx will be 20 after adding the last descriptor reference to available ring[19]. After the device processes the last available ring entry and puts its corresponding used ring entry on used ring[19], the used ring’s idx will also be 20. When this happens, almost immediately after adding the last used ring entry, the device must then notify its driver.</p>
+<p>Before execution begins in virtio_scsi_handle_cmd_vq(), let’s say its command VirtQueue’s descriptor and available ring look like figure 15 below:</p>
+<img alt="../../_images/Medium15.avif" src="../../_images/Medium15.avif" />
+<p>Looking back at virtio_scsi_handle_cmd_vq(), let’s walk through this function to see how the virtio-SCSI device handles the data that it’s just been notified of.</p>
+<p>First off, at the beginning of the function, a queue data structure of virtio-SCSI requests (VirtIOSCSIReq), called reqs, is initialized :</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">QTAILQ_HEAD</span><span class="p">(,</span><span class="w"> </span><span class="n">VirtIOSCSIReq</span><span class="p">)</span><span class="w"> </span><span class="n">reqs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">QTAILQ_HEAD_INITIALIZER</span><span class="p">(</span><span class="n">reqs</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<p>For the virtio-SCSI’s command VirtQueue, each entry on its available ring is made into a VirtIOSCSIReq object that is appended at the end of the reqs queue. We can see this is the case looking at the do-while loop that comes right after it:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// virtio_scsi_handle_cmd_vq</span>
+<span class="k">do</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="cm">/* Turn off notifications if we&#39;re suppressing them */</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">suppress_notifications</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">virtio_queue_set_notification</span><span class="p">(</span><span class="n">vq</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">((</span><span class="n">req</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">virtio_scsi_pop_req</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">vq</span><span class="p">)))</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">progress</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">virtio_scsi_handle_cmd_req_prepare</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">req</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">ret</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">QTAILQ_INSERT_TAIL</span><span class="p">(</span><span class="o">&amp;</span><span class="n">reqs</span><span class="p">,</span><span class="w"> </span><span class="n">req</span><span class="p">,</span><span class="w"> </span><span class="n">next</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ret</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="o">-</span><span class="n">EINVAL</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="cm">/* The device is broken and shouldn&#39;t</span>
+<span class="cm">           process any request */</span><span class="w"></span>
+<span class="w">            </span><span class="p">...</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="cm">/* Turn on notifications if we&#39;ve been suppressing them */</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">suppress_notifications</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">virtio_queue_set_notification</span><span class="p">(</span><span class="n">vq</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"> </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">ret</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="o">-</span><span class="n">EINVAL</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">virtio_queue_empty</span><span class="p">(</span><span class="n">vq</span><span class="p">));</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Before we start reading the available ring, we first suppress any notifications being sent to the driver by the device (VIRTIO_VRING_F_EVENT_IDX). Then we enter the second while loop while ((req = virtio_scsi_pop_req(s, vq))). In this while loop, we’re going through the available ring and for each entry we put its data into a VirtIOSCSIReq object. Each VirtIOSCSIReq object is then appended to the end of the reqs queue.</p>
+<p>By the end of the while loop we would have something like figure 16 below, where Req1 refers to VirtIOSCSIReq object created from reading available ring entry ring[0], Req2 is the VirtIOSCSIReq object from reading available ring entry ring[1], and similarly Req3 from the available ring entry ring[2]:</p>
+<img alt="../../_images/Medium16.avif" src="../../_images/Medium16.avif" />
+<p>After we’ve read all we can from the available ring we then renable notifications so that the device can notify the driver of used data once the device has processed the requests and put them on the used ring. Note that this only enables notifications, not send them. In our scenario (with VIRTIO_VRING_F_EVENT_IDX), this just sets us up to notify our device once we’ve put all of our processed requests’ data onto the used ring.</p>
+<p>Before we actually go and submit our requests, you’ll notice that we’re still in the do-while loop that terminates if the device broke or if we haven’t read all the data from the available ring. This is here in case more data was added to the available ring right after we read the last entry from it.</p>
+<p>Now that the device has read all it can from the available ring and converted each entry into its own VirtIOSCSIReq object, we then loop through the reqs queue and submit each request individually for processing by the actual physical SCSI device:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">QTAILQ_FOREACH_SAFE</span><span class="p">(</span><span class="n">req</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">reqs</span><span class="p">,</span><span class="w"> </span><span class="n">next</span><span class="p">,</span><span class="w"> </span><span class="n">next</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="n">virtio_scsi_handle_cmd_req_submit</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">req</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Once a request has been fulfilled by the host’s SCSI device, execution then goes to virtio_scsi_command_complete(), then virtio_scsi_complete_cmd_req(), and then finally virtio_scsi_complete_req(). The more interesting of the three functions is virtio_scsi_complete_req(), as this is the function where the device puts used data onto the used ring.</p>
+<p>Let’s take a look at it:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// In hw/scsi/virtio-scsi.c</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">virtio_scsi_complete_req</span><span class="p">(</span><span class="n">VirtIOSCSIReq</span><span class="w"> </span><span class="o">*</span><span class="n">req</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">VirtIOSCSI</span><span class="w"> </span><span class="o">*</span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">req</span><span class="o">-&gt;</span><span class="n">dev</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">VirtQueue</span><span class="w"> </span><span class="o">*</span><span class="n">vq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">req</span><span class="o">-&gt;</span><span class="n">vq</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">VirtIODevice</span><span class="w"> </span><span class="o">*</span><span class="n">vdev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">VIRTIO_DEVICE</span><span class="p">(</span><span class="n">s</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">qemu_iovec_from_buf</span><span class="p">(</span><span class="o">&amp;</span><span class="n">req</span><span class="o">-&gt;</span><span class="n">resp_iov</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">req</span><span class="o">-&gt;</span><span class="n">resp</span><span class="p">,</span><span class="w"></span>
+<span class="w">                        </span><span class="n">req</span><span class="o">-&gt;</span><span class="n">resp_size</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="cm">/* Push used request data onto used ring */</span><span class="w"></span>
+<span class="w">    </span><span class="n">virtqueue_push</span><span class="p">(</span><span class="n">vq</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">req</span><span class="o">-&gt;</span><span class="n">elem</span><span class="p">,</span><span class="w"></span>
+<span class="w">                   </span><span class="n">req</span><span class="o">-&gt;</span><span class="n">qsgl</span><span class="p">.</span><span class="n">size</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">req</span><span class="o">-&gt;</span><span class="n">resp_iov</span><span class="p">.</span><span class="n">size</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="cm">/* Determine if we need to notify the driver */</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">s</span><span class="o">-&gt;</span><span class="n">dataplane_started</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">s</span><span class="o">-&gt;</span><span class="n">dataplane_fenced</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">virtio_notify_irqfd</span><span class="p">(</span><span class="n">vdev</span><span class="p">,</span><span class="w"> </span><span class="n">vq</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">virtio_notify</span><span class="p">(</span><span class="n">vdev</span><span class="p">,</span><span class="w"> </span><span class="n">vq</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">req</span><span class="o">-&gt;</span><span class="n">sreq</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">req</span><span class="o">-&gt;</span><span class="n">sreq</span><span class="o">-&gt;</span><span class="n">hba_private</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="n">scsi_req_unref</span><span class="p">(</span><span class="n">req</span><span class="o">-&gt;</span><span class="n">sreq</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="n">virtio_scsi_free_req</span><span class="p">(</span><span class="n">req</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>To complete a request, the virtio-SCSI device must make the processed data accessible to the driver by putting it on the used ring (virtqueue_push()). Remember, the actual data has already been written to a descriptor’s buffer by this point (or to multiple buffers from chained, writable descriptors). All we’re doing now is telling the driver where to look in the descriptor ring and how much we wrote to its data buffer, if anything.</p>
+<p>After adding an entry to the used ring for Req1, our command VirtQueue’s VRings would look like figure 17 below:</p>
+<img alt="../../_images/Medium17.avif" src="../../_images/Medium17.avif" />
+<p>The first request referred to a device read-only buffer so the descriptor index is 0 and the written length is 0. idx is also incremented to 1. After virtqueue_push() we then check to see if we should notify the driver.</p>
+<p>Recall that our device is using the VIRTIO_VRING_F_EVENT_IDX feature. In our example, the device would notify the driver once our used ring idx is 3. Thus, for this request, no notification is sent to the driver.</p>
+<p>The next two requests refer to device-writable buffers. For consistency, let’s say the written length of Req2 is 0x200 and for Req3 it’s 0x500. Immediately after returning from virtqueue_push() for Req3, the used ring would look like figure 18 below:</p>
+<img alt="../../_images/Medium18.avif" src="../../_images/Medium18.avif" />
+<p>Now the device will notify the driver of the contents of the used ring since the condition for the device’s feature VIRTIO_VRING_F_EVENT_IDX was met. That is, the used ring’s idx is equal to the available ring’s idx. Once the driver has been notified, the driver goes into the used ring to find the processed data on the descriptor ring and does whatever it wanted to with the data.</p>
+<p>After notifying the driver and doing some cleanup work, the job of the virtio-SCSI device has been completed and goes back to waiting for the driver to notify it of new data to process on its available ring.</p>
+</section>
+</section>
+<section id="virtio-summary">
+<h2><a class="toc-backref" href="#id20" role="doc-backlink">VirtIO Summary</a><a class="headerlink" href="#virtio-summary" title="Permalink to this heading">¶</a></h2>
+<p>In this article we went over what VirtIO is, why we should care, its alternatives (e.g. emulation), and key concepts such as devices &amp; drivers, VirtQueues, and VRings. We then looked at a standard VirtIO device (in Qemu) and followed the execution of one of its VirtQueues to extrapolate the role of VirtQueues and VRings in a VirtIO device.</p>
+<p>It should be noted that this article barely scratches the surface of VirtIO, as we’ve only covered the bare basics and used simple examples. In our examples we only assumed a split VirtQueue configuration and only used the VIRTIO_RING_F_EVENT_IDX feature bit. For example, we didn’t go into detail about notifications, VirtIO driver-side code (in kernel), or other features that modify the operations of VirtQueues and its VRings (e.g. “packed” VirtQueues, indirect descriptors, in-order descriptor use, SR-IOV, etc.).</p>
+<p>Regardless, this article should create a solid working knowledge of VirtIO such that learning about other VirtIO devices or concepts is much easier to pick up.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cplus/index.html">Cplus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Virtulization</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../qemu/index.html">Qemu</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Virtio</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="0001-pre.html">Virtio devices and drivers overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0001.html">Introduction to virtio-networking and vhost-net</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0002.html">Deep dive into Virtio-networking and vhost-net</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0003.html">How vhost-user came into being: Virtio-networking and DPDK</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0004.html">A journey to the vhost-users realm</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Introduction to VirtIO</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0006.html">Qemu: Virtio-net Envrionment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0007.html">Qemu: Virtio_net_pci</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0009.html">Qemu: Virtio_bus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0008.html">Qemu: Virtio_net Device</a></li>
+<li class="toctree-l3"><a class="reference internal" href="vhost-user.html">Vhost-user Protocol</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../00001.html">Install Ret Hat 7 server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00002.html">Qemu ifup script</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00003.html">Random Mac address</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00004.html">Assign tap to VM Client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00005.html">Open vSwitch with Libvirt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00006.html">EAL: No free hugepages reported in hugepages-2048kB</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00007.html">Failed to connect socket /var/run/openvswitch/centos1_eth0: Permission denied</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00008.html">Establish OVP reference envrionment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00009.html">libvirt: Specify the kernel and rootfs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00010.html">WRLinux with wayland and weston</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00011.html">Enable the support console for VM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00012.html">Start Qemu with monitor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00013.html">Creating images from ISO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00014.html">Create image from Wrlinux image</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Virtulization</a><ul>
+  <li><a href="index.html">Virtio</a><ul>
+      <li>Previous: <a href="0004.html" title="previous chapter">A journey to the vhost-users realm</a></li>
+      <li>Next: <a href="0006.html" title="next chapter">Qemu: Virtio-net Envrionment</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../../_sources/virt/virtio/0005.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

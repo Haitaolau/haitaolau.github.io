@@ -1,0 +1,19 @@
+
+.. _delete_the_few_chars_of_every_line:
+
+====================================================
+ How to delete the first few n chars of every line?
+====================================================
+
+
+
+Set the mark (C-X-SPC) at the beginning of the first line you want to prefix, move the cursor to last line to be prefixed, and type M-x kill-rectangle RET. 
+
+
+
+
+
+
+
+
+

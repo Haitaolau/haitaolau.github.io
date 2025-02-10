@@ -1,0 +1,22 @@
+================
+Find
+================
+
+
+find executable programes
+=========================
+
+.. code-block:: console
+   
+   find . -type f -executable
+
+get the iommu_group
+========================
+
+.. code-block:: console
+
+   find /sys/kernel/iommu_groups/ -type l
+
+
+
+

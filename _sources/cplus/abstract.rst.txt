@@ -1,0 +1,88 @@
+==========================
+Abstract Class
+==========================
+
+
+Defination
+--------------
+
+.. code-block:: 
+ 
+  class abstractClass {
+  public:
+      virtual void func() = 0;
+  };
+
+* 如果父类中有了纯虚函数，子类继承父类的时候，必须实现纯虚函数
+* 如果父类中有了纯虚函数，这个父类就无法实例话对象了，即抽象类无法实例化对象。
+
+.. code-block:: c 
+  
+   #include <iostream>
+   
+   using namespace std;
+   
+   class Test
+   {
+       int x;
+       public:
+       virtual void show() = 0;
+       int getX() { return x; }
+   };
+   
+   int main(void)
+   {
+       Test t;
+       return 0;
+   }
+
+Output
+
+.. code-block:: console
+
+   3.cpp: In function ‘int main()’:
+   3.cpp:15:10: error: cannot declare variable ‘t’ to be of abstract type ‘Test’
+      15 |     Test t;
+         |          ^
+   3.cpp:5:7: note:   because the following virtual functions are pure within ‘Test’:
+       5 | class Test
+         |       ^~~~
+   3.cpp:9:18: note:       ‘virtual void Test::show()’
+       9 |     virtual void show() = 0;
+         |                  ^~~~
+ 
+* If we do not override the pure virtual function in derived class, then derived class also becomes abstract class
+
+.. code-block:: c
+   
+   #include<iostream>
+   using namespace std;
+   class Base
+   {
+   public:
+       virtual void show() = 0;
+   };
+     
+   class Derived : public Base { };
+     
+   int main(void)
+   {
+     Derived d;
+     return 0;
+   }
+
+output
+
+.. code-block:: console
+
+   Compiler Error: cannot declare variable 'd' to be of abstract type 
+   'Derived'  because the following virtual functions are pure within
+   'Derived': virtual void Base::show() 
+
+* 如果类中有了纯虚函数，则这个类通常为抽象类
+
+在设计时，常常希望基类仅仅作为其派生类的一个接口。这就是
+
+说，仅想对基类进行向上类型转换，使用它的接口，而不希望用户实
+
+际地创建一个基类的对象。这个时候就会使用抽象类

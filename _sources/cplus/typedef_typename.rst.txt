@@ -1,0 +1,13 @@
+=======================
+typedef typename
+=======================
+
+
+
+.. code-block:: c
+
+   typedef typename __type_traits<_Tp>::has_trivial_destructor _Trivial_destructor;
+
+
+typedef 创建了类型别名: __type_traits<_Tp>::has_trivial_destructor 是类型,别名是 _Trivial_destructor 
+typename 告诉编译器__type_traits<_Tp>::has_trivial_destructor 是个类型不是一个成员

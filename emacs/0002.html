@@ -1,0 +1,180 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>How do I find the function definition? &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Complete Definition of beginning-of-buffer" href="0003.html" />
+    <link rel="prev" title="How do I insert &lt;some text&gt; at the beginning of every line?" href="0001.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="how-do-i-find-the-function-definition">
+<h1>How do I find the function definition?<a class="headerlink" href="#how-do-i-find-the-function-definition" title="Permalink to this heading">¶</a></h1>
+<section id="describe-function">
+<h2>describe-function<a class="headerlink" href="#describe-function" title="Permalink to this heading">¶</a></h2>
+<p>The ‘descirbe-function’ is bound to c-h f,</p>
+<p>Type C-h f and then type describe-function, you will get the whole The full documentation of describe-function.</p>
+<img alt="../_images/emacs_00002_01.png" src="../_images/emacs_00002_01.png" />
+<p>If you are interested, you can get the full documen-
+tation of any Emacs Lisp function at any time by typing C-h f and then the name
+of the function (and then RET). Similarly, you can get the full documentation for a
+variable by typing C-h v and then the name of the variable (and then RET).
+Also, describe-function will tell you the location of the function definition.</p>
+<section id="example">
+<h3>Example<a class="headerlink" href="#example" title="Permalink to this heading">¶</a></h3>
+<p>Typing the following commands:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">C-h f and typing mark-whole-buffer</span>
+<span class="go">or</span>
+<span class="go">M-x describe-function and then typing mark-whole-buffer</span>
+</pre></div>
+</div>
+<img alt="../_images/emacs_00002_02.png" src="../_images/emacs_00002_02.png" />
+<p>Put point into the name of the file that contains the function and press the RET
+key. In this case, RET means push-button rather than “return” or “enter”. Emacs
+will take you directly to the function definition</p>
+<img alt="../_images/emacs_00002_03.png" src="../_images/emacs_00002_03.png" />
+<img alt="../_images/emacs_00002_04.png" src="../_images/emacs_00002_04.png" />
+</section>
+</section>
+<section id="xref-find-definitions">
+<h2>xref-find-definitions<a class="headerlink" href="#xref-find-definitions" title="Permalink to this heading">¶</a></h2>
+<p>More generally, if you want to see a function in its original source file, you can use the xref-find-definitions function to jump to it. xref-find-definitions
+works with a wide variety of languages, not just Lisp, and C, and it works with
+non-programming text as well. For example, xref-find-definitions will jump to
+the various nodes in the Texinfo source file of this document (provided that you’ve run the etags utility to record all the nodes in the manuals that come with Emacs; see Section “Create Tags Table” in The GNU Emacs Manual).</p>
+<p>To use the xref-find-definitions command, type M-. (i.e., press the period
+key while holding down the META key, or else type the ESC key and then type the
+period key), and then, at the prompt, type in the name of the function whose
+source code you want to see, such as mark-whole-buffer, and then type RET. (If
+the command doesn’t prompt, invoke it with an argument: C-u M-.; see Section 3.4
+“Interactive Options”, page 31.) Emacs will switch buffers and display the source code for the function on your screen1 . To switch back to your current buffer, type M-, or C-x b RET. (On some keyboards, the META key is labeled ALT.)</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cplus/index.html">Cplus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Emacs</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="commands.html">Emacs Commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0007.html">Emacs Commands: Blank Lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0001.html">How do I insert &lt;some text&gt; at the beginning of every line?</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">How do I find the function definition?</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#describe-function">describe-function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#xref-find-definitions">xref-find-definitions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="0003.html">Complete Definition of beginning-of-buffer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0004.html">Complete Definition of mark-whole-buffer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0005.html">Fundamental Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0006.html">How to delete the first few n chars of every line?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0008.html">jumps to the location of the mark - and M-&lt; sets the mark before jumping</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Emacs</a><ul>
+      <li>Previous: <a href="0001.html" title="previous chapter">How do I insert &lt;some text&gt; at the beginning of every line?</a></li>
+      <li>Next: <a href="0003.html" title="next chapter">Complete Definition of beginning-of-buffer</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/emacs/0002.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

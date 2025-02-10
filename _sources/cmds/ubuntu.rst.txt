@@ -1,0 +1,184 @@
+============
+Ubuntu
+============
+
+
+How to find the package that provides a file
+=============================================
+
+1. apt-file 
+
+Install apt-file 
+
+.. code-block:: console 
+
+   apt-get install apt-file
+   apt-file update
+
+
+Example:
+
+.. code-block:: console 
+
+   root@218c9deecf36:/buildarea1# apt-file search makeinfo
+   emacs-common: /usr/share/emacs/26.3/lisp/textmodes/makeinfo.elc
+   emacs-el: /usr/share/emacs/26.3/lisp/textmodes/makeinfo.el.gz
+   manpages-ja: /usr/share/man/ja/man1/makeinfo.1.gz
+   manpages-zh: /usr/share/man/zh_CN/man1/makeinfo.1.gz
+   manpages-zh: /usr/share/man/zh_TW/man1/makeinfo.1.gz
+   octave-common: /usr/share/octave/5.2.0/m/help/__makeinfo__.m
+   octave-doc: /usr/share/doc/octave/octave.html/XREFmakeinfo_005fprogram.html
+   octave-plplot: /usr/share/plplot_octave/support/__makeinfo__.m
+   sendmail-cf: /usr/share/sendmail/cf/sh/makeinfo.sh
+   texi2html: /usr/share/texi2html/makeinfo.init
+   texinfo: /usr/bin/makeinfo
+   texinfo: /usr/share/doc/texinfo/html/Invoking-makeinfo.html
+   texinfo: /usr/share/doc/texinfo/html/makeinfo-Advantages.html
+   texinfo: /usr/share/doc/texinfo/html/makeinfo-Options.html
+   texinfo: /usr/share/doc/texinfo/html/makeinfo-Pointer-Creation.html
+   texinfo: /usr/share/doc/texinfo/html/makeinfo-Preferred.html
+   texinfo: /usr/share/doc/texinfo/html/makeinfo-advantages.html
+   texinfo: /usr/share/doc/texinfo/html/makeinfo-in-Emacs.html
+   texinfo: /usr/share/doc/texinfo/html/makeinfo-top-command.html
+   texinfo: /usr/share/doc/texinfo/html/makeinfo-top.html
+   texinfo: /usr/share/man/man1/makeinfo.1.gz
+   vim-syntastic: /usr/share/vim/addons/syntax_checkers/texinfo/makeinfo.vim
+   xemacs21-basesupport: /usr/share/xemacs21/xemacs-packages/lisp/texinfo/makeinfo.elc
+   xemacs21-basesupport-el: /usr/share/xemacs21/xemacs-packages/lisp/texinfo/makeinfo.el.gz
+   root@218c9deecf36:/buildarea1#
+
+
+
+How to Check Timezone in Linux
+=================================
+
+.. code-block:: console 
+
+   hliu4@ala-lpggp2$cat /etc/timezone
+   America/Los_Angeles
+   hliu4@ala-lpggp2$
+
+
+Search who provide the boost
+==================================
+
+.. code-block:: console 
+
+   wrsadmin@PEK-HLIU4-D1$aptitude search boost
+
+
+
+
+Systemd list all failed services
+=================================================
+
+.. code-block:: console 
+
+   root@intel-x86-64:~# systemctl list-units --failed
+   UNIT                      LOAD   ACTIVE SUB    DESCRIPTION
+   ● apache2.service           loaded failed failed The Apache HTTP Server
+   ● ceph-crash.service        loaded failed failed Ceph crash dump collector
+   ● logrotate.service         loaded failed failed Rotate log files
+   ● modprobe@drm.service      loaded failed failed Load Kernel Module drm
+   ● nagios-core.service       loaded failed failed Nagios core
+   ● named.service             loaded failed failed Berkeley Internet Name Domain (DNS)
+   ● ninfod.service            loaded failed failed Respond to IPv6 Node Information Queries
+   ● ovsdb-server.service      loaded failed failed Open vSwitch Database Unit
+   ● postfix.service           loaded failed failed Postfix Mail Transport Agent
+   ● rdisc.service             loaded failed failed Network Router Discovery Daemon
+   ● rng-tools.service         loaded failed failed Hardware RNG Entropy Gatherer Daemon
+   ● systemd-logind.service    loaded failed failed User Login Management
+   ● systemd-resolved.service  loaded failed failed Network Name Resolution
+   ● systemd-timesyncd.service loaded failed failed Network Time Synchronization
+   
+   LOAD   = Reflects whether the unit definition was properly loaded.
+   ACTIVE = The high-level unit activation state, i.e. generalization of SUB.
+   SUB    = The low-level unit activation state, values depend on unit type.
+   14 loaded units listed.
+   
+
+
+Switching boot target to text
+==============================
+
+.. code-block:: console 
+
+   sudo systemctl set-default multi-user.target
+   sudo reboot
+
+Switching boot target to graphical
+===================================
+
+.. code-block:: console 
+
+   sudo systemctl set-default graphical.target
+   sudo reboot
+
+
+update and upgrade the ubuntu
+===============================
+
+.. code-block:: console
+
+   apt-get update 
+   apt-get upgrade 
+
+install the development tools
+====================================
+
+.. code-block:: console
+
+   apt-get install build-essential
+   apt-get install autoconf automake gdb git libffi-dev zlib1g-dev    
+   apt-get install wget vim libssl-dev
+   apt-get install fakeroot ncurses-dev xz-utils bc flex libelf-dev bison
+   apt-get install -y libgcrypt-dev
+   apt-get install pkg-config
+   apt-get install python3
+   apt-get install git 
+   apt-get install git-email
+   apt-get install libboost-all-dev
+
+
+How To: Disable Sleep on Ubuntu Server
+=========================================
+
+Confirm Sleep Status with systemd
++++++++++++++++++++++++++++++++++++++++++
+
+.. code-block:: bash 
+
+   wrsadmin@pek-hliu4-d1:~$ systemctl status sleep.target
+   ○ sleep.target - Sleep
+     Loaded: loaded (/lib/systemd/system/sleep.target; static)
+     Active: inactive (dead)
+     Docs: man:systemd.special(7)
+
+Disable Sleep in Ubuntu with systemd
+++++++++++++++++++++++++++++++++++++++++
+
+.. code-block:: bash 
+
+   wrsadmin@pek-hliu4-d1:~$ systemctl status sleep.target
+   ○ sleep.target - Sleep
+    Loaded: loaded (/lib/systemd/system/sleep.target; static)
+    Active: inactive (dead)
+    Docs: man:systemd.special(7)
+    wrsadmin@pek-hliu4-d1:~$ sudo systemctl mask sleep.target
+    suspend.target hibernate.target hybrid-sleep.target
+    Created symlink /etc/systemd/system/sleep.target →
+    /dev/null.
+    Created symlink /etc/systemd/system/suspend.target →
+    /dev/null.
+    Created symlink /etc/systemd/system/hibernate.target →
+    /dev/null.
+    Created symlink /etc/systemd/system/hybrid-sleep.target →
+    /dev/null.
+    wrsadmin@pek-hliu4-d1:~$ systemctl status sleep.target
+    ○ sleep.target
+    Loaded: masked (Reason: Unit sleep.target is masked.)
+    Active: inactive (dead)
+    wrsadmin@pek-hliu4-d1:~$
+    
+
+

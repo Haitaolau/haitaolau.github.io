@@ -1,0 +1,19 @@
+=================================
+ Open Source: GNU Public License
+=================================
+
+Although a copyleft license also allows sharing the code, copyleft licenses do so under certain conditions that are more restrictive than attribution licenses.
+
+
+According to a copyleft license, you're free to use the software, but it doesn't come as a free beer.
+
+
+Under a copyleft license, you can copy, modify, and distribute the code, but in exchange for this rights, you must transfer the exact same rights to other subsequent users of this code.
+
+
+This means that if you modify the code, you must provide your modifications and your derivative work under the same copyleft license that the original code is licensed under.
+
+
+One of the most popular copyleft licenses is the General Public License, known as GPL.
+
+

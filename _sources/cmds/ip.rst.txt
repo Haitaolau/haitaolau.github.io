@@ -1,0 +1,23 @@
+============
+Ip command
+============
+
+
+Set vlan interface 
+==================
+
+.. code-block:: console 
+
+   ifconfig eth2 up
+   ip link add link eth2 name eth2.50 type vlan id 50
+   ip addr add 100.1.1.1/24 dev eth2.50
+   ip link set dev eth2.50 up
+   ip -6 addr add 2000:100:1::1/64 dev eth2.50
+   
+   ifconfig eth3 up
+   ip link add link eth3 name eth3.100 type vlan id 100
+   ip addr add 200.1.1.1/24 dev eth3.100
+   ip link set dev eth3.100 up
+   ip -t addr add 2000:200:1::1/64 dev eth3.100
+   
+

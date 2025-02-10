@@ -1,0 +1,36 @@
+======================
+Random Mac address
+======================
+
+
+.. code-block:: bash 
+
+   #!/bin/bash 
+
+   echo -n $[RANDOM%10]$[RANDOM%10]:
+   echo -n $[RANDOM%10]$[RANDOM%10]:
+   echo -n $[RANDOM%10]$[RANDOM%10]:
+   echo -n $[RANDOM%10]$[RANDOM%10]:
+   echo -n $[RANDOM%10]$[RANDOM%10]:
+   echo $[RANDOM%10]$[RANDOM%10]
+
+
+The outpu:
+
+.. code-block:: console 
+
+   wrsadmin@pek-hliu4-d1:~/workspace$ ./random_mac.sh 
+   10:47:42:99:29:96
+   wrsadmin@pek-hliu4-d1:~/workspace$ ./random_mac.sh 
+   06:01:65:23:15:28
+   wrsadmin@pek-hliu4-d1:~/workspace$ ./random_mac.sh 
+   92:55:64:41:88:45
+   wrsadmin@pek-hliu4-d1:~/workspace$ ./random_mac.sh 
+   73:57:09:02:33:47
+   wrsadmin@pek-hliu4-d1:~/workspace$ ./random_mac.sh 
+   51:72:80:46:83:83
+   wrsadmin@pek-hliu4-d1:~/workspace$ ./random_mac.sh 
+   13:92:70:55:80:31
+   wrsadmin@pek-hliu4-d1:~/workspace$ ./random_mac.sh 
+   30:69:18:81:78:96
+

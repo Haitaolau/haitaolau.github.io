@@ -1,0 +1,63 @@
+============================================
+ Complete Definition of beginning-of-buffer
+============================================
+
+
+.. note::
+
+   You can either call this function with the key command **M-<** which will move the
+   cusor to the beginning of the buffer
+   
+
+.. code-block:: python
+
+   (defun beginning-of-buffer (&optional arg)
+     "Move point to the beginning of the buffer.
+        With numeric arg N, put point N/10 of the way from the beginning.
+     If the buffer is narrowed, this command uses the beginning of the
+     accessible part of the buffer.
+   
+     Push mark at previous position, unless either a \\[universal-argument] prefix
+     is supplied, or Transient Mark mode is enabled and the mark is active."
+     (declare (interactive-only "use `(goto-char (point-min))' instead."))
+     (interactive "^P")
+     (or (consp arg)
+         (region-active-p)
+         (push-mark))
+     (let ((size (- (point-max) (point-min))))
+       (goto-char (if (and arg (not (consp arg)))
+   		   (+ (point-min) 1
+   		      (/ (* size (prefix-numeric-value arg)) 10))
+   		 (point-min))))
+     (if (and arg (not (consp arg))) (forward-line 1)))
+
+In outline, the whole function looks like this:
+
+.. code-block:: python
+
+   (defun beginning-of-buffer (&optional arg)
+      "documentation..."
+      (interactive "P")
+      (or (is-the-argument-a-cons-cell arg)
+          (and are-both-transient-mark-mode-and-mark-active-true)
+          (push-mark))
+      (let (determine-size-and-set-it)
+          (goto-char
+             (if-there-is-an-argument
+                 figure-out-where-to-go
+             else-go-to
+             (point-min))))
+      do-nicety
+
+
+ 
+ 
+**&optional arg**
+
+ - a particular keyword is used to tell the Lisp interpreter that an argument is optional (The ‘&’ in front of ‘optional’ is part of the keyword.)
+
+**push-mark**
+
+ - when this expression is evaluated by the Lisp interpreter, it sets a mark at the current position of the cursor, wherever that may be. Th position of this mark is saved in the mark ring.
+
+   

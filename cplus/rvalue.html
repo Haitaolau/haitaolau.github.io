@@ -1,0 +1,327 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Cplus Rvalue &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="lvalue &amp;&amp; rvalue" href="lvalue_and_rvalue.html" />
+    <link rel="prev" title="Copy constructor" href="copyconstructor.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="cplus-rvalue">
+<h1>Cplus Rvalue<a class="headerlink" href="#cplus-rvalue" title="Permalink to this heading">¶</a></h1>
+<p><a class="reference external" href="https://en.cppreference.com/w/cpp/language/value_category">Value categories</a></p>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">¶</a></h2>
+<p>Rvalue references are a feature of C++ that was added with the C++11 standard
+Rvalue references solve at least two problems:</p>
+<ul class="simple">
+<li><p>Implementing move semantics</p></li>
+<li><p>Perfect forwarding</p></li>
+</ul>
+<p>The original definition of lvalues and rvalues from the earliest days of C is as follows:
+An lvalue is an expression e that may appear on the left or on the right hand side of
+an assignment,
+whereas an rvalue is an expression that can only appear on the right hand side of an assignment</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">42</span><span class="p">;</span><span class="w"></span>
+<span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">43</span><span class="p">;</span><span class="w"></span>
+
+<span class="c1">// a and b are both l-values:</span>
+<span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">b</span><span class="p">;</span><span class="w"> </span><span class="c1">// ok</span>
+<span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">;</span><span class="w"> </span><span class="c1">// ok</span>
+<span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">b</span><span class="p">;</span><span class="w"> </span><span class="c1">// ok</span>
+
+<span class="c1">// a * b is an rvalue:</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">b</span><span class="p">;</span><span class="w"> </span><span class="c1">// ok, rvalue on right hand side of assignment</span>
+<span class="n">a</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">42</span><span class="p">;</span><span class="w"> </span><span class="c1">// error, rvalue on left hand side of assignment</span>
+</pre></div>
+</div>
+<p>Here is an alternate definition which, although it can still be argued with, will put you
+in a position to tackle rvalue references: An lvalue is an expression that refers to a memory
+location and allows us to take the address of that memory location via the &amp; operator. An
+rvalue is an expression that is not an lvalue.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// lvalues:</span>
+<span class="c1">//</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">42</span><span class="p">;</span><span class="w"></span>
+<span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">43</span><span class="p">;</span><span class="w"> </span><span class="c1">// ok, i is an lvalue</span>
+<span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">i</span><span class="p">;</span><span class="w"> </span><span class="c1">// ok, i is an lvalue</span>
+<span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="nf">foo</span><span class="p">();</span><span class="w"></span>
+<span class="n">foo</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">42</span><span class="p">;</span><span class="w"> </span><span class="c1">// ok, foo() is an lvalue</span>
+<span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">p1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">foo</span><span class="p">();</span><span class="w"> </span><span class="c1">// ok, foo() is an lvalue</span>
+
+<span class="c1">// rvalues:</span>
+<span class="c1">//</span>
+<span class="kt">int</span><span class="w"> </span><span class="nf">foobar</span><span class="p">();</span><span class="w"></span>
+<span class="kt">int</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">foobar</span><span class="p">();</span><span class="w"> </span><span class="c1">// ok, foobar() is an rvalue</span>
+<span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">p2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">foobar</span><span class="p">();</span><span class="w"> </span><span class="c1">// error, cannot take the address of an rvalue</span>
+<span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">42</span><span class="p">;</span><span class="w"> </span><span class="c1">// ok, 42 is an rvalue</span>
+</pre></div>
+</div>
+</section>
+<section id="rvalue-references">
+<h2>Rvalue References<a class="headerlink" href="#rvalue-references" title="Permalink to this heading">¶</a></h2>
+<p>Prior to C++11, if you had a temporary object, you could use a “regular” or “lvalue reference” to bind it, but only if it was const:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getName</span><span class="p">();</span><span class="w"> </span><span class="c1">// ok</span>
+<span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getName</span><span class="p">();</span><span class="w"> </span><span class="c1">// NOT ok</span>
+</pre></div>
+</div>
+<p>The intuition here is that you cannot use a “mutable” reference because, if you did, you’d be able to modify some object that is about to disappear, and that would be dangerous. Notice, by the way, that holding on to a const reference to a temporary object ensures that the temporary object isn’t immediately destructed. This is a nice guarantee of C++, but it is still a temporary object, so you don’t want to modify it.</p>
+<p>In C++11, however, there’s a new kind of reference, an “rvalue reference”, that will let you bind a mutable reference to an rvalue, but not an lvalue. In other words, rvalue references are perfect for detecting if a value is temporary object or not. Rvalue references use the &amp;&amp; syntax instead of just &amp;, and can be const and non-const, just like lvalue references, although you’ll rarely see a const rvalue reference (as we’ll see, mutable references are kind of the point):</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="n">string</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getName</span><span class="p">();</span><span class="w"> </span><span class="c1">// ok</span>
+<span class="n">string</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getName</span><span class="p">();</span><span class="w"> </span><span class="c1">// also ok - praise be!</span>
+</pre></div>
+</div>
+<p>So far this is all well and good, but how does it help? The most important thing about lvalue references vs rvalue references is what happens when you write functions that take lvalue or rvalue references as arguments. Let’s say we have two functions:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">printReference</span><span class="w"> </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">String</span><span class="o">&amp;</span><span class="w"> </span><span class="n">str</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">str</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="n">printReference</span><span class="w"> </span><span class="p">(</span><span class="n">String</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">str</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">str</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Now the behavior gets interesting–the printReference function taking a const lvalue reference will accept any argument that it’s given, whether it be an lvalue or an rvalue, and regardless of whether the lvalue or rvalue is mutable or not. However, in the presence of the second overload, printReference taking an rvalue reference, it will be given all values except mutable rvalue-references. In other words, if you write:</p>
+<p>..code-block:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">string</span> <span class="n">me</span><span class="p">(</span> <span class="s2">&quot;alex&quot;</span> <span class="p">);</span>
+<span class="n">printReference</span><span class="p">(</span>  <span class="n">me</span> <span class="p">);</span> <span class="o">//</span> <span class="n">calls</span> <span class="n">the</span> <span class="n">first</span> <span class="n">printReference</span> <span class="n">function</span><span class="p">,</span> <span class="n">taking</span> <span class="n">an</span> <span class="n">lvalue</span> <span class="n">reference</span>
+
+<span class="n">printReference</span><span class="p">(</span> <span class="n">getName</span><span class="p">()</span> <span class="p">);</span> <span class="o">//</span> <span class="n">calls</span> <span class="n">the</span> <span class="n">second</span> <span class="n">printReference</span> <span class="n">function</span><span class="p">,</span> <span class="n">taking</span> <span class="n">a</span> <span class="n">mutable</span> <span class="n">rvalue</span> <span class="n">reference</span>
+</pre></div>
+</div>
+</section>
+<section id="move-constructor">
+<h2>Move constructor<a class="headerlink" href="#move-constructor" title="Permalink to this heading">¶</a></h2>
+<p>The most common pattern you’ll see when working with rvalue references is to create a move constructor and move assignment operator (which follows the same principles). A move constructor, like a copy constructor, takes an instance of an object as its argument and creates a new instance based on the original object. However, the move constructor can avoid memory reallocation because we know it has been provided a temporary object, so rather than copy the fields of the object, we will move them.</p>
+<p>What does it mean to move a field of the object? If the field is a primitive type, like int, we just copy it. It gets more interesting if the field is a pointer: here, rather than allocate and initialize new memory, we can simply steal the pointer and null out the pointer in the temporary object! We know the temporary object will no longer be needed, so we can take its pointer out from under it.</p>
+<p>Imagine that we have a simple ArrayWrapper class, like this:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ArrayWrapper</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">        </span><span class="n">ArrayWrapper</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">n</span><span class="p">)</span><span class="w"></span>
+<span class="w">            </span><span class="o">:</span><span class="w"> </span><span class="n">_p_vals</span><span class="p">(</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="kt">int</span><span class="p">[</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
+<span class="w">            </span><span class="p">,</span><span class="w"> </span><span class="n">_size</span><span class="p">(</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="p">{}</span><span class="w"></span>
+<span class="w">        </span><span class="c1">// copy constructor</span>
+<span class="w">        </span><span class="n">ArrayWrapper</span><span class="w"> </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">ArrayWrapper</span><span class="o">&amp;</span><span class="w"> </span><span class="n">other</span><span class="p">)</span><span class="w"></span>
+<span class="w">            </span><span class="o">:</span><span class="w"> </span><span class="n">_p_vals</span><span class="p">(</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="kt">int</span><span class="p">[</span><span class="w"> </span><span class="n">other</span><span class="p">.</span><span class="n">_size</span><span class="w">  </span><span class="p">]</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
+<span class="w">            </span><span class="p">,</span><span class="w"> </span><span class="n">_size</span><span class="p">(</span><span class="w"> </span><span class="n">other</span><span class="p">.</span><span class="n">_size</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">_size</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
+<span class="w">            </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="n">_p_vals</span><span class="p">[</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">other</span><span class="p">.</span><span class="n">_p_vals</span><span class="p">[</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="p">];</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="o">~</span><span class="n">ArrayWrapper</span><span class="w"> </span><span class="p">()</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="k">delete</span><span class="w"> </span><span class="p">[]</span><span class="w"> </span><span class="n">_p_vals</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="k">private</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="n">_p_vals</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">_size</span><span class="p">;</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Notice that the copy constructor has to both allocate memory and copy every value from the array, one at a time! That’s a lot of work for a copy. Let’s add a move constructor and gain some massive efficiency.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ArrayWrapper</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">        </span><span class="c1">// default constructor produces a moderately sized array</span>
+<span class="w">        </span><span class="n">ArrayWrapper</span><span class="w"> </span><span class="p">()</span><span class="w"></span>
+<span class="w">            </span><span class="o">:</span><span class="w"> </span><span class="n">_p_vals</span><span class="p">(</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="kt">int</span><span class="p">[</span><span class="w"> </span><span class="mi">64</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
+<span class="w">            </span><span class="p">,</span><span class="w"> </span><span class="n">_size</span><span class="p">(</span><span class="w"> </span><span class="mi">64</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="p">{}</span><span class="w"></span>
+
+<span class="w">        </span><span class="n">ArrayWrapper</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">n</span><span class="p">)</span><span class="w"></span>
+<span class="w">            </span><span class="o">:</span><span class="w"> </span><span class="n">_p_vals</span><span class="p">(</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="kt">int</span><span class="p">[</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
+<span class="w">            </span><span class="p">,</span><span class="w"> </span><span class="n">_size</span><span class="p">(</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="p">{}</span><span class="w"></span>
+
+<span class="w">        </span><span class="c1">// move constructor</span>
+<span class="w">        </span><span class="n">ArrayWrapper</span><span class="w"> </span><span class="p">(</span><span class="n">ArrayWrapper</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">other</span><span class="p">)</span><span class="w"></span>
+<span class="w">            </span><span class="o">:</span><span class="w"> </span><span class="n">_p_vals</span><span class="p">(</span><span class="w"> </span><span class="n">other</span><span class="p">.</span><span class="n">_p_vals</span><span class="w">  </span><span class="p">)</span><span class="w"></span>
+<span class="w">            </span><span class="p">,</span><span class="w"> </span><span class="n">_size</span><span class="p">(</span><span class="w"> </span><span class="n">other</span><span class="p">.</span><span class="n">_size</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">other</span><span class="p">.</span><span class="n">_p_vals</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="n">other</span><span class="p">.</span><span class="n">_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">        </span><span class="c1">// copy constructor</span>
+<span class="w">        </span><span class="n">ArrayWrapper</span><span class="w"> </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">ArrayWrapper</span><span class="o">&amp;</span><span class="w"> </span><span class="n">other</span><span class="p">)</span><span class="w"></span>
+<span class="w">            </span><span class="o">:</span><span class="w"> </span><span class="n">_p_vals</span><span class="p">(</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="kt">int</span><span class="p">[</span><span class="w"> </span><span class="n">other</span><span class="p">.</span><span class="n">_size</span><span class="w">  </span><span class="p">]</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
+<span class="w">            </span><span class="p">,</span><span class="w"> </span><span class="n">_size</span><span class="p">(</span><span class="w"> </span><span class="n">other</span><span class="p">.</span><span class="n">_size</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">_size</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
+<span class="w">            </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="n">_p_vals</span><span class="p">[</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">other</span><span class="p">.</span><span class="n">_p_vals</span><span class="p">[</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="p">];</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="o">~</span><span class="n">ArrayWrapper</span><span class="w"> </span><span class="p">()</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="k">delete</span><span class="w"> </span><span class="p">[]</span><span class="w"> </span><span class="n">_p_vals</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">private</span><span class="o">:</span><span class="w"></span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="n">_p_vals</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">_size</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">};</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Wow, the move constructor is actually simpler than the copy constructor! That’s quite a feat. The main things to notice are:</p>
+<blockquote>
+<div><p>The parameter is a non-const rvalue reference
+other._p_vals is set to NULL</p>
+</div></blockquote>
+<p>The second observation explains the first–we couldn’t set other._p_vals to NULL if we’d taken a const rvalue reference.</p>
+<p>But why do we need to set other._p_vals = NULL? The reason is the destructor–when the temporary object goes out of scope, just like all other C++ objects, its destructor will run.</p>
+<p>When its destructor runs, it will free _p_vals. The same _p_vals that we just copied! If we don’t set other._p_vals to NULL, the move would not really be a move–it would just be a copy that introduces a crash later on once we start using freed memory.</p>
+<p>This is the whole point of a move constructor: to avoid a copy by changing the original, temporary object!</p>
+<p>Again, the overload rules work such that the move constructor is called only for a temporary object–and only a temporary object that can be modified. One thing this means is that if you have a function that returns a const object, it will cause the copy constructor to run instead of the move constructor–so don’t write code like this:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="n">ArrayWrapper</span><span class="w"> </span><span class="nf">getArrayWrapper</span><span class="w"> </span><span class="p">();</span><span class="w"> </span><span class="c1">// makes the move constructor</span>
+<span class="w">                                       </span><span class="c1">// useless, the temporary is const!</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Cplus</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="libstdc%2B%2B_2_9_1/index.html">Libstd c++ 2.9.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Operator_overloading/index.html">C++ Operator overloading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="access_modifiers.html">Access Modifiers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="references.html">References (or Aliases)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="const.html">const</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functemplate.html">Function template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="passarguments.html">Pass arguments to function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="friend.html">Friend class and function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="abstract.html">Abstract Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="copyconstructor.html">Copy constructor</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Cplus Rvalue</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rvalue-references">Rvalue References</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#move-constructor">Move constructor</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="lvalue_and_rvalue.html">lvalue &amp;&amp; rvalue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="placement_new.html">Placement new operator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="template/index.html">Template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cast/index.html">C++ Cast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="decltype.html">Decltype</a></li>
+<li class="toctree-l2"><a class="reference internal" href="explicit_implicit.html">Explicit and Implicit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="constructor.html">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="typedef_typename.html">typedef typename</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Cplus</a><ul>
+      <li>Previous: <a href="copyconstructor.html" title="previous chapter">Copy constructor</a></li>
+      <li>Next: <a href="lvalue_and_rvalue.html" title="next chapter">lvalue &amp;&amp; rvalue</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/cplus/rvalue.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,25 @@
+===========
+clear
+===========
+
+
+
+.. code-block:: c++
+  
+   template <class _Tp, class _Alloc>
+   void 
+   _List_base<_Tp,_Alloc>::clear() 
+   {
+     _List_node<_Tp>* __cur = (_List_node<_Tp>*) _M_node->_M_next;
+       while (__cur != _M_node) {
+           _List_node<_Tp>* __tmp = __cur;
+           __cur = (_List_node<_Tp>*) __cur->_M_next;
+           _Destroy(&__tmp->_M_data);
+           _M_put_node(__tmp);
+           }
+       _M_node->_M_next = _M_node;
+       _M_node->_M_prev = _M_node;
+   }
+
+ 
+.. image:: ../../../_static/image/list_clear.jpg

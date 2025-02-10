@@ -1,0 +1,75 @@
+==========================
+Constructor & insert
+==========================
+
+Last change: |today|
+
+
+Constructor
+----------------
+
+The constructor:
+
+.. code-block:: c++
+
+   list(size_type __n, const _Tp& __value,
+        const allocator_type& __a = allocator_type())
+        : _Base(__a)
+       { insert(begin(), __n, __value); }
+
+_Base()基类的构造函数会首先创建一个头节点,节点的next指针和prev指针都指向自己
+
+.. image:: ../../../_static/image/list_constructor.jpg
+
+
+.. _list_insert:
+
+Insert
+------------
+
+The insert:
+
+.. code-block:: c++
+
+   void insert(iterator __pos, size_type __n, const _Tp& __x)
+       { _M_fill_insert(__pos, __n, __x); }
+
+The _M_fill_insert:
+
+.. code-block:: c++
+
+   template <class _Tp, class _Alloc>
+   void 
+   list<_Tp, _Alloc>::_M_fill_insert(iterator __position, 
+                              size_type __n, const _Tp& __x)
+   {
+      for ( ; __n > 0; --__n)
+      insert(__position, __x);
+   }
+
+The insert with two parameter:
+
+.. code-block:: c++
+
+   iterator insert(iterator __position, const _Tp& __x) {
+      _Node* __tmp = _M_create_node(__x);
+      __tmp->_M_next = __position._M_node;
+      __tmp->_M_prev = __position._M_node->_M_prev;
+      __position._M_node->_M_prev->_M_next = __tmp;
+      __position._M_node->_M_prev = __tmp;
+      return __tmp;
+   }
+
+.. image:: ../../../_static/image/list_insert1.jpg
+
+Example:
+
+.. code-block:: c++
+
+   // words4 is {"Mo", "Mo", "Mo", "Mo", "Mo"}
+   std::list<std::string> words4(5, "Mo");
+
+
+
+
+.. image:: ../../../_static/image/list_constructor2.jpg

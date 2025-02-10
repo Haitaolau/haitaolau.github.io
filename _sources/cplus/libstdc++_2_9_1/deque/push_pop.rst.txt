@@ -1,0 +1,288 @@
+=================
+push and pop
+=================
+
+
+Push
+-------
+
+push_back(const value_type&)
+=============================
+
+.. code-block:: cpp
+
+	  void push_back(const value_type& __t) {
+	    //最后缓冲区有两个（或者以上）的元素空间
+	    if (_M_finish._M_cur != _M_finish._M_last - 1) {
+	      construct(_M_finish._M_cur, __t);
+	      ++_M_finish._M_cur;
+	    }
+	    else
+	      _M_push_back_aux(__t);
+	  }
+
+push_back()
+=============
+
+.. code-block:: cpp
+
+     void push_back() {
+    if (_M_finish._M_cur != _M_finish._M_last - 1) {
+      construct(_M_finish._M_cur);
+      ++_M_finish._M_cur;
+    }
+    else
+      _M_push_back_aux();
+  }
+  
+  
+首先判断当前node节点是否已经满了，_M_finish._M_cur != _M_finish._M_last - 1
+
+如果已经满了，则调用_M_push_back_aux 重新分配空间
+
+
+Example 1
+==========
+
+.. code-block:: cpp
+
+   std::deque<int> ideq(20,9);
+
+   for (int i = 0; i <ideq.size(); ++i)
+   {
+   		ideq[i] = i;
+   }
+
+
+   for (int i = 0; i < 3; ++i)
+   {
+   		ideq.push_back(i);
+   }
+   for (std::deque<int>::iterator it = ideq.begin(); it!=ideq.end(); ++it)
+       std::cout << ' ' << *it;
+
+   std::cout << std::endl;
+
+
+output
+==========
+
+.. code-block:: console 
+
+	liuhaitaodeMBP2:test $ ./deque1 
+	 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 0 1 2
+	liuhaitaodeMBP2:test $ 
+
+
+.. image:: ../../../_static/image/deque_ini2.jpg
+
+
+由于最后一个缓冲区里面仍然有4个备用元素空间，所以不会引起缓冲区的再分配。
+
+
+_M_push_back_aux
+====================
+
+.. code-block:: cpp
+
+	// Called only if _M_finish._M_cur == _M_finish._M_last - 1.
+	template <class _Tp, class _Alloc>
+	void deque<_Tp,_Alloc>::_M_push_back_aux(const value_type& __t)
+	{
+	  value_type __t_copy = __t;
+	  _M_reserve_map_at_back();
+	  //重新配置一个新的节点node，
+	  *(_M_finish._M_node + 1) = _M_allocate_node();
+	  __STL_TRY {
+	    //初始化新的元素
+	    construct(_M_finish._M_cur, __t_copy);
+	    //设置finish指向为新分配的node
+	    _M_finish._M_set_node(_M_finish._M_node + 1);
+	    //设置finish的状态
+	    _M_finish._M_cur = _M_finish._M_first;
+	  }
+	  __STL_UNWIND(_M_deallocate_node(*(_M_finish._M_node + 1)));
+	}
+
+
+please refer to :ref:`_M_reserve_map_at_back <M_reserve_map_at_back>`
+
+
+_M_reserve_map_at_back 已经将需要的node节点在map中申请出来（预留），所以这里只需要调用
+
+_M_allocate_node() 创建所有的node节点就ok
+
+构建新的元素并填充__t
+
+.. note::
+
+   这里新构建的元素，并没有用新的node里面的空间，而是剩余的空间， _M_finish._M_cur, 这个时候_M_finish还没有更改.
+   
+
+将_M_finish._M_node + 1设置为新的结尾
+
+
+Example 2
+==========
+
+再增加一个元素3在尾端
+
+.. code-block:: cpp
+
+   ideq.push_back(3);
+
+
+.. image:: ../../../_static/image/deque_ini3.jpg
+
+
+
+push_front(const value_type& __t)
+=================================
+
+.. code-block:: cpp
+
+   void push_front(const value_type& __t) {
+    if (_M_start._M_cur != _M_start._M_first) {//第一缓冲区尚有备用空间
+      construct(_M_start._M_cur - 1, __t); //直接在备用空间上进行初始化元素
+      --_M_start._M_cur;  //调整备用空间的使用状态
+    }
+    else
+     // 第一缓冲区已经没有备用空间了
+      _M_push_front_aux(__t);
+   }
+
+
+push_front
+==============
+
+.. code-block:: cpp
+
+   void push_front() {
+    if (_M_start._M_cur != _M_start._M_first) {
+      construct(_M_start._M_cur - 1);
+      --_M_start._M_cur;
+    }
+    else
+      _M_push_front_aux();
+   }
+
+
+   
+_M_push_front_aux
+====================
+
+.. code-block:: cpp 
+
+   // Called only if _M_start._M_cur == _M_start._M_first.
+	template <class _Tp, class _Alloc>
+	void  deque<_Tp,_Alloc>::_M_push_front_aux(const value_type& __t)
+	{
+	  value_type __t_copy = __t;
+	  _M_reserve_map_at_front();
+	  *(_M_start._M_node - 1) = _M_allocate_node();
+	  __STL_TRY {
+	    _M_start._M_set_node(_M_start._M_node - 1);
+	    _M_start._M_cur = _M_start._M_last - 1;
+	    construct(_M_start._M_cur, __t_copy);
+	  }
+	  __STL_UNWIND((++_M_start, _M_deallocate_node(*(_M_start._M_node - 1))));
+	} 
+
+
+请参考 :ref:`_M_reserve_map_at_front <M_reserve_map_at_front>`
+
+
+Example 3
+==============
+
+.. code-block:: cpp 
+
+   ideq.push_front(99);
+
+
+.. image:: ../../../_static/image/deque_ini4.jpg
+
+
+Example 4
+==============
+
+.. code-block:: cpp 
+
+   ideq.push_front(98);
+   ideq.push_front(97);
+
+
+.. image:: ../../../_static/image/deque_ini5.jpg
+
+Pop
+--------
+
+pop_back
+============
+
+.. code-block:: cpp
+
+  void pop_back() {
+    if (_M_finish._M_cur != _M_finish._M_first) {
+    //最后缓冲区有一个或者更多的元素
+      --_M_finish._M_cur; // 调整指针，M_cur所指向的空间没有存储元素
+      destroy(_M_finish._M_cur); //析构掉M_cur所指向的元素
+    }
+    else
+    //最后一个缓冲区（node节点）里面没有数据，
+    //调用_M_pop_back_aux 将缓冲区（node节点）释放掉
+      _M_pop_back_aux();
+  }   
+  
+  
+  
+_M_pop_back_aux
+===================
+  
+.. code-block:: cpp 
+
+	// Called only if _M_finish._M_cur == _M_finish._M_first.
+	template <class _Tp, class _Alloc>
+	void deque<_Tp,_Alloc>::_M_pop_back_aux()
+	{
+	  _M_deallocate_node(_M_finish._M_first); //释放掉最后一个缓冲区（node节点）
+	  _M_finish._M_set_node(_M_finish._M_node - 1); //将倒数第二缓冲区（node节点）设置为finish
+	  _M_finish._M_cur = _M_finish._M_last - 1; //将cur指向上一个缓冲区中的最后一个元素
+	  destroy(_M_finish._M_cur); //将改元素析构掉
+	}
+	
+
+  
+pop_front
+=============
+  
+.. code-block:: cpp 
+
+  void pop_front() {
+    if (_M_start._M_cur != _M_start._M_last - 1) {
+    // 第一个缓冲区（node节点）有两个（或者更多）的元素
+      destroy(_M_start._M_cur);//析构
+      ++_M_start._M_cur; //调整指针
+    }
+    else 
+    // 第一缓冲区（node）只有一个元素
+      _M_pop_front_aux();
+  }
+  
+_M_pop_front_aux
+==================
+  
+.. code-block:: cpp
+
+	// Called only if _M_start._M_cur == _M_start._M_last - 1.  Note that 
+	// if the deque has at least one element (a precondition for this member 
+	// function), and if _M_start._M_cur == _M_start._M_last, then the deque 
+	// must have at least two nodes.
+	template <class _Tp, class _Alloc>
+	void deque<_Tp,_Alloc>::_M_pop_front_aux()
+	{
+	  destroy(_M_start._M_cur);  //析构cur元素
+	  _M_deallocate_node(_M_start._M_first);//释放第一缓冲区
+	  _M_start._M_set_node(_M_start._M_node + 1);//将第二缓冲区设置成为first node
+	  _M_start._M_cur = _M_start._M_first;//cur指向第二缓冲区的first元素
+	}  

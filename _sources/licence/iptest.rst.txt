@@ -1,0 +1,343 @@
+============
+ IP Testing
+============
+
+
+.. contents:: Table of Contents
+
+.. |check| unicode:: U+2611      
+
+.. |non-check| unicode:: U+2610
+		     
+Who are the stakeholders that depend upon the successful completion of a product IP review ?
+============================================================================================
+
+
+|check| A) Product marketing and Sales
+
+|non-check| B) Human Resources
+
+|check| C) Engineering Program manager(EPM)
+
+|check| D) Legal
+
+
+
+3rd party IP(someone else's IP) can be (check all that apply)?
+==============================================================
+	      
+|check| A) commercial IP
+
+|check| B) open source IP
+
+|non-check| C) Wind River IP
+
+|check| D) Intel IP
+
+|non-check| E) all of the above
+
+
+Software can be protected by
+============================
+
+|non-check| A) copyright
+
+|non-check| B) patent
+
+|check| C) all of the above
+
+|non-check| D) none of the above
+
+
+Whenever an engineer encounters an Ip problem/issue, he/she sould
+=================================================================
+
+|non-check| A) Send a detailed e-mail to ghe engineering manager describing all the specifics of the IP issue and alerting other colleagues as well
+
+|non-check| B) Send a request to Export Compliance team and wait for their guidance
+
+|check| C) Call IP manager or IP Analyst to request the quidance on the issue
+
+|non-check| D) No action required, IP Analyst or EPM will take care of this
+
+
+A copyright holder of software can (check all that apply):
+==========================================================
+
+|non-check| A) change the license of third party code the author added to his/her software
+
+|check| B) change the license of the software
+
+|check| C) give the same software to two different people under two different license
+
+-----
+
+If one downloads software found on the internet that has no specified license, it means that:
+=============================================================================================
+
+|non-check| A) such software is in public domain, freely available to useN
+
+|non-check| B) permission to copy, modify and distribute such software is available under open source license termsNN
+
+|check| C) permission to copy, modify and distribute such software has not been obtained
+
+|non-check| D) none of the above
+
+-----
+
+What are the obligations normally imposed by an attribution-style open sosurce license?
+=======================================================================================
+
+|check| A) copyright and license notices must be preseved unchanged in the source code
+
+|check| B) copyright and license notices must be provided to the end user
+
+|non-check| C) source code must be provided
+
+|non-check| D) all ofthe above
+
+-----
+
+Copyrights always require special registration with the government
+==================================================================
+
+|non-check| A) True
+
+|check| B) False
+
+
+-----
+
+Who at Wind River is responsible for submitting an IP disclosure for a piece of 3rd partly IP
+=============================================================================================
+
+|non-check| A) IP analyst conducting IP review of a respective Wind River product
+
+|check| B) Engineer integrating that piece of IP into a respective Wind River product
+
+|non-check| C) Product manager responsible for the product release
+
+|non-check| D) none of the above
+
+-----
+
+Which open source licenses below are considered to be attriibution-style licenses?
+==================================================================================
+
+|check| A) Apache license
+
+|non-check| B) GNU General Public License(GPL)
+
+|check| C) BSD license 
+
+|non-check| D) GNU Library(or lesser) Public license(LGPL)
+
+|non-check| E) Eclipse Public License(EPL)
+
+|check| F) MIT license
+
+------
+
+Which open source licenses below are considered to be copyleft licenses?
+==================================================================================
+
+|non-check| A) Apache license
+
+|check| B) GNU General Public License(GPL)
+
+|non-check| C) BSD license 
+
+|check| D) GNU Library(or lesser) Public license(LGPL)
+
+|check| E) Eclipse Public License(EPL)
+
+|non-check| F) MIT license
+
+
+
+-----
+
+Example(s) of a derivative work is
+==================================
+
+|check| A) a movie based on a book
+
+|check| B) modified source code file
+
+|check| C) linked binaries to create new work
+
+|check| D) binary file
+
+-------
+
+What can happen if you fail to submit a disclosure for the use of 3rd party IP
+==============================================================================
+
+|check| A) A potential IP issue might be missed
+
+|check| B) Wind River may incur legal damages and unpaid royalties
+
+|check| C) A product might end up with 3rd party software without the proper license
+
+|non-check| D) You will lose your birthday as a day-off(vacation)
+
+|check| E) Our customers may face legal issues for distributing our product without a 3rd party license
+
+
+------
+
+What is one criterion that determines whether software is open source software?
+===============================================================================
+
+|non-check| A) Code was developed by a group of people collaborating on the internet
+
+|non-check| B) Code is freely downloadable from Github
+
+|check| C) Code is available under an open source license
+
+|non-check| D) Code is in public domain
+
+-------
+
+
+Which open source license requires to provide source code for the distribution of the binary
+============================================================================================
+
+|non-check| A) MIT
+
+|non-check| B) public domain
+
+|non-check| C) BSD-3-Clause
+
+|non-check| D) Apache-2.0
+
+|check| E) GPL-2.0
+
+------
+
+Why is the developer sign-off acknowledging all the 3rd party IP has been disclosed required for IP review process?
+===================================================================================================================
+
+
+|non-check| A) to ensure all 3rd party Ip has been accounted for in the release
+
+|non-check| B) to ensure potential IP issues are not missed 
+
+|check| C) all of the above
+
+|non-check| D) none of the above
+
+-------
+
+A Wind River engineer may:
+==========================
+
+|non-check| A) remove some else's copyright notice from 3rd party IP
+
+|non-check| B) copy open source software and mark the code his/her own
+
+|non-check| C) perform patent searches on his/her own prior to discussing with Wind River Legal
+
+|non-check| D) if aware of potential IP issue, send an e-emal with all the detailed information about the issue to the rest of engineering team
+
+|check| E) none of the above
+
+-------
+
+Intellectual property(IP) can exist in the form of
+==================================================
+
+|check| A) documentation
+
+|check| B) software
+
+|non-check| C) land
+
+|check| D) images
+
+-------
+
+When are you required to disclose third party software(using the ip portal)
+===========================================================================
+
+|non-check| A) Disclose after GA date when the product ships
+
+|non-check| B) No need to disclose, if unsure whether that piece of software will eventually make it into the release
+
+|non-check| C) Wait unti the code/feautre freeze date
+
+|check| D) Disclose as soon as you are considering to integrate that piece of software into the code base.
+
+-------
+
+What can happen if a Wind River engineer combines GPL licensed code with Wind River proprietary code?
+=====================================================================================================
+
+
+|check| A) the new work(combination of GPL code and WR code) must be licensed under the GPL license
+
+|check| B) Wind River will be obligated to release its proprietary source code under the terms of GPL license
+
+|non-check| C) you can remove GPL license notice and substitute it with Wind River copyright and license notice
+
+|non-check| D) the new work(combination of GPL code and WR code) can be licensed under Wind RIver proprietary license
+
+------
+
+According to the company's global IP policy, Wind River employees
+=================================================================
+
+
+|check| A) Shall avoid conducting any patent searches or expressing opinion about potential patent infringements, unless authorized by Wind River Legal
+
+|non-check| B) Are encouraged to perform patent searches and express an opinion about patent infringement of 3rd party technology, if they feel there are might be such an infringement
+
+|non-check| C) May download software from the internet and integrate into the product, without disclosing it to IP group
+
+|non-check| D) May forego Ip test if being confident about his/here own knoledge of IP review.
+
+
+-------
+
+Who is responsible for providing a sign off to acknowledge that he/she has disclosed all the 3rd party Ip in a given release?
+=============================================================================================================================
+
+
+|non-check| A) Product manager responsible for a release
+
+|check| B) Engineer working with the code for a respenctive release
+
+|non-check| C) IP analyst conducting IP review on a respective release
+
+------
+
+You have third party software that you would like to integrate into VxWorks. What do you need to do ?
+=====================================================================================================
+
+|non-check| A) check whether such software is acceptable per VxWorks IP policy
+
+|non-check| B) submit IP disclosure from at ip.wrs.com
+
+|check| C) all of the above
+
+|non-check| D) none of the above
+
+-------
+
+What are the potential consequences of the misuse of 3rd party IP?
+==================================================================
+
+|check| A) damaged reputation as a trusted software vendor
+
+|check| B) distraction and loss of productivity
+
+|check| C) millions in legal damages and fees
+
+|check| D) revenue loss from a court halting a product distribution
+
+|non-check| E) employee loses all yearly vocation time
+
+|check| F) loss of IP
+
+
+

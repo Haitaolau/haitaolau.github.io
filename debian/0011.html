@@ -1,0 +1,428 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Debian: Building the package &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Debian Pipeline" href="pipeline/index.html" />
+    <link rel="prev" title="Create orig tarballs from git" href="0010.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="debian-building-the-package">
+<h1><a class="toc-backref" href="#id1" role="doc-backlink">Debian: Building the package</a><a class="headerlink" href="#debian-building-the-package" title="Permalink to this heading">¶</a></h1>
+<nav class="contents" id="table-of-contents">
+<p class="topic-title">Table of contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#debian-building-the-package" id="id1">Debian: Building the package</a></p>
+<ul>
+<li><p><a class="reference internal" href="#dpkg-buildpackages-us-uc-ui" id="id2">dpkg-buildpackages -us -uc -ui</a></p>
+<ul>
+<li><p><a class="reference internal" href="#clean-the-source-tree-debian-rules-clean" id="id3">1. clean the source tree (debian/rules clean)</a></p></li>
+<li><p><a class="reference internal" href="#build-the-source-package-dpkg-source-b" id="id4">2. build the source package (dpkg-source -b)</a></p>
+<ul>
+<li><p><a class="reference internal" href="#dpkg-source" id="id5">dpkg-source</a></p></li>
+<li><p><a class="reference internal" href="#make-the-dsc-file" id="id6">make the .dsc file</a></p></li>
+<li><p><a class="reference internal" href="#make-the-debian-tar-gz-file" id="id7">make the .debian.tar.gz file</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#build-the-program-debian-rules-build" id="id8">3. build the program (debian/rules build)</a></p></li>
+<li><p><a class="reference internal" href="#build-binary-packages-fakeroot-debian-rules-binary" id="id9">4. build binary packages (fakeroot debian/rules binary)</a></p>
+<ul>
+<li><p><a class="reference internal" href="#dh-installdeb-install-files-into-the-debian-directory" id="id10">dh_installdeb - install files into the DEBIAN directory</a></p></li>
+<li><p><a class="reference internal" href="#dh-gencontrol-generate-and-install-control-file" id="id11">dh_gencontrol - generate and install control file</a></p>
+<ul>
+<li><p><a class="reference internal" href="#debian-binary-package-control-files-debian-control" id="id12">Debian binary package control files - DEBIAN/control</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#dh-builddeb-build-debian-binary-packages" id="id13">dh_builddeb - build Debian binary packages</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#make-the-buildinfo-file-using-dpkg-genbuildinfo" id="id14">5. make the .buildinfo file, using dpkg-genbuildinfo</a></p></li>
+<li><p><a class="reference internal" href="#make-the-changes-file-using-dpkg-genchanges" id="id15">6. make the .changes file, using dpkg-genchanges</a></p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+<p>Refer to <a class="reference external" href="https://www.debian.org/doc/manuals/maint-guide/build.en.html#completebuild">Chapter 6. Building the package</a></p>
+<section id="dpkg-buildpackages-us-uc-ui">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">dpkg-buildpackages -us -uc -ui</a><a class="headerlink" href="#dpkg-buildpackages-us-uc-ui" title="Permalink to this heading">¶</a></h2>
+<p>Issue the following command in the source directory</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>dpkg-buildpackage -us -uc -ui
+</pre></div>
+</div>
+<p>This will do everything to make full binary and source packages for you. It will:</p>
+<section id="clean-the-source-tree-debian-rules-clean">
+<h3><a class="toc-backref" href="#id3" role="doc-backlink">1. clean the source tree (debian/rules clean)</a><a class="headerlink" href="#clean-the-source-tree-debian-rules-clean" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>root@33f22f60cb16:/usr/src/work-ssl/tmp/libgcrypt# make -f debian/rules clean
+dh clean --builddirectory<span class="o">=</span>build
+dh_auto_clean -O--builddirectory<span class="o">=</span>build
+dh_autoreconf_clean -O--builddirectory<span class="o">=</span>build
+dh_clean -O--builddirectory<span class="o">=</span>build
+</pre></div>
+</div>
+</section>
+<section id="build-the-source-package-dpkg-source-b">
+<h3><a class="toc-backref" href="#id4" role="doc-backlink">2. build the source package (dpkg-source -b)</a><a class="headerlink" href="#build-the-source-package-dpkg-source-b" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>root@33f22f60cb16:/usr/src/work-ssl/tmp/libgcrypt-1.10.1# dpkg-source -b  .
+dpkg-source: info: using <span class="nb">source</span> format <span class="s1">&#39;3.0 (quilt)&#39;</span>
+dpkg-source: info: using patch list from debian/patches/series
+dpkg-source: info: applying 12_lessdeps_libgcrypt-config.diff
+dpkg-source: info: applying 15_multiarchpath_in_-L.diff
+dpkg-source: info: applying 25_norevisionfromgit.diff
+dpkg-source: info: applying 31_0002-kdf-argon2-Fix-for-the-case-output-64.patch
+dpkg-source: info: applying 31_0003-hwf-ppc-fix-missing-HWF_PPC_ARCH_3_10-in-HW-feature.patch
+dpkg-source: info: applying <span class="m">32</span>-build-Prefer-gpgrt-config-when-available.patch
+dpkg-source: info: applying <span class="m">35</span>-keccak-Use-size_t-to-avoid-integer-overflow.patch
+dpkg-source: info: applying <span class="m">37</span>-doc-Update-document-for-pkg-config-and-libgcrypt.m4.patch
+dpkg-source: info: applying <span class="m">38</span>-fips-Unblock-MD5-in-fips-mode-but-mark-non-approved-.patch
+dpkg-source: warning: upstream signing key but no upstream tarball signature
+dpkg-source: info: building libgcrypt20 using existing ./libgcrypt20_1.10.1.orig.tar.bz2
+dpkg-source: info: using patch list from debian/patches/series
+dpkg-source: info: building libgcrypt20 <span class="k">in</span> libgcrypt20_1.10.1-3elxr1.debian.tar.xz
+dpkg-source: info: building libgcrypt20 <span class="k">in</span> libgcrypt20_1.10.1-3elxr1.dsc
+</pre></div>
+</div>
+<p>The dpkg-source would apply the patches from debian/patches and generate xxxx.debian.tar.xz and xxxx.dsc file.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>root@33f22f60cb16:/usr/src/work-ssl/tmp/libgcrypt-1.10.1# ls ../
+libgcrypt  libgcrypt-1.10.1  libgcrypt20_1.10.1-3elxr1.debian.tar.xz  libgcrypt20_1.10.1-3elxr1.dsc  libgcrypt20_1.10.1.orig.tar.bz2
+</pre></div>
+</div>
+<section id="dpkg-source">
+<h4><a class="toc-backref" href="#id5" role="doc-backlink">dpkg-source</a><a class="headerlink" href="#dpkg-source" title="Permalink to this heading">¶</a></h4>
+<p>The <strong>/usr/bin/dpkg-source</strong> is provided by dpkg-dev package.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wrsadmin@pek-hliu4-d2:~/workspace/doc$ apt-file search /usr/bin/dpkg-source
+dpkg-dev: /usr/bin/dpkg-source
+wrsadmin@pek-hliu4-d2:~/workspace/doc$
+</pre></div>
+</div>
+<p><a class="reference external" href="https://manpages.debian.org/testing/dpkg-dev/dpkg-source.1.en.html">dpkg-source - Debian source package (.dsc) manipulation tool</a></p>
+</section>
+<section id="make-the-dsc-file">
+<h4><a class="toc-backref" href="#id6" role="doc-backlink">make the .dsc file</a><a class="headerlink" href="#make-the-dsc-file" title="Permalink to this heading">¶</a></h4>
+<p>The <strong>libgcrypt20_1.10.1-3elxr1.dsc</strong> is a summary of the contents of the source code. The file is generated from your control file, and is used when unpacking the source with dpkg-source.</p>
+<p><a class="reference external" href="https://manpages.debian.org/testing/dpkg-dev/dsc.5.en.html">dsc - Debian source package control file format</a></p>
+</section>
+<section id="make-the-debian-tar-gz-file">
+<h4><a class="toc-backref" href="#id7" role="doc-backlink">make the .debian.tar.gz file</a><a class="headerlink" href="#make-the-debian-tar-gz-file" title="Permalink to this heading">¶</a></h4>
+<p>This compressed tarball contains your debian directory contents. Each and every addition you made to the original source code is stored as a quilt patch in debian/patches.</p>
+<p>If someone else wants to re-create your package from scratch, they can easily do so using the above three files. The extraction procedure is trivial: just copy the three files somewhere else and run <strong>dpkg-source -x libgcrypt20_1.10.1-3elxr1.dsc</strong></p>
+</section>
+</section>
+<section id="build-the-program-debian-rules-build">
+<h3><a class="toc-backref" href="#id8" role="doc-backlink">3. build the program (debian/rules build)</a><a class="headerlink" href="#build-the-program-debian-rules-build" title="Permalink to this heading">¶</a></h3>
+<p><strong>make -f debian/rules build</strong> would execute the <strong>dh build</strong> command which would run some other jobs.</p>
+<p>To see what commands are included in a sequence, without actually doing anything</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>root@33f22f60cb16:/usr/src/work-ssl/tmp/libgcrypt-1.10.1# dh build --no-act
+dh_testdir
+dh_update_autotools_config
+dh_autoreconf
+debian/rules override_dh_auto_configure
+debian/rules override_dh_auto_build-indep
+dh_auto_build -Nlibgcrypt20-doc -Nlibgcrypt-mingw-w64-dev
+dh_auto_test
+create-stamp debian/debhelper-build-stamp
+</pre></div>
+</div>
+</section>
+<section id="build-binary-packages-fakeroot-debian-rules-binary">
+<h3><a class="toc-backref" href="#id9" role="doc-backlink">4. build binary packages (fakeroot debian/rules binary)</a><a class="headerlink" href="#build-binary-packages-fakeroot-debian-rules-binary" title="Permalink to this heading">¶</a></h3>
+<p><strong>make -f debian/rules build</strong> would execute the <strong>dh binary</strong> command which would run some other jobs.</p>
+<p>To see what commands are included in a sequence, without actually doing anything</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>root@33f22f60cb16:/usr/src/work-ssl/tmp/libgcrypt-1.10.1# dh binary --no-act
+dh_testdir                                                                                                                                                  dh_update_autotools_config                                                                                                                                  dh_autoreconf                                                                                                                                               debian/rules override_dh_auto_configure                                                                                                                     debian/rules override_dh_auto_build-indep                                                                                                                   dh_auto_build -Nlibgcrypt20-doc -Nlibgcrypt-mingw-w64-dev                                                                                                   dh_auto_test                                                                                                                                                create-stamp debian/debhelper-build-stamp                                                                                                                   dh_testroot                                                                                                                                                 dh_prep                                                                                                                                                     dh_installdirs                                                                                                                                              debian/rules override_dh_auto_install-arch                                                                                                                  debian/rules override_dh_auto_install-indep                                                                                                                 dh_install                                                                                                                                                  dh_installdocs                                                                                                                                              dh_installchangelogs                                                                                                                                        dh_installexamples                                                                                                                                          dh_installman                                                                                                                                               dh_installcatalogs                                                                                                                                          dh_installcron
+
+dh_installdebconf
+dh_installemacsen
+dh_installifupdown
+debian/rules override_dh_installinfo
+dh_installinit
+dh_installtmpfiles
+dh_installsystemd
+dh_installsystemduser
+dh_installmenu
+dh_installmime
+dh_installmodules
+dh_installlogcheck
+dh_installlogrotate
+dh_installpam
+dh_installppp
+dh_installudev
+dh_installgsettings
+dh_installinitramfs
+dh_installalternatives
+dh_bugfiles
+dh_ucf
+dh_lintian
+dh_icons
+dh_perl
+dh_usrlocal
+dh_link
+dh_installwm
+dh_installxfonts
+dh_strip_nondeterminism
+dh_compress
+dh_fixperms
+dh_missing
+dh_dwz -a
+dh_strip -a
+dh_makeshlibs -a
+dh_shlibdeps -a
+dh_installdeb
+dh_gencontrol
+dh_md5sums
+dh_builddeb
+</pre></div>
+</div>
+<section id="dh-installdeb-install-files-into-the-debian-directory">
+<h4><a class="toc-backref" href="#id10" role="doc-backlink">dh_installdeb - install files into the DEBIAN directory</a><a class="headerlink" href="#dh-installdeb-install-files-into-the-debian-directory" title="Permalink to this heading">¶</a></h4>
+<p>Refert to : <a class="reference external" href="https://manpages.debian.org/testing/debhelper/dh_installdeb.1.en.html">https://manpages.debian.org/testing/debhelper/dh_installdeb.1.en.html</a></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>root@33f22f60cb16:/usr/src/work-ssl/tmp/libgcrypt-1.10.1# dh_installdeb -O--builddirectory<span class="o">=</span>build --verbose
+ install -m0755 -d debian/libgcrypt20-doc/DEBIAN
+ install -m0755 -d debian/libgcrypt20-dev/DEBIAN
+ install -m0755 -d debian/libgcrypt20/DEBIAN
+ cp -f debian/libgcrypt20.postinst debian/libgcrypt20/DEBIAN/postinst
+ <span class="o">[</span>META<span class="o">]</span> Replace <span class="c1">#TOKEN#s in &quot;debian/libgcrypt20/DEBIAN/postinst&quot;</span>
+ chmod <span class="m">0755</span> -- debian/libgcrypt20/DEBIAN/postinst
+ chown <span class="m">0</span>:0 -- debian/libgcrypt20/DEBIAN/postinst
+ install -p -m0644 debian/.debhelper/generated/libgcrypt20/triggers debian/libgcrypt20/DEBIAN/triggers
+ install -m0755 -d debian/libgcrypt20-udeb/DEBIAN
+ install -m0755 -d debian/libgcrypt-mingw-w64-dev/DEBIAN
+root@33f22f60cb16:/usr/src/work-ssl/tmp/libgcrypt-1.10.1#
+</pre></div>
+</div>
+</section>
+<section id="dh-gencontrol-generate-and-install-control-file">
+<h4><a class="toc-backref" href="#id11" role="doc-backlink">dh_gencontrol - generate and install control file</a><a class="headerlink" href="#dh-gencontrol-generate-and-install-control-file" title="Permalink to this heading">¶</a></h4>
+<p>Refer to <a class="reference external" href="https://manpages.debian.org/testing/debhelper/dh_gencontrol.1.en.html">https://manpages.debian.org/testing/debhelper/dh_gencontrol.1.en.html</a></p>
+<p>dh_gencontrol is merely a wrapper around <strong>dpkg-gencontrol</strong></p>
+<p>dpkg-gencontrol gitlab: <a class="reference external" href="https://salsa.debian.org/dpkg-team/dpkg/-/blob/main/scripts/dpkg-gencontrol.pl?ref_type=heads">https://salsa.debian.org/dpkg-team/dpkg/-/blob/main/scripts/dpkg-gencontrol.pl?ref_type=heads</a></p>
+<p>dh_gencontrol is a debhelper program that is responsible for generating control files, and installing them into the DEBIAN directory with the proper permissions</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>root@33f22f60cb16:/usr/src/work-ssl/tmp/libgcrypt-1.10.1# dh_gencontrol -O--builddirectory<span class="o">=</span>build  --verbose
+install -m0755 -d debian/libgcrypt20-doc/DEBIAN
+dpkg-gencontrol -plibgcrypt20-doc -ldebian/changelog -Tdebian/libgcrypt20-doc.substvars -Pdebian/libgcrypt20-doc
+chmod <span class="m">0644</span> -- debian/libgcrypt20-doc/DEBIAN/control
+chown <span class="m">0</span>:0 -- debian/libgcrypt20-doc/DEBIAN/control
+install -m0755 -d debian/libgcrypt20-dev/DEBIAN
+install -m0755 -d debian/.debhelper/libgcrypt20-dev/dbgsym-root/DEBIAN
+dpkg-gencontrol -plibgcrypt20-dev -ldebian/changelog -Tdebian/libgcrypt20-dev.substvars -Pdebian/.debhelper/libgcrypt20-dev/dbgsym-root -UPre-Depends -URecommends -USuggests -UEnhances -UProvides -UEssential -UConflicts -DPriority<span class="o">=</span>optional -UHomepage -UImportant -UBuilt-Using -DAuto-Built-Package<span class="o">=</span>debug-symbols -UProtected -DPackage<span class="o">=</span>libgcrypt20-dev-dbgsym <span class="s2">&quot;-DDepends=libgcrypt20-dev (= \${binary:Version})&quot;</span> <span class="s2">&quot;-DDescription=debug symbols for libgcrypt20-dev&quot;</span> <span class="s2">&quot;-DBuild-Ids=630a061decd5001bd93dd35722363eed025b1314 668a8375a03d6b17b7f41f38c59a2458ea1b8e2a fb90f3fccfb4cf23fd0830fec17f942c0af989d8&quot;</span> -DSection<span class="o">=</span>debug -UMulti-Arch -UReplaces -UBreaks
+dpkg-gencontrol: warning: package libgcrypt20-dev: substitution variable <span class="si">${</span><span class="nv">shlibs</span><span class="p">:</span><span class="nv">Depends</span><span class="si">}</span> unused, but is defined
+chmod <span class="m">0644</span> -- debian/.debhelper/libgcrypt20-dev/dbgsym-root/DEBIAN/control
+chown <span class="m">0</span>:0 -- debian/.debhelper/libgcrypt20-dev/dbgsym-root/DEBIAN/control
+dpkg-gencontrol -plibgcrypt20-dev -ldebian/changelog -Tdebian/libgcrypt20-dev.substvars -Pdebian/libgcrypt20-dev
+dpkg-gencontrol: warning: package libgcrypt20-dev: substitution variable <span class="si">${</span><span class="nv">shlibs</span><span class="p">:</span><span class="nv">Depends</span><span class="si">}</span> unused, but is defined
+chmod <span class="m">0644</span> -- debian/libgcrypt20-dev/DEBIAN/control
+chown <span class="m">0</span>:0 -- debian/libgcrypt20-dev/DEBIAN/control
+install -m0755 -d debian/libgcrypt20/DEBIAN
+install -m0755 -d debian/.debhelper/libgcrypt20/dbgsym-root/DEBIAN
+dpkg-gencontrol -plibgcrypt20 -ldebian/changelog -Tdebian/libgcrypt20.substvars -Pdebian/.debhelper/libgcrypt20/dbgsym-root -UPre-Depends -URecommends -USuggests -UEnhances -UProvides -UEssential -UConflicts -DPriority<span class="o">=</span>optional -UHomepage -UImportant -UBuilt-Using -DAuto-Built-Package<span class="o">=</span>debug-symbols -UProtected -DPackage<span class="o">=</span>libgcrypt20-dbgsym <span class="s2">&quot;-DDepends=libgcrypt20 (= \${binary:Version})&quot;</span> <span class="s2">&quot;-DDescription=debug symbols for libgcrypt20&quot;</span> -DBuild-Ids<span class="o">=</span>8b97035b9bbc512bde064bc8fd5fdfa78645ccce -DSection<span class="o">=</span>debug -UReplaces -UBreaks
+chmod <span class="m">0644</span> -- debian/.debhelper/libgcrypt20/dbgsym-root/DEBIAN/control
+chown <span class="m">0</span>:0 -- debian/.debhelper/libgcrypt20/dbgsym-root/DEBIAN/control
+dpkg-gencontrol -plibgcrypt20 -ldebian/changelog -Tdebian/libgcrypt20.substvars -Pdebian/libgcrypt20
+chmod <span class="m">0644</span> -- debian/libgcrypt20/DEBIAN/control
+chown <span class="m">0</span>:0 -- debian/libgcrypt20/DEBIAN/control
+install -m0755 -d debian/libgcrypt20-udeb/DEBIAN
+dpkg-gencontrol -plibgcrypt20-udeb -ldebian/changelog -Tdebian/libgcrypt20-udeb.substvars -Pdebian/libgcrypt20-udeb
+chmod <span class="m">0644</span> -- debian/libgcrypt20-udeb/DEBIAN/control
+chown <span class="m">0</span>:0 -- debian/libgcrypt20-udeb/DEBIAN/control
+install -m0755 -d debian/libgcrypt-mingw-w64-dev/DEBIAN
+dpkg-gencontrol -plibgcrypt-mingw-w64-dev -ldebian/changelog -Tdebian/libgcrypt-mingw-w64-dev.substvars -Pdebian/libgcrypt-mingw-w64-dev
+dpkg-gencontrol: warning: Depends field of package libgcrypt-mingw-w64-dev: substitution variable <span class="si">${</span><span class="nv">shlibs</span><span class="p">:</span><span class="nv">Depends</span><span class="si">}</span> used, but is not defined
+chmod <span class="m">0644</span> -- debian/libgcrypt-mingw-w64-dev/DEBIAN/control
+chown <span class="m">0</span>:0 -- debian/libgcrypt-mingw-w64-dev/DEBIAN/control
+</pre></div>
+</div>
+<section id="debian-binary-package-control-files-debian-control">
+<h5><a class="toc-backref" href="#id12" role="doc-backlink">Debian binary package control files - DEBIAN/control</a><a class="headerlink" href="#debian-binary-package-control-files-debian-control" title="Permalink to this heading">¶</a></h5>
+<p><a class="reference external" href="https://manpages.debian.org/testing/dpkg-dev/deb-control.5.en.html">deb-control - Debian binary package control file format</a></p>
+</section>
+</section>
+<section id="dh-builddeb-build-debian-binary-packages">
+<h4><a class="toc-backref" href="#id13" role="doc-backlink">dh_builddeb - build Debian binary packages</a><a class="headerlink" href="#dh-builddeb-build-debian-binary-packages" title="Permalink to this heading">¶</a></h4>
+<p>Refer to <a class="reference external" href="https://manpages.debian.org/testing/debhelper/dh_builddeb.1.en.html">dh_builddeb</a></p>
+<p>dh_builddeb: <a class="reference external" href="https://salsa.debian.org/debian/debhelper/-/blob/main/dh_builddeb?ref_type=heads">https://salsa.debian.org/debian/debhelper/-/blob/main/dh_builddeb?ref_type=heads</a></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>root@33f22f60cb16:/usr/src/work-ssl/tmp/libgcrypt-1.10.1# dh_builddeb -O--builddirectory<span class="o">=</span>build
+dpkg-deb: building package <span class="s1">&#39;libgcrypt20-doc&#39;</span> <span class="k">in</span> <span class="s1">&#39;../libgcrypt20-doc_1.10.1-3elxr1_all.deb&#39;</span>.
+dpkg-deb: building package <span class="s1">&#39;libgcrypt20-dev&#39;</span> <span class="k">in</span> <span class="s1">&#39;../libgcrypt20-dev_1.10.1-3elxr1_amd64.deb&#39;</span>.
+dpkg-deb: building package <span class="s1">&#39;libgcrypt20-dev-dbgsym&#39;</span> <span class="k">in</span> <span class="s1">&#39;../libgcrypt20-dev-dbgsym_1.10.1-3elxr1_amd64.deb&#39;</span>.
+dpkg-deb: building package <span class="s1">&#39;libgcrypt20&#39;</span> <span class="k">in</span> <span class="s1">&#39;../libgcrypt20_1.10.1-3elxr1_amd64.deb&#39;</span>.
+dpkg-deb: building package <span class="s1">&#39;libgcrypt20-dbgsym&#39;</span> <span class="k">in</span> <span class="s1">&#39;../libgcrypt20-dbgsym_1.10.1-3elxr1_amd64.deb&#39;</span>.
+dpkg-deb: building package <span class="s1">&#39;libgcrypt20-udeb&#39;</span> <span class="k">in</span> <span class="s1">&#39;debian/.debhelper/scratch-space/build-libgcrypt20-udeb/libgcrypt20-udeb_1.10.1-3elxr1_amd64.deb&#39;</span>.
+        Renaming libgcrypt20-udeb_1.10.1-3elxr1_amd64.deb to libgcrypt20-udeb_1.10.1-3elxr1_amd64.udeb
+dpkg-deb: building package <span class="s1">&#39;libgcrypt-mingw-w64-dev&#39;</span> <span class="k">in</span> <span class="s1">&#39;../libgcrypt-mingw-w64-dev_1.10.1-3elxr1_all.deb&#39;</span>.
+</pre></div>
+</div>
+<p>The <strong>/usr/bin/dpkg-deb</strong> is provided by dpkg package.</p>
+<p>gitlab: <a class="reference external" href="https://salsa.debian.org/dpkg-team/dpkg/-/tree/main/src/deb?ref_type=heads">https://salsa.debian.org/dpkg-team/dpkg/-/tree/main/src/deb?ref_type=heads</a></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wrsadmin@pek-hliu4-d2:~/workspace/doc$ apt-file search /usr/bin/dpkg-deb
+dpkg: /usr/bin/dpkg-deb
+</pre></div>
+</div>
+</section>
+</section>
+<section id="make-the-buildinfo-file-using-dpkg-genbuildinfo">
+<h3><a class="toc-backref" href="#id14" role="doc-backlink">5. make the .buildinfo file, using dpkg-genbuildinfo</a><a class="headerlink" href="#make-the-buildinfo-file-using-dpkg-genbuildinfo" title="Permalink to this heading">¶</a></h3>
+<p>Refer to <a class="reference external" href="https://dyn.manpages.debian.org/testing/dpkg-dev/dpkg-genbuildinfo.1.en.html">https://dyn.manpages.debian.org/testing/dpkg-dev/dpkg-genbuildinfo.1.en.html</a>?</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>dpkg-genbuildinfo -O../libgcrypt20_1.10.1-3elxr1_amd64.buildinfo
+</pre></div>
+</div>
+<p>.buildinfo: <a class="reference external" href="https://dyn.manpages.debian.org/testing/dpkg-dev/deb-buildinfo.5.en.html">https://dyn.manpages.debian.org/testing/dpkg-dev/deb-buildinfo.5.en.html</a></p>
+<p>The <strong>/usr/bin/dpkg-genbuildinfo</strong> is provided by dpkg-dev package.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wrsadmin@pek-hliu4-d2:~/workspace/doc$ apt-file search dpkg-genbuildinfo
+dpkg-dev: /usr/bin/dpkg-genbuildinfo
+</pre></div>
+</div>
+</section>
+<section id="make-the-changes-file-using-dpkg-genchanges">
+<h3><a class="toc-backref" href="#id15" role="doc-backlink">6. make the .changes file, using dpkg-genchanges</a><a class="headerlink" href="#make-the-changes-file-using-dpkg-genchanges" title="Permalink to this heading">¶</a></h3>
+<p>Refer to <a class="reference external" href="https://dyn.manpages.debian.org/testing/dpkg-dev/dpkg-genchanges.1.en.html">https://dyn.manpages.debian.org/testing/dpkg-dev/dpkg-genchanges.1.en.html</a>?</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>dpkg-genchanges -O../libgcrypt20_1.10.1-3elxr1_amd64.changes
+</pre></div>
+</div>
+<p>.changes: <a class="reference external" href="https://dyn.manpages.debian.org/testing/dpkg-dev/deb-changes.5.en.html">https://dyn.manpages.debian.org/testing/dpkg-dev/deb-changes.5.en.html</a></p>
+<p>The <strong>/usr/bin/dpkg-genchanges</strong> is provided by dpkg-dev package.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wrsadmin@pek-hliu4-d2:~/workspace/doc$ apt-file search dpkg-genchanges
+dpkg-dev: /usr/bin/dpkg-genchanges
+</pre></div>
+</div>
+<p>This file describes all the changes made in the current package revision; it is used by the Debian FTP archive maintenance programs to install the binary and source packages. It is partly generated from the changelog file and the .dsc file.</p>
+<p>As you keep working on the package, its behavior will change and new features will be added. People downloading your package can look at this file and quickly see what has changed</p>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cplus/index.html">Cplus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Debian</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="0005.html">Launch up Debian VM with Qemu</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debian-installer/index.html">Debian Installer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debian-command/index.html">Debian command</a></li>
+<li class="toctree-l2"><a class="reference internal" href="live-cd/index.html">Debian Live CD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="elxr_edge/index.html">eLxr Edge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="os-tree/index.html">OS tree</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0001.html">Ruck: build pablo with minimal ostree rootfs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0002.html">How to build deb package for libxfce4ui</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0003.html">How to Search for Debian package?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0004.html">How to Check Debian package version?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0006.html">How to download deb packages using apt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0007.html">E: You must put some ‘source’ URIs in your sources.list</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0008.html">How can I specify the repository from which a package will be installed?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0009.html">How to install build dependencies for packages ?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0010.html">Create orig tarballs from git</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Debian: Building the package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#dpkg-buildpackages-us-uc-ui">dpkg-buildpackages -us -uc -ui</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pipeline/index.html">Debian Pipeline</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Debian</a><ul>
+      <li>Previous: <a href="0010.html" title="previous chapter">Create orig tarballs from git</a></li>
+      <li>Next: <a href="pipeline/index.html" title="next chapter">Debian Pipeline</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/debian/0011.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,269 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Friend class and function &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Abstract Class" href="abstract.html" />
+    <link rel="prev" title="Pass arguments to function" href="passarguments.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="friend-class-and-function">
+<h1>Friend class and function<a class="headerlink" href="#friend-class-and-function" title="Permalink to this heading">¶</a></h1>
+<section id="friend-function">
+<h2>Friend function<a class="headerlink" href="#friend-function" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>可以将一个全局函数，某个类的成员函数，甚至整个类声明为友元函数</p></li>
+<li><p>类的友元函数是定义在类外部，但有权访问类的所有私有（private）成员和保护（protected）成员</p></li>
+<li><p>尽管友元函数的原型有在类的定义中出现过，但是友元函数并不是成员函数。</p></li>
+</ul>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">class</span><span class="w"> </span><span class="n">Box</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w"> </span><span class="n">private</span><span class="o">:</span><span class="w"></span>
+<span class="w">     </span><span class="kt">double</span><span class="w"> </span><span class="n">width</span><span class="p">;</span><span class="w"></span>
+<span class="w"> </span><span class="n">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">     </span><span class="kt">void</span><span class="w"> </span><span class="n">setWidth</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">w</span><span class="p">);</span><span class="w"></span>
+<span class="w">     </span><span class="n">friend</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">showWidth</span><span class="p">(</span><span class="n">Box</span><span class="o">*</span><span class="w"> </span><span class="n">box</span><span class="p">);</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+
+<span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">Box::setWidth</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">w</span><span class="p">)</span><span class="w"></span>
+<span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">     </span><span class="n">this</span><span class="o">-&gt;</span><span class="n">width</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">w</span><span class="p">;</span><span class="w"></span>
+<span class="w"> </span><span class="p">}</span><span class="w"></span>
+
+<span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">showWidth</span><span class="p">(</span><span class="n">Box</span><span class="o">*</span><span class="w"> </span><span class="n">box</span><span class="p">)</span><span class="w"></span>
+<span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">     </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;The width is : &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">box</span><span class="o">-&gt;</span><span class="n">width</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w"> </span><span class="p">}</span><span class="w"></span>
+
+<span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"></span>
+<span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">     </span><span class="n">Box</span><span class="o">*</span><span class="w"> </span><span class="n">box</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">new</span><span class="w"> </span><span class="n">Box</span><span class="p">;</span><span class="w"></span>
+<span class="w">     </span><span class="n">box</span><span class="o">-&gt;</span><span class="n">setWidth</span><span class="p">(</span><span class="mf">15.34</span><span class="p">);</span><span class="w"></span>
+<span class="w">     </span><span class="n">showWidth</span><span class="p">(</span><span class="n">box</span><span class="p">);</span><span class="w"></span>
+<span class="w">     </span><span class="n">delete</span><span class="w"> </span><span class="n">box</span><span class="p">;</span><span class="w"></span>
+<span class="w"> </span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="friend-class">
+<h2>Friend Class<a class="headerlink" href="#friend-class" title="Permalink to this heading">¶</a></h2>
+<p>一个类 A 可以将另一个类 B 声明为自己的友元，
+类 B 的所有成员函数就都可以访问类 A 对象的私有成员</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">class</span><span class="w"> </span><span class="n">HRManager</span><span class="p">;</span><span class="w"></span>
+<span class="n">class</span><span class="w"> </span><span class="n">Employee</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="n">private</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">e_age</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">e_sex</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">e_name</span><span class="p">;</span><span class="w"></span>
+<span class="n">public</span><span class="o">:</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">friend</span><span class="w"> </span><span class="n">class</span><span class="w"> </span><span class="n">HRManager</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">Employee</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">this</span><span class="o">-&gt;</span><span class="n">e_age</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="n">this</span><span class="o">-&gt;</span><span class="n">e_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="n">this</span><span class="o">-&gt;</span><span class="n">e_sex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">};</span><span class="w"></span>
+<span class="w">    </span><span class="n">Employee</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">age</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">sex</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">name</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="o">:</span><span class="n">e_age</span><span class="p">(</span><span class="n">age</span><span class="p">),</span><span class="w"> </span><span class="n">e_sex</span><span class="p">(</span><span class="n">sex</span><span class="p">),</span><span class="w"> </span><span class="n">e_name</span><span class="p">(</span><span class="n">name</span><span class="p">){}</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+
+<span class="n">class</span><span class="w"> </span><span class="n">HRManager</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="n">private</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">hr_age</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">hr_sex</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">hr_name</span><span class="p">;</span><span class="w"></span>
+<span class="n">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">HRManager</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">this</span><span class="o">-&gt;</span><span class="n">hr_age</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="n">this</span><span class="o">-&gt;</span><span class="n">hr_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="n">this</span><span class="o">-&gt;</span><span class="n">hr_sex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">};</span><span class="w"></span>
+<span class="w">    </span><span class="n">HRManager</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">age</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">sex</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">name</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="o">:</span><span class="n">hr_age</span><span class="p">(</span><span class="n">age</span><span class="p">),</span><span class="w"> </span><span class="n">hr_sex</span><span class="p">(</span><span class="n">sex</span><span class="p">),</span><span class="w"> </span><span class="n">hr_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">showStudentInfo</span><span class="p">(</span><span class="n">Employee</span><span class="o">&amp;</span><span class="w"> </span><span class="n">employee</span><span class="p">);</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">HRManager</span><span class="o">*</span><span class="w"> </span><span class="n">hr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">new</span><span class="w"> </span><span class="n">HRManager</span><span class="p">(</span><span class="mi">38</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s">&quot;sherry&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">Employee</span><span class="o">*</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">new</span><span class="w"> </span><span class="n">Employee</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Terry&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">hr</span><span class="o">-&gt;</span><span class="n">showStudentInfo</span><span class="p">(</span><span class="o">*</span><span class="n">e</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">delete</span><span class="w"> </span><span class="n">e</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">delete</span><span class="w"> </span><span class="n">hr</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>HRManager 可以访问员工的私有信息，但是员工不可以访问HR的私有信息</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ol class="arabic simple">
+<li><p>友元关系是单向的，类A是类B的朋友，但类B不一定是类A的朋友</p></li>
+<li><p>友元关系不能被继承</p></li>
+<li><p>友元关系不具有传递性，类B是类A的朋友，类C是类B的朋友，但类C不一定是类A的朋友</p></li>
+</ol>
+</div>
+<p>We can also use a friend Class in C++ using the friend keyword. For example,</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ClassB</span><span class="p">;</span>
+
+<span class="k">class</span> <span class="nc">ClassA</span> <span class="p">{</span>
+   <span class="o">//</span> <span class="n">ClassB</span> <span class="ow">is</span> <span class="n">a</span> <span class="n">friend</span> <span class="k">class</span> <span class="nc">of</span> <span class="n">ClassA</span>
+   <span class="n">friend</span> <span class="k">class</span> <span class="nc">ClassB</span><span class="p">;</span>
+   <span class="o">...</span> <span class="o">..</span> <span class="o">...</span>
+<span class="p">}</span>
+
+<span class="k">class</span> <span class="nc">ClassB</span> <span class="p">{</span>
+   <span class="o">...</span> <span class="o">..</span> <span class="o">...</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>When a class is declared a friend class, all the member functions of the friend class become friend functions.</p>
+<p>Since ClassB is a friend class, we can access all members of ClassA from inside ClassB.</p>
+<p>However, we cannot access members of ClassB from inside ClassA. It is because friend relation in C++ is only granted, not taken.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Cplus</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="libstdc%2B%2B_2_9_1/index.html">Libstd c++ 2.9.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Operator_overloading/index.html">C++ Operator overloading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="access_modifiers.html">Access Modifiers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="references.html">References (or Aliases)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="const.html">const</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functemplate.html">Function template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="passarguments.html">Pass arguments to function</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Friend class and function</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#friend-function">Friend function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#friend-class">Friend Class</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="abstract.html">Abstract Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="copyconstructor.html">Copy constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rvalue.html">Cplus Rvalue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lvalue_and_rvalue.html">lvalue &amp;&amp; rvalue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="placement_new.html">Placement new operator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="template/index.html">Template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cast/index.html">C++ Cast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="decltype.html">Decltype</a></li>
+<li class="toctree-l2"><a class="reference internal" href="explicit_implicit.html">Explicit and Implicit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="constructor.html">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="typedef_typename.html">typedef typename</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Cplus</a><ul>
+      <li>Previous: <a href="passarguments.html" title="previous chapter">Pass arguments to function</a></li>
+      <li>Next: <a href="abstract.html" title="next chapter">Abstract Class</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/cplus/friend.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

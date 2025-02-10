@@ -1,0 +1,14 @@
+===============================
+ Launch up Debian VM with Qemu
+===============================
+
+
+.. code-block:: console
+
+   qemu-system-x86_64 -cpu host -smp 16 -m 8192 \
+       -hda  /run/media/sda1/debian/debian.qcow2  \
+       -cdrom /run/media/sda1/debian/debian-12.6.0-amd64-DVD-1.iso  \
+       --enable-kvm -vga virtio -vnc :0 -device e1000,netdev=net0 \
+       -netdev user,id=net0,hostfwd=tcp::5555-:22
+
+   

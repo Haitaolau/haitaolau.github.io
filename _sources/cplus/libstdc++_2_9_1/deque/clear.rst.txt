@@ -1,0 +1,41 @@
+=========
+Clear
+=========
+
+
+.. note::
+
+   最终需要保留一个缓冲区，这是deque的策略，就是deque的最初始的状态
+
+
+.. code-block:: cpp
+
+	template <class _Tp, class _Alloc> 
+	void deque<_Tp,_Alloc>::clear()
+	{
+	  //针对头尾以外的每一个缓冲区
+	  for (_Map_pointer __node = _M_start._M_node + 1;
+	       __node < _M_finish._M_node;
+	       ++__node) {
+	       //将缓冲区的所有元素析构掉，调用destroy的第二版
+	    destroy(*__node, *__node + _S_buffer_size());
+	    //释放缓冲区（node节点）
+	    _M_deallocate_node(*__node);
+	  }
+	
+	  //至少有头尾两个缓冲区node
+	  if (_M_start._M_node != _M_finish._M_node) {
+	     //析构掉头缓冲区内的所有元素
+	    destroy(_M_start._M_cur, _M_start._M_last);
+	    //析构掉尾缓冲区内的所有元素
+	    destroy(_M_finish._M_first, _M_finish._M_cur);
+	    //释放最后一个缓冲区，第一个缓冲区留下
+	    _M_deallocate_node(_M_finish._M_first);
+	  }
+	  else //只有一个缓冲区
+	    //析构这个缓冲区内的所有元素，但是并不释放这个node点，不需要
+	    //调用 _M_deallocate_node（）
+	    destroy(_M_start._M_cur, _M_finish._M_cur);
+	
+	  _M_finish = _M_start;
+	}

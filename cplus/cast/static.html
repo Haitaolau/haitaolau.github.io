@@ -1,0 +1,362 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>C++ static Cast &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Const_cast" href="const.html" />
+    <link rel="prev" title="C++ Cast" href="index.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="c-static-cast">
+<h1>C++ static Cast<a class="headerlink" href="#c-static-cast" title="Permalink to this heading">¶</a></h1>
+<p>This is the simplest type of cast that can be used. It is a compile-time cast. It does things like implicit conversions between types (such as int to float, or pointer to void*), and it can also call explicit conversion functions.</p>
+<p>Syntax:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">static_cast</span><span class="w"> </span><span class="o">&lt;</span><span class="n">dest_type</span><span class="o">&gt;</span><span class="w"> </span><span class="p">(</span><span class="n">source</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<p>The return value of static_cast will be of dest_type.</p>
+<p>static_cast&lt;&gt;是最常用的类型转换运算符，主要执行非多态的转换，用于代替C语言中通常的转换操作。static_cast&lt;&gt;可以实现下列转换</p>
+<ol class="arabic simple">
+<li><p>基本数据类型之间的转换</p></li>
+<li><p>将任何类型转换为void类型</p></li>
+<li><p>把空指针转换成目标类型的指针</p></li>
+<li><p>用于类层次结构中基类和派生类之间指针或引用的转换。向上转换（派生类转换为基类）是安全的；向下转换（基类转换为派生类）没有动态类型检查，是不安全的</p></li>
+</ol>
+<p>Example:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// C++ Program to demonstrate</span>
+<span class="c1">// static_cast</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+<span class="n">using</span><span class="w"> </span><span class="n">namespace</span><span class="w"> </span><span class="n">std</span><span class="p">;</span><span class="w"></span>
+
+<span class="c1">// Driver code</span>
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">     </span><span class="kt">float</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">3.5</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">     </span><span class="c1">// Implicit type case</span>
+<span class="w">     </span><span class="c1">// float to int</span>
+<span class="w">     </span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">f</span><span class="p">;</span><span class="w"></span>
+<span class="w">     </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;The Value of a: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">a</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">     </span><span class="c1">// using static_cast for float to int</span>
+<span class="w">     </span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">f</span><span class="p">);</span><span class="w"></span>
+<span class="w">     </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">The Value of b: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">b</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Output</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">The Value of a: 3</span>
+<span class="go">The Value of b: 3</span>
+</pre></div>
+</div>
+<section id="static-cast-for-primitive-data-type-pointers">
+<h2>1. static_cast for primitive data type pointers:<a class="headerlink" href="#static-cast-for-primitive-data-type-pointers" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// C++ Program to demonstrate</span>
+<span class="c1">// static_cast char* to int*</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+<span class="n">using</span><span class="w"> </span><span class="n">namespace</span><span class="w"> </span><span class="n">std</span><span class="p">;</span><span class="w"></span>
+
+<span class="c1">// Driver code</span>
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w"></span>
+<span class="kt">char</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sc">&#39;a&#39;</span><span class="p">;</span><span class="w"></span>
+
+<span class="c1">// Pass at compile time,</span>
+<span class="c1">// may fail at run time</span>
+<span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">q</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">c</span><span class="p">;</span><span class="w"></span>
+<span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">*&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="n">c</span><span class="p">);</span><span class="w"></span>
+<span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>output:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">error: invalid &#39;static_cast&#39; from type &#39;int*&#39; to type &#39;char*&#39;</span>
+</pre></div>
+</div>
+<p>This means that even if you think you can somehow typecast a particular object pointer into another but it’s illegal, the static_cast will not allow you to do this.</p>
+</section>
+<section id="converting-an-object-using-a-user-defined-conversion-operator">
+<h2>2. Converting an Object using a User-Defined Conversion Operator<a class="headerlink" href="#converting-an-object-using-a-user-defined-conversion-operator" title="Permalink to this heading">¶</a></h2>
+<p>static_cast is able to call the conversion operator of the class if it is defined. Let’s take another example of converting an object to and from a class.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// C++ Program to cast</span>
+<span class="c1">// class object to string</span>
+<span class="c1">// object</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;string&gt;</span><span class="cp"></span>
+<span class="n">using</span><span class="w"> </span><span class="n">namespace</span><span class="w"> </span><span class="n">std</span><span class="p">;</span><span class="w"></span>
+
+<span class="c1">// new class</span>
+<span class="n">class</span><span class="w"> </span><span class="n">integer</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">     </span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">;</span><span class="w"></span>
+
+<span class="n">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">     </span><span class="c1">// constructor</span>
+<span class="w">     </span><span class="n">integer</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">x_in</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"></span>
+<span class="w">             </span><span class="o">:</span><span class="w"> </span><span class="n">x</span><span class="p">{</span><span class="w"> </span><span class="n">x_in</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="w">     </span><span class="p">{</span><span class="w"></span>
+<span class="w">             </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="s">&quot; Constructor Called&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w">     </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">     </span><span class="c1">// user defined conversion operator to string type</span>
+<span class="w">     </span><span class="n">operator</span><span class="w"> </span><span class="n">string</span><span class="p">()</span><span class="w"></span>
+<span class="w">     </span><span class="p">{</span><span class="w"></span>
+<span class="w">             </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; Conversion Operator Called&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w">             </span><span class="k">return</span><span class="w"> </span><span class="n">to_string</span><span class="p">(</span><span class="n">x</span><span class="p">);</span><span class="w"></span>
+<span class="w">     </span><span class="p">}</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+
+<span class="c1">// Driver code</span>
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">     </span><span class="n">integer</span><span class="w"> </span><span class="n">obj</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span><span class="w"></span>
+<span class="w">     </span><span class="n">string</span><span class="w"> </span><span class="n">str</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">obj</span><span class="p">;</span><span class="w"></span>
+<span class="w">     </span><span class="n">obj</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">20</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">     </span><span class="c1">// using static_cast for typecasting</span>
+<span class="w">     </span><span class="n">string</span><span class="w"> </span><span class="n">str2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">static_cast</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(</span><span class="n">obj</span><span class="p">);</span><span class="w"></span>
+<span class="w">     </span><span class="n">obj</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">static_cast</span><span class="o">&lt;</span><span class="n">integer</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">30</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">     </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="mi">3</span><span class="w"> </span><span class="n">Constructor</span><span class="w"> </span><span class="n">Called</span><span class="w"></span>
+<span class="mi">3</span><span class="w"> </span><span class="n">Conversion</span><span class="w"> </span><span class="n">Operator</span><span class="w"> </span><span class="n">Called</span><span class="w"></span>
+<span class="mi">20</span><span class="w"> </span><span class="n">Constructor</span><span class="w"> </span><span class="n">Called</span><span class="w"></span>
+<span class="mi">20</span><span class="w"> </span><span class="n">Conversion</span><span class="w"> </span><span class="n">Operator</span><span class="w"> </span><span class="n">Called</span><span class="w"></span>
+<span class="mi">30</span><span class="w"> </span><span class="n">Constructor</span><span class="w"> </span><span class="n">Called</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="static-cast-for-inheritance-in-c">
+<h2>3. static_cast for Inheritance in C++<a class="headerlink" href="#static-cast-for-inheritance-in-c" title="Permalink to this heading">¶</a></h2>
+<p>static_cast can provide both upcasting and downcasting in case of inheritance. The following example demonstrates the use of static_cast in the case of upcasting.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// C++ Program to demonstrate</span>
+<span class="c1">// static_cast in inheritance</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+<span class="n">using</span><span class="w"> </span><span class="n">namespace</span><span class="w"> </span><span class="n">std</span><span class="p">;</span><span class="w"></span>
+<span class="n">class</span><span class="w"> </span><span class="n">Base</span><span class="w"></span>
+<span class="p">{};</span><span class="w"></span>
+<span class="n">class</span><span class="w"> </span><span class="n">Derived</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">public</span><span class="w"> </span><span class="n">Base</span><span class="w"></span>
+<span class="p">{};</span><span class="w"></span>
+
+<span class="c1">// Driver code</span>
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">Derived</span><span class="w"> </span><span class="n">d1</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="c1">// Implicit cast allowed</span>
+<span class="w">    </span><span class="n">Base</span><span class="o">*</span><span class="w"> </span><span class="n">b1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">Base</span><span class="o">*</span><span class="p">)(</span><span class="o">&amp;</span><span class="n">d1</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="c1">// upcasting using static_cast</span>
+<span class="w">    </span><span class="n">Base</span><span class="o">*</span><span class="w"> </span><span class="n">b2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">static_cast</span><span class="o">&lt;</span><span class="n">Base</span><span class="o">*&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="n">d1</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>In the above example, we inherited the base class as public. What happens when we inherit it as private? The below example demonstrate the following:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// C++ program to demonstrate</span>
+<span class="c1">// static_cast in case of</span>
+<span class="c1">// private inheritance</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+<span class="n">using</span><span class="w"> </span><span class="n">namespace</span><span class="w"> </span><span class="n">std</span><span class="p">;</span><span class="w"></span>
+
+<span class="n">class</span><span class="w"> </span><span class="n">Base</span><span class="w"></span>
+<span class="p">{};</span><span class="w"></span>
+
+<span class="n">class</span><span class="w"> </span><span class="n">Derived</span><span class="o">:</span><span class="w"> </span><span class="n">private</span><span class="w"> </span><span class="n">Base</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="c1">// Inherited private/protected</span>
+<span class="c1">// not public</span>
+<span class="p">};</span><span class="w"></span>
+
+<span class="c1">// Driver code</span>
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="n">Derived</span><span class="w"> </span><span class="n">d1</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">   </span><span class="c1">// Implicit type cast allowed</span>
+<span class="w">   </span><span class="n">Base</span><span class="o">*</span><span class="w"> </span><span class="n">b1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">Base</span><span class="o">*</span><span class="p">)(</span><span class="o">&amp;</span><span class="n">d1</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">   </span><span class="c1">// static_cast not allowed</span>
+<span class="w">   </span><span class="n">Base</span><span class="o">*</span><span class="w"> </span><span class="n">b2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">static_cast</span><span class="o">&lt;</span><span class="n">Base</span><span class="o">*&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="n">d1</span><span class="p">);</span><span class="w"></span>
+<span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Compile-time Error:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">[Error] &#39;Base&#39; is an inaccessible base of &#39;Derived&#39;</span>
+</pre></div>
+</div>
+<p>The above code will not compile even if you inherit it as protected.</p>
+<p>so to use static_cast in case of inheritance, the base class must be accessible, non virtual and unambiguous.</p>
+</section>
+<section id="static-cast-to-cast-to-and-from-void-pointer">
+<h2>4. static_cast to Cast ‘to and from’ Void Pointer<a class="headerlink" href="#static-cast-to-cast-to-and-from-void-pointer" title="Permalink to this heading">¶</a></h2>
+<p>static_cast operator allows casting from any pointer type to void pointer and vice versa.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// C++ program to demonstrate</span>
+<span class="c1">// static_cast to cast &#39;to and</span>
+<span class="c1">// from&#39; the void pointer</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+<span class="n">using</span><span class="w"> </span><span class="n">namespace</span><span class="w"> </span><span class="n">std</span><span class="p">;</span><span class="w"></span>
+
+<span class="c1">// Driver code</span>
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w"></span>
+<span class="w">   </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">static_cast</span><span class="o">&lt;</span><span class="kt">void</span><span class="o">*&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="n">i</span><span class="p">);</span><span class="w"></span>
+<span class="w">   </span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">ip</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">v</span><span class="p">);</span><span class="w"></span>
+<span class="w">   </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="o">*</span><span class="n">ip</span><span class="p">;</span><span class="w"></span>
+<span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">10</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Cplus</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../libstdc%2B%2B_2_9_1/index.html">Libstd c++ 2.9.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Operator_overloading/index.html">C++ Operator overloading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../access_modifiers.html">Access Modifiers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../references.html">References (or Aliases)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../const.html">const</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../functemplate.html">Function template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../passarguments.html">Pass arguments to function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../friend.html">Friend class and function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../abstract.html">Abstract Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../copyconstructor.html">Copy constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rvalue.html">Cplus Rvalue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../lvalue_and_rvalue.html">lvalue &amp;&amp; rvalue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../placement_new.html">Placement new operator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../template/index.html">Template</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">C++ Cast</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">C++ static Cast</a></li>
+<li class="toctree-l3"><a class="reference internal" href="const.html">Const_cast</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../decltype.html">Decltype</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../explicit_implicit.html">Explicit and Implicit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../constructor.html">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../typedef_typename.html">typedef typename</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Cplus</a><ul>
+  <li><a href="index.html">C++ Cast</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">C++ Cast</a></li>
+      <li>Next: <a href="const.html" title="next chapter">Const_cast</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../../_sources/cplus/cast/static.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

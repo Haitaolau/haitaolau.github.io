@@ -1,0 +1,45 @@
+=============
+Lxc container
+=============
+
+
+The configure file 
+===================
+
+.. code-block:: console 
+   
+   #lxc_configure.cfg
+   lxc.utsname = lxc0
+   lxc.rootfs = /run/media/sdb1/jdm/rootfs
+   
+   lxc.autodev = 1
+   
+   lxc.cgroup.cpuset.cpus = 2,3
+   lxc.tty = 6
+   lxc.pts = 512
+   
+   # prevent 100% cpu usage by systemd-journal the default is supposed to
+   # be zero anyway:
+   lxc.kmsg = 0
+   
+   # networking
+   #lxc.network.type = veth
+   #lxc.network.link=lxcbr0
+   #lxc.network.veth.pair = lxc0
+   #lxc.network.name = eth0
+   #lxc.network.hwaddr = ac:de:48:34:01:01
+   #lxc.network.flags = up
+   #lxc.network.ipv4 = 192.168.123.112/24
+   #lxc.network.ipv4.gateway = 192.168.123.1
+   
+   
+
+
+Start Lxc
+=============
+
+.. code-block:: console 
+
+   #lxc.sh
+   lxc-start -n lxc0 -f ./lxc_configure.cfg  -F -o ./lxc.log
+

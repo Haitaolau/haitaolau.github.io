@@ -1,0 +1,232 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Fold Expressions &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Universal References" href="universal_references.html" />
+    <link rel="prev" title="Variadic function templates" href="variadic_function.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="fold-expressions">
+<h1>Fold Expressions<a class="headerlink" href="#fold-expressions" title="Permalink to this heading">¶</a></h1>
+<p><a class="reference external" href="https://en.cppreference.com/w/cpp/language/fold">fold expression from cppreference.com</a></p>
+<p>C++ 17标准引入的，引入折叠表达式的主要目的是计算某个值（表达式的结果当然是一个值）。</p>
+<p>这个值的特殊性在于：它与所有可变参有关，而不是与单独某个可变参有关。</p>
+<p>换句话说，需要所有的可变参都参与计算，才能求出该值（如求所有可变参的和</p>
+<p>折叠表达式一般有4种格式:</p>
+<ul class="simple">
+<li><p>Unary Left Fold 一元左折</p></li>
+<li><p>Unary Right Fold 一元右折</p></li>
+<li><p>Binary Left Fold 二元左折</p></li>
+<li><p>Binary Right Fold 二元左折</p></li>
+</ul>
+<p>所谓 <strong>左折</strong> 就是参数从 <strong>左侧</strong> 开始计算；所谓 <strong>右折</strong> 就是参数从 <strong>右侧</strong> 开始计算</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+<span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span><span class="p">...</span><span class="w"> </span><span class="n">T</span><span class="o">&gt;</span><span class="w"></span>
+<span class="k">auto</span><span class="w"> </span><span class="n">sub_val_left</span><span class="p">(</span><span class="n">T</span><span class="p">...</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">(...</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">args</span><span class="p">);</span><span class="c1">//形式1，一元左折</span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span><span class="p">...</span><span class="w"> </span><span class="n">T</span><span class="o">&gt;</span><span class="w"></span>
+<span class="k">auto</span><span class="w"> </span><span class="n">sub_val_right</span><span class="p">(</span><span class="n">T</span><span class="p">...</span><span class="n">args</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="n">args</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">...);</span><span class="w"> </span><span class="c1">//形式2，一元右折</span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="kt">int</span><span class="w"> </span><span class="n">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">*</span><span class="n">argv</span><span class="p">[])</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">sub_val_left</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span><span class="w"> </span><span class="mi">40</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">sub_val_right</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span><span class="w"> </span><span class="mi">40</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>The output:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">wrsadmin@PEK-HLIU4-D1$</span>g++ -std<span class="o">=</span>c++17  template5.cpp  -o template5
+<span class="gp">wrsadmin@PEK-HLIU4-D1$</span>./template5
+<span class="go">-80</span>
+<span class="go">-20</span>
+<span class="gp">wrsadmin@PEK-HLIU4-D1$</span>
+</pre></div>
+</div>
+<p>sub_val_left(10, 20, 30, 40) ==&gt; <strong>((10-20)-30)-40</strong> = -80</p>
+<p>sub_val_right(10,20, 30, 40) ==&gt; <strong>10-(20-(30-40))</strong> = -20</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">std</span><span class="p">;</span><span class="w"></span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="p">...</span><span class="w"> </span><span class="n">T</span><span class="o">&gt;</span><span class="w"></span>
+<span class="k">auto</span><span class="w"> </span><span class="n">sub_val_left_b</span><span class="p">(</span><span class="n">T</span><span class="p">...</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="mi">220</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">args</span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="p">...</span><span class="w"> </span><span class="n">T</span><span class="o">&gt;</span><span class="w"></span>
+<span class="k">auto</span><span class="w"> </span><span class="n">sub_val_right_b</span><span class="p">(</span><span class="n">T</span><span class="p">...</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="n">args</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">220</span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+
+<span class="kt">int</span><span class="w"> </span><span class="n">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">*</span><span class="n">argv</span><span class="p">[])</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">sub_val_left_b</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span><span class="w"> </span><span class="mi">40</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">sub_val_right_b</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span><span class="w"> </span><span class="mi">40</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>The output:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">wrsadmin@PEK-HLIU4-D1$</span>g++ -std<span class="o">=</span>c++17  template6.cpp  -o template6
+<span class="gp">wrsadmin@PEK-HLIU4-D1$</span>./template6
+<span class="go">120</span>
+<span class="go">200</span>
+<span class="gp">wrsadmin@PEK-HLIU4-D1$</span>
+</pre></div>
+</div>
+<p>sub_val_left_b(10, 20, 30, 40)  ==&gt; <strong>(((220-10)-20)-30)-40</strong> = 120</p>
+<p>sub_val_right_b(10, 20, 30, 40) ==&gt; <strong>10-(20-(30-(40-220)))</strong> = 200</p>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Cplus</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../libstdc%2B%2B_2_9_1/index.html">Libstd c++ 2.9.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Operator_overloading/index.html">C++ Operator overloading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../access_modifiers.html">Access Modifiers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../references.html">References (or Aliases)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../const.html">const</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../functemplate.html">Function template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../passarguments.html">Pass arguments to function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../friend.html">Friend class and function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../abstract.html">Abstract Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../copyconstructor.html">Copy constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rvalue.html">Cplus Rvalue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../lvalue_and_rvalue.html">lvalue &amp;&amp; rvalue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../placement_new.html">Placement new operator</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Template</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="instantiation.html">Instantiation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="parameter_deduction.html">Parameter Deduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="overide.html">Overide</a></li>
+<li class="toctree-l3"><a class="reference internal" href="variadic_function.html">Variadic function templates</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Fold Expressions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="universal_references.html">Universal References</a></li>
+<li class="toctree-l3"><a class="reference internal" href="type_deduction.html">Type Deduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ref_and_cref.html">std::ref and std::cref</a></li>
+<li class="toctree-l3"><a class="reference internal" href="auto_type_deduction.html">Auto type deduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="perfect_forwarding.html">Perfect Forwarding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="trait.html">Traits</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../cast/index.html">C++ Cast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decltype.html">Decltype</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../explicit_implicit.html">Explicit and Implicit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../constructor.html">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../typedef_typename.html">typedef typename</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Cplus</a><ul>
+  <li><a href="index.html">Template</a><ul>
+      <li>Previous: <a href="variadic_function.html" title="previous chapter">Variadic function templates</a></li>
+      <li>Next: <a href="universal_references.html" title="next chapter">Universal References</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../../_sources/cplus/template/fold_expressions.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

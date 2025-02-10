@@ -1,0 +1,104 @@
+======================================
+ How to Check Debian package version?
+======================================
+
+.. contents:: Tables of Content
+   
+
+
+Debian Linux package version using apt-cache command
+====================================================
+
+
+The syntax:
+
+.. code-block:: console
+
+   root@localhost:~# apt-cache  policy libxfce4ui-utils
+   libxfce4ui-utils:
+     Installed: 4.18.2-2
+     Candidate: 4.18.2-2
+     Version table:
+    *** 4.18.2-2 100
+           100 /usr/share/dpkg/database/status
+   root@localhost:~# 
+   		
+
+
+Debian Linux package version using apt command
+==============================================
+
+The syntax:
+
+.. code-block:: console
+
+   root@localhost:~# apt list libxfce4ui-utils
+   Listing... Done
+   libxfce4ui-utils/now 4.18.2-2 amd64 [installed,local]
+   root@localhost:~# 
+   
+		
+Debian linux package version using dpkg command
+===============================================
+
+1. using dpkg -s
+----------------
+   
+The syntax:
+
+
+.. code-block:: console
+
+   root@localhost:~# dpkg -s libxfce4ui-utils
+   Package: libxfce4ui-utils
+   Status: install ok installed
+   Priority: optional
+   Section: xfce
+   Installed-Size: 240
+   Maintainer: Debian Xfce Maintainers <debian-xfce@lists.debian.org>
+   Architecture: amd64
+   Source: libxfce4ui
+   Version: 4.18.2-2
+   Depends: libc6 (>= 2.34), libepoxy0 (>= 1.2), libglib2.0-0 (>= 2.55.2), libgtk-3-0 (>= 3.16.2), libgtop-2.0-11 (>= 2.22.3), libx11-6, libxfce4ui-2-0 (>= 4.11.0), libxfce4util7 (>= 4.17.2)
+   Description: Utility files for libxfce4ui
+    This package contains the Xfce settings plugin and the utility files for
+    libxfce4ui-2-0 which are:
+      - xfce4-about
+   Homepage: https://docs.xfce.org/xfce/libxfce4ui/start
+   		
+
+
+2. using dpkg -l
+----------------
+
+.. code-block:: console
+
+   root@localhost:~# dpkg -l libxfce4ui-utils
+   Desired=Unknown/Install/Remove/Purge/Hold
+   | Status=Not/Inst/Conf-files/Unpacked/halF-conf/Half-inst/trig-aWait/Trig-pend
+   |/ Err?=(none)/Reinst-required (Status,Err: uppercase=bad)
+   ||/ Name             Version      Architecture Description
+   +++-================-============-============-=================================
+   ii  libxfce4ui-utils 4.18.2-2     amd64        Utility files for libxfce4ui
+   root@localhost:~# 
+
+   
+Debian Linux package version using pkg -v
+=========================================
+
+Depends on your package switches like -v or --version might be available to you:
+
+.. code-block:: console
+
+   root@localhost:~# export DISPLAY=:0.0
+   root@localhost:~# xfce4-about -V
+   
+   (xfce4-about:826): dbind-WARNING **: 08:09:00.195: AT-SPI: Error retrieving accessibility bus address: org.freedesktop.DBus.Error.ServiceUnknown: The name org.a11y.Bus was not provided by any .service files
+   xfce4-about 4.18.2 (Xfce 4.18)
+   
+   Copyright (c) 2008-2023
+   	The Xfce development team. All rights reserved.
+   
+   Please report bugs to <https://gitlab.xfce.org/xfce/libxfce4ui/-/issues>.
+   root@localhost:~# 
+   		

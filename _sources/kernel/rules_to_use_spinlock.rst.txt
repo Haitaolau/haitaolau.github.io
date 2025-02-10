@@ -1,0 +1,49 @@
+===========================
+Spinlock rules
+===========================
+
+1. When spinlock is used ?
+===========================
+
+Ans: In the following situations.
+
+    The thread that holds the lock is not allowed to sleep.
+    The thread that is waiting for a lock does not sleep, but spins in a tight loop.
+
+When properly used, spinlock can give higher performance than semaphore. Ex: Intrrrupt handler.
+
+2. What are the rules to use spinlocks?
+=======================================
+
+Ans:
+Rule - 1: Any code that holds the spinlock, can not relinquish the processor for any reason except to service
+interrupts ( sometimes not even then). So code holding spinlock can not sleep.
+
+Reason: suppose your driver holding spinlock goes to sleep. Ex: calls function copy_from_user() or copy_to_user(),
+        or kernel preemption kicks in so higher priority process pushed your code aside. Effectively the process
+        relinquishes the CPU holding spinlock.
+
+Now we do not know when the code will release the lock. If some other thread tries to obtain the same lock, it
+would spin for very long time. In the worst case it would result in deedlock.
+
+Kernel preemption case is handled by the spinlock code itself. Anytime kernel code holds a spinlock, preemption
+is disabled on the relevant processor. Even uniprocessor system must disable the preemption in this way.
+
+Rule - 2: Disable interrupts on the local CPU, while the spinlock is held.
+
+Reason: Support your driver take a spinlock that control access to the device
+        and then issues an interrupt. This causes the interrupt handler to run. Now the
+        interrupt handler also needs the lock to access the device. If the interrupt handler runs
+        on the same processor, it will start spinning. The driver code also can not run to release
+        the lock. SO the processor will spin for ever.
+
+Rule - 3: Spinlocks must be held for the minimum time possible.
+
+Reason: Long lock hold times also keeps the current processor from scheduling, meaning a higher
+        priority process may have to wait to get the CPU.
+
+So it impacts kernel latency (time a process may have to wait to be scheduled). Typically spinlocks
+should be held for the time duration, less than that CPU takes to do a contex switch between threads.
+
+Rule -4: if you have semaphores and spinlocks both to be taken. Then take semaphore first and then spinlock.
+

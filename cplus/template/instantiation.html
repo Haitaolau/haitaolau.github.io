@@ -1,0 +1,230 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Instantiation &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Parameter Deduction" href="parameter_deduction.html" />
+    <link rel="prev" title="Template" href="index.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="instantiation">
+<h1>Instantiation<a class="headerlink" href="#instantiation" title="Permalink to this heading">¶</a></h1>
+<p>编译的时候，编译器就会对这个函数模板进行实例化,
+用具体的“类型”代替“类型模板参数”的过程就叫作实例化（也称为代码生成器）</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#include &lt;iostream&gt;</span>
+<span class="n">using</span> <span class="n">namespace</span> <span class="n">std</span><span class="p">;</span>
+<span class="n">template</span> <span class="o">&lt;</span><span class="n">typename</span> <span class="n">T</span><span class="o">&gt;</span> <span class="n">T</span> <span class="n">Sub</span><span class="p">(</span><span class="n">T</span> <span class="n">tv1</span><span class="p">,</span> <span class="n">T</span> <span class="n">tv2</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="n">tv1</span> <span class="o">-</span> <span class="n">tv2</span><span class="p">;</span> <span class="p">}</span>
+
+<span class="nb">int</span> <span class="n">main</span><span class="p">(</span><span class="nb">int</span> <span class="n">argc</span><span class="p">,</span> <span class="n">char</span><span class="o">*</span> <span class="n">argv</span><span class="p">[]){</span>
+    <span class="nb">int</span> <span class="n">subv</span> <span class="o">=</span> <span class="n">Sub</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">);</span>
+    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s2">&quot;subv = &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">subv</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+    <span class="n">double</span> <span class="n">subv2</span><span class="o">=</span> <span class="n">Sub</span><span class="p">(</span><span class="mf">4.7</span> <span class="p">,</span> <span class="mf">2.1</span><span class="p">);</span>
+    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s2">&quot;subv2 = &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">subv2</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>针对int和double两种类型，每种类型都会被实例化一次，所以，
+Sub()函数模板一共会被实例化两次，相当于产生了两个Sub()函数</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>wrsadmin@PEK-HLIU4-D1:~/workspace/tmp$ objdump -t template1  | grep Sub
+000000000000132b  w    F .text  000000000000001e              _Z3SubIdET_S0_S0_
+0000000000001315  w    F .text  0000000000000016              _Z3SubIiET_S0_S0_
+wrsadmin@PEK-HLIU4-D1:~/workspace/tmp$ objdump -d template1
+
+[...]
+0000000000001315 &lt;_Z3SubIiET_S0_S0_&gt;:
+    1315:       f3 0f 1e fa             endbr64
+    1319:       55                      push   %rbp
+    131a:       48 89 e5                mov    %rsp,%rbp
+    131d:       89 7d fc                mov    %edi,-0x4(%rbp)
+    1320:       89 75 f8                mov    %esi,-0x8(%rbp)
+    1323:       8b 45 fc                mov    -0x4(%rbp),%eax
+    1326:       2b 45 f8                sub    -0x8(%rbp),%eax
+    1329:       5d                      pop    %rbp
+    132a:       c3                      retq
+
+000000000000132b &lt;_Z3SubIdET_S0_S0_&gt;:
+    132b:       f3 0f 1e fa             endbr64
+    132f:       55                      push   %rbp
+    1330:       48 89 e5                mov    %rsp,%rbp
+    1333:       f2 0f 11 45 f8          movsd  %xmm0,-0x8(%rbp)
+    1338:       f2 0f 11 4d f0          movsd  %xmm1,-0x10(%rbp)
+    133d:       f2 0f 10 45 f8          movsd  -0x8(%rbp),%xmm0
+    1342:       f2 0f 5c 45 f0          subsd  -0x10(%rbp),%xmm0
+    1347:       5d                      pop    %rbp
+    1348:       c3                      retq
+    1349:       0f 1f 80 00 00 00 00    nopl   0x0(%rax)
+</pre></div>
+</div>
+<p>实例化之后的函数名分别为Sub&lt;int&gt;和Sub&lt;double&gt;</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/*</span> <span class="n">First</span> <span class="n">instantiated</span> <span class="n">from</span><span class="p">:</span> <span class="n">insights</span><span class="o">.</span><span class="n">cpp</span><span class="p">:</span><span class="mi">8</span> <span class="o">*/</span>
+<span class="c1">#ifdef INSIGHTS_USE_TEMPLATE</span>
+<span class="n">template</span><span class="o">&lt;&gt;</span>
+<span class="nb">int</span> <span class="n">Sub</span><span class="o">&lt;</span><span class="nb">int</span><span class="o">&gt;</span><span class="p">(</span><span class="nb">int</span> <span class="n">tv1</span><span class="p">,</span> <span class="nb">int</span> <span class="n">tv2</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">return</span> <span class="n">tv1</span> <span class="o">-</span> <span class="n">tv2</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="c1">#endif</span>
+
+
+<span class="o">/*</span> <span class="n">First</span> <span class="n">instantiated</span> <span class="n">from</span><span class="p">:</span> <span class="n">insights</span><span class="o">.</span><span class="n">cpp</span><span class="p">:</span><span class="mi">10</span> <span class="o">*/</span>
+<span class="c1">#ifdef INSIGHTS_USE_TEMPLATE</span>
+<span class="n">template</span><span class="o">&lt;&gt;</span>
+<span class="n">double</span> <span class="n">Sub</span><span class="o">&lt;</span><span class="n">double</span><span class="o">&gt;</span><span class="p">(</span><span class="n">double</span> <span class="n">tv1</span><span class="p">,</span> <span class="n">double</span> <span class="n">tv2</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">return</span> <span class="n">tv1</span> <span class="o">-</span> <span class="n">tv2</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="c1">#endif</span>
+</pre></div>
+</div>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Cplus</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../libstdc%2B%2B_2_9_1/index.html">Libstd c++ 2.9.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Operator_overloading/index.html">C++ Operator overloading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../access_modifiers.html">Access Modifiers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../references.html">References (or Aliases)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../const.html">const</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../functemplate.html">Function template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../passarguments.html">Pass arguments to function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../friend.html">Friend class and function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../abstract.html">Abstract Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../copyconstructor.html">Copy constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rvalue.html">Cplus Rvalue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../lvalue_and_rvalue.html">lvalue &amp;&amp; rvalue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../placement_new.html">Placement new operator</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Template</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Instantiation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="parameter_deduction.html">Parameter Deduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="overide.html">Overide</a></li>
+<li class="toctree-l3"><a class="reference internal" href="variadic_function.html">Variadic function templates</a></li>
+<li class="toctree-l3"><a class="reference internal" href="fold_expressions.html">Fold Expressions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="universal_references.html">Universal References</a></li>
+<li class="toctree-l3"><a class="reference internal" href="type_deduction.html">Type Deduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ref_and_cref.html">std::ref and std::cref</a></li>
+<li class="toctree-l3"><a class="reference internal" href="auto_type_deduction.html">Auto type deduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="perfect_forwarding.html">Perfect Forwarding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="trait.html">Traits</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../cast/index.html">C++ Cast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decltype.html">Decltype</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../explicit_implicit.html">Explicit and Implicit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../constructor.html">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../typedef_typename.html">typedef typename</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../licence/index.html">OpenSource License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Cplus</a><ul>
+  <li><a href="index.html">Template</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Template</a></li>
+      <li>Next: <a href="parameter_deduction.html" title="next chapter">Parameter Deduction</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../../_sources/cplus/template/instantiation.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

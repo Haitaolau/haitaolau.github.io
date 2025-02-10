@@ -1,0 +1,53 @@
+============
+ostree log
+============
+
+.. contents:: Table of content
+
+NAME
+======
+
+::
+
+   ostree-log - Show log starting at a commit or ref
+
+
+SYNOPSIS
+==========
+
+::
+
+   ostree log [OPTIONS...] {REF}
+
+
+DESCRIPTION
+=============
+
+::
+
+   Shows a log of commits to a given ref or branch. Includes commit checksum, timestamp, and commit message.
+
+
+OPTIONS
+=========
+
+::
+
+   --raw
+
+     Show raw variant data.
+
+
+EXAMPLE
+=======
+
+.. code-block:: console
+
+   root@32b81b5fc0ca:/usr/src/tmp/example# ostree log --repo=/usr/src/tmp/example/ostree/repo/ elxr/amd64
+   commit 320d15f07a1c9e5222778dfa6889b084a1a0968c9a9b53c16ab03f7f9ba1235e
+   ContentChecksum:  4aae26ac48ac1386e52b7f7b7a7c59950c628902df385960c49f9208ff96ad0e
+   Date:  2024-08-19 08:14:55 +0000
+   
+       Initial commit
+   
+   		

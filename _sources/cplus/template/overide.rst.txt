@@ -1,0 +1,50 @@
+===================
+Overide
+===================
+
+
+函数模板的重载与函数的重载比较类似，函数（函数模板）重载的概念是：
+函数（函数模板）名字相同，但参数数量或参数类型不同。编译器会根据调
+用时给出的具体实参，选择一个编译器认为最合适的函数模板实例化和调用
+
+
+.. code-block::
+   
+   #include <iostream>
+
+   template<typename T>
+   void myfunc(T tmpvalue){
+       std::cout << "myfunc(T templave) executed" << std::endl;
+   }
+   
+   template<typename T>
+   void myfunc(T* tmpvalue){
+       std::cout << "myfunc(T* templave) executed" << std::endl;
+   }
+   
+   
+   int main(int argc, char* argv[]){
+       myfunc(12);
+       char* p = nullptr;
+       myfunc(p);
+   
+       return 0;
+   }
+
+The result: 
+
+PEK-HLIU4-D1$./template2
+myfunc(T templave) executed
+myfunc(T* templave) executed
+
+当调用myfunc(p);代码行时，编译器执行的是形参为T*类型的函数模板
+
+
+函数模板和函数可以同时存在，此时该函数也是一种重载，增加下面的myfunc()函数定义，注意其形参的形式
+
+
+myfunc(int templave) executed
+myfunc(T* templave) executed
+
+
+myfunc(12);代码行调用的是普通的myfunc()函数，而不是实例化后的myfunc()函数模板。当普通函数和函数模板都比较合适的时候，编译器会优先选择普通函数执行
