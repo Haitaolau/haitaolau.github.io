@@ -1,0 +1,209 @@
+=====================
+ Build and Test STIG
+=====================
+
+
+
+.. contents:: Tables of Contents
+	      
+
+1. Establish testing envrionment
+==================================
+
+
+1.1. Download ISO image
+-----------------------
+
+.. code-block:: bash
+
+   hliu4@pek-lpd-susbld:hliu4$curl -O https://downloads.elxr.dev/elxr-12.7.0.0-amd64-CD-1.iso
+     % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                    Dload  Upload   Total   Spent    Left  Speed
+   100  647M  100  647M    0     0  18.2M      0  0:00:35  0:00:35 --:--:-- 18.7M
+   hliu4@pek-lpd-susbld:hliu4$
+   		
+
+
+1.2. Install
+------------
+
+
+.. code-block:: bash
+
+   #!/bin/bash 
+   
+   test -f elxr-dev.qcow2 && rm elxr-dev.qcow2
+   
+   qemu-img create -f qcow2 elxr-dev.qcow2 60G
+   
+   sudo qemu-system-x86_64 -cpu host -smp 2  -m 1024 -hda elxr-dev.qcow2 -cdrom elxr-12.9.0.0-amd64-CD-1.iso -boot d --enable-kvm -vga virtio -vnc :3
+
+
+Here is the above file :download:`install.sh <src/install.sh>`
+
+
+1.3. Boot Up
+------------
+
+.. code-block:: bash
+
+   sudo qemu-system-x86_64 -cpu host \
+           -smp 8 -m 8192 \
+           -hda elxr-dev.qcow2 \
+           -cdrom elxr-12.9.0.0-amd64-CD-1.iso \
+           -enable-kvm -vga virtio -vnc :3 \
+           -device e1000,netdev=net0 -netdev user,id=net0,hostfwd=tcp::5555-:22		
+   
+Here is the above file :download:`start.sh <src/start.sh>`
+
+
+1.4. Install Stig's packages
+----------------------------
+
+
+.. code-block:: bash
+
+   apt update && apt install -y ssg-base ssg-debderived openscap-scanner
+
+2. Tesing
+==========
+
+
+2.1. Remediation during scanning
+--------------------------------
+
+ .. code-block:: bash
+
+   oscap xccdf eval --remediate --profile xccdf_org.ssgproject.content_profile_stig --results-arf results-first.xml --report first-run.html ssg-elxr12-ds.xml
+   
+   oscap xccdf eval --remediate --profile xccdf_org.ssgproject.content_profile_stig --results-arf results-second.xml --report second-run.html ssg-elxr12-ds.xml
+   
+
+
+2.2 Remediation with remediation script
+---------------------------------------
+
+
+
+OpenSCAP can generate remediation scripts in Bash for security compliance issues identified during a scan.
+
+These scripts automatically apply fixes to the system, bringing it into compliance with the specified security policy.
+
+To generate a Bash remediation script, the oscap xccdf eval command is used with the --remediate and --fix-type bash options.
+
+This process involves scanning the system against an SCAP policy, identifying non-compliant settings, and then generating a Bash script to correct those settings.
+
+
+2.2.1 scan the system
+~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+   oscap xccdf eval --profile stig --cpe /usr/share/xml/scap/ssg/content/ssg-elxr12-cpe-dictionary.xml \
+                    --results audit-first.xml --report first-audit.html \
+                    /usr/share/xml/scap/ssg/content/ssg-elxr12-xccdf.xml
+
+
+2.2.2 generate the fix script
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+
+   oscap xccdf generate --profile stig fix --fix-type bash /usr/share/xml/scap/ssg/content/ssg-elxr12-xccdf.xml > fix.sh
+
+
+2.2.3 apply the remediation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+		
+   chmod +x fix.sh
+   ./fix.sh
+   reboot
+
+
+The script must be run with root privileges to apply the changes. Verify the changes.
+
+2.2.4. re-scan the system
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: bash 
+
+   oscap xccdf eval --profile stig \
+                    --cpe /usr/share/xml/scap/ssg/content/ssg-elxr12-cpe-dictionary.xml \
+                    --results audit-second.xml \
+		    --report second-audit.html \
+		    /usr/share/xml/scap/ssg/content/ssg-elxr12-xccdf.xml
+      
+
+After running the script, it's recommended to re-scan the system to ensure that the fixes were applied correctly and the system is now compliant.
+
+
+It's important to test these scripts in a non-production environment first, as they can make significant changes to the system.
+
+
+3. build elxr stig xml using docker
+===================================
+   
+3.1 create docker
+------------------
+
+
+.. code-block:: bash
+
+   #!/bin/bash 
+
+   sudo docker run -i -t --privileged -v $(pwd):/usr/src \
+            -v $(pwd)/data:/var/tmp/tiler \
+            -v /dev:/dev \
+            -v /run:/run \
+            -v /sys:/sys \
+            -v /var/tmp:/var/tmp \
+            -v /var/www/html:/var/www/html \
+            --name "hliu4-base-`date+%F`" \
+            registry.gitlab.com/elxr/ci/pipeline/base:bookworm
+   		
+   
+Here is the above file :download:`base-docker <src/base-docker>`
+
+
+3.2 clone the source
+--------------------
+
+.. code-block:: bash
+
+   git clone https://gitlab.com/elxr/packages/scap-security-guide.git
+
+
+3.3 install the build-dependencies
+----------------------------------
+
+.. code-block:: bash
+
+   apt build-dep scap-security-guide
+
+
+3.4 build scap-security-guide with dpkg-buildpackage
+----------------------------------------------------
+
+
+.. code-block:: bash
+
+   dpkg-buildpackage -us -uc -ui
+
+3.5 build scap-security-guide manually
+--------------------------------------
+
+.. code-block:: bash
+
+   cd /work/scap-security-guide/debian/patches
+   
+   cat series | xargs git am
+   
+   cd /work/scap-security-guide/build
+   
+   cmake ../ && make -j4 elxr12		
+   
+
+   
