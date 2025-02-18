@@ -38,55 +38,97 @@
             
   <section id="emacs-commands">
 <h1>Emacs Commands<a class="headerlink" href="#emacs-commands" title="Permalink to this heading">¶</a></h1>
-<dl class="simple">
-<dt>C- means “control key”, Hold down the control key while</dt><dd><p>pressing the next key</p>
-</dd>
-<dt>M- means “meta key”, (“Escape” in the lab, on other</dt><dd><p>computers sometimes “Alt”). For meta commands with the
-Escape key, press the Escape key and then release it,
-then press the other key. Thus M-f stands for the
-keyboard sequence “press and release the Escape key”, ”
-press f”.</p>
-</dd>
-</dl>
-<p><strong>C-x C-s</strong>         Save file</p>
-<p><strong>C-x C-w</strong>         Write file out with new name (i.e. ‘save as’)</p>
-<p><strong>C-x C-f</strong>         Find (open) file. (If the file doesn’t exist, it will be created.)</p>
-<p><strong>C-x C-c</strong>         Quit Emacs</p>
-<p><strong>C-z</strong>                 Leave Emacs temporarily (return with “fg” (“foreground”))</p>
-<p><strong>C-g</strong>                 Abort an Emacs command (get out of trouble)</p>
-<p><strong>C-_</strong>                  Undo</p>
-<p><strong>C-x 2</strong>             Split Emacs screen into two horizontally</p>
-<p><strong>C-x 3</strong>              Split Emacs screen into two vertically</p>
-<p><strong>C-x o</strong>             move from one half screen to another</p>
-<p><strong>C-x 1</strong>             Return to only one screen (whichever your cursor is in)</p>
-<p><strong>c-x C-b</strong>         List the current buffers</p>
-<p><strong>C-x b</strong>             Switch to a different active buffer</p>
-<p><strong>C-k</strong>               Kill text from cursor to end of line (Cut text out)</p>
-<p><strong>C-y</strong>               Yank back killed text. (Paste text in)</p>
-<p><strong>C-l</strong>               Redisplay the screen if it is garbled</p>
-<p>Commands to move about the screen (can also use the arrow keys.)</p>
-<p><strong>C-f</strong>               Move cursor forward one character</p>
-<p><strong>C-b</strong>  Move cursor backwards one character</p>
-<p><strong>C-n</strong>               Move cursor to next line</p>
-<p><strong>C-p</strong>               Move cursor to previous line</p>
-<p><strong>C-a</strong>               Move cursor to beginning of line</p>
-<p><strong>C-e</strong>               Move cursor to end of line</p>
-<p><strong>C-v</strong>               Go forward one screen</p>
-<p><strong>M-v</strong>               Go backward one screen</p>
-<p><strong>M-f</strong>               Move cursor forward one word</p>
-<p><strong>M-b</strong>               Move cursor backwards one word</p>
-<p><strong>M-&gt;</strong>               Move to end of file</p>
-<p><strong>M-&lt;</strong>               Move to beginning of file</p>
-<p><strong>C-u 7 C-n</strong>     Move forward 7 lines</p>
-<p><strong>C-u 10 C-p</strong>     Move back 10 lines</p>
-<p>To go to a specific line: Type M-x goto-line &lt;Enter&gt;, then
-type the line number followed by &lt;Enter&gt;. There are also
-shortcuts. Type the command “help -q emacs goto” in a local
-window to find out about it. (Local shortcut is M-x #).</p>
-<p>Emacs has an excellent on-line help tutorial. To use it,
-start up emacs. When you are in emacs, type C-h, then type
-the letter “t”. Follow directions. When you wish to leave
-the tutorial, type C-x C-c.</p>
+<section id="basic-movement-and-editing">
+<h2>Basic Movement and Editing<a class="headerlink" href="#basic-movement-and-editing" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">C-f</span></code> (Forward char): Move cursor one character forward.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">C-b</span></code> (Backward char): Move cursor one character backward.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">C-p</span></code> (Previous line): Move cursor one line up.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">C-n</span></code> (Next line): Move cursor one line down.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">M-f</span></code> (Forward word): Move cursor one word forward.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">M-b</span></code> (Backward word): Move cursor one word backward.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">C-a</span></code> (Beginning of line): Move cursor to the beginning of the line.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">C-e</span></code> (End of line): Move cursor to the end of the line.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">M-a</span></code> (Beginning of sentence): Move cursor to the beginning of the sentence.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">M-e</span></code> (End of sentence): Move cursor to the end of the sentence.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">M-&lt;</span></code> (Beginning of buffer): Move cursor to the beginning of the buffer (file).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">M-&gt;</span></code> (End of buffer): Move cursor to the end of the buffer (file).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">C-v</span></code> (Scroll down): Scroll the buffer down one screenful.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">M-v</span></code> (Scroll up): Scroll the buffer up one screenful.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">C-g</span></code> (Quit/Cancel): Abort the current command or operation.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">C-x</span> <span class="pre">C-x</span></code> (Exchange point and mark): Swap the cursor position (point) and the mark (a saved cursor position).</p></li>
+</ul>
+</section>
+<section id="working-with-text-kill-yank-copy-paste">
+<h2>Working with Text (Kill/Yank/Copy/Paste)<a class="headerlink" href="#working-with-text-kill-yank-copy-paste" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">C-d</span></code> (Delete char): Delete the character under the cursor.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DEL</span></code> (Delete backward char): Delete the character to the left of the cursor.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">M-d</span></code> (Kill word): Delete the word to the right of the cursor.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">M-DEL</span></code> (Kill backward word): Delete the word to the left of the cursor.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">C-k</span></code> (Kill line): Delete from the cursor to the end of the line.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">C-y</span></code> (Yank): Paste (insert) the most recently killed (deleted or copied) text.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">M-y</span></code> (Yank pop): Cycle through previously killed text in the kill ring.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">C-w</span></code> (Kill region): Delete the selected text (region).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">C-x</span> <span class="pre">C-w</span></code> (Copy region): Copy the selected text (region).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">C-x</span> <span class="pre">h</span></code> (Mark whole buffer): Select the entire buffer.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">C-x</span> <span class="pre">u</span></code> (Undo): Undo the last action.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">C-x</span> <span class="pre">C-s</span></code> (Save buffer): Save the current file.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">C-x</span> <span class="pre">C-f</span></code> (Find file): Open a file.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">C-x</span> <span class="pre">C-b</span></code> (Switch buffer): Switch to another open buffer (file).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">C-x</span> <span class="pre">k</span></code> (Kill buffer): Close a buffer (file).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">C-x</span> <span class="pre">i</span></code> (Insert file): Insert the contents of a file into the current buffer.</p></li>
+</ul>
+</section>
+<section id="searching-and-replacing">
+<h2>Searching and Replacing<a class="headerlink" href="#searching-and-replacing" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">C-s</span></code> (Incremental search forward): Start an incremental search forward.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">C-r</span></code> (Incremental search backward): Start an incremental search backward.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">M-x</span> <span class="pre">replace-string</span></code>: Replace all occurrences of one string with another.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">M-x</span> <span class="pre">query-replace</span></code>: Replace strings interactively.</p></li>
+</ul>
+</section>
+<section id="working-with-windows-and-buffers-managing-layout">
+<h2>Working with Windows and Buffers (Managing Layout)<a class="headerlink" href="#working-with-windows-and-buffers-managing-layout" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">C-x</span> <span class="pre">2</span></code> (Split window vertically): Split the current window into two vertical windows.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">C-x</span> <span class="pre">3</span></code> (Split window horizontally): Split the current window into two horizontal windows.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">C-x</span> <span class="pre">o</span></code> (Other window): Switch to the other window.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">C-x</span> <span class="pre">1</span></code> (One window): Close all other windows.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">C-x</span> <span class="pre">0</span></code> (Delete window): Close the current window.</p></li>
+</ul>
+</section>
+<section id="help-and-documentation-learning-more">
+<h2>Help and Documentation (Learning More)<a class="headerlink" href="#help-and-documentation-learning-more" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">C-h</span></code> (Help): Access the Emacs help system.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">C-h</span> <span class="pre">t</span></code> (Emacs tutorial): Start the Emacs tutorial.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">C-h</span> <span class="pre">i</span></code> (Info): Browse the Emacs Info documentation.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">C-h</span> <span class="pre">k</span></code> (Describe key): Describe the function bound to a specific key.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">C-h</span> <span class="pre">f</span></code> (Describe function): Describe a specific Emacs function.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">C-h</span> <span class="pre">v</span></code> (Describe variable): Describe a specific Emacs variable.</p></li>
+</ul>
+</section>
+<section id="important-notes">
+<h2>Important Notes<a class="headerlink" href="#important-notes" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">C-</span></code> means Ctrl key.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">M-</span></code> means Alt key (or Meta key).</p></li>
+<li><p>Emacs is highly customizable.</p></li>
+<li><p>Use the Emacs help system (<code class="docutils literal notranslate"><span class="pre">C-h</span></code>).</p></li>
+</ul>
+</section>
+<section id="tips-for-learning">
+<h2>Tips for Learning<a class="headerlink" href="#tips-for-learning" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Start with the tutorial (<code class="docutils literal notranslate"><span class="pre">C-h</span> <span class="pre">t</span></code>).</p></li>
+<li><p>Practice regularly.</p></li>
+<li><p>Use the help system (<code class="docutils literal notranslate"><span class="pre">C-h</span></code>).</p></li>
+<li><p>Don’t try to learn everything at once.</p></li>
+<li><p>Customize Emacs.</p></li>
+</ul>
+</section>
 </section>
 
 
@@ -117,7 +159,16 @@ the tutorial, type C-x C-c.</p>
 <li class="toctree-l1"><a class="reference internal" href="../andorid/index.html">Andorid</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../yocto/index.html">Yocto</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Emacs</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Emacs Commands</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Emacs Commands</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#basic-movement-and-editing">Basic Movement and Editing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#working-with-text-kill-yank-copy-paste">Working with Text (Kill/Yank/Copy/Paste)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#searching-and-replacing">Searching and Replacing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#working-with-windows-and-buffers-managing-layout">Working with Windows and Buffers (Managing Layout)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#help-and-documentation-learning-more">Help and Documentation (Learning More)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#important-notes">Important Notes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tips-for-learning">Tips for Learning</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="0007.html">Emacs Commands: Blank Lines</a></li>
 <li class="toctree-l2"><a class="reference internal" href="0001.html">How do I insert &lt;some text&gt; at the beginning of every line?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="0002.html">How do I find the function definition?</a></li>

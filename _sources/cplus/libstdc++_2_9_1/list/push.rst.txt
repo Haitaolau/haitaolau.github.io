@@ -2,9 +2,6 @@
 push
 =======================
 
-Last change: |today|
-
-
 Please refer to :ref:`list_insert`
 
 .. code-block:: c++

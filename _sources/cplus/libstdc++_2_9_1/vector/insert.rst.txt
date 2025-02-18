@@ -2,8 +2,6 @@
 Insert function
 ==========================
 
-Last change: |today|
-
 .. code-block:: c++
 
    template <class _Tp, class _Alloc>

@@ -2,9 +2,6 @@
 Constructor & insert
 ==========================
 
-Last change: |today|
-
-
 Constructor
 ----------------
 

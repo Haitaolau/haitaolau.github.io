@@ -1,89 +1,86 @@
-===================
 Emacs Commands
-===================
+==============
 
-.. include:: <isonum.txt>
+Basic Movement and Editing
+--------------------------
 
-C- means "control key", Hold down the control key while
-   pressing the next key
-M- means "meta key", (“Escape” in the lab, on other
-   computers sometimes “Alt”). For meta commands with the
-   Escape key, press the Escape key and then release it,
-   then press the other key. Thus M-f stands for the
-   keyboard sequence "press and release the Escape key", "
-   press f".
+*   ``C-f`` (Forward char): Move cursor one character forward.
+*   ``C-b`` (Backward char): Move cursor one character backward.
+*   ``C-p`` (Previous line): Move cursor one line up.
+*   ``C-n`` (Next line): Move cursor one line down.
+*   ``M-f`` (Forward word): Move cursor one word forward.
+*   ``M-b`` (Backward word): Move cursor one word backward.
+*   ``C-a`` (Beginning of line): Move cursor to the beginning of the line.
+*   ``C-e`` (End of line): Move cursor to the end of the line.
+*   ``M-a`` (Beginning of sentence): Move cursor to the beginning of the sentence.
+*   ``M-e`` (End of sentence): Move cursor to the end of the sentence.
+*   ``M-<`` (Beginning of buffer): Move cursor to the beginning of the buffer (file).
+*   ``M->`` (End of buffer): Move cursor to the end of the buffer (file).
+*   ``C-v`` (Scroll down): Scroll the buffer down one screenful.
+*   ``M-v`` (Scroll up): Scroll the buffer up one screenful.
+*   ``C-g`` (Quit/Cancel): Abort the current command or operation.
+*   ``C-x C-x`` (Exchange point and mark): Swap the cursor position (point) and the mark (a saved cursor position).
 
+Working with Text (Kill/Yank/Copy/Paste)
+----------------------------------------
 
-**C-x C-s** |nbsp| |nbsp| |nbsp| |nbsp| Save file
+*   ``C-d`` (Delete char): Delete the character under the cursor.
+*   ``DEL`` (Delete backward char): Delete the character to the left of the cursor.
+*   ``M-d`` (Kill word): Delete the word to the right of the cursor.
+*   ``M-DEL`` (Kill backward word): Delete the word to the left of the cursor.
+*   ``C-k`` (Kill line): Delete from the cursor to the end of the line.
+*   ``C-y`` (Yank): Paste (insert) the most recently killed (deleted or copied) text.
+*   ``M-y`` (Yank pop): Cycle through previously killed text in the kill ring.
+*   ``C-w`` (Kill region): Delete the selected text (region).
+*   ``C-x C-w`` (Copy region): Copy the selected text (region).
+*   ``C-x h`` (Mark whole buffer): Select the entire buffer.
+*   ``C-x u`` (Undo): Undo the last action.
+*   ``C-x C-s`` (Save buffer): Save the current file.
+*   ``C-x C-f`` (Find file): Open a file.
+*   ``C-x C-b`` (Switch buffer): Switch to another open buffer (file).
+*   ``C-x k`` (Kill buffer): Close a buffer (file).
+*   ``C-x i`` (Insert file): Insert the contents of a file into the current buffer.
 
-**C-x C-w** |nbsp| |nbsp| |nbsp| |nbsp| Write file out with new name (i.e. 'save as')
+Searching and Replacing
+-----------------------
 
-**C-x C-f** |nbsp| |nbsp| |nbsp| |nbsp| Find (open) file. (If the file doesn't exist, it will be created.)
+*   ``C-s`` (Incremental search forward): Start an incremental search forward.
+*   ``C-r`` (Incremental search backward): Start an incremental search backward.
+*   ``M-x replace-string``: Replace all occurrences of one string with another.
+*   ``M-x query-replace``: Replace strings interactively.
 
-**C-x C-c** |nbsp| |nbsp| |nbsp| |nbsp| Quit Emacs
+Working with Windows and Buffers (Managing Layout)
+--------------------------------------------------
 
-**C-z** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Leave Emacs temporarily (return with "fg" ("foreground"))
+*   ``C-x 2`` (Split window vertically): Split the current window into two vertical windows.
+*   ``C-x 3`` (Split window horizontally): Split the current window into two horizontal windows.
+*   ``C-x o`` (Other window): Switch to the other window.
+*   ``C-x 1`` (One window): Close all other windows.
+*   ``C-x 0`` (Delete window): Close the current window.
 
-**C-g** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Abort an Emacs command (get out of trouble)
+Help and Documentation (Learning More)
+---------------------------------------
 
-**C-_**  |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Undo
+*   ``C-h`` (Help): Access the Emacs help system.
+*   ``C-h t`` (Emacs tutorial): Start the Emacs tutorial.
+*   ``C-h i`` (Info): Browse the Emacs Info documentation.
+*   ``C-h k`` (Describe key): Describe the function bound to a specific key.
+*   ``C-h f`` (Describe function): Describe a specific Emacs function.
+*   ``C-h v`` (Describe variable): Describe a specific Emacs variable.
 
-**C-x 2** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Split Emacs screen into two horizontally
+Important Notes
+---------------
 
-**C-x 3** |nbsp| |nbsp| |nbsp| |nbsp|  |nbsp| |nbsp| Split Emacs screen into two vertically
+*   ``C-`` means Ctrl key.
+*   ``M-`` means Alt key (or Meta key).
+*   Emacs is highly customizable.
+*   Use the Emacs help system (``C-h``).
 
-**C-x o** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| move from one half screen to another
+Tips for Learning
+-----------------
 
-**C-x 1** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Return to only one screen (whichever your cursor is in)
-
-**c-x C-b** |nbsp| |nbsp| |nbsp| |nbsp| List the current buffers
-
-**C-x b** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Switch to a different active buffer
-
-**C-k** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Kill text from cursor to end of line (Cut text out)
-
-**C-y** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Yank back killed text. (Paste text in)
-
-**C-l** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Redisplay the screen if it is garbled
-
-
-Commands to move about the screen (can also use the arrow keys.)
-
-**C-f** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Move cursor forward one character
-
-**C-b**  Move cursor backwards one character
-
-**C-n** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Move cursor to next line
-
-**C-p** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Move cursor to previous line
-
-**C-a** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Move cursor to beginning of line
-
-**C-e** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Move cursor to end of line
-
-**C-v** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Go forward one screen
-
-**M-v** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Go backward one screen
-
-**M-f** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Move cursor forward one word
-
-**M-b** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Move cursor backwards one word
-
-**M->** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Move to end of file
-
-**M-<** |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| |nbsp| Move to beginning of file
-
-**C-u 7 C-n** |nbsp| |nbsp| Move forward 7 lines
-
-**C-u 10 C-p** |nbsp| |nbsp| Move back 10 lines
-
-To go to a specific line: Type M-x goto-line <Enter>, then
-type the line number followed by <Enter>. There are also
-shortcuts. Type the command "help -q emacs goto" in a local
-window to find out about it. (Local shortcut is M-x #).
-
-
-Emacs has an excellent on-line help tutorial. To use it,
-start up emacs. When you are in emacs, type C-h, then type
-the letter "t". Follow directions. When you wish to leave
-the tutorial, type C-x C-c.
+*   Start with the tutorial (``C-h t``).
+*   Practice regularly.
+*   Use the help system (``C-h``).
+*   Don't try to learn everything at once.
+*   Customize Emacs.
