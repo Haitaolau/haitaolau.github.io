@@ -1,0 +1,43 @@
+=========================================
+ Change the mirror for elxr docker image
+=========================================
+
+
+1. create a apt soruce file
+
+
+.. code-block:: bash
+
+   hliu4@pek-lpd-susbld:tiler$cat docker/files/elxr.sources
+   deb http://mirror.elxr.dev/elxr aria main
+   deb http://ftp.cn.debian.org/debian bookworm main non-free-firmware
+   deb http://ftp.cn.debian.org/debian bookworm-updates main
+   deb http://security.debian.org/debian-security bookworm-security main
+   # deb-src http://security.debian.org/debian-security bookworm-security main
+
+
+2. Modify the Dockerfile
+
+
+.. code-block:: bash
+
+   diff --git a/docker/Dockerfile b/docker/Dockerfile
+   index e0f1768..d622a07 100644
+   --- a/docker/Dockerfile
+   +++ b/docker/Dockerfile
+   @@ -1,4 +1,6 @@
+   -FROM elxrlinux/elxr:12.6.1.0
+   +FROM elxrlinux/elxr:12.9.0.0
+   +
+   +COPY files/elxr.sources  /etc/apt/sources.list.d/0000mirror.list
+
+    # Don't pin the packages versions to exact values
+    # hadolint ignore=DL3008
+   @@ -27,6 +29,7 @@ RUN apt-get update && \
+            qemu-user-static \
+            arch-test \
+            gir1.2-ostree-1.0 \
+   +        debmake \
+            git && \
+            rm -rf /var/lib/apt/lists/*
+

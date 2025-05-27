@@ -59,5 +59,3 @@ In outline, the whole function looks like this:
 **push-mark**
 
  - when this expression is evaluated by the Lisp interpreter, it sets a mark at the current position of the cursor, wherever that may be. Th position of this mark is saved in the mark ring.
-
-   

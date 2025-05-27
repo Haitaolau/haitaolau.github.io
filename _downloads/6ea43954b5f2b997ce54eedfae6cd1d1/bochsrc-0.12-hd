@@ -1,0 +1,7 @@
+#!/bin/bash 
+
+
+LIBPATH=$(realpath lib/)
+
+#LTDL_LIBRARY_PATH=${LIBPATH} ./bochs -f bochsrc-0.12-hd.bxrc -dbg_gui
+LTDL_LIBRARY_PATH=${LIBPATH} ./bochs -f bochsrc-0.12-hd.bxrc

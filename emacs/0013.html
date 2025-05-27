@@ -1,0 +1,202 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Lisp: Buffer &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="The Definition of append-to-buffer" href="0014.html" />
+    <link rel="prev" title="Lisp: Using setq" href="0012.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="lisp-buffer">
+<h1>Lisp: Buffer<a class="headerlink" href="#lisp-buffer" title="Permalink to this heading">¶</a></h1>
+<section id="buffer-name">
+<h2>Buffer-name<a class="headerlink" href="#buffer-name" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">buffer</span><span class="o">-</span><span class="n">name</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>When I do this in Info, the value returned by evaluating (buffer-name) is “test.txt”</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">buffer</span><span class="o">-</span><span class="n">file</span><span class="o">-</span><span class="n">name</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>the value returned by evaluating (buffer-file-name) is “/home/wrsadmin/workspace/test.txt”</p>
+<p>The two functions, buffer-name and buffer-file-name, show the difference between a file and a buffer.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In the expressions, the parentheses tell the Lisp interpreter to treat buffer-name and buffer-file-name as functions; without the parentheses, the interpreter would attempt to evaluate the symbols as variables</p>
+</div>
+</section>
+<section id="getting-buffers">
+<h2>Getting Buffers<a class="headerlink" href="#getting-buffers" title="Permalink to this heading">¶</a></h2>
+<p>The buffer-name function returns the name of the buffer; to get the buffer itself, a different function is needed: the current-buffer function</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">current</span><span class="o">-</span><span class="n">buffer</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If you evaluate this expression in Info in Emacs in the usual way, “<strong>#&lt;buffer test.txt&gt;</strong>” will appear in the echo area</p>
+<p>A related function is other-buffer. This returns the most recently selected buffer other than the one you are in currently, not a printed representation of its name. If you have recently switched back and forth from the <em>0013.rst</em> buffer, other-buffer will return that buffer.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">other</span><span class="o">-</span><span class="n">buffer</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You should see #&lt;buffer 0013.rst&gt; appear in the echo area,</p>
+</section>
+<section id="switching-buffers">
+<h2>Switching Buffers<a class="headerlink" href="#switching-buffers" title="Permalink to this heading">¶</a></h2>
+<p>The other-buffer function actually provides a buffer when it is used as an argument to a function that requires one. We can see this by using other-buffer and switch-to-buffer to switch to a different buffer.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">switch</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">buffer</span> <span class="p">(</span><span class="n">other</span><span class="o">-</span><span class="n">buffer</span><span class="p">))</span>
+</pre></div>
+</div>
+</section>
+<section id="buffer-size-and-the-location-of-point">
+<h2>Buffer Size and the Location of Point<a class="headerlink" href="#buffer-size-and-the-location-of-point" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">buffer</span><span class="o">-</span><span class="n">size</span><span class="p">)</span>
+
+<span class="p">(</span><span class="n">point</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cplus/index.html">Cplus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Emacs</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="commands.html">Emacs Commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0007.html">Emacs Commands: Blank Lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0001.html">How do I insert &lt;some text&gt; at the beginning of every line?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0002.html">How do I find the function definition?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0003.html">Complete Definition of beginning-of-buffer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0004.html">Complete Definition of mark-whole-buffer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0005.html">Fundamental Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0006.html">How to delete the first few n chars of every line?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0008.html">jumps to the location of the mark - and M-&lt; sets the mark before jumping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0009.html">How to close windows in Emacs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0010.html">Lisp error:wrong-type-argument number-or-marker-p</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0011.html">Lisp: The message Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0012.html">Lisp: Using setq</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Lisp: Buffer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#buffer-name">Buffer-name</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#getting-buffers">Getting Buffers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#switching-buffers">Switching Buffers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#buffer-size-and-the-location-of-point">Buffer Size and the Location of Point</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="0014.html">The Definition of append-to-buffer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0015.html">How to get quick overviews of Elisp functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0016.html">Complete Definition of zap-to-char</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0017.html">Elisp: Case Sensitivity (case-fold-search)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0018.html">Complete Definition of kill-region</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0019.html">The progn Special Form</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0020.html">Condition-case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0021.html">Condition-case with nil</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licence/index.html">OpenSource License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bochs/index.html">Bochs IA-32 Emulator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../system/index.html">System</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Emacs</a><ul>
+      <li>Previous: <a href="0012.html" title="previous chapter">Lisp: Using setq</a></li>
+      <li>Next: <a href="0014.html" title="next chapter">The Definition of append-to-buffer</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/emacs/0013.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

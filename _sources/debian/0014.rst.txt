@@ -1,0 +1,42 @@
+=========================
+ Debian Useful Resources
+=========================
+
+
+
+.. contents:: Table of contents
+
+
+Below are some useful links and references for working with the Debian project and ecosystem.
+
+Bug Tracking and Security
+--------------------------
+
+- `Debian Bug Tracking System <https://www.debian.org/Bugs/>`_
+- `Security Bug Tracker <https://security-tracker.debian.org/tracker/>`_
+
+Development Resources
+---------------------
+
+- `Debian Python Team <https://salsa.debian.org/python-team>`_
+- `Debian Developers' Corner <https://www.debian.org/devel/>`_
+- `Building Tutorial <https://wiki.debian.org/BuildingTutorial>`_
+
+Mailing Lists and Community
+---------------------------
+
+- `Debian Mailing Lists <https://lists.debian.org/>`_
+
+Documentation
+-------------
+
+- `Debian New Maintainers' Guide <https://www.debian.org/doc/manuals/maint-guide/index.en.html>`_
+- `Debian Policy Manual <https://www.debian.org/doc/debian-policy/index.html>`_
+- `Debian Repository Format <https://wiki.debian.org/DebianRepository/Format>`_
+
+
+Repositories
+------------
+
+- `The main Debian archive <https://ftp.debian.org/debian/>`_
+- `security updates for stable Debian releases <http://security.debian.org/debian-security/>`_

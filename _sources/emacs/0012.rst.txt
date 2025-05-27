@@ -1,0 +1,30 @@
+==================
+ Lisp: Using setq
+==================
+
+
+.. code-block::
+
+   (setq flowers '(rose violet daisy buttercup))
+
+   (setq carnivores '(lion tiger leopard))
+
+   (setq trees '(pine fir oak maple)
+      herbivores '(gazelle antelope zebra))
+
+
+.. code-block::
+
+   (setq counter 0)                ; Let’s call this the initializer.
+
+   (setq counter (+ counter 1))    ; This is the incrementer.
+
+   counter                         ; This is the counter.
+
+
+.. Note::
+
+   The text following the ‘;’ are comments.
+
+
+   

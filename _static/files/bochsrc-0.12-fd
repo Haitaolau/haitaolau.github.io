@@ -1,0 +1,6 @@
+#!/bin/bash 
+
+
+LIBPATH=$(realpath lib/)
+
+LTDL_LIBRARY_PATH=${LIBPATH} ./bochs -f bochsrc-0.12-fd.bxrc

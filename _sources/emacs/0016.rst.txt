@@ -1,0 +1,138 @@
+====================================
+ Complete Definition of zap-to-char
+====================================
+
+
+
+.. contents:: The table of contents
+
+
+.. code-block:: elisp
+
+   (defun zap-to-char (arg char &optional interactive)
+     "Kill up to and including ARGth occurrence of CHAR.
+   When run interactively, the argument INTERACTIVE is non-nil.
+   Case is ignored if `case-fold-search' is non-nil in the current buffer.
+   Goes backward if ARG is negative; error if CHAR not found.
+   See also `zap-up-to-char'.
+   If called interactively, do a case sensitive search if CHAR
+   is an upper-case character."
+     (interactive (list (prefix-numeric-value current-prefix-arg)
+   		     (read-char-from-minibuffer "Zap to char: "
+   						nil 'read-char-history)
+                  t))
+     ;; Avoid "obsolete" warnings for translation-table-for-input.
+     (with-no-warnings
+       (if (char-table-p translation-table-for-input)
+   	(setq char (or (aref translation-table-for-input char) char))))
+     (let ((case-fold-search (if (and interactive (char-uppercase-p char))
+                                 nil
+                               case-fold-search)))
+       (kill-region (point) (search-forward (char-to-string char) nil nil arg))))
+
+
+
+The interactive Expression
+==========================
+
+
+In Emacs Lisp, the ``interactive`` form is used to make functions callable interactively. There are different ways to specify how arguments are obtained from the user. This document explains the equivalence between two common methods.
+
+Method 1: Using a List of Forms
+-------------------------------
+
+The first method involves providing a list of forms to the ``interactive`` form. Each form in the list is evaluated to determine the corresponding argument.
+
+Example:
+
+.. code-block:: elisp
+
+   (interactive (list (prefix-numeric-value current-prefix-arg)
+                      (read-char-from-minibuffer "Zap to char: "
+                                                  nil 'read-char-history
+                                                  t)))
+
+Explanation:
+
+* ``(prefix-numeric-value current-prefix-arg)``: This form retrieves the numeric prefix argument provided by the user (if any).
+
+   * ``current-prefix-arg``: This variable holds the raw prefix argument (e.g., C-u, C-u 4, etc.) that the user provided before calling the function.
+
+   * ``prefix-numeric-value``: This function extracts the numeric value from the prefix argument.
+
+      1. If a number was given (e.g., C-u 5), it returns that number.
+      2. If only C-u was given, it returns 4.
+      3. If no prefix argument was given, it returns nil.
+
+* ``(read-char-from-minibuffer "Zap to char: " nil 'read-char-history t)``: This form prompts the user to enter a character using the minibuffer.
+
+   * ``read-char-from-minibuffer``: This function reads a single character from the minibuffer
+
+
+Method 2: Using a String of Codes
+----------------------------------
+
+The second method involves providing a string of codes to the ``interactive`` form. Each code in the string represents a specific type of argument.
+
+Example:
+
+.. code-block:: elisp
+
+   (interactive "p\ncZap to char: ")
+
+Explanation:
+
+* ``"p"``: This code represents the numeric prefix argument. It is equivalent to ``(prefix-numeric-value current-prefix-arg)`` in the first method.
+* ``"cZap to char: "``: This code represents a character read from the minibuffer. The string following the code is the prompt. This is equivalent to ``(read-char-from-minibuffer "Zap to char: " nil 'read-char-history t)`` in the first method.
+
+Equivalence
+-----------
+
+The two examples above are equivalent. Both methods achieve the same result:
+
+1.  Retrieve the numeric prefix argument.
+2.  Prompt the user to enter a character.
+3.  Pass these values as arguments to the function.
+
+The string method is often preferred for its brevity and conciseness. The list method provides more flexibility for complex argument processing.
+
+In summary, ``(interactive (list (prefix-numeric-value current-prefix-arg) (read-char-from-minibuffer ...)))`` and ``(interactive "p\\nc...")`` are functionally identical, representing two different ways to specify interactive arguments in Emacs Lisp.
+
+References:
+-----------
+
+https://www.gnu.org/software/emacs/manual/html_node/elisp/Using-Interactive.html
+
+https://www.gnu.org/software/emacs/manual/html_node/elisp/Prefix-Command-Arguments.html
+
+
+
+The Body of zap-to-char
+=======================
+
+
+.. code-block:: elisp
+
+   (if (char-table-p translation-table-for-input)
+       (setq char (or (aref translation-table-for-input char) char)))
+   (let ((case-fold-search (if (and interactive (char-uppercase-p char))
+                              nil
+                            case-fold-search)))
+   (kill-region (point) (progn
+                          (search-forward (char-to-string char) nil nil arg)
+                          (point)))
+
+* ``char-table-p``: It determines whether its argument is a character table.
+
+* ``setq char (or (aref translation-table-for-input char) char``:is saying: "if char has a mapping in translation-table-for-input then use that; otherwise keep its original value".
+
+* ``case-fold-search``: Case is ignored if ``case-fold-search`` is non-nil in the current buffer. see :ref:`case_fold_search`
+
+* ``interacrive``: When run interactively, the argument ``interactive`` is non-nil.
+
+* ``setq char (or (aref translation-table-for-input char) char``:is saying: "if char has a mapping in translation-table-for-input then use that; otherwise keep its original value".
+
+* ``(point)``: is the current positon of cursor.
+
+
+

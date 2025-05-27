@@ -1,0 +1,59 @@
+========================
+ The progn Special Form
+========================
+
+In Emacs Lisp, `progn` is a special form that allows you to evaluate multiple expressions sequentially,
+returning the value of the last expression. It is useful when you need to group several expressions together
+but only care about the result of the final one.
+
+Syntax:
+--------
+
+.. code-block:: elisp
+
+   (progn expr1 expr2 ... exprN)
+
+Example Usage:
+--------------
+
+.. code-block:: elisp
+
+   (progn
+     (setq x 10)
+     (setq y 20)
+     (+ x y))
+
+In this example:
+
+*    x is set to 10.
+
+*    y is set to 20.
+
+*    The last expression (+ x y) is evaluated and returns 30, which is the result of the entire progn block.
+
+
+When to Use progn
+-----------------
+
+
+* You need to execute multiple forms (statements) but only return the result of the last form.
+
+* It can be useful in conditionals (if, while, cond, etc.) where multiple actions need to be performed before returning a result.
+
+
+
+Example in an if statement
+--------------------------
+
+.. code-block:: elisp
+
+   (if (>= x 10)
+       (progn
+         (message "x is greater than or equal to 10")
+         (setq x (+ x 5)))
+     (message "x is less than 10"))
+
+
+In this case, if x is greater than or equal to 10, the progn ensures both the message and setq expressions are evaluated sequentially.
+
+

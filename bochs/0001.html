@@ -1,0 +1,219 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Compile Bochs based on debian &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Booting Linux 0.12 with Bochs on Ubuntu" href="0002.html" />
+    <link rel="prev" title="Bochs IA-32 Emulator" href="index.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="compile-bochs-based-on-debian">
+<h1>Compile Bochs based on debian<a class="headerlink" href="#compile-bochs-based-on-debian" title="Permalink to this heading">¶</a></h1>
+<section id="build-the-bochs">
+<h2>Build the Bochs<a class="headerlink" href="#build-the-bochs" title="Permalink to this heading">¶</a></h2>
+<section id="clone">
+<h3>Clone<a class="headerlink" href="#clone" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone  https://github.com/bochs-emu/Bochs.git
+</pre></div>
+</div>
+</section>
+<section id="configure">
+<h3>Configure<a class="headerlink" href="#configure" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>configure --build<span class="o">=</span>x86_64-linux-gnu <span class="se">\</span>
+          --prefix<span class="o">=</span>/usr <span class="se">\</span>
+          --includedir<span class="o">=</span><span class="si">${</span><span class="nv">prefix</span><span class="si">}</span>/include <span class="se">\</span>
+          --mandir<span class="o">=</span><span class="si">${</span><span class="nv">prefix</span><span class="si">}</span>/share/man <span class="se">\</span>
+          --infodir<span class="o">=</span><span class="si">${</span><span class="nv">prefix</span><span class="si">}</span>/share/info <span class="se">\</span>
+          --sysconfdir<span class="o">=</span>/etc <span class="se">\</span>
+          --localstatedir<span class="o">=</span>/var <span class="se">\</span>
+          --disable-option-checking <span class="se">\</span>
+          --disable-silent-rules <span class="se">\</span>
+          --libdir<span class="o">=</span><span class="si">${</span><span class="nv">prefix</span><span class="si">}</span>/lib/x86_64-linux-gnu <span class="se">\</span>
+          --disable-maintainer-mode <span class="se">\</span>
+          --disable-dependency-tracking <span class="se">\</span>
+          --with-rfb <span class="se">\</span>
+          --with-sdl2 <span class="se">\</span>
+          --with-term <span class="se">\</span>
+          --with-x11 <span class="se">\</span>
+          --with-wx <span class="se">\</span>
+          --disable-docbook <span class="se">\</span>
+          --enable-3dnow <span class="se">\</span>
+          --enable-a20-pin <span class="se">\</span>
+          --enable-all-optimizations <span class="se">\</span>
+          --enable-avx <span class="se">\</span>
+          --enable-busmouse <span class="se">\</span>
+          --enable-cdrom <span class="se">\</span>
+          --enable-cet <span class="se">\</span>
+          --enable-clgd54xx <span class="se">\</span>
+          --enable-compressed-hd <span class="se">\</span>
+          --enable-cpu-level<span class="o">=</span><span class="m">6</span> <span class="se">\</span>
+          --enable-debugger <span class="se">\</span>
+          --enable-debugger-gui <span class="se">\</span>
+          --enable-disasm <span class="se">\</span>
+          --enable-e1000 <span class="se">\</span>
+          --enable-es1370 <span class="se">\</span>
+          --enable-evex <span class="se">\</span>
+          --enable-fpu <span class="se">\</span>
+          --enable-idle-hack <span class="se">\</span>
+          --enable-instrumentation <span class="se">\</span>
+          --enable-pci <span class="se">\</span>
+          --enable-plugins <span class="se">\</span>
+          --enable-repeat-speedups <span class="se">\</span>
+          --enable-memtype <span class="se">\</span>
+          --enable-ne2000 <span class="se">\</span>
+          --enable-pnic <span class="se">\</span>
+          --enable-protection-keys <span class="se">\</span>
+          --enable-raw-serial <span class="se">\</span>
+          --enable-sb16 <span class="se">\</span>
+          --enable-smp <span class="se">\</span>
+          --enable-svm <span class="se">\</span>
+          --enable-usb <span class="se">\</span>
+          --enable-usb-ehci <span class="se">\</span>
+          --enable-usb-ohci <span class="se">\</span>
+          --enable-usb-xhci <span class="se">\</span>
+          --enable-vmx<span class="o">=</span><span class="m">2</span> <span class="se">\</span>
+          --enable-voodoo <span class="se">\</span>
+          --enable-x86-64 <span class="se">\</span>
+          --enable-x86-debugger <span class="se">\</span>
+          --enable-pcidev
+</pre></div>
+</div>
+</section>
+<section id="compile">
+<h3>Compile<a class="headerlink" href="#compile" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make -j <span class="m">128</span>
+</pre></div>
+</div>
+</section>
+<section id="run-and-test">
+<h3>Run and test<a class="headerlink" href="#run-and-test" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>find build/ -name <span class="s2">&quot;*.so&quot;</span> -exec cp <span class="o">{}</span> test/lib <span class="se">\;</span>
+<span class="nv">LTDL_LIBRARY_PATH</span><span class="o">=</span>/home/wrsadmin/workspace/libstdc++/test/lib ./build/bochs -f .bochsrc
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cplus/index.html">Cplus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licence/index.html">OpenSource License</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Bochs IA-32 Emulator</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Compile Bochs based on debian</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#build-the-bochs">Build the Bochs</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="0002.html">Booting Linux 0.12 with Bochs on Ubuntu</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../system/index.html">System</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Bochs IA-32 Emulator</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Bochs IA-32 Emulator</a></li>
+      <li>Next: <a href="0002.html" title="next chapter">Booting Linux 0.12 with Bochs on Ubuntu</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/bochs/0001.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

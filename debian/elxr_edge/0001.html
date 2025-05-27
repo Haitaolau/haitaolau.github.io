@@ -276,23 +276,96 @@ mkfs -F -t ext4 -L ROOT <span class="si">${</span><span class="nv">LOOPDEV</span
 <span class="nb">echo</span> <span class="s2">&quot;Mounting </span><span class="si">${</span><span class="nv">LOOPDEV</span><span class="si">}</span><span class="s2">&quot;</span>
 
 systemd-dissect -m <span class="si">${</span><span class="nv">LOOPDEV</span><span class="si">}</span> <span class="si">${</span><span class="nv">ROOTFS</span><span class="si">}</span>
+</pre></div>
+</div>
+<p>The current contents of the project directory are presented below:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">root@6afee473d507:/usr/src/test/elxr-minimal-ostree-amd64# </span>ls rootfs/
+<span class="go">boot  efi  lost+found</span>
+<span class="gp">root@6afee473d507:/usr/src/test/elxr-minimal-ostree-amd64# </span>tree
+<span class="go">.</span>
+<span class="go">`-- rootfs</span>
+<span class="go">    |-- boot</span>
+<span class="go">    |   `-- lost+found</span>
+<span class="go">    |-- efi</span>
+<span class="go">    `-- lost+found</span>
 
-
-<span class="nb">echo</span> <span class="s2">&quot;Creating </span><span class="si">${</span><span class="nv">ROOTFS</span><span class="si">}</span><span class="s2">/ostree/repo&quot;</span>
+<span class="go">6 directories, 0 files</span>
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span> <span class="s2">&quot;Creating </span><span class="si">${</span><span class="nv">ROOTFS</span><span class="si">}</span><span class="s2">/ostree/repo&quot;</span>
 
 <span class="nb">test</span> -d <span class="s2">&quot;</span><span class="si">${</span><span class="nv">ROOTFS</span><span class="si">}</span><span class="s2">/ostree/repo&quot;</span> <span class="o">||</span> mkdir -p <span class="si">${</span><span class="nv">ROOTFS</span><span class="si">}</span>/ostree/repo
 
 <span class="nb">echo</span> <span class="s2">&quot;Create ostree repository&quot;</span>
 
 ostree init --repo <span class="si">${</span><span class="nv">ROOTFS</span><span class="si">}</span>/ostree/repo --mode archive-z2
+</pre></div>
+</div>
+<p>The current contents of the project directory are presented below:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">root@6afee473d507:/usr/src/test# </span>tree elxr-minimal-ostree-amd64/rootfs/
+<span class="go">elxr-minimal-ostree-amd64/rootfs/</span>
+<span class="go">|-- boot</span>
+<span class="go">|   `-- lost+found</span>
+<span class="go">|-- efi</span>
+<span class="go">|-- lost+found</span>
+<span class="go">`-- ostree</span>
+<span class="go">    `-- repo</span>
+<span class="go">        |-- config</span>
+<span class="go">        |-- extensions</span>
+<span class="go">        |-- objects</span>
+<span class="go">        |-- refs</span>
+<span class="go">        |   |-- heads</span>
+<span class="go">        |   |-- mirrors</span>
+<span class="go">        |   `-- remotes</span>
+<span class="go">        |-- state</span>
+<span class="go">        `-- tmp</span>
+<span class="go">            `-- cache</span>
 
-<span class="nb">echo</span> <span class="s2">&quot;Pull ostree from /var/www/html/repo&quot;</span>
+<span class="go">16 directories, 1 file</span>
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span> <span class="s2">&quot;Pull ostree from /var/www/html/repo&quot;</span>
 
 <span class="nb">echo</span> <span class="s2">&quot;Pulling elxr/amd64 from /var/www/html/repo&quot;</span>
 
 ostree pull-local --repo <span class="si">${</span><span class="nv">ROOTFS</span><span class="si">}</span>/ostree/repo /var/www/html/repo elxr/amd64
+</pre></div>
+</div>
+<p>The current contents of the project directory are presented below:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">root@6afee473d507:/usr/src/test# </span>tree elxr-minimal-ostree-amd64/rootfs/ -L <span class="m">4</span>
+<span class="go">elxr-minimal-ostree-amd64/rootfs/</span>
+<span class="go">|-- boot</span>
+<span class="go">|   `-- lost+found</span>
+<span class="go">|-- efi</span>
+<span class="go">|-- lost+found</span>
+<span class="go">`-- ostree</span>
+<span class="go">    `-- repo</span>
+<span class="go">        |-- config</span>
+<span class="go">        |-- extensions</span>
+<span class="go">        |-- objects</span>
+<span class="go">        |   |-- 00</span>
+<span class="go">        |   |-- 01</span>
+<span class="go">        |   |-- 02</span>
+<span class="go">        ...</span>
+<span class="go">        ...</span>
+<span class="go">        ...</span>
+<span class="go">        |   |-- fb</span>
+<span class="go">        |   |-- fc</span>
+<span class="go">        |   |-- fd</span>
+<span class="go">        |   |-- fe</span>
+<span class="go">        |   `-- ff</span>
+<span class="go">        |-- refs</span>
+<span class="go">        |   |-- heads</span>
+<span class="go">        |   |-- mirrors</span>
+<span class="go">        |   `-- remotes</span>
+<span class="go">        |-- state</span>
+<span class="go">        `-- tmp</span>
+<span class="go">            `-- cache</span>
 
-<span class="nb">echo</span> <span class="s2">&quot;Updating summary of ostree repository&quot;</span>
+<span class="go">272 directories, 1 file</span>
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span> <span class="s2">&quot;Updating summary of ostree repository&quot;</span>
 
 ostree summary -u --repo<span class="o">=</span><span class="si">${</span><span class="nv">ROOTFS</span><span class="si">}</span>/ostree/repo
 
@@ -300,14 +373,183 @@ ostree summary -u --repo<span class="o">=</span><span class="si">${</span><span 
 <span class="nb">echo</span> <span class="s2">&quot;Configuring </span><span class="si">${</span><span class="nv">LOOPDEV</span><span class="si">}</span><span class="s2"> for ostree&quot;</span>
 
 ostree admin init-fs <span class="si">${</span><span class="nv">ROOTFS</span><span class="si">}</span>
+</pre></div>
+</div>
+<p>The current contents of the project directory are presented below:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">root@6afee473d507:/usr/src/test# </span>tree elxr-minimal-ostree-amd64/rootfs/ -I <span class="s2">&quot;*.dirtree|*.filez|*.dirmeta|*.commit&quot;</span>
+<span class="go">elxr-minimal-ostree-amd64/rootfs/</span>
+<span class="go">|-- boot</span>
+<span class="go">|   `-- lost+found</span>
+<span class="go">|-- dev</span>
+<span class="go">|-- efi</span>
+<span class="go">|-- home</span>
+<span class="go">|-- lost+found</span>
+<span class="go">|-- ostree</span>
+<span class="go">|   |-- deploy</span>
+<span class="go">|   `-- repo</span>
+<span class="go">|       |-- config</span>
+<span class="go">|       |-- extensions</span>
+<span class="go">|       |-- objects</span>
+<span class="go">|       |   |-- 00</span>
+<span class="go">|       |   |-- 01</span>
+<span class="go">|       |   |-- 02</span>
+<span class="go">|       |   |-- 03</span>
+<span class="go">|       |   |-- 04</span>
+<span class="go">|       |   |-- 05</span>
+<span class="go">....</span>
+<span class="go">....</span>
+<span class="go">....</span>
+<span class="go">|       |   |-- f5</span>
+<span class="go">|       |   |-- f6</span>
+<span class="go">|       |   |-- f7</span>
+<span class="go">|       |   |-- f8</span>
+<span class="go">|       |   |-- f9</span>
+<span class="go">|       |   |-- fa</span>
+<span class="go">|       |   |-- fb</span>
+<span class="go">|       |   |-- fc</span>
+<span class="go">|       |   |-- fd</span>
+<span class="go">|       |   |-- fe</span>
+<span class="go">|       |   `-- ff</span>
+<span class="go">|       |-- refs</span>
+<span class="go">|       |   |-- heads</span>
+<span class="go">|       |   |   `-- elxr</span>
+<span class="go">|       |   |       `-- amd64</span>
+<span class="go">|       |   |-- mirrors</span>
+<span class="go">|       |   `-- remotes</span>
+<span class="go">|       |-- state</span>
+<span class="go">|       |-- summary</span>
+<span class="go">|       `-- tmp</span>
+<span class="go">|           `-- cache</span>
+<span class="go">|-- proc</span>
+<span class="go">|-- root</span>
+<span class="go">|-- run</span>
+<span class="go">|-- sys</span>
+<span class="go">`-- tmp</span>
 
-ostree admin os-init --sysroot <span class="si">${</span><span class="nv">ROOTFS</span><span class="si">}</span> elxr
+<span class="go">281 directories, 3 files</span>
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ostree admin os-init --sysroot <span class="si">${</span><span class="nv">ROOTFS</span><span class="si">}</span> elxr
+</pre></div>
+</div>
+<p>The current contents of the project directory are presented below:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">root@6afee473d507:/usr/src/test# </span>ostree admin os-init --sysroot <span class="si">${</span><span class="nv">ROOTFS</span><span class="si">}</span> elxr
+<span class="go">ostree/deploy/elxr initialized as OSTree stateroot</span>
+<span class="gp">root@6afee473d507:/usr/src/test# </span>tree elxr-minimal-ostree-amd64/rootfs/ -I <span class="s2">&quot;*.dirtree|*.filez|*.dirmeta|*.commit&quot;</span>
+<span class="go">elxr-minimal-ostree-amd64/rootfs/</span>
+<span class="go">|-- boot</span>
+<span class="go">|   `-- lost+found</span>
+<span class="go">|-- dev</span>
+<span class="go">|-- efi</span>
+<span class="go">|-- home</span>
+<span class="go">|-- lost+found</span>
+<span class="go">|-- ostree</span>
+<span class="go">|   |-- deploy</span>
+<span class="go">|   |   `-- elxr</span>
+<span class="go">|   |       `-- var</span>
+<span class="go">|   `-- repo</span>
+<span class="go">|       |-- config</span>
+<span class="go">|       |-- extensions</span>
+<span class="go">|       |-- objects</span>
+<span class="go">|       |   |-- 00</span>
+<span class="go">|       |   |-- 01</span>
+<span class="go">|       |   |-- 02</span>
+<span class="go">....</span>
+<span class="go">....</span>
+<span class="go">....</span>
+<span class="go">|       |   |-- fc</span>
+<span class="go">|       |   |-- fd</span>
+<span class="go">|       |   |-- fe</span>
+<span class="go">|       |   `-- ff</span>
+<span class="go">|       |-- refs</span>
+<span class="go">|       |   |-- heads</span>
+<span class="go">|       |   |   `-- elxr</span>
+<span class="go">|       |   |       `-- amd64</span>
+<span class="go">|       |   |-- mirrors</span>
+<span class="go">|       |   `-- remotes</span>
+<span class="go">|       |-- state</span>
+<span class="go">|       |-- summary</span>
+<span class="go">|       `-- tmp</span>
+<span class="go">|           `-- cache</span>
+<span class="go">|-- proc</span>
+<span class="go">|-- root</span>
+<span class="go">|-- run</span>
+<span class="go">|-- sys</span>
+<span class="go">`-- tmp</span>
 
-<span class="nb">echo</span> <span class="s2">&quot;Deploying elxr/amd64&quot;</span>
+<span class="go">283 directories, 3 files</span>
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span> <span class="s2">&quot;Deploying elxr/amd64&quot;</span>
 
 ostree admin deploy --sysroot <span class="si">${</span><span class="nv">ROOTFS</span><span class="si">}</span> --os elxr elxr/amd64 --karg<span class="o">=</span><span class="nv">root</span><span class="o">=</span><span class="nv">LABEL</span><span class="o">=</span>ROOT --karg<span class="o">=</span>rw --karg<span class="o">=</span><span class="s1">&#39;console=ttyS0,115200n8 console=tty0&#39;</span>
+</pre></div>
+</div>
+<p>The current contents of the project directory are presented below:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">root@6afee473d507:/usr/src/test# </span>ostree admin deploy --sysroot <span class="si">${</span><span class="nv">ROOTFS</span><span class="si">}</span> --os elxr elxr/amd64 --karg<span class="o">=</span><span class="nv">root</span><span class="o">=</span><span class="nv">LABEL</span><span class="o">=</span>ROOT --karg<span class="o">=</span>rw --karg<span class="o">=</span><span class="s1">&#39;console=ttyS0,115200n8 console=tty0&#39;</span>
+<span class="go">Relabeling /var (no stamp file &#39;var/.ostree-selabeled&#39; found)</span>
+<span class="go">Bootloader updated; bootconfig swap: yes; bootversion: boot.1.1, deployment count change: 1</span>
 
-<span class="nb">echo</span> <span class="s2">&quot;Restoring /var&quot;</span>
+<span class="gp">root@6afee473d507:/usr/src/test# </span>tree elxr-minimal-ostree-amd64/rootfs/ -I <span class="s2">&quot;*.dirtree|*.filez|*.dirmeta|*.commit&quot;</span> -L <span class="m">4</span>
+<span class="go">elxr-minimal-ostree-amd64/rootfs/</span>
+<span class="go">|-- boot</span>
+<span class="go">|   |-- boot -&gt; .</span>
+<span class="go">|   |-- loader -&gt; loader.1</span>
+<span class="go">|   |-- loader.1</span>
+<span class="go">|   |   `-- entries</span>
+<span class="go">|   |       `-- ostree-1.conf</span>
+<span class="go">|   |-- lost+found</span>
+<span class="go">|   `-- ostree</span>
+<span class="go">|       `-- elxr-8dfea2828b186f4c77d1bbc9c3cf9ef5f520b8a56e0f97b4696b1e66bfd92e2f</span>
+<span class="go">|           |-- initramfs-6.1.0-32-amd64.img</span>
+<span class="go">|           `-- vmlinuz-6.1.0-32-amd64</span>
+<span class="go">|-- dev</span>
+<span class="go">|-- efi</span>
+<span class="go">|-- home</span>
+<span class="go">|-- lost+found</span>
+<span class="go">|-- ostree</span>
+<span class="go">|   |-- boot.1 -&gt; boot.1.1</span>
+<span class="go">|   |-- boot.1.1</span>
+<span class="go">|   |   `-- elxr</span>
+<span class="go">|   |       `-- 8dfea2828b186f4c77d1bbc9c3cf9ef5f520b8a56e0f97b4696b1e66bfd92e2f</span>
+<span class="go">|   |-- deploy</span>
+<span class="go">|   |   `-- elxr</span>
+<span class="go">|   |       |-- backing</span>
+<span class="go">|   |       |-- deploy</span>
+<span class="go">|   |       `-- var</span>
+<span class="go">|   `-- repo</span>
+<span class="go">|       |-- config</span>
+<span class="go">|       |-- extensions</span>
+<span class="go">|       |-- objects</span>
+<span class="go">|       |   |-- 00</span>
+<span class="go">|       |   |-- 01</span>
+<span class="go">|       |   |-- 02</span>
+<span class="go">|       |   |-- 03</span>
+<span class="go">|       |   |-- 04</span>
+<span class="go">|       |   |-- 05</span>
+<span class="go">....</span>
+<span class="go">....</span>
+<span class="go">....</span>
+<span class="go">|       |   |-- fd</span>
+<span class="go">|       |   |-- fe</span>
+<span class="go">|       |   `-- ff</span>
+<span class="go">|       |-- refs</span>
+<span class="go">|       |   |-- heads</span>
+<span class="go">|       |   |-- mirrors</span>
+<span class="go">|       |   `-- remotes</span>
+<span class="go">|       |-- state</span>
+<span class="go">|       |-- summary</span>
+<span class="go">|       `-- tmp</span>
+<span class="go">|           `-- cache</span>
+<span class="go">|-- proc</span>
+<span class="go">|-- root</span>
+<span class="go">|-- run</span>
+<span class="go">|-- sys</span>
+<span class="go">`-- tm</span>
+<span class="go">294 directories, 5 files</span>
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span> <span class="s2">&quot;Restoring /var&quot;</span>
 <span class="nv">VAR_SRC</span><span class="o">=</span><span class="k">$(</span>realpath <span class="si">${</span><span class="nv">ROOTFS</span><span class="si">}</span>/ostree/deploy/elxr/deploy/*.0<span class="k">)</span>
 <span class="nv">VAR_DST</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">ROOTFS</span><span class="si">}</span><span class="s2">/ostree/deploy/elxr&quot;</span>
 <span class="nb">echo</span> <span class="s2">&quot;Copying </span><span class="si">${</span><span class="nv">VAR_SRC</span><span class="si">}</span><span class="s2">/usr/rootdirs/var -&gt; </span><span class="si">${</span><span class="nv">VAR_DST</span><span class="si">}</span><span class="s2">&quot;</span>
@@ -333,8 +575,87 @@ bwrap --bind <span class="si">${</span><span class="nv">VAR_SRC</span><span clas
      --no-variables <span class="se">\</span>
      --entry-token <span class="se">\</span>
      os-id
+</pre></div>
+</div>
+<p>The current contents of the project directory are presented below:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Created &quot;/efi/EFI&quot;.</span>
+<span class="go">Created &quot;/efi/EFI/systemd&quot;.</span>
+<span class="go">Created &quot;/efi/EFI/BOOT&quot;.</span>
+<span class="go">Created &quot;/efi/loader&quot;.</span>
+<span class="go">Created &quot;/boot/EFI&quot;.</span>
+<span class="go">Created &quot;/boot/EFI/Linux&quot;.</span>
+<span class="go">Copied &quot;/usr/lib/systemd/boot/efi/systemd-bootx64.efi&quot; to &quot;/efi/EFI/systemd/systemd-bootx64.efi&quot;.</span>
+<span class="go">Copied &quot;/usr/lib/systemd/boot/efi/systemd-bootx64.efi&quot; to &quot;/efi/EFI/BOOT/BOOTX64.EFI&quot;.</span>
+<span class="go">Random seed file /efi/loader/random-seed successfully written (32 bytes).</span>
+<span class="gp">root@6afee473d507:/usr/src/test#</span>
+<span class="gp">root@6afee473d507:/usr/src/test# </span>tree elxr-minimal-ostree-amd64/rootfs/ -I <span class="s2">&quot;*.dirtree|*.filez|*.dirmeta|*.commit&quot;</span> -L <span class="m">4</span>
+<span class="go">elxr-minimal-ostree-amd64/rootfs/</span>
+<span class="go">|-- boot</span>
+<span class="go">|   |-- EFI</span>
+<span class="go">|   |   `-- Linux</span>
+<span class="go">|   |-- boot -&gt; .</span>
+<span class="go">|   |-- loader -&gt; loader.1</span>
+<span class="go">|   |-- loader.1</span>
+<span class="go">|   |   |-- entries</span>
+<span class="go">|   |   |   `-- ostree-1.conf</span>
+<span class="go">|   |   `-- entries.srel</span>
+<span class="go">|   |-- lost+found</span>
+<span class="go">|   `-- ostree</span>
+<span class="go">|       `-- elxr-8dfea2828b186f4c77d1bbc9c3cf9ef5f520b8a56e0f97b4696b1e66bfd92e2f</span>
+<span class="go">|           |-- initramfs-6.1.0-32-amd64.img</span>
+<span class="go">|           `-- vmlinuz-6.1.0-32-amd64</span>
+<span class="go">|-- dev</span>
+<span class="go">|-- efi</span>
+<span class="go">|   |-- EFI</span>
+<span class="go">|   |   |-- BOOT</span>
+<span class="go">|   |   |   `-- BOOTX64.EFI</span>
+<span class="go">|   |   `-- systemd</span>
+<span class="go">|   |       `-- systemd-bootx64.efi</span>
+<span class="go">|   `-- loader</span>
+<span class="go">|       |-- loader.conf</span>
+<span class="go">|       `-- random-seed</span>
+<span class="go">|-- home</span>
+<span class="go">|-- lost+found</span>
+<span class="go">|-- ostree</span>
+<span class="go">|   |-- boot.1 -&gt; boot.1.1</span>
+<span class="go">|   |-- boot.1.1</span>
+<span class="go">|   |   `-- elxr</span>
+<span class="go">|   |       `-- 8dfea2828b186f4c77d1bbc9c3cf9ef5f520b8a56e0f97b4696b1e66bfd92e2f</span>
+<span class="go">|   |-- deploy</span>
+<span class="go">|   |   `-- elxr</span>
+<span class="go">|   |       |-- backing</span>
+<span class="go">|   |       |-- deploy</span>
+<span class="go">|   |       `-- var</span>
+<span class="go">|   `-- repo</span>
+<span class="go">|       |-- config</span>
+<span class="go">|       |-- extensions</span>
+<span class="go">|       |-- objects</span>
+<span class="go">|       |   |-- 00</span>
+<span class="go">|       |   |-- 01</span>
+<span class="go">|       |   |-- 02</span>
+<span class="go">|       |   |-- 03</span>
+<span class="go">|       |   |-- fc</span>
+<span class="go">|       |   |-- fd</span>
+<span class="go">|       |   |-- fe</span>
+<span class="go">|       |   `-- ff</span>
+<span class="go">|       |-- refs</span>
+<span class="go">|       |   |-- heads</span>
+<span class="go">|       |   |-- mirrors</span>
+<span class="go">|       |   `-- remotes</span>
+<span class="go">|       |-- state</span>
+<span class="go">|       |-- summary</span>
+<span class="go">|       `-- tmp</span>
+<span class="go">|           `-- cache</span>
+<span class="go">|-- proc</span>
+<span class="go">|-- root</span>
+<span class="go">|-- run</span>
+<span class="go">|-- sys</span>
+<span class="go">`-- tmp</span>
 
-<span class="nb">echo</span> <span class="s2">&quot;Configuring boot loader&quot;</span>
+<span class="go">300 directories, 10 files</span>
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span> <span class="s2">&quot;Configuring boot loader&quot;</span>
 
 sed -i <span class="s1">&#39;s/#timeout/timeout/&#39;</span> <span class="si">${</span><span class="nv">ROOTFS</span><span class="si">}</span>/efi/loader/loader.conf
 
@@ -385,6 +706,7 @@ zstd -3 --keep -f -T128 <span class="nv">$CURRENT</span>/elxr-minimal-ostree-amd
 <li class="toctree-l1"><a class="reference internal" href="../../emacs/index.html">Emacs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../virt/index.html">Virtulization</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">Debian</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../0014.html">Debian Useful Resources</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../0005.html">Launch up Debian VM with Qemu</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../debian-installer/index.html">Debian Installer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../debian-command/index.html">Debian command</a></li>
@@ -406,10 +728,13 @@ zstd -3 --keep -f -T128 <span class="nv">$CURRENT</span>/elxr-minimal-ostree-amd
 <li class="toctree-l2"><a class="reference internal" href="../0011.html">Debian: Building the package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../pipeline/index.html">Debian Pipeline</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../0012.html">Build and Test STIG</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../0013.html">Change the mirror for elxr docker image</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../tools/index.html">Tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../licence/index.html">OpenSource License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bochs/index.html">Bochs IA-32 Emulator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../system/index.html">System</a></li>
 </ul>
 
 <div class="relations">

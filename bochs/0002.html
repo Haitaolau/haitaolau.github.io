@@ -1,0 +1,302 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Booting Linux 0.12 with Bochs on Ubuntu &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="System" href="../system/index.html" />
+    <link rel="prev" title="Compile Bochs based on debian" href="0001.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="booting-linux-0-12-with-bochs-on-ubuntu">
+<h1><a class="toc-backref" href="#id1" role="doc-backlink">Booting Linux 0.12 with Bochs on Ubuntu</a><a class="headerlink" href="#booting-linux-0-12-with-bochs-on-ubuntu" title="Permalink to this heading">¶</a></h1>
+<nav class="contents" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#booting-linux-0-12-with-bochs-on-ubuntu" id="id1">Booting Linux 0.12 with Bochs on Ubuntu</a></p>
+<ul>
+<li><p><a class="reference internal" href="#establish-envrionment" id="id2">Establish envrionment</a></p></li>
+<li><p><a class="reference internal" href="#create-a-bochs-configuration-file" id="id3">Create a Bochs Configuration File</a></p></li>
+<li><p><a class="reference internal" href="#start-bochs-with-bochsrc-0-12-hd-script" id="id4">Start Bochs with bochsrc-0.12-hd script</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<section id="establish-envrionment">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">Establish envrionment</a><a class="headerlink" href="#establish-envrionment" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="create-a-bochs-configuration-file">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">Create a Bochs Configuration File</a><a class="headerlink" href="#create-a-bochs-configuration-file" title="Permalink to this heading">¶</a></h2>
+<p>Create a file named bochsrc-0.12-hd.bxrc</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># The configuration file for Linux kernel 0.12.</span>
+<span class="c1"># For detailed information about each parameters see the file</span>
+<span class="c1"># bochsrc-sample.txt included in bochs.</span>
+
+<span class="c1">#=======================================================================</span>
+<span class="c1"># MEGS</span>
+<span class="c1"># Set the number of Megabytes of physical memory you want to emulate.</span>
+<span class="c1">#=======================================================================</span>
+<span class="n">megs</span><span class="p">:</span> <span class="mi">32</span>
+
+<span class="c1">#=======================================================================</span>
+<span class="c1"># ROMIMAGE:</span>
+<span class="c1"># The ROM BIOS controls what the PC does when it first powers on.</span>
+<span class="c1">#=======================================================================</span>
+<span class="c1">#romimage: file=$BXSHARE/BIOS-bochs-latest</span>
+
+<span class="n">romimage</span><span class="p">:</span> <span class="n">file</span><span class="o">=</span><span class="n">bios</span><span class="o">/</span><span class="n">BIOS</span><span class="o">-</span><span class="n">bochs</span><span class="o">-</span><span class="n">latest</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">fastboot</span>
+<span class="c1">#=======================================================================</span>
+<span class="c1"># VGAROMIMAGE</span>
+<span class="c1"># You now need to load a VGA ROM BIOS into C0000.</span>
+<span class="c1">#=======================================================================</span>
+<span class="c1">#vgaromimage: file=$BXSHARE/VGABIOS-lgpl-latest</span>
+<span class="n">vgaromimage</span><span class="p">:</span> <span class="n">file</span><span class="o">=</span><span class="n">bios</span><span class="o">/</span><span class="n">VGABIOS</span><span class="o">-</span><span class="n">lgpl</span><span class="o">-</span><span class="n">latest</span><span class="o">.</span><span class="n">bin</span>
+
+<span class="c1">#=======================================================================</span>
+<span class="c1"># CPU:</span>
+<span class="c1"># This defines cpu-related parameters inside Bochs:  Examples:</span>
+<span class="c1">#</span>
+<span class="c1">#  Bochs Machine/Compiler                                 Mips</span>
+<span class="c1"># ____________________________________________________________________</span>
+<span class="c1">#  2.2.6 2.6Ghz Intel Core 2 Duo with WinXP/g++ 3.4      21 to 25 Mips</span>
+<span class="c1">#  2.2.6 2.1Ghz Athlon XP with Linux 2.6/g++ 3.4         12 to 15 Mips</span>
+<span class="c1">#  2.0.1 1.6Ghz Intel P4 with Win2000/g++ 3.3             5 to  7 Mips</span>
+<span class="c1">#=======================================================================</span>
+<span class="c1">#cpu: count=1, ips=10000000, reset_on_triple_fault=1</span>
+<span class="c1">#cpu: model=corei7_haswell_4770</span>
+<span class="n">cpu</span><span class="p">:</span> <span class="n">model</span><span class="o">=</span><span class="n">pentium</span>
+<span class="c1">#=======================================================================</span>
+<span class="c1"># FLOPPYA,FLOPPYB:</span>
+<span class="c1"># Point this to pathname of floppy image file or device</span>
+<span class="c1">#=======================================================================</span>
+<span class="c1">#floppya: 1_44=&quot;bootimage-0.12-hd&quot;, status=inserted</span>
+<span class="n">floppya</span><span class="p">:</span> <span class="mi">1_44</span><span class="o">=</span><span class="s2">&quot;linux-0.12-080324/bootimage-0.12-hd&quot;</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="n">inserted</span>
+<span class="n">floppyb</span><span class="p">:</span> <span class="mi">1_44</span><span class="o">=</span><span class="s2">&quot;linux-0.12-080324/diskb.img&quot;</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="n">inserted</span>
+
+<span class="c1">#=======================================================================</span>
+<span class="c1"># ATA[0-3]-MASTER, ATA[0-3]-SLAVE</span>
+<span class="c1">#</span>
+<span class="c1"># This defines the type and characteristics of all attached ata devices:</span>
+<span class="c1">#   type=       type of attached device [disk|cdrom]</span>
+<span class="c1">#   mode=       only valid for disks [flat|concat|external|dll|sparse|vmware3]</span>
+<span class="c1">#   mode=       only valid for disks [undoable|growing|volatile]</span>
+<span class="c1">#   path=       path of the image</span>
+<span class="c1">#   cylinders=  only valid for disks</span>
+<span class="c1">#   heads=      only valid for disks</span>
+<span class="c1">#   spt=        only valid for disks</span>
+<span class="c1">#   status=     only valid for cdroms [inserted|ejected]</span>
+<span class="c1">#   biosdetect= type of biosdetection [none|auto], only for disks on ata0 [cmos]</span>
+<span class="c1">#   translation=type of translation of the bios, only for disks [none|lba|large|rechs|auto]</span>
+<span class="c1">#   model=      string returned by identify device command</span>
+<span class="c1">#   journal=    optional filename of the redolog for undoable and volatile disks</span>
+<span class="c1">#</span>
+<span class="c1"># Point this at a hard disk image file, cdrom iso file, or physical cdrom</span>
+<span class="c1"># device.  To create a hard disk image, try running bximage.  It will help you</span>
+<span class="c1"># choose the size and then suggest a line that works with it.</span>
+<span class="c1">#</span>
+<span class="c1"># In UNIX it may be possible to use a raw device as a Bochs hard disk,</span>
+<span class="c1"># but WE DON&#39;T RECOMMEND IT.  In Windows there is no easy way.</span>
+<span class="c1">#</span>
+<span class="c1"># In windows, the drive letter + colon notation should be used for cdroms.</span>
+<span class="c1"># Depending on versions of windows and drivers, you may only be able to</span>
+<span class="c1"># access the &quot;first&quot; cdrom in the system.  On MacOSX, use path=&quot;drive&quot;</span>
+<span class="c1"># to access the physical drive.</span>
+<span class="c1">#</span>
+<span class="c1"># The path is always mandatory. Disk geometry autodetection works with images</span>
+<span class="c1"># created by bximage if CHS is set to 0/0/0 (cylinders are calculated using</span>
+<span class="c1"># heads=16 and spt=63). For other hard disk images and modes the cylinders,</span>
+<span class="c1"># heads, and spt are mandatory.</span>
+<span class="c1">#</span>
+<span class="c1"># Default values are:</span>
+<span class="c1">#   mode=flat, biosdetect=auto, translation=auto, model=&quot;Generic 1234&quot;</span>
+<span class="c1">#</span>
+<span class="c1"># The biosdetect option has currently no effect on the bios</span>
+<span class="c1">#</span>
+<span class="c1"># Examples:</span>
+<span class="c1">#   ata0-master: type=disk, mode=flat, path=10M.sample, cylinders=306, heads=4, spt=17</span>
+<span class="c1">#   ata0-slave:  type=disk, mode=flat, path=20M.sample, cylinders=615, heads=4, spt=17</span>
+<span class="c1">#   ata1-master: type=disk, mode=flat, path=30M.sample, cylinders=615, heads=6, spt=17</span>
+<span class="c1">#   ata1-slave:  type=disk, mode=flat, path=46M.sample, cylinders=940, heads=6, spt=17</span>
+<span class="c1">#   ata2-master: type=disk, mode=flat, path=62M.sample, cylinders=940, heads=8, spt=17</span>
+<span class="c1">#   ata2-slave:  type=disk, mode=flat, path=112M.sample, cylinders=900, heads=15, spt=17</span>
+<span class="c1">#   ata3-master: type=disk, mode=flat, path=483M.sample, cylinders=1024, heads=15, spt=63</span>
+<span class="c1">#   ata3-slave:  type=cdrom, path=iso.sample, status=inserted</span>
+<span class="c1">#=======================================================================</span>
+<span class="n">ata0</span><span class="o">-</span><span class="n">master</span><span class="p">:</span> <span class="nb">type</span><span class="o">=</span><span class="n">disk</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s2">&quot;linux-0.12-080324/rootimage-0.12-hd&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">flat</span><span class="p">,</span> <span class="n">cylinders</span><span class="o">=</span><span class="mi">487</span><span class="p">,</span> <span class="n">heads</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">spt</span><span class="o">=</span><span class="mi">63</span>
+<span class="c1">#ata0-slave: type=disk, path=&quot;rootimage-0.12-hd1&quot;, mode=flat, cylinders=487, heads=16, spt=63</span>
+
+<span class="c1">#=======================================================================</span>
+<span class="c1"># BOOT:</span>
+<span class="c1">#=======================================================================</span>
+<span class="n">boot</span><span class="p">:</span> <span class="n">floppy</span>
+<span class="c1">#boot: disk</span>
+<span class="c1">#boot: a</span>
+<span class="c1">#boot: c</span>
+
+<span class="c1">#=======================================================================</span>
+<span class="c1"># disable the mouse, since DLX is text only</span>
+<span class="c1">#=======================================================================</span>
+<span class="n">mouse</span><span class="p">:</span> <span class="n">enabled</span><span class="o">=</span><span class="mi">0</span>
+
+<span class="c1">#=======================================================================</span>
+<span class="c1"># LOG:</span>
+<span class="c1">#=======================================================================</span>
+<span class="c1">#log: /dev/null</span>
+<span class="n">log</span><span class="p">:</span> <span class="n">bochsout</span><span class="o">.</span><span class="n">txt</span>
+
+<span class="c1">#=======================================================================</span>
+<span class="c1"># LOG CONTROLS</span>
+<span class="c1">#=======================================================================</span>
+<span class="n">panic</span><span class="p">:</span> <span class="n">action</span><span class="o">=</span><span class="n">ask</span>
+<span class="n">error</span><span class="p">:</span> <span class="n">action</span><span class="o">=</span><span class="n">report</span>
+<span class="n">info</span><span class="p">:</span> <span class="n">action</span><span class="o">=</span><span class="n">report</span>
+<span class="n">debug</span><span class="p">:</span> <span class="n">action</span><span class="o">=</span><span class="n">ignore</span>
+<span class="c1">#debug: action=ignore</span>
+
+<span class="c1">#=======================================================================</span>
+<span class="c1"># VGA_UPDATE_INTERVAL:</span>
+<span class="c1">#=======================================================================</span>
+<span class="c1">#vga_update_interval: 300000</span>
+<span class="c1">#</span>
+<span class="c1">#display_library: x, options=&quot;gui_debug&quot;</span>
+</pre></div>
+</div>
+<p>Here is the above file <a class="reference download internal" download="" href="../_downloads/bcfb8e49c44e482ab5020b09ecd844cb/bochsrc-0.12-hd.bxrc"><code class="xref download docutils literal notranslate"><span class="pre">bochsrc-0.12-hd.bxrc</span></code></a></p>
+</section>
+<section id="start-bochs-with-bochsrc-0-12-hd-script">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">Start Bochs with bochsrc-0.12-hd script</a><a class="headerlink" href="#start-bochs-with-bochsrc-0-12-hd-script" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+
+<span class="nv">LIBPATH</span><span class="o">=</span><span class="k">$(</span>realpath lib/<span class="k">)</span>
+
+<span class="c1">#LTDL_LIBRARY_PATH=${LIBPATH} ./bochs -f bochsrc-0.12-hd.bxrc -dbg_gui</span>
+<span class="nv">LTDL_LIBRARY_PATH</span><span class="o">=</span><span class="si">${</span><span class="nv">LIBPATH</span><span class="si">}</span> ./bochs -f bochsrc-0.12-hd.bxrc
+</pre></div>
+</div>
+<p>Here is the above file <a class="reference download internal" download="" href="../_downloads/6ea43954b5f2b997ce54eedfae6cd1d1/bochsrc-0.12-hd"><code class="xref download docutils literal notranslate"><span class="pre">bochsrc-0.12-hd.bxrc</span></code></a></p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cplus/index.html">Cplus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licence/index.html">OpenSource License</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Bochs IA-32 Emulator</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="0001.html">Compile Bochs based on debian</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Booting Linux 0.12 with Bochs on Ubuntu</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#establish-envrionment">Establish envrionment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#create-a-bochs-configuration-file">Create a Bochs Configuration File</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#start-bochs-with-bochsrc-0-12-hd-script">Start Bochs with bochsrc-0.12-hd script</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../system/index.html">System</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Bochs IA-32 Emulator</a><ul>
+      <li>Previous: <a href="0001.html" title="previous chapter">Compile Bochs based on debian</a></li>
+      <li>Next: <a href="../system/index.html" title="next chapter">System</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/bochs/0002.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

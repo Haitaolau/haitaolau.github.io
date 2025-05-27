@@ -5,6 +5,7 @@ Debian
 .. toctree::
    :maxdepth: 1
 
+   0014
    0005
    debian-installer/index
    debian-command/index
@@ -12,7 +13,7 @@ Debian
    elxr_edge/index
    os-tree/index
    0001
-   0002   
+   0002
    0003
    0004
    0006
@@ -23,4 +24,5 @@ Debian
    0011
    pipeline/index
    0012
-   
+   0013
+

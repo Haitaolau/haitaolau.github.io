@@ -1,0 +1,245 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Condition-case &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Condition-case with nil" href="0021.html" />
+    <link rel="prev" title="The progn Special Form" href="0019.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="condition-case">
+<h1>Condition-case<a class="headerlink" href="#condition-case" title="Permalink to this heading">¶</a></h1>
+<p>in emacs lisp, condition-case is used for error handling. it allows you to catch errors
+and handle them without terminating the program or causing a crash. it’s somewhat similar
+to a try/except block in other languages like python.</p>
+<section id="syntax">
+<h2>syntax<a class="headerlink" href="#syntax" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-elisp notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="k">condition-case</span><span class="w"></span>
+<span class="w">  </span><span class="nv">var</span><span class="w"></span>
+<span class="w">  </span><span class="nv">bodyform</span><span class="w"></span>
+<span class="w">  </span><span class="nv">clause</span><span class="w"> </span><span class="o">...</span><span class="p">)</span><span class="w"></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>var: the variable that will hold the error information (usually an error object).</p></li>
+<li><p>bodyform: the code to execute, which may raise an error.</p></li>
+<li><p>clause: defines the handler for specific types of errors.</p></li>
+</ul>
+</section>
+<section id="example-usage">
+<h2>example usage<a class="headerlink" href="#example-usage" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-elisp notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="k">condition-case</span><span class="w"> </span><span class="nv">err</span><span class="w"></span>
+<span class="w">    </span><span class="p">(</span><span class="k">progn</span><span class="w"></span>
+<span class="w">      </span><span class="p">(</span><span class="k">setq</span><span class="w"> </span><span class="nv">x</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span><span class="w"></span>
+<span class="w">      </span><span class="p">(</span><span class="k">setq</span><span class="w"> </span><span class="nv">y</span><span class="w"> </span><span class="p">(</span><span class="nf">/</span><span class="w"> </span><span class="nv">x</span><span class="w"> </span><span class="mi">0</span><span class="p">)))</span><span class="w">  </span><span class="c1">;; this will raise a division by zero error</span><span class="w"></span>
+<span class="w">  </span><span class="p">(</span><span class="ne">error</span><span class="w"></span>
+<span class="w">   </span><span class="p">(</span><span class="nf">message</span><span class="w"> </span><span class="s">&quot;an error occurred: %s&quot;</span><span class="w"> </span><span class="nv">err</span><span class="p">)))</span><span class="w"></span>
+</pre></div>
+</div>
+<p>in this example:</p>
+<ul class="simple">
+<li><p>the body contains code that raises an error (/ x 0).</p></li>
+<li><p>if an error occurs, control jumps to the error clause where it handles the error by printing a message.</p></li>
+</ul>
+</section>
+<section id="common-clauses">
+<h2>common clauses<a class="headerlink" href="#common-clauses" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><strong>error</strong>: catches any general error.</p></li>
+<li><p><strong>debug</strong>: catches debug errors.</p></li>
+<li><p><strong>quit</strong>: catches user interrupts (e.g., c-g).</p></li>
+<li><p><strong>file-error</strong>: catches errors related to file operations.</p></li>
+</ul>
+</section>
+<section id="more-specific-handling-example">
+<h2>more specific handling example<a class="headerlink" href="#more-specific-handling-example" title="Permalink to this heading">¶</a></h2>
+<p>you can handle specific errors by specifying the error types in the clauses.</p>
+<div class="highlight-elisp notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="k">condition-case</span><span class="w"> </span><span class="nv">err</span><span class="w"></span>
+<span class="w">    </span><span class="p">(</span><span class="k">progn</span><span class="w"></span>
+<span class="w">      </span><span class="p">(</span><span class="k">setq</span><span class="w"> </span><span class="nv">x</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span><span class="w"></span>
+<span class="w">      </span><span class="p">(</span><span class="k">setq</span><span class="w"> </span><span class="nv">y</span><span class="w"> </span><span class="p">(</span><span class="nf">/</span><span class="w"> </span><span class="nv">x</span><span class="w"> </span><span class="mi">0</span><span class="p">)))</span><span class="w">  </span><span class="c1">;; division by zero error</span><span class="w"></span>
+<span class="w">  </span><span class="p">(</span><span class="ne">error</span><span class="w"></span>
+<span class="w">   </span><span class="p">(</span><span class="nf">message</span><span class="w"> </span><span class="s">&quot;general error: %s&quot;</span><span class="w"> </span><span class="nv">err</span><span class="p">))</span><span class="w"></span>
+<span class="w">  </span><span class="p">(</span><span class="nv">arith-error</span><span class="w"></span>
+<span class="w">   </span><span class="p">(</span><span class="nf">message</span><span class="w"> </span><span class="s">&quot;caught an arithmetic error!&quot;</span><span class="p">)))</span><span class="w"></span>
+</pre></div>
+</div>
+<p>explanation:</p>
+<ul class="simple">
+<li><p>if an arithmetic error (like division by zero) occurs, the <cite>arith-error</cite> clause will handle it and print the corresponding message.</p></li>
+<li><p>if a general error occurs, the <cite>error</cite> clause will handle it.</p></li>
+</ul>
+</section>
+<section id="handling-multiple-error-types">
+<h2>handling multiple error types<a class="headerlink" href="#handling-multiple-error-types" title="Permalink to this heading">¶</a></h2>
+<p>you can handle multiple error types within a single <cite>condition-case</cite> expression, each with its own clause:</p>
+<div class="highlight-elisp notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="k">condition-case</span><span class="w"> </span><span class="nv">err</span><span class="w"></span>
+<span class="w">    </span><span class="p">(</span><span class="k">progn</span><span class="w"></span>
+<span class="w">      </span><span class="p">(</span><span class="k">setq</span><span class="w"> </span><span class="nv">x</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span><span class="w"></span>
+<span class="w">      </span><span class="p">(</span><span class="k">setq</span><span class="w"> </span><span class="nv">y</span><span class="w"> </span><span class="p">(</span><span class="nf">/</span><span class="w"> </span><span class="nv">x</span><span class="w"> </span><span class="mi">0</span><span class="p">)))</span><span class="w">  </span><span class="c1">;; division by zero error</span><span class="w"></span>
+<span class="w">  </span><span class="p">(</span><span class="ne">error</span><span class="w"></span>
+<span class="w">   </span><span class="p">(</span><span class="nf">message</span><span class="w"> </span><span class="s">&quot;general error occurred&quot;</span><span class="p">))</span><span class="w"></span>
+<span class="w">  </span><span class="p">(</span><span class="nv">arith-error</span><span class="w"></span>
+<span class="w">   </span><span class="p">(</span><span class="nf">message</span><span class="w"> </span><span class="s">&quot;caught division by zero!&quot;</span><span class="p">))</span><span class="w"></span>
+<span class="w">  </span><span class="p">(</span><span class="nv">file-error</span><span class="w"></span>
+<span class="w">   </span><span class="p">(</span><span class="nf">message</span><span class="w"> </span><span class="s">&quot;file-related error occurred&quot;</span><span class="p">)))</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="summary">
+<h2>summary<a class="headerlink" href="#summary" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><cite>condition-case</cite> provides a structured way to handle errors in emacs lisp.</p></li>
+<li><p>it allows you to specify different clauses for different types of errors.</p></li>
+<li><p>each clause defines how to handle a specific kind of error without halting the program unexpectedly.</p></li>
+</ul>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cplus/index.html">Cplus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Emacs</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="commands.html">Emacs Commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0007.html">Emacs Commands: Blank Lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0001.html">How do I insert &lt;some text&gt; at the beginning of every line?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0002.html">How do I find the function definition?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0003.html">Complete Definition of beginning-of-buffer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0004.html">Complete Definition of mark-whole-buffer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0005.html">Fundamental Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0006.html">How to delete the first few n chars of every line?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0008.html">jumps to the location of the mark - and M-&lt; sets the mark before jumping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0009.html">How to close windows in Emacs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0010.html">Lisp error:wrong-type-argument number-or-marker-p</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0011.html">Lisp: The message Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0012.html">Lisp: Using setq</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0013.html">Lisp: Buffer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0014.html">The Definition of append-to-buffer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0015.html">How to get quick overviews of Elisp functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0016.html">Complete Definition of zap-to-char</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0017.html">Elisp: Case Sensitivity (case-fold-search)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0018.html">Complete Definition of kill-region</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0019.html">The progn Special Form</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Condition-case</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#syntax">syntax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example-usage">example usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#common-clauses">common clauses</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#more-specific-handling-example">more specific handling example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#handling-multiple-error-types">handling multiple error types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#summary">summary</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="0021.html">Condition-case with nil</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licence/index.html">OpenSource License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bochs/index.html">Bochs IA-32 Emulator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../system/index.html">System</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Emacs</a><ul>
+      <li>Previous: <a href="0019.html" title="previous chapter">The progn Special Form</a></li>
+      <li>Next: <a href="0021.html" title="next chapter">Condition-case with nil</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/emacs/0020.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

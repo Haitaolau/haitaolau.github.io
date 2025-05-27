@@ -1,0 +1,78 @@
+====================
+ Lisp: Buffer
+====================
+
+
+Buffer-name
+===========
+
+.. code-block::
+
+   (buffer-name)
+
+When I do this in Info, the value returned by evaluating (buffer-name) is "test.txt"
+
+.. code-block::
+
+   (buffer-file-name)
+
+the value returned by evaluating (buffer-file-name) is "/home/wrsadmin/workspace/test.txt"
+
+The two functions, buffer-name and buffer-file-name, show the difference between a file and a buffer.
+
+
+
+.. note::
+
+   In the expressions, the parentheses tell the Lisp interpreter to treat buffer-name and buffer-file-name as functions; without the parentheses, the interpreter would attempt to evaluate the symbols as variables
+
+
+Getting Buffers
+===============
+
+
+The buffer-name function returns the name of the buffer; to get the buffer itself, a different function is needed: the current-buffer function
+
+
+.. code-block::
+
+   (current-buffer)
+
+If you evaluate this expression in Info in Emacs in the usual way, "**#<buffer test.txt>**" will appear in the echo area
+
+
+A related function is other-buffer. This returns the most recently selected buffer other than the one you are in currently, not a printed representation of its name. If you have recently switched back and forth from the *0013.rst* buffer, other-buffer will return that buffer.
+
+
+.. code-block::
+
+   (other-buffer)
+
+
+You should see #<buffer 0013.rst> appear in the echo area,
+
+
+Switching Buffers
+=================
+
+
+The other-buffer function actually provides a buffer when it is used as an argument to a function that requires one. We can see this by using other-buffer and switch-to-buffer to switch to a different buffer.
+
+
+.. code-block::
+
+   (switch-to-buffer (other-buffer))
+
+
+Buffer Size and the Location of Point
+=====================================
+
+
+
+.. code-block::
+
+   (buffer-size)
+
+   (point)
+
+   

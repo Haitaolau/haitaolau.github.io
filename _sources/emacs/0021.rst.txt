@@ -1,0 +1,85 @@
+=========================
+Condition-case with nil
+=========================
+
+
+In Emacs Lisp, using condition-case with nil as the error variable is a common idiom when you want to handle errors but don’t care about the error value itself.
+
+
+Syntax Overview
+---------------
+
+.. code-block:: elisp
+
+   (condition-case nil
+       BODY
+     (ERROR-TYPE HANDLER-FORMS))
+
+* nil: Instead of binding the error to a variable (like err), nil means “ignore the error value.”
+
+* BODY: The code to try.
+
+* ERROR-TYPE: The kind of error to catch.
+
+* HANDLER-FORMS: What to do if the error occurs.
+
+
+
+
+Example: Ignore Errors Silently
+-------------------------------
+
+
+.. code-block:: elisp
+
+   (condition-case nil
+       (delete-file "nonexistent.txt")
+     (file-error nil))  ;; Do nothing if file doesn't exist
+
+This tries to delete a file. If it fails with a file-error, it quietly ignores the failure.
+
+
+
+Example: Provide a Fallback
+---------------------------
+
+
+.. code-block:: elisp
+
+   (condition-case nil
+       (open-network-stream "my-connection" nil "example.com" 80)
+     (error
+      (message "Failed to open network connection")))
+
+
+This tries to open a network stream. If any error occurs, it prints a friendly message instead of crashing.
+
+
+In brief, in the kill-region function, the code condition-case works like this:
+
+
+.. code-block:: elisp
+
+   If no errors, run only this code
+       but, if errors, run this other code.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

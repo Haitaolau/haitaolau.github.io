@@ -1,0 +1,111 @@
+===============================
+ Compile Bochs based on debian
+===============================
+
+
+Build the Bochs
+================
+
+Clone
+-------
+
+.. code-block:: bash
+
+   git clone  https://github.com/bochs-emu/Bochs.git
+
+Configure
+----------
+
+.. code-block:: bash
+
+   configure --build=x86_64-linux-gnu \
+             --prefix=/usr \
+             --includedir=${prefix}/include \
+             --mandir=${prefix}/share/man \
+             --infodir=${prefix}/share/info \
+             --sysconfdir=/etc \
+             --localstatedir=/var \
+             --disable-option-checking \
+             --disable-silent-rules \
+             --libdir=${prefix}/lib/x86_64-linux-gnu \
+             --disable-maintainer-mode \
+             --disable-dependency-tracking \
+             --with-rfb \
+             --with-sdl2 \
+             --with-term \
+             --with-x11 \
+             --with-wx \
+             --disable-docbook \
+             --enable-3dnow \
+             --enable-a20-pin \
+             --enable-all-optimizations \
+             --enable-avx \
+             --enable-busmouse \
+             --enable-cdrom \
+             --enable-cet \
+             --enable-clgd54xx \
+             --enable-compressed-hd \
+             --enable-cpu-level=6 \
+             --enable-debugger \
+             --enable-debugger-gui \
+             --enable-disasm \
+             --enable-e1000 \
+             --enable-es1370 \
+             --enable-evex \
+             --enable-fpu \
+             --enable-idle-hack \
+             --enable-instrumentation \
+             --enable-pci \
+             --enable-plugins \
+             --enable-repeat-speedups \
+             --enable-memtype \
+             --enable-ne2000 \
+             --enable-pnic \
+             --enable-protection-keys \
+             --enable-raw-serial \
+             --enable-sb16 \
+             --enable-smp \
+             --enable-svm \
+             --enable-usb \
+             --enable-usb-ehci \
+             --enable-usb-ohci \
+             --enable-usb-xhci \
+             --enable-vmx=2 \
+             --enable-voodoo \
+             --enable-x86-64 \
+             --enable-x86-debugger \
+             --enable-pcidev
+
+
+
+Compile
+---------
+
+.. code-block:: bash
+
+   make -j 128
+
+
+Run and test
+-------------
+
+
+.. code-block:: bash
+
+    find build/ -name "*.so" -exec cp {} test/lib \;
+    LTDL_LIBRARY_PATH=/home/wrsadmin/workspace/libstdc++/test/lib ./build/bochs -f .bochsrc
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

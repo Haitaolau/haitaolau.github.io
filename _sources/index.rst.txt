@@ -23,6 +23,8 @@ Welcome to Gdocs's documentation!
    debian/index
    tools/index
    licence/index
+   bochs/index
+   system/index
    
 .. * :ref:`corp_index`
    * :ref:`python_index`

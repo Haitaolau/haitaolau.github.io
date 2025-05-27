@@ -5,6 +5,8 @@ Corporation
 ==================
 
 
+.. contents:: Table of Contents
+
 .. _corp_links:
 
 Links
@@ -24,229 +26,15 @@ Links
 
 * `knowbe4 Training <https://training.knowbe4.com/learner/index.html#/training>`_
 
-Build wetson & wayland for LIN1022
-=====================================
 
-1. build linux1022
-----------------------
 
-.. code-block:: console
+Start Vlm
+=========
 
-   git clone --branch WRLINUX_10_21_LTS git://pek-git.wrs.com/wrlinux-x
-   wrlinux-x/setup.sh --machines intel-x86-64 --dl-layers --distro=wrlinux-graphics
 
-2. Eanble the webston and wayland 
----------------------------------
+.. code-block:: bash
 
-adding the followings into conf/local.conf
+   ssh -X hliu4@pek-lpd-susbld /folk/vlm/bin/vlmstart
 
-.. code-block:: console
 
-   # Add known layers to recipe lists
-   require conf/wrlinux-recipelists.inc
-
-   CUSTOMER_RECIPES:openembedded-layer += 'libxaw'
-   CUSTOMER_RECIPES:openembedded-layer += 'xterm'
-
-   IMAGE_INSTALL:append = " weston"
-   IMAGE_FEATURES:append = " weston"
-   IMAGE_FEATURES:remove = "x11-base x11-sato"
-   IMAGE_INSTALL:append = " weston-xwayland weston-init weston-examples gtk+3-demo xterm mesa-demos"
-
-
-
-
-
-
-WRlinux and yocto version
-==========================
-
-`Yocto release version <https://wiki.yoctoproject.org/wiki/Releases>`_
-
-===============   =============  ==========   ===============     ===========    ==================
-Product Version   Yocto Version  Codename     Kernel Version      PR Date        EOL Date Official
-===============   =============  ==========   ===============     ===========    ==================
-LTS22             Yocto 4.0      Kirkstone    5.15
-LTS21             Yocto 3.3      Hardknott    5.10                9-Jun-21
-LTS 19            Yocto 3.0      Zeus         5.2                 15-Nov-19	   1-Jan-25
-LTS 18            Yocto 2.6      Thud         4.18.x              15-Nov-18	   1-Jan-24
-LTS 17            Yocto 2.4      Rocko        4.12.x              15-Nov-17	   1-Jan-23
-WRLinux 9.0       Yocto 2.2      Morty        4.8.x               12-Dec-16	   1-Jan-21
-WRLinux 8.0       Yocto 2.0      Jethro       4.1.x               12-Dec-15	   1-Jan-21
-WRLinux 7.0       Yocto 1.7      Dizzy        3.14.x              12-Dec-14	   1-Jan-20
-WRLinux 6.0       Yocto 1.5      Dora         3.10.x              13-Dec-13	   1-Jan-19
-WRLinux 5.0.1     Yocto 1.2      Denzil       3.4.x               20-Mar-13	   28-Sep-17
-WRLinux 5.0       Yocto 1.2      Denzil       3.4.x               27-Sep-12	   28-Sep-17
-WRLinux 4.3       NA             NA           2.6.34.10           16-Dec-11	   23-Oct-15
-WRLinux 4.2       NA             NA           2.6.34.9            29-Jul-11	   23-Oct-15
-===============   =============  ==========   ===============     ===========    ==================
-
-Windows Image(ISO)
-===================
-
-**file://pek-nas1/iso_images/Windows/**
-
-**\\\\pek-nas1\\iso_images\\Windows**
-
-Add New printer
-==================
-
-**file://pek-eps01/**
-
-**\\\\pek-eps01\\**
-
-
-Build WRlinux
-===============
-
-WRLinux 1021
---------------
-
-**1. Build within CDC server**
-
-  .. code-block:: console 
-
-     git clone --branch WRLINUX_10_21_LTS git://pek-git.wrs.com/wrlinux-x
-     ./wrlinux-x/setup.sh --machines intel-x86-64 --distros wrlinux --dl-layers --accept-eula=yes
-
-**2. Build within Alameda Server**
-
-  .. code-block:: console 
-
-     git clone --branch WRLINUX_10_21_LTS git://ala-lxgit.wrs.com/wrlinux-x
-     ./wrlinux-x/setup.sh --machines intel-x86-64 --distros wrlinux-std-sato --dl-layers --accept-eula=yes
-
-
-
-
-WRLinux 1019
---------------
-
-**1. Build within CDC server**
-
-  .. code-block:: console 
-
-     git clone --branch WRLINUX_10_19_LTS git://pek-git.wrs.com/wrlinux-x
-     ./wrlinux-x/setup.sh --machines intel-x86-64 --distros wrlinux --dl-layers --accept-eula=yes
-
-**2. Build within Alameda Server**
-
-  .. code-block:: console 
-
-     git clone --branch WRLINUX_10_19_LTS git://ala-lxgit.wrs.com/wrlinux-x
-     ./wrlinux-x/setup.sh --machines intel-x86-64 --distros wrlinux-std-sato --dl-layers --accept-eula=yes
-
-
-
-
-WRLinux 1018
---------------
-
-**1. Build within CDC server**
-
-  .. code-block:: console 
-
-     git clone --branch WRLINUX_10_18_LTS git://pek-git.wrs.com/wrlinux-x
-     ./wrlinux-x/setup.sh --machines intel-x86-64 --distros wrlinux --dl-layers --accept-eula=yes
-
-**2. Build within Alameda Server**
-
-  .. code-block:: console 
-
-     git clone --branch WRLINUX_10_18_LTS git://ala-lxgit.wrs.com/wrlinux-x
-     ./wrlinux-x/setup.sh --machines intel-x86-64 --distros wrlinux-std-sato --dl-layers --accept-eula=yes
-
-
-WRLinux 8 
----------
-
-**1. Build the openvswith and dpdk**
-  .. code-block:: console 
-
-     /net/pek-lpd-susbld/pek-lpd-susbld12/wrlinux-8.0-rcpl/wrlinux-8/wrlinux/configure --enable-reconfig --enable-kernel=ovp --enable-rootfs=ovp_kvm+installer-support --enable-bootimage=hdd,tar.bz2 --with-bootimage-space=1024 --enable-checkout-all-layers=yes --enable-rm-oldimgs=yes --enable-addons=wr-ovp --enable-internet-download=yes --with-layer=wr-dpdk --with-init=sysvinit --with-license-flags-whitelist=non-commercial --enable-board=intel-x86-64 --enable-jobs=10 --enable-parallel-pkgbuilds=10 --with-template=feature/ovs-2.7.0 --with-rcpl-version=0025
-
-**2. Build standard**
-  .. code-block:: console 
-     
-     /buildarea/hliu4/wrlinux-x/wrlinux_8_0_head/wrlinux/configure --enable-board=intel-x86-64 --enable-kernel=standard --enable-rootfs=glibc_std --enable-reconfig --enable-rm-oldimgs=yes --enable-internet-download=yes --enable-jobs=10 --enable-parallel-pkgbuilds=10 --with-rcpl-version=0
-
-**3. Build fsl-p2020**
-
-  .. code-block:: console 
-
-     /net/pek-lpd-susbld/pek-lpd-susbld12/wrlinux-8.0-rcpl/wrlinux-8/wrlinux/configure --with-layer=mitel_bsp,meta-java,common,common-downloads --enable-board=fsl-p2020 --enable-kernel=standard --enable-jobs=12 --enable-parallel-pkgbuilds=12 --enable-rootfs=glibc_std --enable-reconfig=yes --enable-bootimage=cpio.gz.u-boot --with-rcpl-version=0027
-
-
-
-
-WRLinux 7
-------------
-
-  .. code-block:: console
-
-     /net/pek-lpd-susbld/pek-lpd-susbld12/wrlinux-7.0-rcpl/wrlinux-7/wrlinux/configure --enable-board=intel-x86-64 --enable-jobs=8 --enable-parallel-pkgbuilds=8 --enable-reconfig --enable-kernel=standard --enable-rootfs=glibc_std --with-rcpl-version=0029
-
-
-WRLinux 6
------------
-
-**1. Build SCP Version**
-
-  .. code-block:: console
-
-     /net/pek-lpd-susbld/pek-lpd-susbld12/wrlinux-6.0-rcpl/wrlinux-6/wrlinux/configure --enable-kernel=secure --enable-rootfs=secure-core --enable-board=intel-x86-64 --enable-unsupported-config=yes --enable-jobs=14 --enable-parallel-pkgbuilds=14 --enable-reconfig --with-rcpl-version=auto
-
-**2. Build standard**
-
-  .. code-block:: console 
-
-     /net/pek-lpd-susbld/pek-lpd-susbld12/wrlinux-6.0-rcpl/wrlinux-6/wrlinux/configure --enable-board=intel-x86-64 --enable-kernel=standard --enable-rootfs=glibc-std+installer-support --enable-jobs=14 --enable-parallel-pkgbuilds=14 --enable-reconfig --enable-bootimage=hdd,tar.bz2,iso --with-rcpl-version=auto
-
-**3. Build the ovs and dpdk**
-
-  .. code-block:: console 
-
-     /net/pek-lpd-susbld/pek-lpd-susbld12/wrlinux-6.0-rcpl/wrlinux-6/wrlinux/configure --enable-parallel-pkgbuilds=14 --enable-jobs=14 --enable-board=intel-x86-64 --enable-rootfs=ovp-kvm+initramfs+installer-support --enable-addons=wr-ovp --enable-bootimage=hdd,tar.bz2,iso --with-bootimage-space=1024 --enable-checkout-all-layers=yes --enable-reconfig --enable-rm-oldimgs=yes --with-template=feature/initramfs,feature/kexec,feature/kdump,feature/target-toolchain --enable-target-installer=yes --with-rcpl-version=0038
-
-
-WRLinux OVP
-============
-
-  Just change the distros to wrlinux-ovp
-
-  .. code-block:: console
-
-     ./wrlinux-x/setup.sh --machines intel-x86-64 --distros wrlinux-ovp --dl-layers --accept-eula=yes 
-
-OVP7
-----
-
-  rcpl 13
-
-  .. code-block:: console
-
-     /net/pek-lpd-susbld/pek-lpd-susbld12/wrlinux-7.0-rcpl/wrlinux-7/wrlinux/configure --enable-board=intel-x86-64 --enable-rootfs=ovp-kvm+installer-support --enable-addons=wr-ovp --enable-jobs=8 --enable-parallel-pkgbuilds=8 --enable-reconfig --with-layer=wr-dpdk --enable-bootimage=hdd,tar.bz2 --with-bootimage-space=1024 --enable-checkout-all-layers=yes --enable-rm-oldimgs=yes --with-init=sysvinit --with-rcpl-version=0013
-
-  rcpl 26
-
-  .. code-block:: console 
-
-     /net/pek-lpd-susbld/pek-lpd-susbld12/wrlinux-7.0-rcpl/wrlinux-7/wrlinux/configure --enable-board=intel-x86-64 --enable-rootfs=ovp-kvm+installer-support --enable-addons=wr-ovp --enable-jobs=12 --enable-parallel-pkgbuilds=12 --enable-reconfig --with-layer=wr-dpdk --enable-bootimage=hdd,tar.bz2 --with-bootimage-space=1024 --enable-checkout-all-layers=yes --enable-rm-oldimgs=yes --with-template=feature/new-dpdk-ovs,feature/self-hosted,feature/dpdk --with-init=sysvinit --enable-internet-download=yes --with-rcpl-version=0026
-
-  
-
-Start Qemu with runqemu 
-=======================
-
-  .. code-block:: console 
-     
-     runqemu qemux86-64 slirp nographic
-
-  You could also specify the memory for qemu. 
-
-  .. code-block:: console 
-     
-     runqemu qemux86-64 slirp nographic qemuparams=“-m 2048"
-
-
-
+   

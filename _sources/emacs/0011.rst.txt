@@ -1,0 +1,54 @@
+============================
+ Lisp: The message Function
+============================
+
+
+you can print a message in your echo area by evaluating the following list:
+
+.. code-block::
+
+   (message "This message appears in the echo area!")
+
+
+
+.. code-block::
+
+   (message "The name of this buffer is: %s." (buffer-name))
+
+In Info, "The name of this buffer is: *info*." will appear in the echo area. The function
+
+buffer-name returns the name of the buffer as a string, which the message function inserts in place of %s.
+
+
+To print a value as an integer, use ‘%d’ in the same way as ‘%s’.
+
+.. code-block::
+
+   (message "The value of fill-column is %d." fill-column)
+
+
+On my system, when I evaluate this list, "The value of fill-column is 72." appears in my echo area5.
+
+
+.. code-block::
+
+   (message "There are %d %s in the office!"
+         (- fill-column 14) "pink elephants")
+
+
+On my system it says, "There are 58 pink elephants in the office!".
+
+
+.. code-block::
+
+   (message "He saw %d %s"
+         (- fill-column 32)
+         (concat "red "
+                 (substring
+                  "The quick brown foxes jumped." 16 21)
+                 " leaping."))
+
+
+When your fill column is 70 and you evaluate the expression, the message "He saw 38 red foxes leaping." appears in your echo area.
+
+

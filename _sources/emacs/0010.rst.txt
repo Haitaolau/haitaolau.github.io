@@ -1,0 +1,44 @@
+===================================================
+ Lisp error:wrong-type-argument number-or-marker-p
+===================================================
+
+
+
+When a function is passed an argument of the wrong type, the Lisp interpreter produces an error message
+For example:
+
+.. code-block::
+
+   (+ 2 'hello)
+
+type C-x C-e to excute the above expression.
+
+When you do this you will generate an error message.
+
+
+.. code-block::
+
+
+   ---------- Buffer: *Backtrace* ----------
+   Debugger entered--Lisp error:
+            (wrong-type-argument number-or-marker-p hello)
+     +(2 hello)
+     eval((+ 2 'hello) nil)
+     elisp--eval-last-sexp(t)
+     eval-last-sexp(nil)
+     funcall-interactively(eval-print-last-sexp nil)
+     call-interactively(eval-print-last-sexp nil nil)
+     command-execute(eval-print-last-sexp)
+   ---------- Buffer: *Backtrace* ----------
+
+
+The beginning of the error message is clear—it states ‘wrong type argument’
+
+number-or-marker-p 的 ' p ' 是 Lisp 编程早期开始的一种实践的体现。' p ' 代表谓词。
+
+在早期 Lisp 研究人员使用的行话中，谓词指的是一个函数，用于确定某个属性是真还是假。所以 ' p '
+
+告诉我们 number-or-marker-p 是一个函数的名称，它确定提供的参数是数字还是标记是真还是假。
+
+其他以 ' p ' 结尾的 Lisp 符号包括 zerop、 一个测试其参数是否为零的函数，以及 listp，一个测试其参数是否为 list 的函数。
+

@@ -1,3 +1,4 @@
+
 ======================================
  Simplify Ruckstack with shell script
 ======================================
@@ -253,37 +254,309 @@ Step4. creating image and making a partition
    echo "Mounting ${LOOPDEV}"
    
    systemd-dissect -m ${LOOPDEV} ${ROOTFS}
-   
-   
+
+
+The current contents of the project directory are presented below:
+
+.. code-block:: console
+
+   root@6afee473d507:/usr/src/test/elxr-minimal-ostree-amd64# ls rootfs/
+   boot  efi  lost+found
+   root@6afee473d507:/usr/src/test/elxr-minimal-ostree-amd64# tree
+   .
+   `-- rootfs
+       |-- boot
+       |   `-- lost+found
+       |-- efi
+       `-- lost+found
+
+   6 directories, 0 files
+
+
+.. code-block:: bash
+
    echo "Creating ${ROOTFS}/ostree/repo"
-   
+
    test -d "${ROOTFS}/ostree/repo" || mkdir -p ${ROOTFS}/ostree/repo
-   
+
    echo "Create ostree repository"
-   
+
    ostree init --repo ${ROOTFS}/ostree/repo --mode archive-z2
-   
+
+
+The current contents of the project directory are presented below:
+
+.. code-block:: console
+
+   root@6afee473d507:/usr/src/test# tree elxr-minimal-ostree-amd64/rootfs/
+   elxr-minimal-ostree-amd64/rootfs/
+   |-- boot
+   |   `-- lost+found
+   |-- efi
+   |-- lost+found
+   `-- ostree
+       `-- repo
+           |-- config
+           |-- extensions
+           |-- objects
+           |-- refs
+           |   |-- heads
+           |   |-- mirrors
+           |   `-- remotes
+           |-- state
+           `-- tmp
+               `-- cache
+
+   16 directories, 1 file
+
+
+
+.. code-block:: bash
+
    echo "Pull ostree from /var/www/html/repo"
-   
+
    echo "Pulling elxr/amd64 from /var/www/html/repo" 
-   
+
    ostree pull-local --repo ${ROOTFS}/ostree/repo /var/www/html/repo elxr/amd64
-   
+
+The current contents of the project directory are presented below:
+
+.. code-block:: console
+
+   root@6afee473d507:/usr/src/test# tree elxr-minimal-ostree-amd64/rootfs/ -L 4
+   elxr-minimal-ostree-amd64/rootfs/
+   |-- boot
+   |   `-- lost+found
+   |-- efi
+   |-- lost+found
+   `-- ostree
+       `-- repo
+           |-- config
+           |-- extensions
+           |-- objects
+           |   |-- 00
+           |   |-- 01
+           |   |-- 02
+           ...
+           ...
+           ...
+           |   |-- fb
+           |   |-- fc
+           |   |-- fd
+           |   |-- fe
+           |   `-- ff
+           |-- refs
+           |   |-- heads
+           |   |-- mirrors
+           |   `-- remotes
+           |-- state
+           `-- tmp
+               `-- cache
+
+   272 directories, 1 file
+
+
+
+.. code-block:: bash
+
    echo "Updating summary of ostree repository"
-   
+
    ostree summary -u --repo=${ROOTFS}/ostree/repo
-   
+
    echo "Deploy ostree elxr/amd64 to ${LOOPDEV}"
    echo "Configuring ${LOOPDEV} for ostree"
-   
+
    ostree admin init-fs ${ROOTFS}
-   
+
+The current contents of the project directory are presented below:
+
+.. code-block:: console
+
+   root@6afee473d507:/usr/src/test# tree elxr-minimal-ostree-amd64/rootfs/ -I "*.dirtree|*.filez|*.dirmeta|*.commit" 
+   elxr-minimal-ostree-amd64/rootfs/
+   |-- boot
+   |   `-- lost+found
+   |-- dev
+   |-- efi
+   |-- home
+   |-- lost+found
+   |-- ostree
+   |   |-- deploy
+   |   `-- repo
+   |       |-- config
+   |       |-- extensions
+   |       |-- objects
+   |       |   |-- 00
+   |       |   |-- 01
+   |       |   |-- 02
+   |       |   |-- 03
+   |       |   |-- 04
+   |       |   |-- 05
+   ....
+   ....
+   ....
+   |       |   |-- f5
+   |       |   |-- f6
+   |       |   |-- f7
+   |       |   |-- f8
+   |       |   |-- f9
+   |       |   |-- fa
+   |       |   |-- fb
+   |       |   |-- fc
+   |       |   |-- fd
+   |       |   |-- fe
+   |       |   `-- ff
+   |       |-- refs
+   |       |   |-- heads
+   |       |   |   `-- elxr
+   |       |   |       `-- amd64
+   |       |   |-- mirrors
+   |       |   `-- remotes
+   |       |-- state
+   |       |-- summary
+   |       `-- tmp
+   |           `-- cache
+   |-- proc
+   |-- root
+   |-- run
+   |-- sys
+   `-- tmp
+
+   281 directories, 3 files
+
+
+
+.. code-block:: bash
+
    ostree admin os-init --sysroot ${ROOTFS} elxr
-   
+
+The current contents of the project directory are presented below:
+
+
+.. code-block:: console
+
+   root@6afee473d507:/usr/src/test# ostree admin os-init --sysroot ${ROOTFS} elxr
+   ostree/deploy/elxr initialized as OSTree stateroot
+   root@6afee473d507:/usr/src/test# tree elxr-minimal-ostree-amd64/rootfs/ -I "*.dirtree|*.filez|*.dirmeta|*.commit" 
+   elxr-minimal-ostree-amd64/rootfs/
+   |-- boot
+   |   `-- lost+found
+   |-- dev
+   |-- efi
+   |-- home
+   |-- lost+found
+   |-- ostree
+   |   |-- deploy
+   |   |   `-- elxr
+   |   |       `-- var
+   |   `-- repo
+   |       |-- config
+   |       |-- extensions
+   |       |-- objects
+   |       |   |-- 00
+   |       |   |-- 01
+   |       |   |-- 02
+   ....
+   ....
+   ....
+   |       |   |-- fc
+   |       |   |-- fd
+   |       |   |-- fe
+   |       |   `-- ff
+   |       |-- refs
+   |       |   |-- heads
+   |       |   |   `-- elxr
+   |       |   |       `-- amd64
+   |       |   |-- mirrors
+   |       |   `-- remotes
+   |       |-- state
+   |       |-- summary
+   |       `-- tmp
+   |           `-- cache
+   |-- proc
+   |-- root
+   |-- run
+   |-- sys
+   `-- tmp
+
+   283 directories, 3 files
+
+
+.. code-block:: bash
+
    echo "Deploying elxr/amd64"
-   
+
    ostree admin deploy --sysroot ${ROOTFS} --os elxr elxr/amd64 --karg=root=LABEL=ROOT --karg=rw --karg='console=ttyS0,115200n8 console=tty0'
-   
+
+The current contents of the project directory are presented below:
+
+.. code-block:: console
+
+   root@6afee473d507:/usr/src/test# ostree admin deploy --sysroot ${ROOTFS} --os elxr elxr/amd64 --karg=root=LABEL=ROOT --karg=rw --karg='console=ttyS0,115200n8 console=tty0'
+   Relabeling /var (no stamp file 'var/.ostree-selabeled' found)
+   Bootloader updated; bootconfig swap: yes; bootversion: boot.1.1, deployment count change: 1
+
+   root@6afee473d507:/usr/src/test# tree elxr-minimal-ostree-amd64/rootfs/ -I "*.dirtree|*.filez|*.dirmeta|*.commit" -L 4
+   elxr-minimal-ostree-amd64/rootfs/
+   |-- boot
+   |   |-- boot -> .
+   |   |-- loader -> loader.1
+   |   |-- loader.1
+   |   |   `-- entries
+   |   |       `-- ostree-1.conf
+   |   |-- lost+found
+   |   `-- ostree
+   |       `-- elxr-8dfea2828b186f4c77d1bbc9c3cf9ef5f520b8a56e0f97b4696b1e66bfd92e2f
+   |           |-- initramfs-6.1.0-32-amd64.img
+   |           `-- vmlinuz-6.1.0-32-amd64
+   |-- dev
+   |-- efi
+   |-- home
+   |-- lost+found
+   |-- ostree
+   |   |-- boot.1 -> boot.1.1
+   |   |-- boot.1.1
+   |   |   `-- elxr
+   |   |       `-- 8dfea2828b186f4c77d1bbc9c3cf9ef5f520b8a56e0f97b4696b1e66bfd92e2f
+   |   |-- deploy
+   |   |   `-- elxr
+   |   |       |-- backing
+   |   |       |-- deploy
+   |   |       `-- var
+   |   `-- repo
+   |       |-- config
+   |       |-- extensions
+   |       |-- objects
+   |       |   |-- 00
+   |       |   |-- 01
+   |       |   |-- 02
+   |       |   |-- 03
+   |       |   |-- 04
+   |       |   |-- 05
+   ....
+   ....
+   ....
+   |       |   |-- fd
+   |       |   |-- fe
+   |       |   `-- ff
+   |       |-- refs
+   |       |   |-- heads
+   |       |   |-- mirrors
+   |       |   `-- remotes
+   |       |-- state
+   |       |-- summary
+   |       `-- tmp
+   |           `-- cache
+   |-- proc
+   |-- root
+   |-- run
+   |-- sys
+   `-- tm
+   294 directories, 5 files
+
+
+.. code-block:: bash
+
    echo "Restoring /var"
    VAR_SRC=$(realpath ${ROOTFS}/ostree/deploy/elxr/deploy/*.0)
    VAR_DST="${ROOTFS}/ostree/deploy/elxr"
@@ -309,23 +582,110 @@ Step4. creating image and making a partition
    	--boot-path /boot \
    	--no-variables \
    	--entry-token \
-   	os-id 
-   
+   	os-id
+
+The current contents of the project directory are presented below:
+
+.. code-block:: console
+
+   Created "/efi/EFI".
+   Created "/efi/EFI/systemd".
+   Created "/efi/EFI/BOOT".
+   Created "/efi/loader".
+   Created "/boot/EFI".
+   Created "/boot/EFI/Linux".
+   Copied "/usr/lib/systemd/boot/efi/systemd-bootx64.efi" to "/efi/EFI/systemd/systemd-bootx64.efi".
+   Copied "/usr/lib/systemd/boot/efi/systemd-bootx64.efi" to "/efi/EFI/BOOT/BOOTX64.EFI".
+   Random seed file /efi/loader/random-seed successfully written (32 bytes).
+   root@6afee473d507:/usr/src/test#
+   root@6afee473d507:/usr/src/test# tree elxr-minimal-ostree-amd64/rootfs/ -I "*.dirtree|*.filez|*.dirmeta|*.commit" -L 4
+   elxr-minimal-ostree-amd64/rootfs/
+   |-- boot
+   |   |-- EFI
+   |   |   `-- Linux
+   |   |-- boot -> .
+   |   |-- loader -> loader.1
+   |   |-- loader.1
+   |   |   |-- entries
+   |   |   |   `-- ostree-1.conf
+   |   |   `-- entries.srel
+   |   |-- lost+found
+   |   `-- ostree
+   |       `-- elxr-8dfea2828b186f4c77d1bbc9c3cf9ef5f520b8a56e0f97b4696b1e66bfd92e2f
+   |           |-- initramfs-6.1.0-32-amd64.img
+   |           `-- vmlinuz-6.1.0-32-amd64
+   |-- dev
+   |-- efi
+   |   |-- EFI
+   |   |   |-- BOOT
+   |   |   |   `-- BOOTX64.EFI
+   |   |   `-- systemd
+   |   |       `-- systemd-bootx64.efi
+   |   `-- loader
+   |       |-- loader.conf
+   |       `-- random-seed
+   |-- home
+   |-- lost+found
+   |-- ostree
+   |   |-- boot.1 -> boot.1.1
+   |   |-- boot.1.1
+   |   |   `-- elxr
+   |   |       `-- 8dfea2828b186f4c77d1bbc9c3cf9ef5f520b8a56e0f97b4696b1e66bfd92e2f
+   |   |-- deploy
+   |   |   `-- elxr
+   |   |       |-- backing
+   |   |       |-- deploy
+   |   |       `-- var
+   |   `-- repo
+   |       |-- config
+   |       |-- extensions
+   |       |-- objects
+   |       |   |-- 00
+   |       |   |-- 01
+   |       |   |-- 02
+   |       |   |-- 03
+   |       |   |-- fc
+   |       |   |-- fd
+   |       |   |-- fe
+   |       |   `-- ff
+   |       |-- refs
+   |       |   |-- heads
+   |       |   |-- mirrors
+   |       |   `-- remotes
+   |       |-- state
+   |       |-- summary
+   |       `-- tmp
+   |           `-- cache
+   |-- proc
+   |-- root
+   |-- run
+   |-- sys
+   `-- tmp
+
+   300 directories, 10 files
+
+
+
+
+
+.. code-block:: bash
+
+
    echo "Configuring boot loader"
-   
+
    sed -i 's/#timeout/timeout/' ${ROOTFS}/efi/loader/loader.conf
-   
+
    echo "Install ext4 file system driver for UEFI"
-   
+
    cp ${VAR_SRC}/usr/share/edk2/drivers ${ROOTFS}/efi/EFI/systemd/ -rfv 
-   
+
    echo "Unmounting ${LOOPDEV}"
-   
+
    systemd-dissect -u ${ROOTFS}
-   
+
    echo "Compress image $CURRENT/elxr-minimal-ostree-amd64-0.1-amd64.img"
-   
+
    zstd -3 --keep -f -T128 $CURRENT/elxr-minimal-ostree-amd64-0.1-amd64.img
-   
+
 
 Here is the above file :download:`script <04-creat-image-and-parted.sh>`   

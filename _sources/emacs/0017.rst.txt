@@ -1,0 +1,27 @@
+============================================
+ Elisp: Case Sensitivity (case-fold-search)
+============================================
+
+
+https://www.gnu.org/software/emacs/manual/html_node/elisp/Searching-and-Case.html
+
+
+
+By default, searches in Emacs ignore the case of the text they are searching through; if you specify searching for ‘FOO’, then ‘Foo’ or ‘foo’ is also considered a match. This applies to regular expressions, too; thus, ‘[aB]’ would match ‘a’ or ‘A’ or ‘b’ or ‘B’.
+
+
+
+If you do not want this feature, set the variable case-fold-search to nil
+
+.. _case_fold_search:
+
+case-fold-search
+================
+
+This buffer-local variable determines whether searches should ignore case. If the variable is nil they do not ignore case; otherwise (and by default) they do ignore case.
+
+* <t> means search do ignore case.
+
+* By default, the value is <t>
+
+* <nil> means search is case-sensitive.

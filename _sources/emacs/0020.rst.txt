@@ -1,0 +1,105 @@
+================
+Condition-case
+================
+
+
+in emacs lisp, condition-case is used for error handling. it allows you to catch errors
+and handle them without terminating the program or causing a crash. it's somewhat similar
+to a try/except block in other languages like python.
+
+syntax
+======
+
+
+.. code-block:: elisp
+
+   (condition-case
+     var
+     bodyform
+     clause ...)
+
+
+* var: the variable that will hold the error information (usually an error object).
+
+* bodyform: the code to execute, which may raise an error.
+
+* clause: defines the handler for specific types of errors.
+
+
+example usage
+=============
+
+.. code-block:: elisp
+
+   (condition-case err
+       (progn
+         (setq x 10)
+         (setq y (/ x 0)))  ;; this will raise a division by zero error
+     (error
+      (message "an error occurred: %s" err)))
+
+in this example:
+
+*    the body contains code that raises an error (/ x 0).
+
+*    if an error occurs, control jumps to the error clause where it handles the error by printing a message.
+
+
+
+common clauses
+==============
+
+
+* **error**: catches any general error.
+
+* **debug**: catches debug errors.
+
+* **quit**: catches user interrupts (e.g., c-g).
+
+* **file-error**: catches errors related to file operations.
+
+more specific handling example
+==============================
+
+you can handle specific errors by specifying the error types in the clauses.
+
+.. code-block:: elisp
+
+   (condition-case err
+       (progn
+         (setq x 10)
+         (setq y (/ x 0)))  ;; division by zero error
+     (error
+      (message "general error: %s" err))
+     (arith-error
+      (message "caught an arithmetic error!")))
+
+explanation:
+
+- if an arithmetic error (like division by zero) occurs, the `arith-error` clause will handle it and print the corresponding message.
+- if a general error occurs, the `error` clause will handle it.
+
+handling multiple error types
+=============================
+
+you can handle multiple error types within a single `condition-case` expression, each with its own clause:
+
+.. code-block:: elisp
+
+   (condition-case err
+       (progn
+         (setq x 10)
+         (setq y (/ x 0)))  ;; division by zero error
+     (error
+      (message "general error occurred"))
+     (arith-error
+      (message "caught division by zero!"))
+     (file-error
+      (message "file-related error occurred")))
+
+summary
+=======
+
+- `condition-case` provides a structured way to handle errors in emacs lisp.
+- it allows you to specify different clauses for different types of errors.
+- each clause defines how to handle a specific kind of error without halting the program unexpectedly.

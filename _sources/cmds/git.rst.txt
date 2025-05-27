@@ -3,18 +3,20 @@ Git
 ===================
 
 
+.. contents:: The table of contents
+
 Git Log
 ============
 
 **1. simple**
 
-.. code-block:: console 
+.. code-block:: console
 
-   git log --format="%h %ci %s" 
+   git log --format="%h %ci %s"
 
 **2. Deleted file's log**
 
-.. code-block:: console 
+.. code-block:: console
 
    git log --all --full-history --format="%h %ci %s" --
 
@@ -29,3 +31,26 @@ Push an existing repository
    git branch -M main
    git push -u origin main
 
+
+
+Showing commits unique to each branch
+=====================================
+
+
+This command displays the commit history
+
+
+.. code-block::
+
+   git log --oneline --left-right <branch1>...<branch2>
+
+
+Example:
+
+.. image:: ../_static/image/gitlog1.png
+
+.. code-block::
+
+   hliu4@pek-lpd-susbld:elxr-config$git log --oneline --left-right hliu4/dev...main
+   > 5a69196 (origin/main, origin/HEAD, main) Change "suite" to aria
+   > 1917129 Fix ostree minimal image

@@ -1,0 +1,82 @@
+====================================
+ Complete Definition of kill-region
+====================================
+
+.. contents:: The table of contents
+
+This function clips text from a region and copies that text to the kill ring, from which it may be retrieved.
+
+
+The Complete kill-region Implementation
+=======================================
+
+.. code-block:: elisp
+
+   (defun kill-region (beg end &optional region)
+     "Kill (\"cut\") text between point and mark.
+   This deletes the text from the buffer and saves it in the kill ring.
+   The command C-y can retrieve it from there.
+   (If you want to save the region without killing it, use M-w.)
+
+   If you want to append the killed region to the last killed text,
+   use C-M-w before C-w.
+
+   Any command that calls this function is a \"kill command\".
+   If the previous command was also a kill command,
+   the text killed this time appends to the text killed last time
+   to make one entry in the kill ring.
+
+   The killed text is filtered by `filter-buffer-substring' before it is
+   saved in the kill ring, so the actual saved text might be different
+   from what was killed.
+
+   If the buffer is read-only, Emacs will beep and refrain from deleting
+   the text, but put the text in the kill ring anyway.  This means that
+   you can use the killing commands to copy text from a read-only buffer.
+
+   Lisp programs should use this function for killing text.
+    (To delete text, use `delete-region'.)
+   Supply two arguments, character positions BEG and END indicating the
+    stretch of text to be killed.  If the optional argument REGION is
+    non-nil, the function ignores BEG and END, and kills the current
+    region instead.  Interactively, REGION is always non-nil, and so
+    this command always kills the current region."
+     ;; Pass mark first, then point, because the order matters when
+     ;; calling `kill-append'.
+     (interactive (progn
+                    (let ((beg (mark))
+                          (end (point)))
+                      (unless (and beg end)
+                        (user-error "The mark is not set now, so there is no region"))
+                      (list beg end 'region))))
+     (condition-case nil
+         (let ((string (if region
+                           (funcall region-extract-function 'delete)
+                         (filter-buffer-substring beg end 'delete))))
+   	(when string			;STRING is nil if BEG = END
+   	  ;; Add that string to the kill ring, one way or another.
+   	  (if (eq last-command 'kill-region)
+   	      (kill-append string (< end beg))
+   	    (kill-new string)))
+   	(when (or string (eq last-command 'kill-region))
+   	  (setq this-command 'kill-region))
+   	(setq deactivate-mark t)
+   	nil)
+       ((buffer-read-only text-read-only)
+        ;; The code above failed because the buffer, or some of the characters
+        ;; in the region, are read-only.
+        ;; We should beep, in case the user just isn't aware of this.
+        ;; However, there's no harm in putting
+        ;; the region's text in the kill ring, anyway.
+        (copy-region-as-kill beg end region)
+        ;; Set this-command now, so it will be set even if we get an error.
+        (setq this-command 'kill-region)
+        ;; This should barf, if appropriate, and give us the correct error.
+        (if kill-read-only-ok
+   	 (progn (message "Read only text copied to kill ring") nil)
+          ;; Signal an error if the buffer is read-only.
+          (barf-if-buffer-read-only)
+          ;; If the buffer isn't read-only, the text is.
+          (signal 'text-read-only (list (current-buffer)))))))
+
+
