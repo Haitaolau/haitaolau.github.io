@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>OS tree &#8212; GDocs 0.1 documentation</title>
+    <title>How to Start Edge on NXP i.MX8 EVK &#8212; GDocs 0.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
@@ -17,8 +17,8 @@
     <script src="../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Ostree FileSystem Layout" href="0008.html" />
-    <link rel="prev" title="Troubleshooting and Debugging apt-ostree on ELXR Edge OS" href="../elxr_edge/0003.html" />
+    <link rel="next" title="Troubleshooting and Debugging apt-ostree on ELXR Edge OS" href="0003.html" />
+    <link rel="prev" title="Simplify Ruckstack with shell script" href="0001.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -36,20 +36,36 @@
 
           <div class="body" role="main">
             
-  <section id="os-tree">
-<h1>OS tree<a class="headerlink" href="#os-tree" title="Permalink to this heading">¶</a></h1>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="0008.html">Ostree FileSystem Layout</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0001.html">ostree init</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0002.html">ostree admin init-fs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0003.html">ostree pull-local</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0004.html">ostree log</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0005.html">ostree summary</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0006.html">ostree admin os-init</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0007.html">ostree admin deploy</a></li>
-</ul>
+  <section id="how-to-start-edge-on-nxp-i-mx8-evk">
+<h1>How to Start Edge on NXP i.MX8 EVK<a class="headerlink" href="#how-to-start-edge-on-nxp-i-mx8-evk" title="Permalink to this heading">¶</a></h1>
+<section id="bootstrapping-wind-river-linux-with-nfs-root-filesystem">
+<h2>Bootstrapping Wind River Linux with NFS Root Filesystem<a class="headerlink" href="#bootstrapping-wind-river-linux-with-nfs-root-filesystem" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>u-boot<span class="o">=</span>&gt; setenv ipaddr <span class="m">128</span>.224.166.40
+u-boot<span class="o">=</span>&gt; setenv serverip <span class="m">128</span>.224.165.20
+u-boot<span class="o">=</span>&gt; ping <span class="m">128</span>.224.165.20
+u-boot<span class="o">=</span>&gt; setenv bootargs <span class="s2">&quot;console=ttymxc0,115200 rw root=/dev/nfs nfsroot=128.224.165.20:/export/pxeboot/vlm-boards/70897/rootfs,tcp,v3</span>
+<span class="s2">         ip=128.224.166.40:128.224.165.20:128.224.166.1:255.255.254.0::eth0:off selinux=0 enforcing=0&quot;</span>
+u-boot<span class="o">=</span>&gt; setenv bootcmd <span class="s2">&quot;tftpboot 0x40480000 128.224.165.20:vlm-boards/70897/kernel; tftpboot 0x47000000 128.224.165.20:vlm-boards/70897/dtb; booti 0x40480000 - 0x47000000&quot;</span>
+u-boot<span class="o">=</span>&gt; run bootcmd
+</pre></div>
 </div>
+</section>
+<section id="flashing-the-elxr-image-to-mmcblk1-sd-card">
+<h2>Flashing the ELXR Image to mmcblk1 (SD Card)<a class="headerlink" href="#flashing-the-elxr-image-to-mmcblk1-sd-card" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>dd <span class="k">if</span><span class="o">=</span>./elxr-minimal-ostree-imx-99.99.0-arm64.img <span class="nv">of</span><span class="o">=</span>/dev/mmcblk1 <span class="nv">bs</span><span class="o">=</span>1M <span class="nv">conv</span><span class="o">=</span>fdatasync <span class="nv">status</span><span class="o">=</span>progress
+dd <span class="k">if</span><span class="o">=</span>imx8-bootloader.bin <span class="nv">of</span><span class="o">=</span>/dev/mmcblk1 <span class="nv">bs</span><span class="o">=</span>1k <span class="nv">seek</span><span class="o">=</span><span class="m">33</span> <span class="nv">conv</span><span class="o">=</span>fsync,notrunc
+</pre></div>
+</div>
+<p>You can download the bootloader.bin from the following link. It was built by the testing team.
+<a class="reference external" href="http://pek-lpgtest7408.wrs.com/buildarea1/SharedImage/eLxr_edge/ARM64/BOOTLOADER_imx8mq-evk/latest/">http://pek-lpgtest7408.wrs.com/buildarea1/SharedImage/eLxr_edge/ARM64/BOOTLOADER_imx8mq-evk/latest/</a></p>
+</section>
+<section id="configuring-ssh-to-allow-root-access">
+<h2>Configuring SSH to Allow Root Access<a class="headerlink" href="#configuring-ssh-to-allow-root-access" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sed -i <span class="s1">&#39;s/#PermitRootLogin prohibit-password/PermitRootLogin yes/&#39;</span> /etc/ssh/sshd_config
+systemctl restart sshd
+</pre></div>
+</div>
+</section>
 </section>
 
 
@@ -87,18 +103,13 @@
 <li class="toctree-l2"><a class="reference internal" href="../debian-installer/index.html">Debian Installer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../debian-command/index.html">Debian command</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../live-cd/index.html">Debian Live CD</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../elxr_edge/index.html">eLxr Edge</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">OS tree</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="0008.html">Ostree FileSystem Layout</a></li>
-<li class="toctree-l3"><a class="reference internal" href="0001.html">ostree init</a></li>
-<li class="toctree-l3"><a class="reference internal" href="0002.html">ostree admin init-fs</a></li>
-<li class="toctree-l3"><a class="reference internal" href="0003.html">ostree pull-local</a></li>
-<li class="toctree-l3"><a class="reference internal" href="0004.html">ostree log</a></li>
-<li class="toctree-l3"><a class="reference internal" href="0005.html">ostree summary</a></li>
-<li class="toctree-l3"><a class="reference internal" href="0006.html">ostree admin os-init</a></li>
-<li class="toctree-l3"><a class="reference internal" href="0007.html">ostree admin deploy</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">eLxr Edge</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="0001.html">Simplify Ruckstack with shell script</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">How to Start Edge on NXP i.MX8 EVK</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0003.html">Troubleshooting and Debugging apt-ostree on ELXR Edge OS</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../os-tree/index.html">OS tree</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../0001.html">Ruck: build pablo with minimal ostree rootfs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../0002.html">How to build deb package for libxfce4ui</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../0003.html">How to Search for Debian package?</a></li>
@@ -125,8 +136,10 @@
 <ul>
   <li><a href="../../index.html">Documentation overview</a><ul>
   <li><a href="../index.html">Debian</a><ul>
-      <li>Previous: <a href="../elxr_edge/0003.html" title="previous chapter">Troubleshooting and Debugging apt-ostree on ELXR Edge OS</a></li>
-      <li>Next: <a href="0008.html" title="next chapter">Ostree FileSystem Layout</a></li>
+  <li><a href="index.html">eLxr Edge</a><ul>
+      <li>Previous: <a href="0001.html" title="previous chapter">Simplify Ruckstack with shell script</a></li>
+      <li>Next: <a href="0003.html" title="next chapter">Troubleshooting and Debugging apt-ostree on ELXR Edge OS</a></li>
+  </ul></li>
   </ul></li>
   </ul></li>
 </ul>
@@ -161,7 +174,7 @@
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |
-      <a href="../../_sources/debian/os-tree/index.rst.txt"
+      <a href="../../_sources/debian/elxr_edge/0002.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

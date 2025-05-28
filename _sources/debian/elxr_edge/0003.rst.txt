@@ -1,0 +1,56 @@
+==========================================================
+ Troubleshooting and Debugging apt-ostree on ELXR Edge OS
+==========================================================
+
+
+Step 1: Compile apt-ostree Debian package
+-----------------------------------------
+
+.. code-block:: bash
+
+   git clone https://gitlab.com/elxr/tools/apt-ostree.git
+   cd apt-ostree
+   debian/rules clean
+   dpkg-buildpackage -us -uc -ui
+
+This process will generate the **python3-apt-ostree_1.0.4_all.deb** package.
+Next, copy the package into the **elxr-config** project, which is used to configure the Edge OS environment.
+
+Step 2: Install the package onto the Edge OS environment
+--------------------------------------------------------
+
+
+.. code-block:: bash
+
+   mkdir elxr-config/overlay/elxr/debug/
+   cp python3-apt-ostree_1.0.4.all.deb elxr-config/overlay/elxr/debug
+
+"Add chroot $1 dpkg -i /debug/python3-apt-ostree_1.0.4_all.deb to mmdebstrap's customize_hooks to
+ensure that apt-ostree is installed during the image build process."
+
+.. code-block:: diff
+
+   diff --git a/vm/minimal/image-ostree.yaml b/vm/minimal/image-ostree.yaml
+   index 9d966c1..888e63d 100644
+   --- a/vm/minimal/image-ostree.yaml
+   +++ b/vm/minimal/image-ostree.yaml
+   @@ -26,6 +26,7 @@ stages:
+              - systemctl enable --root="$1" elxr-growfs
+              - chroot $1 echo "localhost" > $1/etc/hostname
+              - mkdir -p $1/efi
+   +          - chroot $1 dpkg -i /debug/python3-apt-ostree_1.0.4_all.deb
+            packages:
+              - ${include:manifests/packages-ostree.yaml}
+            mirrors:
+
+Step 3: Build the Edge Os
+-------------------------
+
+.. code-block:: bash
+
+   PBR_VERSION=1.2.3 pip3 install -e pasha
+   PBR_VERSION=1.2.3 pip3 install -e rucksack
+   PBR_VERSION=1.2.3 pip3 install -e tiler
+
+   rs build --debug --config elxr-config/vm/minimal/image-ostree.yaml
+

@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>OS tree &#8212; GDocs 0.1 documentation</title>
+    <title>Troubleshooting and Debugging apt-ostree on ELXR Edge OS &#8212; GDocs 0.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
@@ -17,8 +17,8 @@
     <script src="../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Ostree FileSystem Layout" href="0008.html" />
-    <link rel="prev" title="Troubleshooting and Debugging apt-ostree on ELXR Edge OS" href="../elxr_edge/0003.html" />
+    <link rel="next" title="OS tree" href="../os-tree/index.html" />
+    <link rel="prev" title="How to Start Edge on NXP i.MX8 EVK" href="0002.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -36,20 +36,52 @@
 
           <div class="body" role="main">
             
-  <section id="os-tree">
-<h1>OS tree<a class="headerlink" href="#os-tree" title="Permalink to this heading">¶</a></h1>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="0008.html">Ostree FileSystem Layout</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0001.html">ostree init</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0002.html">ostree admin init-fs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0003.html">ostree pull-local</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0004.html">ostree log</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0005.html">ostree summary</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0006.html">ostree admin os-init</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0007.html">ostree admin deploy</a></li>
-</ul>
+  <section id="troubleshooting-and-debugging-apt-ostree-on-elxr-edge-os">
+<h1>Troubleshooting and Debugging apt-ostree on ELXR Edge OS<a class="headerlink" href="#troubleshooting-and-debugging-apt-ostree-on-elxr-edge-os" title="Permalink to this heading">¶</a></h1>
+<section id="step-1-compile-apt-ostree-debian-package">
+<h2>Step 1: Compile apt-ostree Debian package<a class="headerlink" href="#step-1-compile-apt-ostree-debian-package" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://gitlab.com/elxr/tools/apt-ostree.git
+<span class="nb">cd</span> apt-ostree
+debian/rules clean
+dpkg-buildpackage -us -uc -ui
+</pre></div>
 </div>
+<p>This process will generate the <strong>python3-apt-ostree_1.0.4_all.deb</strong> package.
+Next, copy the package into the <strong>elxr-config</strong> project, which is used to configure the Edge OS environment.</p>
+</section>
+<section id="step-2-install-the-package-onto-the-edge-os-environment">
+<h2>Step 2: Install the package onto the Edge OS environment<a class="headerlink" href="#step-2-install-the-package-onto-the-edge-os-environment" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir elxr-config/overlay/elxr/debug/
+cp python3-apt-ostree_1.0.4.all.deb elxr-config/overlay/elxr/debug
+</pre></div>
+</div>
+<p>“Add chroot $1 dpkg -i /debug/python3-apt-ostree_1.0.4_all.deb to mmdebstrap’s customize_hooks to
+ensure that apt-ostree is installed during the image build process.”</p>
+<div class="highlight-diff notranslate"><div class="highlight"><pre><span></span><span class="gh">diff --git a/vm/minimal/image-ostree.yaml b/vm/minimal/image-ostree.yaml</span><span class="w"></span>
+<span class="gh">index 9d966c1..888e63d 100644</span><span class="w"></span>
+<span class="gd">--- a/vm/minimal/image-ostree.yaml</span><span class="w"></span>
+<span class="gi">+++ b/vm/minimal/image-ostree.yaml</span><span class="w"></span>
+<span class="gu">@@ -26,6 +26,7 @@ stages:</span><span class="w"></span>
+<span class="w"> </span>          - systemctl enable --root=&quot;$1&quot; elxr-growfs<span class="w"></span>
+<span class="w"> </span>          - chroot $1 echo &quot;localhost&quot; &gt; $1/etc/hostname<span class="w"></span>
+<span class="w"> </span>          - mkdir -p $1/efi<span class="w"></span>
+<span class="gi">+          - chroot $1 dpkg -i /debug/python3-apt-ostree_1.0.4_all.deb</span><span class="w"></span>
+<span class="w"> </span>        packages:<span class="w"></span>
+<span class="w"> </span>          - ${include:manifests/packages-ostree.yaml}<span class="w"></span>
+<span class="w"> </span>        mirrors:<span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="step-3-build-the-edge-os">
+<h2>Step 3: Build the Edge Os<a class="headerlink" href="#step-3-build-the-edge-os" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">PBR_VERSION</span><span class="o">=</span><span class="m">1</span>.2.3 pip3 install -e pasha
+<span class="nv">PBR_VERSION</span><span class="o">=</span><span class="m">1</span>.2.3 pip3 install -e rucksack
+<span class="nv">PBR_VERSION</span><span class="o">=</span><span class="m">1</span>.2.3 pip3 install -e tiler
+
+rs build --debug --config elxr-config/vm/minimal/image-ostree.yaml
+</pre></div>
+</div>
+</section>
 </section>
 
 
@@ -87,18 +119,13 @@
 <li class="toctree-l2"><a class="reference internal" href="../debian-installer/index.html">Debian Installer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../debian-command/index.html">Debian command</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../live-cd/index.html">Debian Live CD</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../elxr_edge/index.html">eLxr Edge</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">OS tree</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="0008.html">Ostree FileSystem Layout</a></li>
-<li class="toctree-l3"><a class="reference internal" href="0001.html">ostree init</a></li>
-<li class="toctree-l3"><a class="reference internal" href="0002.html">ostree admin init-fs</a></li>
-<li class="toctree-l3"><a class="reference internal" href="0003.html">ostree pull-local</a></li>
-<li class="toctree-l3"><a class="reference internal" href="0004.html">ostree log</a></li>
-<li class="toctree-l3"><a class="reference internal" href="0005.html">ostree summary</a></li>
-<li class="toctree-l3"><a class="reference internal" href="0006.html">ostree admin os-init</a></li>
-<li class="toctree-l3"><a class="reference internal" href="0007.html">ostree admin deploy</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">eLxr Edge</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="0001.html">Simplify Ruckstack with shell script</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0002.html">How to Start Edge on NXP i.MX8 EVK</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Troubleshooting and Debugging apt-ostree on ELXR Edge OS</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../os-tree/index.html">OS tree</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../0001.html">Ruck: build pablo with minimal ostree rootfs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../0002.html">How to build deb package for libxfce4ui</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../0003.html">How to Search for Debian package?</a></li>
@@ -125,8 +152,10 @@
 <ul>
   <li><a href="../../index.html">Documentation overview</a><ul>
   <li><a href="../index.html">Debian</a><ul>
-      <li>Previous: <a href="../elxr_edge/0003.html" title="previous chapter">Troubleshooting and Debugging apt-ostree on ELXR Edge OS</a></li>
-      <li>Next: <a href="0008.html" title="next chapter">Ostree FileSystem Layout</a></li>
+  <li><a href="index.html">eLxr Edge</a><ul>
+      <li>Previous: <a href="0002.html" title="previous chapter">How to Start Edge on NXP i.MX8 EVK</a></li>
+      <li>Next: <a href="../os-tree/index.html" title="next chapter">OS tree</a></li>
+  </ul></li>
   </ul></li>
   </ul></li>
 </ul>
@@ -161,7 +190,7 @@
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |
-      <a href="../../_sources/debian/os-tree/index.rst.txt"
+      <a href="../../_sources/debian/elxr_edge/0003.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

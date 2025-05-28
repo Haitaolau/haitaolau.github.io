@@ -1,0 +1,44 @@
+====================================
+ How to Start Edge on NXP i.MX8 EVK
+====================================
+
+Bootstrapping Wind River Linux with NFS Root Filesystem
+=======================================================
+
+
+
+.. code-block:: bash
+
+   u-boot=> setenv ipaddr 128.224.166.40
+   u-boot=> setenv serverip 128.224.165.20
+   u-boot=> ping 128.224.165.20
+   u-boot=> setenv bootargs "console=ttymxc0,115200 rw root=/dev/nfs nfsroot=128.224.165.20:/export/pxeboot/vlm-boards/70897/rootfs,tcp,v3
+            ip=128.224.166.40:128.224.165.20:128.224.166.1:255.255.254.0::eth0:off selinux=0 enforcing=0"
+   u-boot=> setenv bootcmd "tftpboot 0x40480000 128.224.165.20:vlm-boards/70897/kernel; tftpboot 0x47000000 128.224.165.20:vlm-boards/70897/dtb; booti 0x40480000 - 0x47000000" 
+   u-boot=> run bootcmd
+
+
+
+
+Flashing the ELXR Image to mmcblk1 (SD Card)
+============================================
+
+.. code-block:: bash
+
+   dd if=./elxr-minimal-ostree-imx-99.99.0-arm64.img of=/dev/mmcblk1 bs=1M conv=fdatasync status=progress
+   dd if=imx8-bootloader.bin of=/dev/mmcblk1 bs=1k seek=33 conv=fsync,notrunc
+
+
+You can download the bootloader.bin from the following link. It was built by the testing team.
+http://pek-lpgtest7408.wrs.com/buildarea1/SharedImage/eLxr_edge/ARM64/BOOTLOADER_imx8mq-evk/latest/
+
+
+Configuring SSH to Allow Root Access
+====================================
+
+
+.. code-block:: bash
+
+   sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+   systemctl restart sshd
+
