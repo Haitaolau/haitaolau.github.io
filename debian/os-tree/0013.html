@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>OS tree &#8212; GDocs 0.1 documentation</title>
+    <title>How to Debug the initrd ? &#8212; GDocs 0.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
@@ -17,8 +17,8 @@
     <script src="../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Ostree FileSystem Layout" href="0008.html" />
-    <link rel="prev" title="Troubleshooting and Debugging apt-ostree on ELXR Edge OS" href="../elxr_edge/0003.html" />
+    <link rel="next" title="How to Grub2 load the Ostree" href="0015.html" />
+    <link rel="prev" title="systemd.generator - systemd unit generators" href="0012.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -36,28 +36,34 @@
 
           <div class="body" role="main">
             
-  <section id="os-tree">
-<h1>OS tree<a class="headerlink" href="#os-tree" title="Permalink to this heading">¶</a></h1>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="0008.html">Ostree FileSystem Layout</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0001.html">ostree init</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0002.html">ostree admin init-fs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0003.html">ostree pull-local</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0004.html">ostree log</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0005.html">ostree summary</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0006.html">ostree admin os-init</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0007.html">ostree admin deploy</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0009.html">Steps to Build dbgsym Package for ostree</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0010.html">Ostree startup procedure</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0014.html">Ostree systemd generator</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0011.html">Systemd initrd</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0012.html">systemd.generator - systemd unit generators</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0013.html">How to Debug the initrd ?</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0015.html">How to Grub2 load the Ostree</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0016.html">ostree-boot: grub2-15_ostree</a></li>
-</ul>
+  <section id="how-to-debug-the-initrd">
+<h1>How to Debug the initrd ?<a class="headerlink" href="#how-to-debug-the-initrd" title="Permalink to this heading">¶</a></h1>
+<p>The kernel command-line parameter rd.break is a powerful debugging and recovery tool in Linux, primarily used</p>
+<p>with modern initramfs implementations like dracut (common in Fedora, RHEL, CentOS) or initramfs-tools (Debian, Ubuntu).</p>
+<blockquote>
+<div><p><strong>rd. prefix</strong>: The rd. prefix in kernel parameters generally indicates that the parameter is intended for the</p>
+<p>initramfs (initial RAM filesystem) environment. These parameters are interpreted by the init script (or systemd instance)</p>
+<p>running inside the initramfs, not directly by the main Linux kernel itself.</p>
+<p><strong>break</strong>: This part instructs the initramfs to stop the boot process and drop you into an interactive shell (often a BusyBox shell) at a specific “breakpoint.”</p>
+</div></blockquote>
+<p>Specifically, when you add rd.break (without any arguments) to the kernel command line:</p>
+<blockquote>
+<div><p><strong>Early Boot Interruption</strong>: The boot process will halt before the initramfs performs the final switch_root (or pivot_root) operation.</p>
+<p>This means control has not yet been fully handed over to the real root filesystem’s /sbin/init (which is typically systemd).</p>
+<p><strong>Emergency Shell Access</strong>: You will be presented with a root shell prompt within the initramfs environment.</p>
+<p>This shell runs on the temporary RAM-based filesystem of the initramfs.</p>
+<p><strong>Real Root at /sysroot</strong>: Crucially, at this point, the initramfs has usually already successfully located</p>
+<p>and mounted your actual root filesystem to /sysroot (by default, it’s mounted read-only). This allows you to inspect its contents.</p>
+</div></blockquote>
+<p>Example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sh-5.2# cat /proc/cmdline
+<span class="nv">initrd</span><span class="o">=</span><span class="se">\o</span>stree<span class="se">\e</span>lxr-845a09b4e96e39f3e3fb29a87373436b064645a08b46174385caf9bc21551816<span class="se">\i</span>nitramfs-6.1.0-29-amd64.img <span class="nv">root</span><span class="o">=</span><span class="nv">LABEL</span><span class="o">=</span>ROOT
+rw <span class="nv">console</span><span class="o">=</span>ttyS0,115200n8 <span class="nv">console</span><span class="o">=</span>tty0 <span class="nv">ostree</span><span class="o">=</span>/ostree/boot.1/elxr/845a09b4e96e39f3e3fb29a87373436b064645a08b46174385caf9bc21551816/0 rd.break
+</pre></div>
 </div>
+<p><strong>/run/initramfs/rdsosreport.txt</strong> is a crucial diagnostic file that is generated by dracut (the initramfs generator used by Fedora, RHEL, CentOS, and others) when your Linux system fails to boot and drops into the emergency mode or dracut emergency shell.</p>
+<p>Essentially, it’s a debug report generated by the initramfs to help you troubleshoot why your system failed to fully boot.</p>
+<p>Here is above  file <a class="reference download internal" download="" href="../../_downloads/c272d58ba253a8a6d2a3a9aa199bdbf8/debug-initrd.txt"><code class="xref download docutils literal notranslate"><span class="pre">rdsosreport.txt</span></code></a></p>
 </section>
 
 
@@ -96,7 +102,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../debian-command/index.html">Debian command</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../live-cd/index.html">Debian Live CD</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../elxr_edge/index.html">eLxr Edge</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">OS tree</a><ul>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">OS tree</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="0008.html">Ostree FileSystem Layout</a></li>
 <li class="toctree-l3"><a class="reference internal" href="0001.html">ostree init</a></li>
 <li class="toctree-l3"><a class="reference internal" href="0002.html">ostree admin init-fs</a></li>
@@ -110,7 +116,7 @@
 <li class="toctree-l3"><a class="reference internal" href="0014.html">Ostree systemd generator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="0011.html">Systemd initrd</a></li>
 <li class="toctree-l3"><a class="reference internal" href="0012.html">systemd.generator - systemd unit generators</a></li>
-<li class="toctree-l3"><a class="reference internal" href="0013.html">How to Debug the initrd ?</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">How to Debug the initrd ?</a></li>
 <li class="toctree-l3"><a class="reference internal" href="0015.html">How to Grub2 load the Ostree</a></li>
 <li class="toctree-l3"><a class="reference internal" href="0016.html">ostree-boot: grub2-15_ostree</a></li>
 </ul>
@@ -141,8 +147,10 @@
 <ul>
   <li><a href="../../index.html">Documentation overview</a><ul>
   <li><a href="../index.html">Debian</a><ul>
-      <li>Previous: <a href="../elxr_edge/0003.html" title="previous chapter">Troubleshooting and Debugging apt-ostree on ELXR Edge OS</a></li>
-      <li>Next: <a href="0008.html" title="next chapter">Ostree FileSystem Layout</a></li>
+  <li><a href="index.html">OS tree</a><ul>
+      <li>Previous: <a href="0012.html" title="previous chapter">systemd.generator - systemd unit generators</a></li>
+      <li>Next: <a href="0015.html" title="next chapter">How to Grub2 load the Ostree</a></li>
+  </ul></li>
   </ul></li>
   </ul></li>
 </ul>
@@ -177,7 +185,7 @@
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |
-      <a href="../../_sources/debian/os-tree/index.rst.txt"
+      <a href="../../_sources/debian/os-tree/0013.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

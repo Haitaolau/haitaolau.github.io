@@ -1,0 +1,603 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Ostree startup procedure &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Ostree systemd generator" href="0014.html" />
+    <link rel="prev" title="Steps to Build dbgsym Package for ostree" href="0009.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="ostree-startup-procedure">
+<h1><a class="toc-backref" href="#id1" role="doc-backlink">Ostree startup procedure</a><a class="headerlink" href="#ostree-startup-procedure" title="Permalink to this heading">¶</a></h1>
+<nav class="contents" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#ostree-startup-procedure" id="id1">Ostree startup procedure</a></p>
+<ul>
+<li><p><a class="reference internal" href="#ostree-boot-package" id="id2">Ostree-boot package</a></p></li>
+<li><p><a class="reference internal" href="#generating-the-initramfs" id="id3">Generating the Initramfs</a></p></li>
+<li><p><a class="reference internal" href="#mounting-the-physical-root" id="id4">Mounting the Physical Root</a></p>
+<ul>
+<li><p><a class="reference internal" href="#ostree-prepare-root" id="id5">ostree-prepare-root</a></p>
+<ul>
+<li><p><a class="reference internal" href="#get-the-deploy-path" id="id6">Get the deploy path</a></p></li>
+<li><p><a class="reference internal" href="#get-read-write-access-permission-for-sysroot" id="id7">Get read-write access permission for sysroot</a></p></li>
+<li><p><a class="reference internal" href="#using-legacy-ostree" id="id8">Using legacy ostree</a></p></li>
+<li><p><a class="reference internal" href="#prepare-usr" id="id9">Prepare /usr</a></p></li>
+<li><p><a class="reference internal" href="#prepare-var" id="id10">Prepare /var</a></p></li>
+<li><p><a class="reference internal" href="#prepare-sysroot-and-sysroot-sysroot" id="id11">Prepare /sysroot and /sysroot/sysroot</a></p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+<section id="ostree-boot-package">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">Ostree-boot package</a><a class="headerlink" href="#ostree-boot-package" title="Permalink to this heading">¶</a></h2>
+<p>First, let’s examine the contents of the Debian ostree-boot package, which notably includes systemd services and a dracut module script.”</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>wrsadmin@pek-hliu4-d2:~/workspace$ dpkg-deb -c ostree-boot_2025.1-1elxr1_amd64.deb | awk &#39;{print $NF}&#39;
+./
+./etc/
+./etc/dracut.conf.d/
+./etc/dracut.conf.d/ostree.conf
+./etc/grub.d/
+./usr/
+./usr/lib/
+./usr/lib/dracut/
+./usr/lib/dracut/modules.d/
+./usr/lib/dracut/modules.d/98ostree/
+./usr/lib/dracut/modules.d/98ostree/module-setup.sh
+./usr/lib/ostree/
+./usr/lib/ostree/ostree-prepare-root
+./usr/lib/ostree/ostree-remount
+./usr/lib/systemd/
+./usr/lib/systemd/system/
+./usr/lib/systemd/system/ostree-boot-complete.service
+./usr/lib/systemd/system/ostree-finalize-staged-hold.service
+./usr/lib/systemd/system/ostree-finalize-staged.path
+./usr/lib/systemd/system/ostree-finalize-staged.service
+./usr/lib/systemd/system/ostree-prepare-root.service
+./usr/lib/systemd/system/ostree-remount.service
+./usr/lib/systemd/system/ostree-state-overlay@.service
+./usr/lib/systemd/system-generators/
+./usr/lib/systemd/system-generators/ostree-system-generator
+./usr/lib/tmpfiles.d/
+./usr/lib/tmpfiles.d/ostree-tmpfiles.conf
+./usr/libexec/
+./usr/libexec/libostree/
+./usr/libexec/libostree/grub2-15_ostree
+./usr/share/
+./usr/share/doc/
+./usr/share/doc/ostree-boot/
+./usr/share/doc/ostree-boot/README.Debian
+./usr/share/doc/ostree-boot/changelog.Debian.gz
+./usr/share/doc/ostree-boot/copyright
+./usr/share/lintian/
+./usr/share/lintian/overrides/
+./usr/share/lintian/overrides/ostree-boot
+./usr/share/man/
+./usr/share/man/man8/
+./usr/share/man/man8/ostree-state-overlay@.service.8.gz
+/usr/libexec/libostree/grub2-15_ostree
+</pre></div>
+</div>
+</section>
+<section id="generating-the-initramfs">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">Generating the Initramfs</a><a class="headerlink" href="#generating-the-initramfs" title="Permalink to this heading">¶</a></h2>
+<p>OSTree provides a dedicated dracut module (often named 98ostree located at /usr/lib/dracut/modules.d/98ostree/).</p>
+<p>This module is essential for generating an initramfs that understands OSTree’s boot logic.</p>
+<p>When using mmdebstrap to create the root filesystem, update-initramfs triggers dracut.
+This process then invokes /usr/lib/dracut/modules.d/98ostree/module-setup.sh to install
+and enable ostree-prepare-root.service, which is responsible for switching the root
+directory to /sysroot.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">install</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">dracut_install</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ostree</span><span class="o">/</span><span class="n">ostree</span><span class="o">-</span><span class="n">prepare</span><span class="o">-</span><span class="n">root</span>
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib</span> <span class="o">/</span><span class="n">etc</span><span class="p">;</span> <span class="n">do</span>
+        <span class="k">if</span> <span class="n">test</span> <span class="o">-</span><span class="n">f</span> <span class="s2">&quot;$r/ostree/prepare-root.conf&quot;</span><span class="p">;</span> <span class="n">then</span>
+            <span class="n">inst_simple</span> <span class="s2">&quot;$r/ostree/prepare-root.conf&quot;</span>
+        <span class="n">fi</span>
+    <span class="n">done</span>
+    <span class="k">if</span> <span class="n">test</span> <span class="o">-</span><span class="n">f</span> <span class="s2">&quot;/etc/ostree/initramfs-root-binding.key&quot;</span><span class="p">;</span> <span class="n">then</span>
+        <span class="n">inst_simple</span> <span class="s2">&quot;/etc/ostree/initramfs-root-binding.key&quot;</span>
+    <span class="n">fi</span>
+    <span class="n">inst_simple</span> <span class="s2">&quot;$</span><span class="si">{systemdsystemunitdir}</span><span class="s2">/ostree-prepare-root.service&quot;</span>
+    <span class="n">mkdir</span> <span class="o">-</span><span class="n">p</span> <span class="s2">&quot;$</span><span class="si">{initdir}</span><span class="s2">$</span><span class="si">{systemdsystemconfdir}</span><span class="s2">/initrd-root-fs.target.wants&quot;</span>
+    <span class="n">ln_r</span> <span class="s2">&quot;$</span><span class="si">{systemdsystemunitdir}</span><span class="s2">/ostree-prepare-root.service&quot;</span> \
+        <span class="s2">&quot;$</span><span class="si">{systemdsystemconfdir}</span><span class="s2">/initrd-root-fs.target.wants/ostree-prepare-root.service&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Looking at the .elxr-config/vm/minimal/mmdebstrap.log, we can see dracut was involved twice.</p>
+<p>The first instance was triggered by the installation of linux-image-amd64, specifically through</p>
+<p>the /etc/kernel/postinst.d/dracut script. The second time, dracut ran at the very end of the</p>
+<p>process, likely initiated by the update-initramfs command.</p>
+<p><strong>The “elxr-config/vm/minimal/mmdebstrap.log”:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">2903</span> <span class="n">I</span><span class="p">:</span> <span class="o">/</span><span class="n">vmlinuz</span><span class="o">.</span><span class="n">old</span> <span class="ow">is</span> <span class="n">now</span> <span class="n">a</span> <span class="n">symlink</span> <span class="n">to</span> <span class="n">boot</span><span class="o">/</span><span class="n">vmlinuz</span><span class="o">-</span><span class="mf">6.1.0</span><span class="o">-</span><span class="mi">32</span><span class="o">-</span><span class="n">amd64</span>
+<span class="mi">2904</span> <span class="n">I</span><span class="p">:</span> <span class="o">/</span><span class="n">initrd</span><span class="o">.</span><span class="n">img</span><span class="o">.</span><span class="n">old</span> <span class="ow">is</span> <span class="n">now</span> <span class="n">a</span> <span class="n">symlink</span> <span class="n">to</span> <span class="n">boot</span><span class="o">/</span><span class="n">initrd</span><span class="o">.</span><span class="n">img</span><span class="o">-</span><span class="mf">6.1.0</span><span class="o">-</span><span class="mi">32</span><span class="o">-</span><span class="n">amd64</span>
+<span class="mi">2905</span> <span class="n">I</span><span class="p">:</span> <span class="o">/</span><span class="n">vmlinuz</span> <span class="ow">is</span> <span class="n">now</span> <span class="n">a</span> <span class="n">symlink</span> <span class="n">to</span> <span class="n">boot</span><span class="o">/</span><span class="n">vmlinuz</span><span class="o">-</span><span class="mf">6.1.0</span><span class="o">-</span><span class="mi">32</span><span class="o">-</span><span class="n">amd64</span>
+<span class="mi">2906</span> <span class="n">I</span><span class="p">:</span> <span class="o">/</span><span class="n">initrd</span><span class="o">.</span><span class="n">img</span> <span class="ow">is</span> <span class="n">now</span> <span class="n">a</span> <span class="n">symlink</span> <span class="n">to</span> <span class="n">boot</span><span class="o">/</span><span class="n">initrd</span><span class="o">.</span><span class="n">img</span><span class="o">-</span><span class="mf">6.1.0</span><span class="o">-</span><span class="mi">32</span><span class="o">-</span><span class="n">amd64</span>
+<span class="mi">2907</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">kernel</span><span class="o">/</span><span class="n">postinst</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">dracut</span><span class="p">:</span>
+<span class="mi">2908</span> <span class="n">dracut</span><span class="p">:</span> <span class="n">Generating</span> <span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">initrd</span><span class="o">.</span><span class="n">img</span><span class="o">-</span><span class="mf">6.1.0</span><span class="o">-</span><span class="mi">32</span><span class="o">-</span><span class="n">amd64</span>
+<span class="o">...</span>
+<span class="o">...</span>
+<span class="mi">3068</span> <span class="n">Processing</span> <span class="n">triggers</span> <span class="k">for</span> <span class="n">dracut</span> <span class="p">(</span><span class="mi">059</span><span class="o">-</span><span class="mi">4</span><span class="p">)</span> <span class="o">...</span>
+<span class="mi">3069</span> <span class="n">dracut</span><span class="p">:</span> <span class="n">Generating</span> <span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">initrd</span><span class="o">.</span><span class="n">img</span><span class="o">-</span><span class="mf">6.1.0</span><span class="o">-</span><span class="mi">32</span><span class="o">-</span><span class="n">amd64</span>
+<span class="mi">3070</span> <span class="n">Processing</span> <span class="n">triggers</span> <span class="k">for</span> <span class="n">dbus</span> <span class="p">(</span><span class="mf">1.14.10</span><span class="o">-</span><span class="mi">1</span><span class="o">~</span><span class="n">deb12u1</span><span class="p">)</span> <span class="o">...</span>
+<span class="mi">3071</span> <span class="n">I</span><span class="p">:</span> <span class="n">running</span> <span class="n">special</span> <span class="n">hook</span><span class="p">:</span> <span class="n">sync</span><span class="o">-</span><span class="ow">in</span> <span class="n">overlay</span><span class="o">/</span><span class="n">ostree</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib</span>
+<span class="mi">3072</span> <span class="n">I</span><span class="p">:</span> <span class="n">running</span> <span class="o">--</span><span class="n">customize</span><span class="o">-</span><span class="n">hook</span> <span class="ow">in</span> <span class="n">shell</span><span class="p">:</span> <span class="n">sh</span> <span class="o">-</span><span class="n">c</span> <span class="s1">&#39;echo &#39;</span><span class="n">root</span><span class="p">:</span><span class="n">root</span><span class="s1">&#39; | chroot &quot;$1&quot; chpasswd&#39;</span> <span class="n">exec</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">mmdebstrap</span><span class="o">.</span><span class="n">qhb8FSfbbp</span>
+<span class="mi">3073</span> <span class="n">I</span><span class="p">:</span> <span class="n">running</span> <span class="o">--</span><span class="n">customize</span><span class="o">-</span><span class="n">hook</span> <span class="ow">in</span> <span class="n">shell</span><span class="p">:</span> <span class="n">sh</span> <span class="o">-</span><span class="n">c</span> <span class="s1">&#39;systemctl enable --root=&quot;$1&quot; systemd-networkd&#39;</span> <span class="n">exec</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">mmdebstrap</span><span class="o">.</span><span class="n">qhb8FSfbbp</span>
+<span class="o">...</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+</section>
+<section id="mounting-the-physical-root">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">Mounting the Physical Root</a><a class="headerlink" href="#mounting-the-physical-root" title="Permalink to this heading">¶</a></h2>
+<p>The initramfs first mounts the underlying physical root partition where the OSTree repository</p>
+<p>and deployments reside (often at /sysroot within the initramfs).</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>wrsadmin@pek-hliu4-d2:~/workspace/ostree$ cat ./src/boot/ostree-prepare-root.service
+# Copyright (C) 2013 Colin Walters &lt;walters@verbum.org&gt;
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library. If not, see &lt;https://www.gnu.org/licenses/&gt;.
+
+[Unit]
+Description=OSTree Prepare OS/
+Documentation=man:ostree(1)
+DefaultDependencies=no
+ConditionKernelCommandLine=ostree
+ConditionPathExists=/etc/initrd-release
+After=sysroot.mount
+Requires=sysroot.mount
+Before=initrd-root-fs.target
+
+OnFailure=emergency.target
+OnFailureJobMode=isolate
+
+[Service]
+Type=oneshot
+ExecStart=/usr/lib/ostree/ostree-prepare-root /sysroot
+StandardInput=null
+StandardOutput=journal
+StandardError=journal+console
+RemainAfterExit=yes
+</pre></div>
+</div>
+<p>The included OSTree-aware scripts in the initramfs (often a service like</p>
+<p>ostree-prepare-root.service) parse the <strong>ostree=</strong> kernel command-line argument</p>
+<p>to identify the target OSTree deployment (e.g., /sysroot/ostree/deploy/myos/a1b2c3d4…).</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>root@localhost:~# systemctl status ostree-prepare-root.service
+○ ostree-prepare-root.service - OSTree Prepare OS/
+     Loaded: loaded (/lib/systemd/system/ostree-prepare-root.service; static)
+     Active: inactive (dead)
+       Docs: man:ostree(1)
+
+Mar 06 14:56:17 localhost systemd[1]: Starting ostree-prepare-root.service - OSTree Prepare OS/...
+Mar 06 14:56:17 localhost ostree-prepare-root[446]: Resolved OSTree target to: /sysroot/ostree/deploy/elxr/deploy/e72cd6aa4f18d53fff989c5f55707e19f0f59e1ce33d3ba2c26a9e8b9fbf572c.0
+Mar 06 14:56:17 localhost ostree-prepare-root[446]: sysroot.readonly configuration value: 0 (fs writable: 1)
+Mar 06 14:56:17 localhost ostree-prepare-root[446]: Using legacy ostree bind mount for /
+Mar 06 14:56:17 localhost systemd[1]: Finished ostree-prepare-root.service - OSTree Prepare OS/.
+</pre></div>
+</div>
+<section id="ostree-prepare-root">
+<h3><a class="toc-backref" href="#id5" role="doc-backlink">ostree-prepare-root</a><a class="headerlink" href="#ostree-prepare-root" title="Permalink to this heading">¶</a></h3>
+<p><a class="reference external" href="https://manpages.debian.org/unstable/ostree/ostree-prepare-root.1.en.html">https://manpages.debian.org/unstable/ostree/ostree-prepare-root.1.en.html</a></p>
+<p><strong>ostree-prepare-root</strong> - Change the view of a mounted root filesystem to an ostree deployment</p>
+<p>The implementation code can be found in ./src/switchroot/ostree-prepare-root.c.</p>
+<p>Let’s take a closer look at some critical sections of the code.</p>
+<section id="get-the-deploy-path">
+<h4><a class="toc-backref" href="#id6" role="doc-backlink">Get the deploy path</a><a class="headerlink" href="#get-the-deploy-path" title="Permalink to this heading">¶</a></h4>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">g_autofree</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">deploy_path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">resolve_deploy_path</span><span class="w"> </span><span class="p">(</span><span class="n">root_mountpoint</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<p>First get the kernel cmdline from the “/proc/cmdline”</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="w"></span>
+<span class="nf">resolve_deploy_path</span><span class="w"> </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">root_mountpoint</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="kt">char</span><span class="w"> </span><span class="n">destpath</span><span class="p">[</span><span class="n">PATH_MAX</span><span class="p">];</span><span class="w"></span>
+<span class="w">  </span><span class="k">struct</span><span class="w"> </span><span class="nc">stat</span><span class="w"> </span><span class="n">stbuf</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">deploy_path</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="n">g_autofree</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">kernel_cmdline</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">read_proc_cmdline</span><span class="w"> </span><span class="p">();</span><span class="w"></span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">kernel_cmdline</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="n">errx</span><span class="w"> </span><span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Failed to read kernel cmdline&quot;</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<p>The kernel_cmdline is</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@localhost</span><span class="p">:</span><span class="o">~</span><span class="c1"># cat /proc/cmdline</span>
+<span class="n">BOOT_IMAGE</span><span class="o">=</span><span class="p">(</span><span class="n">hd0</span><span class="p">,</span><span class="n">gpt2</span><span class="p">)</span><span class="o">/</span><span class="n">ostree</span><span class="o">/</span><span class="n">elxr</span><span class="o">-</span><span class="n">edb3e401f7adf2d2c452e9eade28a08e1923a01e67d3bb169a9d7c12e2a4d1ce</span><span class="o">/</span><span class="n">vmlinuz</span><span class="o">-</span><span class="mf">6.1.0</span><span class="o">-</span><span class="mi">32</span><span class="o">-</span><span class="n">imx</span><span class="o">-</span><span class="n">arm64</span> <span class="n">root</span><span class="o">=</span><span class="n">LABEL</span><span class="o">=</span><span class="n">ROOT</span> <span class="n">rw</span> <span class="n">console</span><span class="o">=</span><span class="n">tty0</span> <span class="n">ostree</span><span class="o">=/</span><span class="n">ostree</span><span class="o">/</span><span class="n">boot</span><span class="mf">.1</span><span class="o">/</span><span class="n">elxr</span><span class="o">/</span><span class="n">edb3e401f7adf2d2c452e9eade28a08e1923a01e67d3bb169a9d7c12e2a4d1ce</span><span class="o">/</span><span class="mi">0</span> <span class="n">console</span><span class="o">=</span><span class="n">ttymxc0</span><span class="p">,</span><span class="mi">115200</span>
+</pre></div>
+</div>
+<p>And then use the <strong>ostree=</strong> kernel commandline argument to find the target deployment root</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">g_autoptr</span><span class="w"> </span><span class="p">(</span><span class="n">GError</span><span class="p">)</span><span class="w"> </span><span class="n">error</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="n">g_autofree</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">ostree_target</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">otcore_get_ostree_target</span><span class="w"> </span><span class="p">(</span><span class="n">kernel_cmdline</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">ostree_target</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">error</span><span class="p">))</span><span class="w"></span>
+<span class="w">  </span><span class="n">errx</span><span class="w"> </span><span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Failed to determine ostree target: %s&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">error</span><span class="o">-&gt;</span><span class="n">message</span><span class="p">);</span><span class="w"></span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">ostree_target</span><span class="p">)</span><span class="w"></span>
+<span class="w">  </span><span class="n">errx</span><span class="w"> </span><span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;No ostree target found&quot;</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<p>So the value of <strong>ostree_target</strong> is <strong>/ostree/boot.1/elxr/edb3e401f7adf2d2c452e9eade28a08e1923a01e67d3bb169a9d7c12e2a4d1ce/0</strong></p>
+<p>Construct a file path by combining root_mountpoint and ostree_target.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">snprintf</span><span class="w"> </span><span class="p">(</span><span class="n">destpath</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="w"> </span><span class="p">(</span><span class="n">destpath</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;%s/%s&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">root_mountpoint</span><span class="p">,</span><span class="w"> </span><span class="n">ostree_target</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"></span>
+<span class="w">  </span><span class="n">err</span><span class="w"> </span><span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;failed to assemble ostree target path&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">lstat</span><span class="w"> </span><span class="p">(</span><span class="n">destpath</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">stbuf</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"></span>
+<span class="w">  </span><span class="n">err</span><span class="w"> </span><span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Couldn&#39;t find specified OSTree root &#39;%s&#39;&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">destpath</span><span class="p">);</span><span class="w"></span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">S_ISLNK</span><span class="w"> </span><span class="p">(</span><span class="n">stbuf</span><span class="p">.</span><span class="n">st_mode</span><span class="p">))</span><span class="w"></span>
+<span class="w">  </span><span class="n">errx</span><span class="w"> </span><span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;OSTree target is not a symbolic link: %s&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">destpath</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<p>The root_mountpoint is <strong>/sysroot</strong>. So the destpath is <strong>/sysroot/ostree/boot.1/elxr/edb3e401f7adf2d2c452e9eade28a08e1923a01e67d3bb169a9d7c12e2a4d1ce/0/</strong>.</p>
+<p>Using <strong>realpath</strong> to get the real path for the destpath.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">deploy_path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">realpath</span><span class="w"> </span><span class="p">(</span><span class="n">destpath</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">);</span><span class="w"></span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">deploy_path</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span><span class="w"></span>
+<span class="w">  </span><span class="n">err</span><span class="w"> </span><span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;realpath(%s) failed&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">destpath</span><span class="p">);</span><span class="w"></span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">stat</span><span class="w"> </span><span class="p">(</span><span class="n">deploy_path</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">stbuf</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"></span>
+<span class="w">  </span><span class="n">err</span><span class="w"> </span><span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;stat(%s) failed&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">deploy_path</span><span class="p">);</span><span class="w"></span>
+<span class="cm">/* Quiet logs if there&#39;s no journal */</span><span class="w"></span>
+<span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">resolved_path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">deploy_path</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">strlen</span><span class="w"> </span><span class="p">(</span><span class="n">root_mountpoint</span><span class="p">);</span><span class="w"></span>
+<span class="n">ot_journal_send</span><span class="w"> </span><span class="p">(</span><span class="s">&quot;MESSAGE=Resolved OSTree target to: %s&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">deploy_path</span><span class="p">,</span><span class="w"></span>
+<span class="w">                 </span><span class="s">&quot;MESSAGE_ID=&quot;</span><span class="w"> </span><span class="n">SD_ID128_FORMAT_STR</span><span class="p">,</span><span class="w"></span>
+<span class="w">                 </span><span class="n">SD_ID128_FORMAT_VAL</span><span class="w"> </span><span class="p">(</span><span class="n">OSTREE_PREPARE_ROOT_DEPLOYMENT_MSG</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;DEPLOYMENT_PATH=%s&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                 </span><span class="n">resolved_path</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;DEPLOYMENT_DEVICE=%&quot;</span><span class="w"> </span><span class="n">PRIu64</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">uint64_t</span><span class="p">)</span><span class="n">stbuf</span><span class="p">.</span><span class="n">st_dev</span><span class="p">,</span><span class="w"></span>
+<span class="w">                 </span><span class="s">&quot;DEPLOYMENT_INODE=%&quot;</span><span class="w"> </span><span class="n">PRIu64</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">uint64_t</span><span class="p">)</span><span class="n">stbuf</span><span class="p">.</span><span class="n">st_ino</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">);</span><span class="w"></span>
+<span class="k">return</span><span class="w"> </span><span class="n">deploy_path</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@localhost</span><span class="p">:</span><span class="o">~</span><span class="c1"># realpath  /sysroot/ostree/boot.1/elxr/edb3e401f7adf2d2c452e9eade28a08e1923a01e67d3bb169a9d7c12e2a4d1ce/0/</span>
+<span class="o">/</span><span class="n">sysroot</span><span class="o">/</span><span class="n">ostree</span><span class="o">/</span><span class="n">deploy</span><span class="o">/</span><span class="n">elxr</span><span class="o">/</span><span class="n">deploy</span><span class="o">/</span><span class="n">e72cd6aa4f18d53fff989c5f55707e19f0f59e1ce33d3ba2c26a9e8b9fbf572c</span><span class="mf">.0</span>
+<span class="n">root</span><span class="nd">@localhost</span><span class="p">:</span><span class="o">~</span><span class="c1"># ls -lh /sysroot/ostree/boot.1/elxr/edb3e401f7adf2d2c452e9eade28a08e1923a01e67d3bb169a9d7c12e2a4d1ce/</span>
+<span class="n">total</span> <span class="mf">4.0</span><span class="n">K</span>
+<span class="n">lrwxrwxrwx</span> <span class="mi">1</span> <span class="n">root</span> <span class="n">root</span> <span class="mi">94</span> <span class="n">May</span> <span class="mi">29</span> <span class="mi">08</span><span class="p">:</span><span class="mi">21</span> <span class="mi">0</span> <span class="o">-&gt;</span> <span class="o">../../../</span><span class="n">deploy</span><span class="o">/</span><span class="n">elxr</span><span class="o">/</span><span class="n">deploy</span><span class="o">/</span><span class="n">e72cd6aa4f18d53fff989c5f55707e19f0f59e1ce33d3ba2c26a9e8b9fbf572c</span><span class="mf">.0</span>
+<span class="n">root</span><span class="nd">@localhost</span><span class="p">:</span><span class="o">~</span><span class="c1">#</span>
+</pre></div>
+</div>
+</section>
+<section id="get-read-write-access-permission-for-sysroot">
+<h4><a class="toc-backref" href="#id7" role="doc-backlink">Get read-write access permission for sysroot</a><a class="headerlink" href="#get-read-write-access-permission-for-sysroot" title="Permalink to this heading">¶</a></h4>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">sysroot_currently_writable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">!</span><span class="n">path_is_on_readonly_fs</span><span class="w"> </span><span class="p">(</span><span class="n">root_arg</span><span class="p">);</span><span class="w"></span>
+<span class="n">g_print</span><span class="w"> </span><span class="p">(</span><span class="s">&quot;sysroot.readonly configuration value: %d (fs writable: %d)</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">sysroot_readonly</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">sysroot_currently_writable</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<p>The output:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Mar <span class="m">06</span> <span class="m">14</span>:56:17 localhost ostree-prepare-root<span class="o">[</span><span class="m">446</span><span class="o">]</span>: sysroot.readonly configuration value: <span class="m">0</span> <span class="o">(</span>fs writable: <span class="m">1</span><span class="o">)</span>
+</pre></div>
+</div>
+</section>
+<section id="using-legacy-ostree">
+<h4><a class="toc-backref" href="#id8" role="doc-backlink">Using legacy ostree</a><a class="headerlink" href="#using-legacy-ostree" title="Permalink to this heading">¶</a></h4>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">using_composefs</span><span class="p">)</span><span class="w"></span>
+<span class="w">  </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">root_transient</span><span class="p">)</span><span class="w"></span>
+<span class="w">      </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">errx</span><span class="w"> </span><span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Must enable composefs with root.transient&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="n">g_print</span><span class="w"> </span><span class="p">(</span><span class="s">&quot;Using legacy ostree bind mount for /</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="cm">/* The deploy root starts out bind mounted to sysroot.tmp */</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mount</span><span class="w"> </span><span class="p">(</span><span class="n">deploy_path</span><span class="p">,</span><span class="w"> </span><span class="n">TMP_SYSROOT</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="n">MS_BIND</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">MS_SILENT</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"></span>
+<span class="w">      </span><span class="n">err</span><span class="w"> </span><span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;failed to make initial bind mount %s&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">deploy_path</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p><strong>using_composefs</strong> is False and <strong>root_transient</strong> is False too.</p>
+<p>The output:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Mar <span class="m">06</span> <span class="m">14</span>:56:17 localhost ostree-prepare-root<span class="o">[</span><span class="m">446</span><span class="o">]</span>: Using legacy ostree <span class="nb">bind</span> mount <span class="k">for</span> /
+</pre></div>
+</div>
+</section>
+<section id="prepare-usr">
+<h4><a class="toc-backref" href="#id9" role="doc-backlink">Prepare /usr</a><a class="headerlink" href="#prepare-usr" title="Permalink to this heading">¶</a></h4>
+<p>A read-only bind mount is created over /sysroot/usr.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>else if (!using_composefs)
+  {
+    /* Otherwise, a read-only bind mount for /usr. (Not needed for composefs) */
+    if (mount (TMP_SYSROOT &quot;/usr&quot;, TMP_SYSROOT &quot;/usr&quot;, NULL, MS_BIND | MS_SILENT, NULL) &lt; 0)
+      err (EXIT_FAILURE, &quot;failed to bind mount (class:readonly) /usr&quot;);
+    if (mount (TMP_SYSROOT &quot;/usr&quot;, TMP_SYSROOT &quot;/usr&quot;, NULL,
+               MS_BIND | MS_REMOUNT | MS_RDONLY | MS_SILENT, NULL)
+        &lt; 0)
+      err (EXIT_FAILURE, &quot;failed to bind mount (class:readonly) /usr&quot;);
+  }
+</pre></div>
+</div>
+<p>&gt;&gt; The output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sh</span><span class="o">-</span><span class="mf">5.2</span><span class="c1"># mount | /sysroot/bin/grep usr</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">vda3</span> <span class="n">on</span> <span class="o">/</span><span class="n">sysroot</span><span class="o">/</span><span class="n">usr</span> <span class="nb">type</span> <span class="n">ext4</span> <span class="p">(</span><span class="n">ro</span><span class="p">,</span><span class="n">relatime</span><span class="p">)</span>
+<span class="n">sh</span><span class="o">-</span><span class="mf">5.2</span><span class="c1">#</span>
+</pre></div>
+</div>
+</section>
+<section id="prepare-var">
+<h4><a class="toc-backref" href="#id10" role="doc-backlink">Prepare /var</a><a class="headerlink" href="#prepare-var" title="Permalink to this heading">¶</a></h4>
+<p>For /var, by default a bind mount is created from the deployment root to /sysroot/var.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/*</span> <span class="n">Prepare</span> <span class="o">/</span><span class="n">var</span><span class="o">.</span>
+ <span class="o">*</span> <span class="n">When</span> <span class="n">a</span> <span class="n">read</span><span class="o">-</span><span class="n">only</span> <span class="n">sysroot</span> <span class="ow">is</span> <span class="n">configured</span><span class="p">,</span> <span class="n">this</span> <span class="n">adds</span> <span class="n">a</span> <span class="n">dedicated</span> <span class="n">bind</span><span class="o">-</span><span class="n">mount</span> <span class="p">(</span><span class="n">to</span> <span class="n">itself</span><span class="p">)</span>
+ <span class="o">*</span> <span class="n">so</span> <span class="n">that</span> <span class="n">the</span> <span class="n">stateroot</span> <span class="n">location</span> <span class="n">stays</span> <span class="n">writable</span><span class="o">.</span> <span class="o">*/</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">sysroot_readonly</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="o">/*</span> <span class="n">Bind</span><span class="o">-</span><span class="n">mount</span> <span class="o">/</span><span class="n">var</span> <span class="p">(</span><span class="n">at</span> <span class="n">stateroot</span> <span class="n">path</span><span class="p">),</span> <span class="ow">and</span> <span class="n">remount</span> <span class="k">as</span> <span class="n">writable</span><span class="o">.</span> <span class="o">*/</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">mount</span> <span class="p">(</span><span class="s2">&quot;../../var&quot;</span><span class="p">,</span> <span class="s2">&quot;../../var&quot;</span><span class="p">,</span> <span class="n">NULL</span><span class="p">,</span> <span class="n">MS_BIND</span> <span class="o">|</span> <span class="n">MS_SILENT</span><span class="p">,</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="n">err</span> <span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">,</span> <span class="s2">&quot;failed to prepare /var bind-mount at </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">srcpath</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">mount</span> <span class="p">(</span><span class="s2">&quot;../../var&quot;</span><span class="p">,</span> <span class="s2">&quot;../../var&quot;</span><span class="p">,</span> <span class="n">NULL</span><span class="p">,</span> <span class="n">MS_BIND</span> <span class="o">|</span> <span class="n">MS_REMOUNT</span> <span class="o">|</span> <span class="n">MS_SILENT</span><span class="p">,</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="n">err</span> <span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">,</span> <span class="s2">&quot;failed to make writable /var bind-mount at </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">srcpath</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="o">/*</span> <span class="n">When</span> <span class="n">running</span> <span class="n">under</span> <span class="n">systemd</span><span class="p">,</span> <span class="o">/</span><span class="n">var</span> <span class="n">will</span> <span class="n">be</span> <span class="n">handled</span> <span class="n">by</span> <span class="n">a</span> <span class="s1">&#39;var.mount&#39;</span> <span class="n">unit</span> <span class="n">outside</span>
+   <span class="o">*</span> <span class="n">of</span> <span class="n">initramfs</span><span class="o">.</span>
+   <span class="o">*</span> <span class="n">Systemd</span> <span class="n">auto</span><span class="o">-</span><span class="n">detection</span> <span class="n">can</span> <span class="n">be</span> <span class="n">overridden</span> <span class="n">by</span> <span class="n">a</span> <span class="n">marker</span> <span class="n">file</span> <span class="n">under</span> <span class="o">/</span><span class="n">run</span><span class="o">.</span> <span class="o">*/</span>
+</pre></div>
+</div>
+<p>Here we use systemd’s var.mount to handle the /var</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>root@localhost:~# cat /run/systemd/generator/var.mount
+##
+# Automatically generated by ostree-system-generator
+##
+
+[Unit]
+Documentation=man:ostree(1)
+ConditionKernelCommandLine=!systemd.volatile
+Before=local-fs.target
+
+[Mount]
+Where=/var
+What=/sysroot/ostree/deploy/elxr/var
+Options=bind,slave,shared
+root@localhost:~#
+</pre></div>
+</div>
+<p>&gt;&gt; The output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@localhost</span><span class="p">:</span><span class="o">~</span><span class="c1"># ls /var/</span>
+<span class="n">backups</span>  <span class="n">cache</span>  <span class="n">home</span>  <span class="n">lib</span>  <span class="n">local</span>  <span class="n">lock</span>  <span class="n">log</span>  <span class="n">mail</span>  <span class="n">mnt</span>  <span class="n">opt</span>  <span class="n">roothome</span>  <span class="n">run</span>  <span class="n">spool</span>  <span class="n">srv</span>  <span class="n">tmp</span>  <span class="n">usrlocal</span>
+<span class="n">root</span><span class="nd">@localhost</span><span class="p">:</span><span class="o">~</span><span class="c1"># ls /sysroot/ostree/deploy/elxr/var/</span>
+<span class="n">backups</span>  <span class="n">cache</span>  <span class="n">home</span>  <span class="n">lib</span>  <span class="n">local</span>  <span class="n">lock</span>  <span class="n">log</span>  <span class="n">mail</span>  <span class="n">mnt</span>  <span class="n">opt</span>  <span class="n">roothome</span>  <span class="n">run</span>  <span class="n">spool</span>  <span class="n">srv</span>  <span class="n">tmp</span>  <span class="n">usrlocal</span>
+<span class="n">root</span><span class="nd">@localhost</span><span class="p">:</span><span class="o">~</span><span class="c1"># mount | grep var</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">mmcblk1p3</span> <span class="n">on</span> <span class="o">/</span><span class="n">var</span> <span class="nb">type</span> <span class="n">ext4</span> <span class="p">(</span><span class="n">rw</span><span class="p">,</span><span class="n">relatime</span><span class="p">)</span>
+<span class="n">root</span><span class="nd">@localhost</span><span class="p">:</span><span class="o">~</span><span class="c1">#</span>
+</pre></div>
+</div>
+</section>
+<section id="prepare-sysroot-and-sysroot-sysroot">
+<h4><a class="toc-backref" href="#id11" role="doc-backlink">Prepare /sysroot and /sysroot/sysroot</a><a class="headerlink" href="#prepare-sysroot-and-sysroot-sysroot" title="Permalink to this heading">¶</a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/*</span> <span class="n">Now</span> <span class="n">we</span> <span class="n">have</span> <span class="n">our</span> <span class="n">ready</span> <span class="n">made</span><span class="o">-</span><span class="n">up</span> <span class="n">up</span> <span class="n">root</span> <span class="n">at</span>
+<span class="o">*</span> <span class="o">/</span><span class="n">sysroot</span><span class="o">.</span><span class="n">tmp</span> <span class="ow">and</span> <span class="n">the</span> <span class="n">physical</span> <span class="n">root</span> <span class="n">at</span> <span class="o">/</span><span class="n">sysroot</span> <span class="p">(</span><span class="n">root_mountpoint</span><span class="p">)</span><span class="o">.</span>
+<span class="o">*</span> <span class="n">We</span> <span class="n">want</span> <span class="n">to</span> <span class="n">end</span> <span class="n">up</span> <span class="k">with</span> <span class="n">our</span> <span class="n">deploy</span> <span class="n">root</span> <span class="n">at</span> <span class="o">/</span><span class="n">sysroot</span><span class="o">/</span> <span class="ow">and</span> <span class="n">the</span> <span class="n">physical</span>
+<span class="o">*</span> <span class="n">root</span> <span class="n">under</span> <span class="o">/</span><span class="n">sysroot</span><span class="o">/</span><span class="n">sysroot</span> <span class="k">as</span> <span class="n">systemd</span> <span class="n">will</span> <span class="n">be</span> <span class="n">responsible</span> <span class="k">for</span>
+<span class="o">*</span> <span class="n">moving</span> <span class="o">/</span><span class="n">sysroot</span> <span class="n">to</span> <span class="o">/.</span>
+<span class="o">*/</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">mount</span> <span class="p">(</span><span class="n">root_mountpoint</span><span class="p">,</span> <span class="s2">&quot;sysroot&quot;</span><span class="p">,</span> <span class="n">NULL</span><span class="p">,</span> <span class="n">MS_MOVE</span> <span class="o">|</span> <span class="n">MS_SILENT</span><span class="p">,</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
+ <span class="n">err</span> <span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">,</span> <span class="s2">&quot;failed to MS_MOVE &#39;</span><span class="si">%s</span><span class="s2">&#39; to &#39;sysroot&#39;&quot;</span><span class="p">,</span> <span class="n">root_mountpoint</span><span class="p">);</span>
+
+<span class="k">if</span> <span class="p">(</span><span class="n">mount</span> <span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">root_mountpoint</span><span class="p">,</span> <span class="n">NULL</span><span class="p">,</span> <span class="n">MS_MOVE</span> <span class="o">|</span> <span class="n">MS_SILENT</span><span class="p">,</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
+ <span class="n">err</span> <span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">,</span> <span class="s2">&quot;failed to MS_MOVE </span><span class="si">%s</span><span class="s2"> to </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">root_mountpoint</span><span class="p">);</span>
+
+<span class="k">if</span> <span class="p">(</span><span class="n">chdir</span> <span class="p">(</span><span class="n">root_mountpoint</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
+ <span class="n">err</span> <span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">,</span> <span class="s2">&quot;failed to chdir to </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">root_mountpoint</span><span class="p">);</span>
+
+<span class="k">if</span> <span class="p">(</span><span class="n">rmdir</span> <span class="p">(</span><span class="n">TMP_SYSROOT</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
+ <span class="n">err</span> <span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">,</span> <span class="s2">&quot;couldn&#39;t remove temporary sysroot </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">TMP_SYSROOT</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Up to now the /sysroot is actually the “deployment root”, while the real root of the filesystem will appear as /sysroot/sysroot.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sh</span><span class="o">-</span><span class="mf">5.2</span><span class="c1"># ls /</span>
+<span class="nb">bin</span>  <span class="n">dracut</span><span class="o">-</span><span class="n">state</span><span class="o">.</span><span class="n">sh</span>  <span class="n">init</span>  <span class="n">lib64</span>  <span class="n">root</span>  <span class="n">sbin</span>      <span class="n">sys</span>      <span class="n">tmp</span>  <span class="n">var</span>
+<span class="n">dev</span>  <span class="n">etc</span>              <span class="n">lib</span>   <span class="n">proc</span>   <span class="n">run</span>   <span class="n">shutdown</span>  <span class="n">sysroot</span>  <span class="n">usr</span>
+<span class="n">sh</span><span class="o">-</span><span class="mf">5.2</span><span class="c1"># ls /sysroot/</span>
+<span class="nb">bin</span>   <span class="n">efi</span>   <span class="n">initrd</span><span class="o">.</span><span class="n">img</span>      <span class="n">lib64</span>  <span class="n">opt</span>     <span class="n">root</span>  <span class="n">srv</span>      <span class="n">tmp</span>  <span class="n">vmlinuz</span>
+<span class="n">boot</span>  <span class="n">etc</span>   <span class="n">initrd</span><span class="o">.</span><span class="n">img</span><span class="o">.</span><span class="n">old</span>  <span class="n">media</span>  <span class="n">ostree</span>  <span class="n">run</span>   <span class="n">sys</span>      <span class="n">usr</span>  <span class="n">vmlinuz</span><span class="o">.</span><span class="n">old</span>
+<span class="n">dev</span>   <span class="n">home</span>  <span class="n">lib</span>             <span class="n">mnt</span>    <span class="n">proc</span>    <span class="n">sbin</span>  <span class="n">sysroot</span>  <span class="n">var</span>
+<span class="n">sh</span><span class="o">-</span><span class="mf">5.2</span><span class="c1"># ls /sysroot/sysroot/</span>
+<span class="n">boot</span>  <span class="n">efi</span>  <span class="n">home</span>  <span class="n">lost</span><span class="o">+</span><span class="n">found</span>  <span class="n">ostree</span>
+<span class="n">sh</span><span class="o">-</span><span class="mf">5.2</span><span class="c1"># ls /sysroot/ostree/deploy/elxr/</span>
+<span class="n">backing</span><span class="o">/</span> <span class="n">deploy</span><span class="o">/</span>  <span class="n">var</span><span class="o">/</span>
+<span class="n">sh</span><span class="o">-</span><span class="mf">5.2</span><span class="c1"># ls /sysroot/ostree/deploy/elxr/deploy/55c0e6d73fb70890778e998b0b7c25c494587b2f734e821961f95ca543ad5418.0</span>
+<span class="nb">bin</span>   <span class="n">efi</span>   <span class="n">initrd</span><span class="o">.</span><span class="n">img</span>      <span class="n">lib64</span>  <span class="n">opt</span>     <span class="n">root</span>  <span class="n">srv</span>      <span class="n">tmp</span>  <span class="n">vmlinuz</span>
+<span class="n">boot</span>  <span class="n">etc</span>   <span class="n">initrd</span><span class="o">.</span><span class="n">img</span><span class="o">.</span><span class="n">old</span>  <span class="n">media</span>  <span class="n">ostree</span>  <span class="n">run</span>   <span class="n">sys</span>      <span class="n">usr</span>  <span class="n">vmlinuz</span><span class="o">.</span><span class="n">old</span>
+<span class="n">dev</span>   <span class="n">home</span>  <span class="n">lib</span>             <span class="n">mnt</span>    <span class="n">proc</span>    <span class="n">sbin</span>  <span class="n">sysroot</span>  <span class="n">var</span>
+<span class="n">sh</span><span class="o">-</span><span class="mf">5.2</span><span class="c1">#</span>
+</pre></div>
+</div>
+<p>systemd performs a switch-root operation, what was /sysroot becomes / and after the transition</p>
+<p>into the real root, the system will be booted into the “deployment”, which is a versioned immutable filesystem tree.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Linux</span> <span class="n">localhost</span> <span class="mf">6.1.0</span><span class="o">-</span><span class="mi">32</span><span class="o">-</span><span class="n">imx</span><span class="o">-</span><span class="n">arm64</span> <span class="c1">#1 SMP eLxr 6.1.129-elxr2-1 (2025-04-23) aarch64</span>
+
+<span class="n">The</span> <span class="n">programs</span> <span class="n">included</span> <span class="k">with</span> <span class="n">the</span> <span class="n">eLxr</span> <span class="n">system</span>
+<span class="n">are</span> <span class="n">free</span> <span class="n">software</span><span class="p">;</span>
+<span class="n">the</span> <span class="n">exact</span> <span class="n">distribution</span> <span class="n">terms</span> <span class="k">for</span> <span class="n">each</span> <span class="n">program</span> <span class="n">are</span> <span class="n">described</span> <span class="ow">in</span> <span class="n">the</span>
+<span class="n">individual</span> <span class="n">files</span> <span class="ow">in</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">doc</span><span class="o">/*/</span><span class="n">copyright</span><span class="o">.</span>
+
+<span class="n">eLxr</span> <span class="n">comes</span> <span class="k">with</span> <span class="n">ABSOLUTELY</span> <span class="n">NO</span> <span class="n">WARRANTY</span><span class="p">,</span>
+<span class="n">to</span> <span class="n">the</span> <span class="n">extent</span> <span class="n">permitted</span> <span class="n">by</span> <span class="n">applicable</span> <span class="n">law</span><span class="o">.</span>
+<span class="n">Last</span> <span class="n">login</span><span class="p">:</span> <span class="n">Tue</span> <span class="n">Jun</span> <span class="mi">10</span> <span class="mi">08</span><span class="p">:</span><span class="mi">48</span><span class="p">:</span><span class="mi">10</span> <span class="mi">2025</span> <span class="kn">from</span> <span class="mf">128.224.153.80</span>
+<span class="o">-</span><span class="n">bash</span><span class="p">:</span> <span class="n">warning</span><span class="p">:</span> <span class="n">setlocale</span><span class="p">:</span> <span class="n">LC_ALL</span><span class="p">:</span> <span class="n">cannot</span> <span class="n">change</span> <span class="n">locale</span> <span class="p">(</span><span class="n">en_US</span><span class="o">.</span><span class="n">UTF</span><span class="o">-</span><span class="mi">8</span><span class="p">)</span>
+<span class="n">root</span><span class="nd">@localhost</span><span class="p">:</span><span class="o">~</span><span class="c1">#</span>
+<span class="n">root</span><span class="nd">@localhost</span><span class="p">:</span><span class="o">~</span><span class="c1"># ls /</span>
+<span class="nb">bin</span>  <span class="n">boot</span>  <span class="n">dev</span>  <span class="n">efi</span>  <span class="n">etc</span>  <span class="n">home</span>  <span class="n">initrd</span><span class="o">.</span><span class="n">img</span>  <span class="n">initrd</span><span class="o">.</span><span class="n">img</span><span class="o">.</span><span class="n">old</span>  <span class="n">lib</span>  <span class="n">media</span>  <span class="n">mnt</span>  <span class="n">opt</span>  <span class="n">ostree</span>
+<span class="n">proc</span>  <span class="n">root</span>  <span class="n">run</span>  <span class="n">sbin</span>  <span class="n">srv</span>  <span class="n">sys</span>  <span class="n">sysroot</span>  <span class="n">tmp</span>  <span class="n">usr</span>  <span class="n">var</span>  <span class="n">vmlinuz</span>  <span class="n">vmlinuz</span><span class="o">.</span><span class="n">old</span>
+<span class="n">root</span><span class="nd">@localhost</span><span class="p">:</span><span class="o">~</span><span class="c1"># ls /sysroot/</span>
+<span class="n">boot</span>  <span class="n">efi</span>  <span class="n">home</span>  <span class="n">lost</span><span class="o">+</span><span class="n">found</span>  <span class="n">ostree</span>
+<span class="n">root</span><span class="nd">@localhost</span><span class="p">:</span><span class="o">~</span><span class="c1"># df</span>
+<span class="n">Filesystem</span>     <span class="mi">1</span><span class="n">K</span><span class="o">-</span><span class="n">blocks</span>    <span class="n">Used</span> <span class="n">Available</span> <span class="n">Use</span><span class="o">%</span> <span class="n">Mounted</span> <span class="n">on</span>
+<span class="n">devtmpfs</span>            <span class="mi">4096</span>       <span class="mi">0</span>      <span class="mi">4096</span>   <span class="mi">0</span><span class="o">%</span> <span class="o">/</span><span class="n">dev</span>
+<span class="n">tmpfs</span>            <span class="mi">1508916</span>       <span class="mi">0</span>   <span class="mi">1508916</span>   <span class="mi">0</span><span class="o">%</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">shm</span>
+<span class="n">tmpfs</span>             <span class="mi">603568</span>    <span class="mi">8436</span>    <span class="mi">595132</span>   <span class="mi">2</span><span class="o">%</span> <span class="o">/</span><span class="n">run</span>
+<span class="n">tmpfs</span>               <span class="mi">5120</span>       <span class="mi">0</span>      <span class="mi">5120</span>   <span class="mi">0</span><span class="o">%</span> <span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">lock</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">mmcblk1p3</span>  <span class="mi">29989552</span> <span class="mi">1502452</span>  <span class="mi">27217424</span>   <span class="mi">6</span><span class="o">%</span> <span class="o">/</span><span class="n">sysroot</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">mmcblk1p2</span>    <span class="mi">457816</span>   <span class="mi">97478</span>    <span class="mi">331257</span>  <span class="mi">23</span><span class="o">%</span> <span class="o">/</span><span class="n">boot</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">mmcblk1p1</span>    <span class="mi">112880</span>   <span class="mi">31717</span>     <span class="mi">81163</span>  <span class="mi">29</span><span class="o">%</span> <span class="o">/</span><span class="n">efi</span>
+<span class="n">tmpfs</span>             <span class="mi">301780</span>       <span class="mi">0</span>    <span class="mi">301780</span>   <span class="mi">0</span><span class="o">%</span> <span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">user</span><span class="o">/</span><span class="mi">0</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cplus/index.html">Cplus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Debian</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../0014.html">Debian Useful Resources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../0005.html">Launch up Debian VM with Qemu</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../debian-installer/index.html">Debian Installer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../debian-command/index.html">Debian command</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../live-cd/index.html">Debian Live CD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../elxr_edge/index.html">eLxr Edge</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">OS tree</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="0008.html">Ostree FileSystem Layout</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0001.html">ostree init</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0002.html">ostree admin init-fs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0003.html">ostree pull-local</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0004.html">ostree log</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0005.html">ostree summary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0006.html">ostree admin os-init</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0007.html">ostree admin deploy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0009.html">Steps to Build dbgsym Package for ostree</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Ostree startup procedure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0014.html">Ostree systemd generator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0011.html">Systemd initrd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0012.html">systemd.generator - systemd unit generators</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0013.html">How to Debug the initrd ?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0015.html">How to Grub2 load the Ostree</a></li>
+<li class="toctree-l3"><a class="reference internal" href="0016.html">ostree-boot: grub2-15_ostree</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../0001.html">Ruck: build pablo with minimal ostree rootfs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../0002.html">How to build deb package for libxfce4ui</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../0003.html">How to Search for Debian package?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../0004.html">How to Check Debian package version?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../0006.html">How to download deb packages using apt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../0007.html">E: You must put some ‘source’ URIs in your sources.list</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../0008.html">How can I specify the repository from which a package will be installed?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../0009.html">How to install build dependencies for packages ?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../0010.html">Create orig tarballs from git</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../0011.html">Debian: Building the package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pipeline/index.html">Debian Pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../0012.html">Build and Test STIG</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../0013.html">Change the mirror for elxr docker image</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../licence/index.html">OpenSource License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bochs/index.html">Bochs IA-32 Emulator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../system/index.html">System</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Debian</a><ul>
+  <li><a href="index.html">OS tree</a><ul>
+      <li>Previous: <a href="0009.html" title="previous chapter">Steps to Build dbgsym Package for ostree</a></li>
+      <li>Next: <a href="0014.html" title="next chapter">Ostree systemd generator</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../../_sources/debian/os-tree/0010.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

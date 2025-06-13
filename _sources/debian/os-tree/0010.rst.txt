@@ -1,0 +1,511 @@
+========================
+Ostree startup procedure
+========================
+
+.. contents:: Table of Contents
+
+Ostree-boot package
+=====================
+
+
+First, let's examine the contents of the Debian ostree-boot package, which notably includes systemd services and a dracut module script."
+
+
+.. code-block::
+
+   wrsadmin@pek-hliu4-d2:~/workspace$ dpkg-deb -c ostree-boot_2025.1-1elxr1_amd64.deb | awk '{print $NF}'
+   ./
+   ./etc/
+   ./etc/dracut.conf.d/
+   ./etc/dracut.conf.d/ostree.conf
+   ./etc/grub.d/
+   ./usr/
+   ./usr/lib/
+   ./usr/lib/dracut/
+   ./usr/lib/dracut/modules.d/
+   ./usr/lib/dracut/modules.d/98ostree/
+   ./usr/lib/dracut/modules.d/98ostree/module-setup.sh
+   ./usr/lib/ostree/
+   ./usr/lib/ostree/ostree-prepare-root
+   ./usr/lib/ostree/ostree-remount
+   ./usr/lib/systemd/
+   ./usr/lib/systemd/system/
+   ./usr/lib/systemd/system/ostree-boot-complete.service
+   ./usr/lib/systemd/system/ostree-finalize-staged-hold.service
+   ./usr/lib/systemd/system/ostree-finalize-staged.path
+   ./usr/lib/systemd/system/ostree-finalize-staged.service
+   ./usr/lib/systemd/system/ostree-prepare-root.service
+   ./usr/lib/systemd/system/ostree-remount.service
+   ./usr/lib/systemd/system/ostree-state-overlay@.service
+   ./usr/lib/systemd/system-generators/
+   ./usr/lib/systemd/system-generators/ostree-system-generator
+   ./usr/lib/tmpfiles.d/
+   ./usr/lib/tmpfiles.d/ostree-tmpfiles.conf
+   ./usr/libexec/
+   ./usr/libexec/libostree/
+   ./usr/libexec/libostree/grub2-15_ostree
+   ./usr/share/
+   ./usr/share/doc/
+   ./usr/share/doc/ostree-boot/
+   ./usr/share/doc/ostree-boot/README.Debian
+   ./usr/share/doc/ostree-boot/changelog.Debian.gz
+   ./usr/share/doc/ostree-boot/copyright
+   ./usr/share/lintian/
+   ./usr/share/lintian/overrides/
+   ./usr/share/lintian/overrides/ostree-boot
+   ./usr/share/man/
+   ./usr/share/man/man8/
+   ./usr/share/man/man8/ostree-state-overlay@.service.8.gz
+   /usr/libexec/libostree/grub2-15_ostree
+
+Generating the Initramfs
+=========================
+
+
+OSTree provides a dedicated dracut module (often named 98ostree located at /usr/lib/dracut/modules.d/98ostree/).
+
+This module is essential for generating an initramfs that understands OSTree's boot logic.
+
+When using mmdebstrap to create the root filesystem, update-initramfs triggers dracut.
+This process then invokes /usr/lib/dracut/modules.d/98ostree/module-setup.sh to install
+and enable ostree-prepare-root.service, which is responsible for switching the root
+directory to /sysroot.
+
+
+.. code-block::
+
+   install() {
+       dracut_install /usr/lib/ostree/ostree-prepare-root
+       for r in /usr/lib /etc; do
+           if test -f "$r/ostree/prepare-root.conf"; then
+               inst_simple "$r/ostree/prepare-root.conf"
+           fi
+       done
+       if test -f "/etc/ostree/initramfs-root-binding.key"; then
+           inst_simple "/etc/ostree/initramfs-root-binding.key"
+       fi
+       inst_simple "${systemdsystemunitdir}/ostree-prepare-root.service"
+       mkdir -p "${initdir}${systemdsystemconfdir}/initrd-root-fs.target.wants"
+       ln_r "${systemdsystemunitdir}/ostree-prepare-root.service" \
+           "${systemdsystemconfdir}/initrd-root-fs.target.wants/ostree-prepare-root.service"
+   }
+
+
+
+Looking at the .elxr-config/vm/minimal/mmdebstrap.log, we can see dracut was involved twice.
+
+The first instance was triggered by the installation of linux-image-amd64, specifically through
+
+the /etc/kernel/postinst.d/dracut script. The second time, dracut ran at the very end of the
+
+process, likely initiated by the update-initramfs command.
+
+
+**The "elxr-config/vm/minimal/mmdebstrap.log":**
+
+
+.. code-block::
+
+   2903 I: /vmlinuz.old is now a symlink to boot/vmlinuz-6.1.0-32-amd64
+   2904 I: /initrd.img.old is now a symlink to boot/initrd.img-6.1.0-32-amd64
+   2905 I: /vmlinuz is now a symlink to boot/vmlinuz-6.1.0-32-amd64
+   2906 I: /initrd.img is now a symlink to boot/initrd.img-6.1.0-32-amd64
+   2907 /etc/kernel/postinst.d/dracut:
+   2908 dracut: Generating /boot/initrd.img-6.1.0-32-amd64
+   ...
+   ...
+   3068 Processing triggers for dracut (059-4) ...
+   3069 dracut: Generating /boot/initrd.img-6.1.0-32-amd64
+   3070 Processing triggers for dbus (1.14.10-1~deb12u1) ...
+   3071 I: running special hook: sync-in overlay/ostree/usr/lib /usr/lib
+   3072 I: running --customize-hook in shell: sh -c 'echo 'root:root' | chroot "$1" chpasswd' exec /tmp/mmdebstrap.qhb8FSfbbp
+   3073 I: running --customize-hook in shell: sh -c 'systemctl enable --root="$1" systemd-networkd' exec /tmp/mmdebstrap.qhb8FSfbbp
+   ...
+   ...
+
+
+Mounting the Physical Root
+==========================
+
+The initramfs first mounts the underlying physical root partition where the OSTree repository
+
+and deployments reside (often at /sysroot within the initramfs).
+
+
+.. code-block::
+
+   wrsadmin@pek-hliu4-d2:~/workspace/ostree$ cat ./src/boot/ostree-prepare-root.service
+   # Copyright (C) 2013 Colin Walters <walters@verbum.org>
+   #
+   # This library is free software; you can redistribute it and/or
+   # modify it under the terms of the GNU Lesser General Public
+   # License as published by the Free Software Foundation; either
+   # version 2 of the License, or (at your option) any later version.
+   #
+   # This library is distributed in the hope that it will be useful,
+   # but WITHOUT ANY WARRANTY; without even the implied warranty of
+   # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   # Lesser General Public License for more details.
+   #
+   # You should have received a copy of the GNU Lesser General Public
+   # License along with this library. If not, see <https://www.gnu.org/licenses/>.
+
+   [Unit]
+   Description=OSTree Prepare OS/
+   Documentation=man:ostree(1)
+   DefaultDependencies=no
+   ConditionKernelCommandLine=ostree
+   ConditionPathExists=/etc/initrd-release
+   After=sysroot.mount
+   Requires=sysroot.mount
+   Before=initrd-root-fs.target
+
+   OnFailure=emergency.target
+   OnFailureJobMode=isolate
+
+   [Service]
+   Type=oneshot
+   ExecStart=/usr/lib/ostree/ostree-prepare-root /sysroot
+   StandardInput=null
+   StandardOutput=journal
+   StandardError=journal+console
+   RemainAfterExit=yes
+
+
+The included OSTree-aware scripts in the initramfs (often a service like
+
+ostree-prepare-root.service) parse the **ostree=** kernel command-line argument
+
+to identify the target OSTree deployment (e.g., /sysroot/ostree/deploy/myos/a1b2c3d4...).
+
+
+.. code-block::
+
+   root@localhost:~# systemctl status ostree-prepare-root.service
+   ○ ostree-prepare-root.service - OSTree Prepare OS/
+        Loaded: loaded (/lib/systemd/system/ostree-prepare-root.service; static)
+        Active: inactive (dead)
+          Docs: man:ostree(1)
+
+   Mar 06 14:56:17 localhost systemd[1]: Starting ostree-prepare-root.service - OSTree Prepare OS/...
+   Mar 06 14:56:17 localhost ostree-prepare-root[446]: Resolved OSTree target to: /sysroot/ostree/deploy/elxr/deploy/e72cd6aa4f18d53fff989c5f55707e19f0f59e1ce33d3ba2c26a9e8b9fbf572c.0
+   Mar 06 14:56:17 localhost ostree-prepare-root[446]: sysroot.readonly configuration value: 0 (fs writable: 1)
+   Mar 06 14:56:17 localhost ostree-prepare-root[446]: Using legacy ostree bind mount for /
+   Mar 06 14:56:17 localhost systemd[1]: Finished ostree-prepare-root.service - OSTree Prepare OS/.
+
+
+
+
+ostree-prepare-root
+-------------------
+
+https://manpages.debian.org/unstable/ostree/ostree-prepare-root.1.en.html
+
+**ostree-prepare-root** - Change the view of a mounted root filesystem to an ostree deployment 
+
+
+
+The implementation code can be found in ./src/switchroot/ostree-prepare-root.c.
+
+Let's take a closer look at some critical sections of the code.
+
+
+Get the deploy path
+++++++++++++++++++++
+
+.. code-block:: c
+
+   g_autofree char *deploy_path = resolve_deploy_path (root_mountpoint);
+
+
+
+First get the kernel cmdline from the "/proc/cmdline"
+
+.. code-block:: c
+
+    static char *
+    resolve_deploy_path (const char *root_mountpoint)
+    {
+      char destpath[PATH_MAX];
+      struct stat stbuf;
+      char *deploy_path;
+      g_autofree char *kernel_cmdline = read_proc_cmdline ();
+      if (!kernel_cmdline)
+        errx (EXIT_FAILURE, "Failed to read kernel cmdline");
+
+The kernel_cmdline is
+
+.. code-block::
+
+   root@localhost:~# cat /proc/cmdline 
+   BOOT_IMAGE=(hd0,gpt2)/ostree/elxr-edb3e401f7adf2d2c452e9eade28a08e1923a01e67d3bb169a9d7c12e2a4d1ce/vmlinuz-6.1.0-32-imx-arm64 root=LABEL=ROOT rw console=tty0 ostree=/ostree/boot.1/elxr/edb3e401f7adf2d2c452e9eade28a08e1923a01e67d3bb169a9d7c12e2a4d1ce/0 console=ttymxc0,115200
+
+
+And then use the **ostree=** kernel commandline argument to find the target deployment root
+
+.. code-block:: c
+
+      g_autoptr (GError) error = NULL;
+      g_autofree char *ostree_target = NULL;
+      if (!otcore_get_ostree_target (kernel_cmdline, NULL, &ostree_target, &error))
+        errx (EXIT_FAILURE, "Failed to determine ostree target: %s", error->message);
+      if (!ostree_target)
+        errx (EXIT_FAILURE, "No ostree target found");
+
+So the value of **ostree_target** is **/ostree/boot.1/elxr/edb3e401f7adf2d2c452e9eade28a08e1923a01e67d3bb169a9d7c12e2a4d1ce/0**
+
+
+Construct a file path by combining root_mountpoint and ostree_target.
+
+.. code-block:: c
+
+      if (snprintf (destpath, sizeof (destpath), "%s/%s", root_mountpoint, ostree_target) < 0)
+        err (EXIT_FAILURE, "failed to assemble ostree target path");
+      if (lstat (destpath, &stbuf) < 0)
+        err (EXIT_FAILURE, "Couldn't find specified OSTree root '%s'", destpath);
+      if (!S_ISLNK (stbuf.st_mode))
+        errx (EXIT_FAILURE, "OSTree target is not a symbolic link: %s", destpath);
+
+The root_mountpoint is **/sysroot**. So the destpath is **/sysroot/ostree/boot.1/elxr/edb3e401f7adf2d2c452e9eade28a08e1923a01e67d3bb169a9d7c12e2a4d1ce/0/**.
+
+Using **realpath** to get the real path for the destpath.
+
+.. code-block:: c
+
+      deploy_path = realpath (destpath, NULL);
+      if (deploy_path == NULL)
+        err (EXIT_FAILURE, "realpath(%s) failed", destpath);
+      if (stat (deploy_path, &stbuf) < 0)
+        err (EXIT_FAILURE, "stat(%s) failed", deploy_path);
+      /* Quiet logs if there's no journal */
+      const char *resolved_path = deploy_path + strlen (root_mountpoint);
+      ot_journal_send ("MESSAGE=Resolved OSTree target to: %s", deploy_path,
+                       "MESSAGE_ID=" SD_ID128_FORMAT_STR,
+                       SD_ID128_FORMAT_VAL (OSTREE_PREPARE_ROOT_DEPLOYMENT_MSG), "DEPLOYMENT_PATH=%s",
+                       resolved_path, "DEPLOYMENT_DEVICE=%" PRIu64, (uint64_t)stbuf.st_dev,
+                       "DEPLOYMENT_INODE=%" PRIu64, (uint64_t)stbuf.st_ino, NULL);
+      return deploy_path;
+
+
+.. code-block::
+
+   root@localhost:~# realpath  /sysroot/ostree/boot.1/elxr/edb3e401f7adf2d2c452e9eade28a08e1923a01e67d3bb169a9d7c12e2a4d1ce/0/
+   /sysroot/ostree/deploy/elxr/deploy/e72cd6aa4f18d53fff989c5f55707e19f0f59e1ce33d3ba2c26a9e8b9fbf572c.0
+   root@localhost:~# ls -lh /sysroot/ostree/boot.1/elxr/edb3e401f7adf2d2c452e9eade28a08e1923a01e67d3bb169a9d7c12e2a4d1ce/
+   total 4.0K
+   lrwxrwxrwx 1 root root 94 May 29 08:21 0 -> ../../../deploy/elxr/deploy/e72cd6aa4f18d53fff989c5f55707e19f0f59e1ce33d3ba2c26a9e8b9fbf572c.0
+   root@localhost:~#
+
+
+Get read-write access permission for sysroot
+++++++++++++++++++++++++++++++++++++++++++++
+
+.. code-block:: c
+
+   const bool sysroot_currently_writable = !path_is_on_readonly_fs (root_arg);
+   g_print ("sysroot.readonly configuration value: %d (fs writable: %d)\n", (int)sysroot_readonly,
+            (int)sysroot_currently_writable);
+
+The output:
+
+.. code-block:: bash
+
+   Mar 06 14:56:17 localhost ostree-prepare-root[446]: sysroot.readonly configuration value: 0 (fs writable: 1)
+
+Using legacy ostree
++++++++++++++++++++
+
+
+.. code-block:: c
+
+   if (!using_composefs)
+     {
+       if (root_transient)
+         {
+           errx (EXIT_FAILURE, "Must enable composefs with root.transient");
+         }
+       g_print ("Using legacy ostree bind mount for /\n");
+       /* The deploy root starts out bind mounted to sysroot.tmp */
+       if (mount (deploy_path, TMP_SYSROOT, NULL, MS_BIND | MS_SILENT, NULL) < 0)
+         err (EXIT_FAILURE, "failed to make initial bind mount %s", deploy_path);
+     }
+
+**using_composefs** is False and **root_transient** is False too. 
+
+
+
+The output:
+
+.. code-block:: bash 
+
+   Mar 06 14:56:17 localhost ostree-prepare-root[446]: Using legacy ostree bind mount for /
+
+
+Prepare /usr
++++++++++++++
+
+A read-only bind mount is created over /sysroot/usr.
+
+.. code-block:: 
+
+   else if (!using_composefs)
+     {
+       /* Otherwise, a read-only bind mount for /usr. (Not needed for composefs) */
+       if (mount (TMP_SYSROOT "/usr", TMP_SYSROOT "/usr", NULL, MS_BIND | MS_SILENT, NULL) < 0)
+         err (EXIT_FAILURE, "failed to bind mount (class:readonly) /usr");
+       if (mount (TMP_SYSROOT "/usr", TMP_SYSROOT "/usr", NULL,
+                  MS_BIND | MS_REMOUNT | MS_RDONLY | MS_SILENT, NULL)
+           < 0)
+         err (EXIT_FAILURE, "failed to bind mount (class:readonly) /usr");
+     }
+
+>> The output:
+
+.. code-block:: 
+
+   sh-5.2# mount | /sysroot/bin/grep usr
+   /dev/vda3 on /sysroot/usr type ext4 (ro,relatime)
+   sh-5.2#
+
+
+Prepare /var
+++++++++++++
+
+
+For /var, by default a bind mount is created from the deployment root to /sysroot/var. 
+
+.. code-block::
+
+   /* Prepare /var.
+    * When a read-only sysroot is configured, this adds a dedicated bind-mount (to itself)
+    * so that the stateroot location stays writable. */
+   if (sysroot_readonly)
+     {
+       /* Bind-mount /var (at stateroot path), and remount as writable. */
+       if (mount ("../../var", "../../var", NULL, MS_BIND | MS_SILENT, NULL) < 0)
+         err (EXIT_FAILURE, "failed to prepare /var bind-mount at %s", srcpath);
+       if (mount ("../../var", "../../var", NULL, MS_BIND | MS_REMOUNT | MS_SILENT, NULL) < 0)
+         err (EXIT_FAILURE, "failed to make writable /var bind-mount at %s", srcpath);
+     }
+
+     /* When running under systemd, /var will be handled by a 'var.mount' unit outside
+      * of initramfs.
+      * Systemd auto-detection can be overridden by a marker file under /run. */
+
+
+
+Here we use systemd's var.mount to handle the /var 
+
+.. code-block:: 
+
+   root@localhost:~# cat /run/systemd/generator/var.mount
+   ##
+   # Automatically generated by ostree-system-generator
+   ##
+
+   [Unit]
+   Documentation=man:ostree(1)
+   ConditionKernelCommandLine=!systemd.volatile
+   Before=local-fs.target
+
+   [Mount]
+   Where=/var
+   What=/sysroot/ostree/deploy/elxr/var
+   Options=bind,slave,shared
+   root@localhost:~#
+
+
+>> The output:
+
+.. code-block::
+
+   root@localhost:~# ls /var/
+   backups  cache  home  lib  local  lock  log  mail  mnt  opt  roothome  run  spool  srv  tmp  usrlocal
+   root@localhost:~# ls /sysroot/ostree/deploy/elxr/var/
+   backups  cache  home  lib  local  lock  log  mail  mnt  opt  roothome  run  spool  srv  tmp  usrlocal
+   root@localhost:~# mount | grep var
+   /dev/mmcblk1p3 on /var type ext4 (rw,relatime)
+   root@localhost:~#
+
+Prepare /sysroot and /sysroot/sysroot
+++++++++++++++++++++++++++++++++++++++
+
+.. code-block:: 
+
+    /* Now we have our ready made-up up root at
+    * /sysroot.tmp and the physical root at /sysroot (root_mountpoint).
+    * We want to end up with our deploy root at /sysroot/ and the physical
+    * root under /sysroot/sysroot as systemd will be responsible for
+    * moving /sysroot to /.
+    */
+    if (mount (root_mountpoint, "sysroot", NULL, MS_MOVE | MS_SILENT, NULL) < 0)
+     err (EXIT_FAILURE, "failed to MS_MOVE '%s' to 'sysroot'", root_mountpoint);
+
+    if (mount (".", root_mountpoint, NULL, MS_MOVE | MS_SILENT, NULL) < 0)
+     err (EXIT_FAILURE, "failed to MS_MOVE %s to %s", ".", root_mountpoint);
+
+    if (chdir (root_mountpoint) < 0)
+     err (EXIT_FAILURE, "failed to chdir to %s", root_mountpoint);
+
+    if (rmdir (TMP_SYSROOT) < 0)
+     err (EXIT_FAILURE, "couldn't remove temporary sysroot %s", TMP_SYSROOT);
+
+
+Up to now the /sysroot is actually the "deployment root", while the real root of the filesystem will appear as /sysroot/sysroot.
+
+.. code-block:: 
+
+   sh-5.2# ls /
+   bin  dracut-state.sh  init  lib64  root  sbin      sys      tmp  var
+   dev  etc              lib   proc   run   shutdown  sysroot  usr
+   sh-5.2# ls /sysroot/
+   bin   efi   initrd.img      lib64  opt     root  srv      tmp  vmlinuz
+   boot  etc   initrd.img.old  media  ostree  run   sys      usr  vmlinuz.old
+   dev   home  lib             mnt    proc    sbin  sysroot  var
+   sh-5.2# ls /sysroot/sysroot/
+   boot  efi  home  lost+found  ostree
+   sh-5.2# ls /sysroot/ostree/deploy/elxr/
+   backing/ deploy/  var/
+   sh-5.2# ls /sysroot/ostree/deploy/elxr/deploy/55c0e6d73fb70890778e998b0b7c25c494587b2f734e821961f95ca543ad5418.0
+   bin   efi   initrd.img      lib64  opt     root  srv      tmp  vmlinuz
+   boot  etc   initrd.img.old  media  ostree  run   sys      usr  vmlinuz.old
+   dev   home  lib             mnt    proc    sbin  sysroot  var
+   sh-5.2#
+
+
+
+systemd performs a switch-root operation, what was /sysroot becomes / and after the transition
+
+into the real root, the system will be booted into the "deployment", which is a versioned immutable filesystem tree.
+
+
+.. code-block::
+
+   Linux localhost 6.1.0-32-imx-arm64 #1 SMP eLxr 6.1.129-elxr2-1 (2025-04-23) aarch64
+
+   The programs included with the eLxr system
+   are free software;
+   the exact distribution terms for each program are described in the
+   individual files in /usr/share/doc/*/copyright.
+
+   eLxr comes with ABSOLUTELY NO WARRANTY,
+   to the extent permitted by applicable law.
+   Last login: Tue Jun 10 08:48:10 2025 from 128.224.153.80
+   -bash: warning: setlocale: LC_ALL: cannot change locale (en_US.UTF-8)
+   root@localhost:~#
+   root@localhost:~# ls /
+   bin  boot  dev  efi  etc  home  initrd.img  initrd.img.old  lib  media  mnt  opt  ostree
+   proc  root  run  sbin  srv  sys  sysroot  tmp  usr  var  vmlinuz  vmlinuz.old
+   root@localhost:~# ls /sysroot/
+   boot  efi  home  lost+found  ostree
+   root@localhost:~# df
+   Filesystem     1K-blocks    Used Available Use% Mounted on
+   devtmpfs            4096       0      4096   0% /dev
+   tmpfs            1508916       0   1508916   0% /dev/shm
+   tmpfs             603568    8436    595132   2% /run
+   tmpfs               5120       0      5120   0% /run/lock
+   /dev/mmcblk1p3  29989552 1502452  27217424   6% /sysroot
+   /dev/mmcblk1p2    457816   97478    331257  23% /boot
+   /dev/mmcblk1p1    112880   31717     81163  29% /efi
+   tmpfs             301780       0    301780   0% /run/user/0
+

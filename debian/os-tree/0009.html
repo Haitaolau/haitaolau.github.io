@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>OS tree &#8212; GDocs 0.1 documentation</title>
+    <title>Steps to Build dbgsym Package for ostree &#8212; GDocs 0.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
@@ -17,8 +17,8 @@
     <script src="../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Ostree FileSystem Layout" href="0008.html" />
-    <link rel="prev" title="Troubleshooting and Debugging apt-ostree on ELXR Edge OS" href="../elxr_edge/0003.html" />
+    <link rel="next" title="Ostree startup procedure" href="0010.html" />
+    <link rel="prev" title="ostree admin deploy" href="0007.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -36,27 +36,42 @@
 
           <div class="body" role="main">
             
-  <section id="os-tree">
-<h1>OS tree<a class="headerlink" href="#os-tree" title="Permalink to this heading">¶</a></h1>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="0008.html">Ostree FileSystem Layout</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0001.html">ostree init</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0002.html">ostree admin init-fs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0003.html">ostree pull-local</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0004.html">ostree log</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0005.html">ostree summary</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0006.html">ostree admin os-init</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0007.html">ostree admin deploy</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0009.html">Steps to Build dbgsym Package for ostree</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0010.html">Ostree startup procedure</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0014.html">Ostree systemd generator</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0011.html">Systemd initrd</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0012.html">systemd.generator - systemd unit generators</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0013.html">How to Debug the initrd ?</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0015.html">How to Grub2 load the Ostree</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0016.html">ostree-boot: grub2-15_ostree</a></li>
-</ul>
+  <section id="steps-to-build-dbgsym-package-for-ostree">
+<h1>Steps to Build dbgsym Package for ostree<a class="headerlink" href="#steps-to-build-dbgsym-package-for-ostree" title="Permalink to this heading">¶</a></h1>
+<p>Add the following lines to <strong>debian/rules</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">override_dh_strip</span><span class="p">:</span>
+     <span class="n">dh_strip</span> <span class="o">--</span><span class="n">dbgsym</span><span class="o">-</span><span class="n">migration</span><span class="o">=</span><span class="n">ostree</span><span class="o">-</span><span class="n">dbgsym</span>
+     <span class="n">dh_strip</span> <span class="o">--</span><span class="n">dbgsym</span><span class="o">-</span><span class="n">migration</span><span class="o">=</span><span class="n">ostree</span><span class="o">-</span><span class="n">root</span><span class="o">-</span><span class="n">obgsym</span>
+     <span class="n">dh_strip</span> <span class="o">--</span><span class="n">dbgsym</span><span class="o">-</span><span class="n">migration</span><span class="o">=</span><span class="n">libostree</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="n">obgsym</span>
+     <span class="n">dh_strip</span> <span class="o">--</span><span class="n">dbgsym</span><span class="o">-</span><span class="n">migration</span><span class="o">=</span><span class="n">ostree</span><span class="o">-</span><span class="n">tests</span><span class="o">-</span><span class="n">dbgsym</span>
+</pre></div>
+</div>
+<p>Build with dpkg-buildpackage</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>dpkg-buildpackage -us -uc
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>hliu4@pek-lpd-susbld:elxr<span class="nv">$ls</span> ostree*dbgsym* -lh
+-rw-r--r-- <span class="m">1</span> root root 142K May <span class="m">28</span> <span class="m">13</span>:47 ostree-boot-dbgsym_2025.1-1elxr1_amd64.deb
+-rw-r--r-- <span class="m">1</span> root root 411K May <span class="m">28</span> <span class="m">13</span>:47 ostree-dbgsym_2025.1-1elxr1_amd64.deb
+-rw-r--r-- <span class="m">1</span> root root 813K May <span class="m">28</span> <span class="m">13</span>:47 ostree-tests-dbgsym_2025.1-1elxr1_amd64.deb
+hliu4@pek-lpd-susbld:elxr<span class="nv">$dpkg</span>-deb -c ostree-dbgsym_2025.1-1elxr1_amd64.deb
+drwxr-xr-x root/root         <span class="m">0</span> <span class="m">2025</span>-03-26 <span class="m">22</span>:11 ./
+drwxr-xr-x root/root         <span class="m">0</span> <span class="m">2025</span>-03-26 <span class="m">22</span>:11 ./usr/
+drwxr-xr-x root/root         <span class="m">0</span> <span class="m">2025</span>-03-26 <span class="m">22</span>:11 ./usr/lib/
+drwxr-xr-x root/root         <span class="m">0</span> <span class="m">2025</span>-03-26 <span class="m">22</span>:11 ./usr/lib/debug/
+drwxr-xr-x root/root         <span class="m">0</span> <span class="m">2025</span>-03-26 <span class="m">22</span>:11 ./usr/lib/debug/.build-id/
+drwxr-xr-x root/root         <span class="m">0</span> <span class="m">2025</span>-03-26 <span class="m">22</span>:11 ./usr/lib/debug/.build-id/da/
+-rw-r--r-- root/root    <span class="m">403064</span> <span class="m">2025</span>-03-26 <span class="m">22</span>:11 ./usr/lib/debug/.build-id/da/6cb67f14b2f5f90118fdd737ea3c508f7cc15a.debug
+drwxr-xr-x root/root         <span class="m">0</span> <span class="m">2025</span>-03-26 <span class="m">22</span>:11 ./usr/lib/debug/.build-id/f9/
+-rw-r--r-- root/root     <span class="m">72624</span> <span class="m">2025</span>-03-26 <span class="m">22</span>:11 ./usr/lib/debug/.build-id/f9/9846f140011111bb4caa844cb7e8e72679e252.debug
+drwxr-xr-x root/root         <span class="m">0</span> <span class="m">2025</span>-03-26 <span class="m">22</span>:11 ./usr/lib/debug/.dwz/
+drwxr-xr-x root/root         <span class="m">0</span> <span class="m">2025</span>-03-26 <span class="m">22</span>:11 ./usr/lib/debug/.dwz/x86_64-linux-gnu/
+-rw-r--r-- root/root      <span class="m">9824</span> <span class="m">2025</span>-03-26 <span class="m">22</span>:11 ./usr/lib/debug/.dwz/x86_64-linux-gnu/ostree.debug
+drwxr-xr-x root/root         <span class="m">0</span> <span class="m">2025</span>-03-26 <span class="m">22</span>:11 ./usr/share/
+drwxr-xr-x root/root         <span class="m">0</span> <span class="m">2025</span>-03-26 <span class="m">22</span>:11 ./usr/share/doc/
+lrwxrwxrwx root/root         <span class="m">0</span> <span class="m">2025</span>-03-26 <span class="m">22</span>:11 ./usr/share/doc/ostree-dbgsym -&gt; ostree
+hliu4@pek-lpd-susbld:elxr$
+</pre></div>
 </div>
 </section>
 
@@ -96,7 +111,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../debian-command/index.html">Debian command</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../live-cd/index.html">Debian Live CD</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../elxr_edge/index.html">eLxr Edge</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">OS tree</a><ul>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">OS tree</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="0008.html">Ostree FileSystem Layout</a></li>
 <li class="toctree-l3"><a class="reference internal" href="0001.html">ostree init</a></li>
 <li class="toctree-l3"><a class="reference internal" href="0002.html">ostree admin init-fs</a></li>
@@ -105,7 +120,7 @@
 <li class="toctree-l3"><a class="reference internal" href="0005.html">ostree summary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="0006.html">ostree admin os-init</a></li>
 <li class="toctree-l3"><a class="reference internal" href="0007.html">ostree admin deploy</a></li>
-<li class="toctree-l3"><a class="reference internal" href="0009.html">Steps to Build dbgsym Package for ostree</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Steps to Build dbgsym Package for ostree</a></li>
 <li class="toctree-l3"><a class="reference internal" href="0010.html">Ostree startup procedure</a></li>
 <li class="toctree-l3"><a class="reference internal" href="0014.html">Ostree systemd generator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="0011.html">Systemd initrd</a></li>
@@ -141,8 +156,10 @@
 <ul>
   <li><a href="../../index.html">Documentation overview</a><ul>
   <li><a href="../index.html">Debian</a><ul>
-      <li>Previous: <a href="../elxr_edge/0003.html" title="previous chapter">Troubleshooting and Debugging apt-ostree on ELXR Edge OS</a></li>
-      <li>Next: <a href="0008.html" title="next chapter">Ostree FileSystem Layout</a></li>
+  <li><a href="index.html">OS tree</a><ul>
+      <li>Previous: <a href="0007.html" title="previous chapter">ostree admin deploy</a></li>
+      <li>Next: <a href="0010.html" title="next chapter">Ostree startup procedure</a></li>
+  </ul></li>
   </ul></li>
   </ul></li>
 </ul>
@@ -177,7 +194,7 @@
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |
-      <a href="../../_sources/debian/os-tree/index.rst.txt"
+      <a href="../../_sources/debian/os-tree/0009.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

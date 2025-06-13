@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>OS tree &#8212; GDocs 0.1 documentation</title>
+    <title>Ostree systemd generator &#8212; GDocs 0.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
@@ -17,8 +17,8 @@
     <script src="../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Ostree FileSystem Layout" href="0008.html" />
-    <link rel="prev" title="Troubleshooting and Debugging apt-ostree on ELXR Edge OS" href="../elxr_edge/0003.html" />
+    <link rel="next" title="Systemd initrd" href="0011.html" />
+    <link rel="prev" title="Ostree startup procedure" href="0010.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -36,27 +36,118 @@
 
           <div class="body" role="main">
             
-  <section id="os-tree">
-<h1>OS tree<a class="headerlink" href="#os-tree" title="Permalink to this heading">¶</a></h1>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="0008.html">Ostree FileSystem Layout</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0001.html">ostree init</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0002.html">ostree admin init-fs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0003.html">ostree pull-local</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0004.html">ostree log</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0005.html">ostree summary</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0006.html">ostree admin os-init</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0007.html">ostree admin deploy</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0009.html">Steps to Build dbgsym Package for ostree</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0010.html">Ostree startup procedure</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0014.html">Ostree systemd generator</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0011.html">Systemd initrd</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0012.html">systemd.generator - systemd unit generators</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0013.html">How to Debug the initrd ?</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0015.html">How to Grub2 load the Ostree</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0016.html">ostree-boot: grub2-15_ostree</a></li>
-</ul>
+  <section id="ostree-systemd-generator">
+<h1>Ostree systemd generator<a class="headerlink" href="#ostree-systemd-generator" title="Permalink to this heading">¶</a></h1>
+<p>Ostree provide a systemd generator named <strong>ostree-system-generator</strong> which</p>
+<p>is responsible for creating <strong>var.mount</strong> and enabling the ostree’s systemd services.</p>
+<p>src/switchroot/ostree-system-generator.c:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>...
+{
+   g_autoptr (GError) local_error = NULL;
+   if (!ostree_cmd__private__ ()-&gt;ostree_system_generator (arg_dest, NULL, arg_dest_late,
+                                                          &amp;local_error))
+      errx (EXIT_FAILURE, &quot;%s&quot;, local_error-&gt;message);
+}
+</pre></div>
+</div>
+<p>ostree_cmd__private__ is a struct which was implemented at <strong>src/libostree/ostree-cmd-private.c</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">const</span> <span class="n">OstreeCmdPrivateVTable</span> <span class="o">*</span>
+<span class="n">ostree_cmd__private__</span> <span class="p">(</span><span class="n">void</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">static</span> <span class="n">OstreeCmdPrivateVTable</span> <span class="n">table</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">_ostree_impl_system_generator</span><span class="p">,</span>    <span class="n">impl_ostree_generate_grub2_config</span><span class="p">,</span>
+    <span class="n">_ostree_repo_static_delta_dump</span><span class="p">,</span>   <span class="n">_ostree_repo_static_delta_query_exists</span><span class="p">,</span>
+    <span class="n">_ostree_repo_static_delta_delete</span><span class="p">,</span> <span class="n">_ostree_repo_verify_bindings</span><span class="p">,</span>
+    <span class="n">_ostree_sysroot_finalize_staged</span><span class="p">,</span>  <span class="n">_ostree_sysroot_boot_complete</span><span class="p">,</span>
+  <span class="p">};</span>
+  <span class="k">return</span> <span class="o">&amp;</span><span class="n">table</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>_ostree_impl_system_generator,</strong> is the main function for systemd generator.</p>
+<p><strong>src/libostree/ostree-impl-system-generator.c</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>if (!require_internal_units (normal_dir, early_dir, late_dir, error))
+  return FALSE;
+if (!fstab_generator (ostree_target, is_aboot, normal_dir, early_dir, late_dir, error))
+  return FALSE;
+</pre></div>
+</div>
+<p><strong>require_internal_units</strong>: Forcibly enable our internal units, since we detected ostree= on the kernel cmdline.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>...
+if (!glnx_shutil_mkdir_p_at (normal_dir_dfd, &quot;local-fs.target.requires&quot;, 0755, cancellable,
+                             error))
+  return FALSE;
+if (symlinkat (SYSTEM_DATA_UNIT_PATH &quot;/ostree-remount.service&quot;, normal_dir_dfd,
+               &quot;local-fs.target.requires/ostree-remount.service&quot;)
+    &lt; 0)
+  return glnx_throw_errno_prefix (error, &quot;symlinkat&quot;);
+if (!glnx_shutil_mkdir_p_at (normal_dir_dfd, &quot;multi-user.target.wants&quot;, 0755, cancellable, error))
+  return FALSE;
+if (symlinkat (SYSTEM_DATA_UNIT_PATH &quot;/ostree-finalize-staged.path&quot;, normal_dir_dfd,
+               &quot;multi-user.target.wants/ostree-finalize-staged.path&quot;)
+    &lt; 0)
+  return glnx_throw_errno_prefix (error, &quot;symlinkat&quot;);
+if (symlinkat (SYSTEM_DATA_UNIT_PATH &quot;/ostree-boot-complete.service&quot;, normal_dir_dfd,
+               &quot;multi-user.target.wants/ostree-boot-complete.service&quot;)
+...
+</pre></div>
+</div>
+<p><strong>fstab_generator</strong>: Generate var.mount</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>/* Generate var.mount */
+static gboolean
+fstab_generator (const char *ostree_target, const bool is_aboot, const char *normal_dir,
+                 const char *early_dir, const char *late_dir, GError **error)
+{
+...
+...
+
+/* Generate our bind mount unit */
+  const char *stateroot_var_path = glnx_strjoina (&quot;/sysroot/ostree/deploy/&quot;, stateroot, &quot;/var&quot;);
+
+...
+...
+
+  if (!g_output_stream_printf (outstream, &amp;bytes_written, cancellable, error,
+                               &quot;##\n# Automatically generated by ostree-system-generator\n##\n\n&quot;
+                               &quot;[Unit]\n&quot;
+                               &quot;Documentation=man:ostree(1)\n&quot;
+                               &quot;ConditionKernelCommandLine=!systemd.volatile\n&quot;
+                               &quot;Before=local-fs.target\n&quot;
+                               &quot;\n&quot;
+                               &quot;[Mount]\n&quot;
+                               &quot;Where=%s\n&quot;
+                               &quot;What=%s\n&quot;
+                               &quot;Options=bind,slave,shared\n&quot;,
+                               var_path, stateroot_var_path))
+...
+...
+
+  if (!glnx_shutil_mkdir_p_at (normal_dir_dfd, &quot;local-fs.target.requires&quot;, 0755, cancellable,
+                            error))
+    return FALSE;
+  if (symlinkat (&quot;../var.mount&quot;, normal_dir_dfd, &quot;local-fs.target.requires/var.mount&quot;) &lt; 0)
+    return glnx_throw_errno_prefix (error, &quot;symlinkat&quot;);
+</pre></div>
+</div>
+<p>The output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>root@localhost:~# ls /run/systemd/generator/local-fs.target.requires/var.mount -lh
+lrwxrwxrwx 1 root root 12 Mar  6 14:56 /run/systemd/generator/local-fs.target.requires/var.mount -&gt; ../var.mount
+root@localhost:~# cat /run/systemd/generator/var.mount
+##
+# Automatically generated by ostree-system-generator
+##
+
+[Unit]
+Documentation=man:ostree(1)
+ConditionKernelCommandLine=!systemd.volatile
+Before=local-fs.target
+
+[Mount]
+Where=/var
+What=/sysroot/ostree/deploy/elxr/var
+Options=bind,slave,shared
+root@localhost:~#
+</pre></div>
 </div>
 </section>
 
@@ -96,7 +187,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../debian-command/index.html">Debian command</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../live-cd/index.html">Debian Live CD</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../elxr_edge/index.html">eLxr Edge</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">OS tree</a><ul>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">OS tree</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="0008.html">Ostree FileSystem Layout</a></li>
 <li class="toctree-l3"><a class="reference internal" href="0001.html">ostree init</a></li>
 <li class="toctree-l3"><a class="reference internal" href="0002.html">ostree admin init-fs</a></li>
@@ -107,7 +198,7 @@
 <li class="toctree-l3"><a class="reference internal" href="0007.html">ostree admin deploy</a></li>
 <li class="toctree-l3"><a class="reference internal" href="0009.html">Steps to Build dbgsym Package for ostree</a></li>
 <li class="toctree-l3"><a class="reference internal" href="0010.html">Ostree startup procedure</a></li>
-<li class="toctree-l3"><a class="reference internal" href="0014.html">Ostree systemd generator</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Ostree systemd generator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="0011.html">Systemd initrd</a></li>
 <li class="toctree-l3"><a class="reference internal" href="0012.html">systemd.generator - systemd unit generators</a></li>
 <li class="toctree-l3"><a class="reference internal" href="0013.html">How to Debug the initrd ?</a></li>
@@ -141,8 +232,10 @@
 <ul>
   <li><a href="../../index.html">Documentation overview</a><ul>
   <li><a href="../index.html">Debian</a><ul>
-      <li>Previous: <a href="../elxr_edge/0003.html" title="previous chapter">Troubleshooting and Debugging apt-ostree on ELXR Edge OS</a></li>
-      <li>Next: <a href="0008.html" title="next chapter">Ostree FileSystem Layout</a></li>
+  <li><a href="index.html">OS tree</a><ul>
+      <li>Previous: <a href="0010.html" title="previous chapter">Ostree startup procedure</a></li>
+      <li>Next: <a href="0011.html" title="next chapter">Systemd initrd</a></li>
+  </ul></li>
   </ul></li>
   </ul></li>
 </ul>
@@ -177,7 +270,7 @@
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |
-      <a href="../../_sources/debian/os-tree/index.rst.txt"
+      <a href="../../_sources/debian/os-tree/0014.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

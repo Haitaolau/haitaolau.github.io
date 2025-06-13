@@ -1,0 +1,50 @@
+===========================================
+Steps to Build dbgsym Package for ostree
+===========================================
+
+
+
+Add the following lines to **debian/rules**
+
+
+.. code-block:: 
+
+   override_dh_strip:
+        dh_strip --dbgsym-migration=ostree-dbgsym
+        dh_strip --dbgsym-migration=ostree-root-obgsym
+        dh_strip --dbgsym-migration=libostree-1-1-obgsym
+        dh_strip --dbgsym-migration=ostree-tests-dbgsym
+
+
+
+Build with dpkg-buildpackage
+
+.. code-block:: bash
+
+   dpkg-buildpackage -us -uc
+
+
+.. code-block:: bash
+
+   hliu4@pek-lpd-susbld:elxr$ls ostree*dbgsym* -lh
+   -rw-r--r-- 1 root root 142K May 28 13:47 ostree-boot-dbgsym_2025.1-1elxr1_amd64.deb
+   -rw-r--r-- 1 root root 411K May 28 13:47 ostree-dbgsym_2025.1-1elxr1_amd64.deb
+   -rw-r--r-- 1 root root 813K May 28 13:47 ostree-tests-dbgsym_2025.1-1elxr1_amd64.deb
+   hliu4@pek-lpd-susbld:elxr$dpkg-deb -c ostree-dbgsym_2025.1-1elxr1_amd64.deb
+   drwxr-xr-x root/root         0 2025-03-26 22:11 ./
+   drwxr-xr-x root/root         0 2025-03-26 22:11 ./usr/
+   drwxr-xr-x root/root         0 2025-03-26 22:11 ./usr/lib/
+   drwxr-xr-x root/root         0 2025-03-26 22:11 ./usr/lib/debug/
+   drwxr-xr-x root/root         0 2025-03-26 22:11 ./usr/lib/debug/.build-id/
+   drwxr-xr-x root/root         0 2025-03-26 22:11 ./usr/lib/debug/.build-id/da/
+   -rw-r--r-- root/root    403064 2025-03-26 22:11 ./usr/lib/debug/.build-id/da/6cb67f14b2f5f90118fdd737ea3c508f7cc15a.debug
+   drwxr-xr-x root/root         0 2025-03-26 22:11 ./usr/lib/debug/.build-id/f9/
+   -rw-r--r-- root/root     72624 2025-03-26 22:11 ./usr/lib/debug/.build-id/f9/9846f140011111bb4caa844cb7e8e72679e252.debug
+   drwxr-xr-x root/root         0 2025-03-26 22:11 ./usr/lib/debug/.dwz/
+   drwxr-xr-x root/root         0 2025-03-26 22:11 ./usr/lib/debug/.dwz/x86_64-linux-gnu/
+   -rw-r--r-- root/root      9824 2025-03-26 22:11 ./usr/lib/debug/.dwz/x86_64-linux-gnu/ostree.debug
+   drwxr-xr-x root/root         0 2025-03-26 22:11 ./usr/share/
+   drwxr-xr-x root/root         0 2025-03-26 22:11 ./usr/share/doc/
+   lrwxrwxrwx root/root         0 2025-03-26 22:11 ./usr/share/doc/ostree-dbgsym -> ostree
+   hliu4@pek-lpd-susbld:elxr$
+
