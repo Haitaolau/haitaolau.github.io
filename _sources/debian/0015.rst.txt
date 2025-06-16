@@ -1,0 +1,112 @@
+===============================================================
+build an ARM64 Debian package on an AMD64 server using sbuild
+===============================================================
+
+
+
+.. contents:: Table of Contents
+
+
+
+To build an ARM64 Debian package on an AMD64 server using sbuild, you need
+
+to create a cross-compilation environment, configure sbuild to use it, and
+
+then build the package. This involves setting up a chroot environment for
+
+ARM64 architecture and using sbuild with the --host and --arch options to
+
+specify the target architecture.
+
+Here's a step-by-step guide
+
+
+
+Step 1. Install necessary packages:
+===================================
+
+
+.. code-block::
+
+   apt update
+   apt install sbuild schroot qemu-user-static binfmt-support mmdebstrap
+
+
+
+Step 2. Create the ARM64 Debian Bookworm Chroot
+===============================================
+
+
+.. code-block::
+
+   mkdir -p ~/.cache/sbuild
+   mmdebstrap --arch=arm64 --include=build-essential,debian-ports-archive-keyring bookworm ~/.cache/sbuild/bookworm-arm64.tar.zst http://deb.debian.org/debian
+
+
+
+Step 3. Create a schroot Configuration File for your Chroot
+===========================================================
+
+
+You should create a new file in **/etc/schroot/chroot.d/** rather than directly
+
+editing **/etc/schroot/schroot.conf**, as this is the recommended practice for maintainability.
+
+Let's create **/etc/schroot/chroot.d/bookworm-arm64.conf**:
+
+
+.. code-block::
+
+   vi /etc/schroot/chroot.d/bookworm-arm64.conf
+
+   # /etc/schroot/chroot.d/bookworm-arm64.conf
+   [bookworm-arm64]
+   description=Debian Bookworm ARM64 Chroot for sbuild
+   # Type 'directory' is often more robust for sbuild if it manages the directory
+   type=directory
+   # Base path where schroot will expect the chroot to be
+   # sbuild will manage putting it here from your .tar.zst
+   directory=/srv/chroot/bookworm-arm64
+   root-groups=sbuild
+   groups=sbuild
+   profile=sbuild
+
+Step 4. Configure sbuild
+========================
+
+
+Create or update ~/.sbuild.conf (or ~/.sbuild/sbuild.conf) with the following (or similar) configuration:
+
+.. code-block::
+
+   # ~/.sbuild.conf
+   $build_arch = "amd64";
+   $host_arch = "arm64";
+   $chroot_autoupdate = 'daily';
+   # Tell sbuild where to *store* the chroot
+   $chroot_dir = '/srv/chroot'; # This directory needs to exist and be writable by sbuild group
+   $sbuild_chroot = 'bookworm-arm64'; # The name of the chroot defined in schroot.conf
+
+
+Step 5. extract the mmdebstrap tarball(manually)
+================================================
+
+Then, you'd initially prepare /srv/chroot and run sbuild-createchroot or sbuild-update to extract the mmdebstrap tarball into it.
+
+
+.. code-block::
+
+   mkdir -p /srv/chroot/bookworm-arm64
+
+   zstd -d ~/.cache/sbuild/bookworm-arm64.tar.zst
+
+   tar vxf ~/.cache/sbuild/bookworm-arm64.tar -C /srv/chroot/bookworm-arm64
+
+
+Step 6. Build the Debian Package for ARM64
+==========================================
+
+
+.. code-block::
+
+   sbuild --host=arm64 --arch=arm64 -d bookworm
