@@ -1,0 +1,53 @@
+==========================
+Inline Function
+==========================
+
+
+
+.. contents:: Table of Contents
+
+
+In C++, inline functions provide a way to optimize the performance of the program by 
+
+reducing the overhead related to a function call. When a function is specified as inline 
+
+the whole code of the inline function is inserted or substituted at the point of its 
+
+call during the compilation instead of using the normal function call mechanism.
+
+
+Syntax
+========
+
+
+.. code-block::
+
+   inline return_type function_name(params)...
+
+
+
+Example
+========
+
+
+.. code-block::
+
+   #include <iostream>
+   using namespace std;
+   
+   // Inline function
+   inline int square(int x) {
+   	return x * x;
+   }
+   
+   int main() {
+   	int num = 5;
+   	
+   	// Calling inline function
+   	int res = square(num);
+   	cout << res;
+   	return 0;
+   }
+
+
+

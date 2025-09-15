@@ -1,0 +1,298 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>steps to build unsigned eLxr kernel &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Steps to build signed eLxr kernel" href="0019.html" />
+    <link rel="prev" title="How to apply the patches from a package’s debian/patches directory" href="0017.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="steps-to-build-unsigned-elxr-kernel">
+<h1><a class="toc-backref" href="#id1" role="doc-backlink">steps to build unsigned eLxr kernel</a><a class="headerlink" href="#steps-to-build-unsigned-elxr-kernel" title="Permalink to this heading">¶</a></h1>
+<nav class="contents" id="tables-of-content">
+<p class="topic-title">Tables of Content</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#steps-to-build-unsigned-elxr-kernel" id="id1">steps to build unsigned eLxr kernel</a></p>
+<ul>
+<li><p><a class="reference internal" href="#build-container" id="id2">Build container</a></p></li>
+<li><p><a class="reference internal" href="#prepare-the-compilation-environment" id="id3">Prepare the compilation environment</a></p></li>
+<li><p><a class="reference internal" href="#clone-the-kernel-source" id="id4">Clone the kernel source</a></p></li>
+<li><p><a class="reference internal" href="#install-the-build-dependencies" id="id5">Install the build-dependencies</a></p></li>
+<li><p><a class="reference internal" href="#build-the-org-tar-gz-source-package" id="id6">Build the org.tar.gz source package</a></p></li>
+<li><p><a class="reference internal" href="#optional-apply-the-patches-from-debian-patches" id="id7">(optional)Apply the patches from debian/patches</a></p></li>
+<li><p><a class="reference internal" href="#compile-kernel" id="id8">Compile kernel</a></p>
+<ul>
+<li><p><a class="reference internal" href="#building-many-packages" id="id9">Building many packages</a></p></li>
+<li><p><a class="reference internal" href="#building-packages-for-one-flavour" id="id10">Building packages for one flavour</a></p></li>
+<li><p><a class="reference internal" href="#building-packages-without-doc" id="id11">Building packages without doc</a></p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+<section id="build-container">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">Build container</a><a class="headerlink" href="#build-container" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+
+sudo docker run  -i -t --privileged <span class="se">\</span>
+        -v <span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/usr/src      <span class="se">\</span>
+        -v /var/run/docker.sock:/var/run/docker.sock <span class="se">\</span>
+        -v /dev:/dev      <span class="se">\</span>
+        -v /run:/run      <span class="se">\</span>
+        -v /sys:/sys      <span class="se">\</span>
+        -v /var/tmp:/var/tmp <span class="se">\</span>
+        --name <span class="s2">&quot;kernel-`date +%+4Y-%m-%d-%k-%M-%S`&quot;</span> <span class="se">\</span>
+        registry.gitlab.com/elxr/ci/pipeline/base:bookworm
+</pre></div>
+</div>
+</section>
+<section id="prepare-the-compilation-environment">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">Prepare the compilation environment</a><a class="headerlink" href="#prepare-the-compilation-environment" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span> <span class="s2">&quot;deb [trusted=yes] https://mirror.elxr.dev/elxr aria  main&quot;</span> &gt;&gt; /etc/apt/sources.list.d/0000elxr.list
+<span class="nb">echo</span> <span class="s2">&quot;deb-src http://deb.debian.org/debian bookworm main&quot;</span> &gt;&gt; /etc/apt/sources.list.d/bookworm-src.list
+
+apt update
+
+apt-get install devscripts git-buildpackage -y
+
+apt-get install --no-install-recommends -y   debhelper   git   gpg   gpgv kernel-wedge   python3   <span class="se">\</span>
+                python3-debian   python3-jinja2   quilt   rsync
+</pre></div>
+</div>
+</section>
+<section id="clone-the-kernel-source">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">Clone the kernel source</a><a class="headerlink" href="#clone-the-kernel-source" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://gitlab.com/elxrpro/Kernel/linux.git
+</pre></div>
+</div>
+<p>If you cloned the project outside the container, run this command inside the container:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git config --global --add safe.directory /usr/src/linux
+</pre></div>
+</div>
+</section>
+<section id="install-the-build-dependencies">
+<h2><a class="toc-backref" href="#id5" role="doc-backlink">Install the build-dependencies</a><a class="headerlink" href="#install-the-build-dependencies" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> linux
+debian/rules clean
+apt build-dep .
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>we should run “debian/rules clean” first, for it would generate the
+debian/control first that the “apt build-deb .” need it.</p>
+</div>
+</section>
+<section id="build-the-org-tar-gz-source-package">
+<h2><a class="toc-backref" href="#id6" role="doc-backlink">Build the org.tar.gz source package</a><a class="headerlink" href="#build-the-org-tar-gz-source-package" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">tar_name</span><span class="o">=</span><span class="k">$(</span>awk -F<span class="s1">&#39;[()-]&#39;</span> <span class="s1">&#39;NR==1 {print $2&quot;-&quot;$3}&#39;</span> debian/changelog<span class="k">)</span>
+git archive --prefix<span class="o">=</span>linux_<span class="si">${</span><span class="nv">tar_name</span><span class="si">}</span>/ -o ../linux_<span class="si">${</span><span class="nv">tar_name</span><span class="si">}</span>.orig.tar.gz HEAD
+</pre></div>
+</div>
+<p>or using tar tools</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tar --exclude<span class="o">=</span>.git --exclude<span class="o">=</span>debian/build -czf ../linux_6.1.140-elxr1.orig.tar.gz .
+</pre></div>
+</div>
+</section>
+<section id="optional-apply-the-patches-from-debian-patches">
+<h2><a class="toc-backref" href="#id7" role="doc-backlink">(optional)Apply the patches from debian/patches</a><a class="headerlink" href="#optional-apply-the-patches-from-debian-patches" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">QUILT_PATCHES</span><span class="o">=</span>debian/patches
+quilt push -a
+</pre></div>
+</div>
+</section>
+<section id="compile-kernel">
+<h2><a class="toc-backref" href="#id8" role="doc-backlink">Compile kernel</a><a class="headerlink" href="#compile-kernel" title="Permalink to this heading">¶</a></h2>
+<section id="building-many-packages">
+<h3><a class="toc-backref" href="#id9" role="doc-backlink">Building many packages</a><a class="headerlink" href="#building-many-packages" title="Permalink to this heading">¶</a></h3>
+<p>To build all possible packages for this architecture, run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ dpkg-buildpackage -b -nc -uc
+</pre></div>
+</div>
+<p>To build all architecture-dependent packages, run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ dpkg-buildpackage -B -nc -uc
+</pre></div>
+</div>
+<p>To build all architecture-independent packages, run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ dpkg-buildpackage -A -nc -uc
+</pre></div>
+</div>
+</section>
+<section id="building-packages-for-one-flavour">
+<h3><a class="toc-backref" href="#id10" role="doc-backlink">Building packages for one flavour</a><a class="headerlink" href="#building-packages-for-one-flavour" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>debian/rules clean
+
+make -f debian/rules.gen binary-arch_amd64_none -j <span class="m">256</span>
+</pre></div>
+</div>
+<p>On your initial run, you must first execute <strong>debian/rules clean</strong> to generate the debian/control file.</p>
+</section>
+<section id="building-packages-without-doc">
+<h3><a class="toc-backref" href="#id11" role="doc-backlink">Building packages without doc</a><a class="headerlink" href="#building-packages-without-doc" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">DEB_BUILD_PROFILES</span><span class="o">=</span><span class="s2">&quot;nodoc&quot;</span>
+dpkg-buildpackage -us -uc -ui --jobs<span class="o">=</span><span class="m">256</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../links.html">Links</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cplus/index.html">Cplus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Debian</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="0014.html">Debian Useful Resources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0005.html">Launch up Debian VM with Qemu</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debian-installer/index.html">Debian Installer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debian-command/index.html">Debian command</a></li>
+<li class="toctree-l2"><a class="reference internal" href="live-cd/index.html">Debian Live CD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="elxr_edge/index.html">eLxr Edge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="os-tree/index.html">OS tree</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0001.html">Ruck: build pablo with minimal ostree rootfs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0002.html">How to build deb package for libxfce4ui</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0003.html">How to Search for Debian package?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0004.html">How to Check Debian package version?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0006.html">How to download deb packages using apt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0007.html">E: You must put some ‘source’ URIs in your sources.list</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0008.html">How can I specify the repository from which a package will be installed?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0009.html">How to install build dependencies for packages ?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0010.html">Create orig tarballs from git</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0011.html">Debian: Building the package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pipeline/index.html">Debian Pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0012.html">Build and Test STIG</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0013.html">Change the mirror for elxr docker image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0015.html">build an ARM64 Debian package on an AMD64 server using sbuild</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0016.html">Build a Debian package directly from a Git repository</a></li>
+<li class="toctree-l2"><a class="reference internal" href="initramfs/index.html">initramfs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0017.html">How to apply the patches from a package’s debian/patches directory</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">steps to build unsigned eLxr kernel</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#build-container">Build container</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#prepare-the-compilation-environment">Prepare the compilation environment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#clone-the-kernel-source">Clone the kernel source</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#install-the-build-dependencies">Install the build-dependencies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#build-the-org-tar-gz-source-package">Build the org.tar.gz source package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#optional-apply-the-patches-from-debian-patches">(optional)Apply the patches from debian/patches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#compile-kernel">Compile kernel</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="0019.html">Steps to build signed eLxr kernel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0020.html">Remove a branch from your fork (remote)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0021.html">git: update your fork project (kernel)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licence/index.html">OpenSource License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bochs/index.html">Bochs IA-32 Emulator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../system/index.html">System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../unix/index.html">UNIX</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../math/index.html">Math</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../todo.html">To Do</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Debian</a><ul>
+      <li>Previous: <a href="0017.html" title="previous chapter">How to apply the patches from a package’s debian/patches directory</a></li>
+      <li>Next: <a href="0019.html" title="next chapter">Steps to build signed eLxr kernel</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/debian/0018.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

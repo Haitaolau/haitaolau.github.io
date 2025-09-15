@@ -1,0 +1,147 @@
+===============================================
+ The difference between dracut and dracut-core
+===============================================
+
+
+Content of dracut-core
+----------------------
+
+
+
+**dracut-core** is the foundational package of the dracut system. It provides
+
+the complete dracut framework including: the core executable, all standard modules,
+
+systemd integration units, manual pages, kernel installation hooks (install.d scripts),
+
+configuration files from /etc/dracut.conf.d/, and the primary dracut command-line interface.
+
+
+
+.. code-block::
+
+   hliu4@pek-lpd-susbld:workspace$dpkg-deb -c dracut-core_106-5i+elxrpro+fips_amd64.deb
+   drwxr-xr-x root/root         0 2025-07-07 22:24 ./
+   drwxr-xr-x root/root         0 2025-07-07 22:24 ./etc/
+   -rw-r--r-- root/root       117 2025-07-07 22:24 ./etc/dracut.conf
+   drwxr-xr-x root/root         0 2025-07-07 22:24 ./etc/dracut.conf.d/
+   drwxr-xr-x root/root         0 2025-07-07 22:24 ./etc/logrotate.d/
+   -rw-r--r-- root/root        82 2025-07-07 22:24 ./etc/logrotate.d/dracut-core
+   drwxr-xr-x root/root         0 2025-07-07 22:24 ./lib/
+   drwxr-xr-x root/root         0 2025-07-07 22:24 ./lib/systemd/
+   drwxr-xr-x root/root         0 2025-07-07 22:24 ./lib/systemd/system/
+   drwxr-xr-x root/root         0 2025-07-07 22:24 ./lib/systemd/system/initrd.target.wants/
+   drwxr-xr-x root/root         0 2025-07-07 22:24 ./lib/systemd/system/sysinit.target.wants/
+   drwxr-xr-x root/root         0 2025-07-07 22:24 ./usr/
+   drwxr-xr-x root/root         0 2025-07-07 22:24 ./usr/bin/
+   -rwxr-xr-x root/root     98106 2025-07-07 22:24 ./usr/bin/dracut
+   -rwxr-xr-x root/root      3650 2025-07-07 22:24 ./usr/bin/dracut-catimages
+   -rwxr-xr-x root/root     16206 2025-07-07 22:24 ./usr/bin/lsinitrd
+   drwxr-xr-x root/root         0 2025-07-07 22:24 ./usr/lib/
+   drwxr-xr-x root/root         0 2025-07-07 22:24 ./usr/lib/dracut/
+   -rwxr-xr-x root/root     31412 2025-07-07 22:24 ./usr/lib/dracut/dracut-functions.sh
+   -rwxr-xr-x root/root     34901 2025-07-07 22:24 ./usr/lib/dracut/dracut-init.sh
+   -rwxr-xr-x root/root      4060 2025-07-07 22:24 ./usr/lib/dracut/dracut-initramfs-restore
+   -rwxr-xr-x root/root     13844 2025-07-07 22:24 ./usr/lib/dracut/dracut-logger.sh
+   -rwxr-xr-x root/root     14576 2025-07-07 22:24 ./usr/lib/dracut/dracut-util
+   -rwxr-xr-x root/root        45 2025-07-07 22:24 ./usr/lib/dracut/dracut-version.sh
+   drwxr-xr-x root/root         0 2025-07-07 22:24 ./usr/lib/dracut/dracut.conf.d/
+   drwxr-xr-x root/root         0 2025-07-07 22:24 ./usr/lib/dracut/dracut.conf.d/fips/
+   -rw-r--r-- root/root        50 2025-07-07 22:24 ./usr/lib/dracut/dracut.conf.d/fips/50-fips.conf
+   ....
+   ....
+   ....
+
+   lrwxrwxrwx root/root         0 2025-07-07 22:24 ./lib/systemd/system/initrd.target.wants/dracut-mount.service -> ../dracut-mount.service
+   lrwxrwxrwx root/root         0 2025-07-07 22:24 ./lib/systemd/system/initrd.target.wants/dracut-pre-mount.service -> ../dracut-pre-mount.service
+   lrwxrwxrwx root/root         0 2025-07-07 22:24 ./lib/systemd/system/initrd.target.wants/dracut-pre-pivot.service -> ../dracut-pre-pivot.service
+   lrwxrwxrwx root/root         0 2025-07-07 22:24 ./lib/systemd/system/initrd.target.wants/dracut-pre-trigger.service -> ../dracut-pre-trigger.service
+   lrwxrwxrwx root/root         0 2025-07-07 22:24 ./lib/systemd/system/initrd.target.wants/dracut-pre-udev.service -> ../dracut-pre-udev.service
+   lrwxrwxrwx root/root         0 2025-07-07 22:24 ./lib/systemd/system/sysinit.target.wants/dracut-shutdown.service -> ../dracut-shutdown.service
+   lrwxrwxrwx root/root         0 2025-07-07 22:24 ./usr/lib/dracut/dracut-functions -> dracut-functions.sh
+
+
+Content of dracut
+-----------------
+
+
+The **dracut** package primarily includes kernel integration hooks (/etc/kernel/postinst.d/dracut
+
+and /etc/kernel/postrm.d/dracut) along with package documentation (changelog and copyright files).
+
+Unlike dracut-core, it doesn't contain the core framework or modules.
+
+
+.. code-block::
+
+   hliu4@pek-lpd-susbld:workspace$dpkg-deb -c dracut_106-5i+elxrpro+fips_all.deb 
+   drwxr-xr-x root/root         0 2025-07-07 22:24 ./
+   drwxr-xr-x root/root         0 2025-07-07 22:24 ./etc/
+   drwxr-xr-x root/root         0 2025-07-07 22:24 ./etc/kernel/
+   drwxr-xr-x root/root         0 2025-07-07 22:24 ./etc/kernel/postinst.d/
+   -rwxr-xr-x root/root       989 2025-07-07 22:24 ./etc/kernel/postinst.d/dracut
+   drwxr-xr-x root/root         0 2025-07-07 22:24 ./etc/kernel/postrm.d/
+   -rwxr-xr-x root/root       500 2025-07-07 22:24 ./etc/kernel/postrm.d/dracut
+   drwxr-xr-x root/root         0 2025-07-07 22:24 ./usr/
+   drwxr-xr-x root/root         0 2025-07-07 22:24 ./usr/share/
+   drwxr-xr-x root/root         0 2025-07-07 22:24 ./usr/share/doc/
+   drwxr-xr-x root/root         0 2025-07-07 22:24 ./usr/share/doc/dracut/
+   -rw-r--r-- root/root       440 2025-07-07 22:24 ./usr/share/doc/dracut/NEWS.Debian.gz
+   -rw-r--r-- root/root      4816 2025-07-07 22:24 ./usr/share/doc/dracut/changelog.Debian.gz
+   -rw-r--r-- root/root      3871 2025-07-07 22:24 ./usr/share/doc/dracut/copyright
+
+
+
+When installing the dracut package, dracut-core is installed first as a dependency. This dependency
+
+relationship can be verified by examining the package metadata:
+
+
+.. code-block:: bash 
+
+   $ dpkg -I dracut_106-5i+elxrpro+fips_all.deb | grep Depends
+     Depends: dracut-core (<< 106-5i+elxrpro+fips+b+~), 
+         dracut-core (>= 106-5i+elxrpro+fips), 
+         linux-base
+
+
+According to debian/dracut-core.README.Debian, you can use dracut functionality without removing
+
+initramfs-tools by installing only the dracut-core package on Debian or Ubuntu systems.
+
+Dracut for Debian
+-----------------
+
+1. Give it a try
+
+Currently dracut is not the default initrd creation tool in Debian.
+You can try dracut without removing initramfs-tools from your machine
+by following these steps:
+
+.. code-block::
+
+   # apt-get --no-install-recommends install dracut-core
+
+   cd /boot
+   cp -p vmlinuz-4.0.9-6-amd64 vmlinuz-4.0.9-6-amd64~dracut
+   dracut /boot/initrd.img-4.0.9-6-amd64~dracut
+   update-grub
+
+You will get a new grub menu entry under advanced boot options, which you can boot then
+
+Select: Advanced options for Debian GNU/Linux
+Then: Debian GNU/Linux, with Linux 4.0.9-6-amd64~dracut
+
+The initrd created by initramfs-tools will remain the default boot entry of grub.
+
+If the new initrd works for you, you can switch from initramfs-tools to dracut
+by installing the package dracut. This will then replace initramfs-tools.
+
+
+2. Check the content of the dracut initrd
+
+.. code-block::
+
+   lsinitrd /boot/initrd.img-4.0.9-6-amd64~dracut
+
+

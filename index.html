@@ -17,7 +17,7 @@
     <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Corporation" href="corp.html" />
+    <link rel="next" title="Links" href="links.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -39,6 +39,7 @@
 <h1>Welcome to Gdocs’s documentation!<a class="headerlink" href="#welcome-to-gdocs-s-documentation" title="Permalink to this heading">¶</a></h1>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="links.html">Links</a></li>
 <li class="toctree-l1"><a class="reference internal" href="corp.html">Corporation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="corp.html#links">Links</a></li>
 <li class="toctree-l2"><a class="reference internal" href="corp.html#start-vlm">Start Vlm</a></li>
@@ -188,6 +189,12 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="cplus/access_modifiers.html">Access Modifiers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/inheritance_access.html">Inheritance Access</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/inheritance_access.html#public-inheritance">public Inheritance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/inheritance_access.html#protected-inheritance">Protected Inheritance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/inheritance_access.html#private-inheritance">Private Inheritance</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="cplus/references.html">References (or Aliases)</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="cplus/references.html#syntax">Syntax</a></li>
 <li class="toctree-l3"><a class="reference internal" href="cplus/references.html#example">Example</a></li>
@@ -226,6 +233,11 @@
 <li class="toctree-l2"><a class="reference internal" href="cplus/copyconstructor.html">Copy constructor</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="cplus/copyconstructor.html#example">Example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="cplus/copyconstructor.html#id1">拷贝构造函数调用时机</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/const_function.html">Const member functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/const_function.html#syntax">Syntax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/const_function.html#examples-of-const-member-functions">Examples of Const Member Functions</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="cplus/rvalue.html">Cplus Rvalue</a><ul>
@@ -267,8 +279,21 @@
 <li class="toctree-l3"><a class="reference internal" href="cplus/explicit_implicit.html#explic">Explic</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="cplus/constructor.html">Constructor</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cplus/typedef_typename.html">typedef typename</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/constructor.html">Types of Constructors in C++</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/constructor.html#default-constructor">Default Constructor</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/typedef_typename.html">typedef typename</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/typedef_typename.html#typdef-typename">typdef typename</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/typedef_typename.html#typedef">typedef</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/pointer_size.html">Size of Pointers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/inline_function.html">Inline Function</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/inline_function.html#syntax">Syntax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/inline_function.html#example">Example</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="els/index.html">ESL</a><ul>
@@ -549,6 +574,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="debian/os-tree/index.html">OS tree</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="debian/os-tree/0017.html">Ostree</a></li>
 <li class="toctree-l3"><a class="reference internal" href="debian/os-tree/0008.html">Ostree FileSystem Layout</a></li>
 <li class="toctree-l3"><a class="reference internal" href="debian/os-tree/0001.html">ostree init</a></li>
 <li class="toctree-l3"><a class="reference internal" href="debian/os-tree/0002.html">ostree admin init-fs</a></li>
@@ -565,6 +591,7 @@
 <li class="toctree-l3"><a class="reference internal" href="debian/os-tree/0013.html">How to Debug the initrd ?</a></li>
 <li class="toctree-l3"><a class="reference internal" href="debian/os-tree/0015.html">How to Grub2 load the Ostree</a></li>
 <li class="toctree-l3"><a class="reference internal" href="debian/os-tree/0016.html">ostree-boot: grub2-15_ostree</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debian/os-tree/0018.html">A Deep Dive into OSTree Commit Implementation</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="debian/0001.html">Ruck: build pablo with minimal ostree rootfs</a><ul>
@@ -624,6 +651,42 @@
 <li class="toctree-l3"><a class="reference internal" href="debian/0015.html#step-6-build-the-debian-package-for-arm64">Step 6. Build the Debian Package for ARM64</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="debian/0016.html">Build a Debian package directly from a Git repository</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="debian/0016.html#create-the-tarball-from-git">Create the tarball from Git</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debian/0016.html#build-the-package">Build the package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="debian/initramfs/index.html">initramfs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="debian/initramfs/0001.html">The difference between dracut and dracut-core</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="debian/0017.html">How to apply the patches from a package’s debian/patches directory</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="debian/0017.html#using-quilt">1. Using quilt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debian/0017.html#using-dpkg-source">2. Using dpkg-source</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="debian/0018.html">steps to build unsigned eLxr kernel</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="debian/0018.html#build-container">Build container</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debian/0018.html#prepare-the-compilation-environment">Prepare the compilation environment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debian/0018.html#clone-the-kernel-source">Clone the kernel source</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debian/0018.html#install-the-build-dependencies">Install the build-dependencies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debian/0018.html#build-the-org-tar-gz-source-package">Build the org.tar.gz source package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debian/0018.html#optional-apply-the-patches-from-debian-patches">(optional)Apply the patches from debian/patches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debian/0018.html#compile-kernel">Compile kernel</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="debian/0019.html">Steps to build signed eLxr kernel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debian/0020.html">Remove a branch from your fork (remote)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="debian/0020.html#delete-locally-and-remotely">1. Delete locally and remotely</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="debian/0021.html">git: update your fork project (kernel)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="debian/0021.html#add-the-upstream-remote-if-not-already-done">1. Add the upstream remote (if not already done)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debian/0021.html#fetch-upstream-updates">2. Fetch upstream updates</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debian/0021.html#rebase-each-branch">3. Rebase each branch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debian/0021.html#push-updates-back-to-your-fork">4.Push updates back to your fork</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="tools/index.html">Tools</a><ul>
@@ -633,6 +696,10 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="tools/gitlab/index.html">GitLab</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="tools/gitlab/0001.html">How To Install and Configure GitLab on Ubuntu</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tools/0001.html">A tool on Linux that can convert an image to a text file</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tools/0001.html#tesseract-ocr">Tesseract OCR</a></li>
 </ul>
 </li>
 </ul>
@@ -693,6 +760,22 @@
 <li class="toctree-l2"><a class="reference internal" href="system/0001.html">Refence Docs</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="unix/index.html">UNIX</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="unix/linkat.html">LINKAT</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="unix/linkat.html#synopsis">SYNOPSIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="unix/linkat.html#example">Example</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="math/index.html">Math</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="math/intermediate_value_theorem.html">intermediate value theorem</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="todo.html">To Do</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="todo.html#fs-verity">fs-verity</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </section>
@@ -715,6 +798,7 @@
 
 <h3>Navigation</h3>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="links.html">Links</a></li>
 <li class="toctree-l1"><a class="reference internal" href="corp.html">Corporation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cmds/index.html">Commands</a></li>
 <li class="toctree-l1"><a class="reference internal" href="kernel/index.html">Linux Kernel</a></li>
@@ -731,13 +815,16 @@
 <li class="toctree-l1"><a class="reference internal" href="licence/index.html">OpenSource License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="bochs/index.html">Bochs IA-32 Emulator</a></li>
 <li class="toctree-l1"><a class="reference internal" href="system/index.html">System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="unix/index.html">UNIX</a></li>
+<li class="toctree-l1"><a class="reference internal" href="math/index.html">Math</a></li>
+<li class="toctree-l1"><a class="reference internal" href="todo.html">To Do</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="#">Documentation overview</a><ul>
-      <li>Next: <a href="corp.html" title="next chapter">Corporation</a></li>
+      <li>Next: <a href="links.html" title="next chapter">Links</a></li>
   </ul></li>
 </ul>
 </div>

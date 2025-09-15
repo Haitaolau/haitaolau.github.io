@@ -1,0 +1,93 @@
+==========================================
+git: update your fork project (kernel)
+==========================================
+
+
+I forked https://gitlab.com/elxrpro/Kernel/linux (with branches aria-base and aria-amd64) and 
+now the upstream project has updated those branches. 
+You want to update your fork with those changes.
+
+1. Add the upstream remote (if not already done)
+=================================================
+
+.. code-block:: bash
+
+   git remote -v
+
+.. code-block:: bash 
+
+   hliu4@pek-lpd-susbld:linux$git remote -v                                                                                                                                                      
+   origin  https://gitlab.com/haitailau/linux.git (fetch)                                                                                                                                        
+   origin  https://gitlab.com/haitailau/linux.git (push)   
+
+If you don’t see upstream pointing to https://gitlab.com/elxrpro/Kernel/linux, then add it:
+
+.. code-block:: bash
+
+   git remote add upstream https://gitlab.com/elxrpro/Kernel/linux 
+
+
+2. Fetch upstream updates
+===========================
+
+
+.. code-block:: bash 
+
+   git fetch upstream
+
+
+.. code-block:: bash 
+
+
+   hliu4@pek-lpd-susbld:linux$git fetch upstream
+   warning: redirecting to https://gitlab.com/elxrpro/Kernel/linux.git/
+   remote: Enumerating objects: 9, done.
+   remote: Counting objects: 100% (8/8), done.
+   remote: Compressing objects: 100% (8/8), done.
+   remote: Total 9 (delta 4), reused 0 (delta 0), pack-reused 1 (from 1)
+   Unpacking objects: 100% (9/9), 6.98 KiB | 1.40 MiB/s, done.
+   From https://gitlab.com/elxrpro/Kernel/linux
+    * [new branch]                aria-amd64 -> upstream/aria-amd64
+    * [new branch]                aria-base  -> upstream/aria-base
+    * [new branch]                elxrpro    -> upstream/elxrpro
+   hliu4@pek-lpd-susbld:linux$git branch
+   * aria-base
+   hliu4@pek-lpd-susbld:linux$git branch -r
+     origin/HEAD -> origin/aria-base
+     origin/aria-amd64
+     origin/aria-base
+     origin/elxrpro
+     origin/hliu4/dev_fips
+     upstream/aria-amd64
+     upstream/aria-base
+     upstream/elxrpro
+ 
+3. Rebase each branch
+======================
+
+For aria-base: 
+
+.. code-block:: bash 
+
+   git checkout --track origin/aria-base
+   git rebase upstream/aria-base
+
+
+For aria-amd64:
+
+.. code-block:: bash 
+
+   git checkout --track origin/aria-amd64
+   git rebase upstream/aria-amd64
+
+
+4.Push updates back to your fork
+==================================
+
+Since rebasing rewrites history, you’ll need --force-with-lease:
+
+.. code-block:: bash
+
+   git push origin aria-base --force-with-lease
+   git push origin aria-amd64 --force-with-lease
+

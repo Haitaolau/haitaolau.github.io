@@ -1,0 +1,55 @@
+====================================
+Steps to build signed eLxr kernel
+====================================
+
+
+
+.. code-block:: bash 
+
+
+   BUILD_ARCH=amd64
+   apt-get install --no-install-recommends -y dpkg-dev git openssl python3 python3-debian sbsigntool
+   apt-get install --no-install-recommends -y ${WORKING_DIR}/linux-kbuild-*[0-9]_*_${BUILD_ARCH}.deb
+
+
+
+.. code-block:: bash 
+
+   git clone --depth=1 https://salsa.debian.org/kernel-team/kernel-team.git
+
+
+.. code-block:: bash 
+
+   /usr/src/kernel-team/scripts/debian-test-sign \
+           /usr/src/linux_6.1.140-elxr1-1+exlrpro+fips_amd64.changes  \
+           debian/certs/ci-test-sign/ci-test-sign-key.pem \
+           debian/certs/ci-test-sign/ci-test-sign.pem
+
+
+
+.. code-block:: bash
+
+   BUILD_ARCH=amd64
+
+   dpkg-source -x /usr/src/linux-signed-amd64_6.1.140+elxr1+1+exlrpro+fips.dsc
+
+   apt-get install --no-install-recommends -y \
+   ${WORKING_DIR}/linux-image-*-unsigned_*_${BUILD_ARCH}.deb \
+   ${WORKING_DIR}/linux-kbuild-*[0-9]_*_${BUILD_ARCH}.deb \
+   ${WORKING_DIR}/linux-support-*_all.deb
+
+
+
+.. code-block:: bash 
+
+   cd linux-signed-amd64-6.1.140+elxr1+1+exlrpro+fips/
+
+   apt build-dep --no-install-recommends -y .
+
+
+.. code-block:: bash 
+
+   dpkg-buildpackage  --build=full --jobs=256
+
+
+

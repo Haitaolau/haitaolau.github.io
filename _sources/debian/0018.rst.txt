@@ -1,0 +1,143 @@
+====================================
+steps to build unsigned eLxr kernel
+====================================
+
+.. contents:: Tables of Content
+
+
+
+Build container
+=================
+
+
+.. code-block:: bash
+
+   #!/bin/bash
+
+   sudo docker run  -i -t --privileged \
+           -v $(pwd):/usr/src      \
+           -v /var/run/docker.sock:/var/run/docker.sock \
+           -v /dev:/dev      \
+           -v /run:/run      \
+           -v /sys:/sys      \
+           -v /var/tmp:/var/tmp \
+           --name "kernel-`date +%+4Y-%m-%d-%k-%M-%S`" \
+           registry.gitlab.com/elxr/ci/pipeline/base:bookworm
+
+
+Prepare the compilation environment
+====================================
+
+
+.. code-block:: bash
+
+   echo "deb [trusted=yes] https://mirror.elxr.dev/elxr aria  main" >> /etc/apt/sources.list.d/0000elxr.list
+   echo "deb-src http://deb.debian.org/debian bookworm main" >> /etc/apt/sources.list.d/bookworm-src.list
+
+   apt update
+
+   apt-get install devscripts git-buildpackage -y
+
+   apt-get install --no-install-recommends -y   debhelper   git   gpg   gpgv kernel-wedge   python3   \
+                   python3-debian   python3-jinja2   quilt   rsync
+
+
+
+Clone the kernel source
+========================
+
+.. code-block:: bash
+
+   git clone https://gitlab.com/elxrpro/Kernel/linux.git
+
+
+
+If you cloned the project outside the container, run this command inside the container:
+
+.. code-block:: bash
+
+   git config --global --add safe.directory /usr/src/linux
+
+
+Install the build-dependencies
+================================
+
+.. code-block:: bash 
+
+    cd linux
+    debian/rules clean
+    apt build-dep .
+
+.. note:: 
+
+   we should run "debian/rules clean" first, for it would generate the
+   debian/control first that the "apt build-deb ." need it. 
+
+
+Build the org.tar.gz source package
+======================================
+
+.. code-block:: bash
+
+   tar_name=$(awk -F'[()-]' 'NR==1 {print $2"-"$3}' debian/changelog)
+   git archive --prefix=linux_${tar_name}/ -o ../linux_${tar_name}.orig.tar.gz HEAD
+
+or using tar tools
+
+.. code-block:: bash 
+
+   tar --exclude=.git --exclude=debian/build -czf ../linux_6.1.140-elxr1.orig.tar.gz .
+
+(optional)Apply the patches from debian/patches
+=================================================
+
+.. code-block:: bash 
+
+   export QUILT_PATCHES=debian/patches
+   quilt push -a
+
+Compile kernel
+================
+
+
+Building many packages
+-------------------------
+
+To build all possible packages for this architecture, run:
+
+.. code-block:: bash 
+
+   $ dpkg-buildpackage -b -nc -uc
+
+To build all architecture-dependent packages, run:
+
+.. code-block:: bash 
+
+   $ dpkg-buildpackage -B -nc -uc
+
+To build all architecture-independent packages, run:
+
+.. code-block:: bash 
+
+   $ dpkg-buildpackage -A -nc -uc
+
+Building packages for one flavour
+----------------------------------
+
+.. code-block:: bash
+
+    debian/rules clean
+
+    make -f debian/rules.gen binary-arch_amd64_none -j 256
+
+On your initial run, you must first execute **debian/rules clean** to generate the debian/control file.
+
+
+Building packages without doc 
+---------------------------------
+
+
+.. code-block:: bash 
+
+   export DEB_BUILD_PROFILES="nodoc"
+   dpkg-buildpackage -us -uc -ui --jobs=256

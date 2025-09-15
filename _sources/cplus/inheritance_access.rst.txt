@@ -1,0 +1,234 @@
+====================
+ Inheritance Access
+====================
+
+
+.. contents:: Table of Contents
+
+
+
+public, protected, and private inheritance have the following features:
+
+
+* **public inheritance**  makes public members of the base class public in the derived class, and the protected members of the base class remain protected in the derived class.
+
+* **protected inheritance** makes the public and protected members of the base class protected in the derived class.
+
+* **private inheritance** makes the public and protected members of the base class private in the derived class.
+
+
+
+
+.. image:: ../_static/image/inherance_access.jpg
+
+
+public Inheritance
+======================
+
+
+Public Visibility mode: If we derive a subclass from a public base class. Then the public member of the
+
+base class will become public in the derived class and protected members of the base class will become protected in the derived class.
+
+
+.. code-block:: cpp
+
+   #include <bits/stdc++.h>
+   using namespace std;
+   class A {
+   public:
+       int x;
+   protected:
+       int y;
+   private:
+       int z;
+   };
+
+   class B : public A {
+   };
+
+   int main()
+   {
+       B b;
+
+       // x is public and it will remain public
+       // so its value will be printed
+       cout << b.x << endl;
+
+       // y is protected and it will remain protected
+       // so it will give visibility error
+       cout << b.y << endl;
+
+       // z is not accessible from B as
+       // z is private and it will remain private
+       // so it will give visibility error
+       cout << b.z << endl;
+   };
+
+
+Output:
+
+.. code-block::
+
+   inherrace_access1.cpp: In function ‘int main()’:
+   inherrace_access1.cpp:37:15: error: ‘int A::y’ is protected within this context
+      37 |     cout << b.y << endl;
+         |               ^
+   inherrace_access1.cpp:14:9: note: declared protected here
+      14 |     int y;
+         |         ^
+   inherrace_access1.cpp:42:15: error: ‘int A::z’ is private within this context
+      42 |     cout << b.z << endl;
+         |               ^
+   inherrace_access1.cpp:17:9: note: declared private here
+      17 |     int z;
+         |         ^
+
+
+Protected Inheritance
+=====================
+
+
+Protected Visibility mode: If we derive a subclass from a Protected base class. Then both public member
+
+and protected members of the base class will become protected in the derived class.
+
+
+.. code-block:: cpp
+
+   class B : protected A {
+   };
+
+output:
+
+.. code-block:: console 
+
+   inherrace_access1.cpp: In function ‘int main()’:
+   inherrace_access1.cpp:33:15: error: ‘int A::x’ is inaccessible within this context
+      33 |     cout << b.x << endl;
+         |               ^
+   inherrace_access1.cpp:11:9: note: declared here
+      11 |     int x;
+         |         ^
+   inherrace_access1.cpp:37:15: error: ‘int A::y’ is protected within this context
+      37 |     cout << b.y << endl;
+         |               ^
+   inherrace_access1.cpp:14:9: note: declared protected here
+      14 |     int y;
+         |         ^
+   inherrace_access1.cpp:42:15: error: ‘int A::z’ is private within this context
+      42 |     cout << b.z << endl;
+         |               ^
+   inherrace_access1.cpp:17:9: note: declared private here
+      17 |     int z;
+         |         ^
+
+
+ We know that protected members can only be accessed from the Derived class. These members cannot be
+
+ directly accessed from outside the class. So we cannot use **b.x** to access this member.
+
+However, we could define a function to  access it.  
+
+ .. code-block:: cpp
+
+    // Derived class
+   // Class B will inherit Class A
+   // using Public Visibility mode
+   class B : protected A {
+           public:
+                   int getX(){return x;}
+                   int getY(){return y;}
+
+   };
+
+
+
+Private Inheritance
+===================
+
+
+
+**Private Visibility mode**: If we derive a subclass from a Private base class. Then both public
+
+member and protected members of the base class will become Private in the derived class.
+
+.. code-block:: cpp
+
+   class B : private A {
+   }
+
+
+.. code-block:: console 
+
+   inherrace_access1.cpp: In function ‘int main()’:
+   inherrace_access1.cpp:35:15: error: ‘int A::x’ is inaccessible within this context
+      35 |     cout << b.x << endl;
+         |               ^
+   inherrace_access1.cpp:11:9: note: declared here
+      11 |     int x;
+         |         ^
+   inherrace_access1.cpp:36:19: error: ‘int A::y’ is protected within this context
+      36 |         cout << b.y << endl;
+         |                   ^
+   inherrace_access1.cpp:14:9: note: declared protected here
+      14 |     int y;
+         |         ^
+   inherrace_access1.cpp:37:19: error: ‘int A::z’ is private within this context
+      37 |         cout << b.z << endl;
+         |                   ^
+   inherrace_access1.cpp:17:9: note: declared private here
+      17 |     int z;
+         |         ^
+
+We know that private members cannot be accessed from the Derived class. These members
+
+
+cannot be directly accessed from outside the class.
+
+
+.. code-block:: cpp
+
+   #include <bits/stdc++.h>
+   using namespace std;
+
+   // Base class
+   // Class A will be inherited
+   class A {
+   protected:
+       int y;
+
+   private:
+       int z;
+   public:
+       int x;
+           int getZ(){return z;}
+
+
+   };
+
+   // Derived class
+   // Class B will inherit Class A
+   // using Public Visibility mode
+   class B : private A {
+           public:
+                   int getX(){return x;}
+                   int getY(){return y;}
+                   int getZ(){return A::getZ();}
+
+   };
+
+   // main function
+   int main()
+   {
+       B b;
+
+       cout << b.getX() << endl;
+           cout << b.getY() << endl;
+           cout << b.getZ() << endl;
+
+           return 0;
+
+   };
+
+

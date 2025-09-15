@@ -5,18 +5,20 @@ Cplus
 ===============
 
 .. toctree::
-   :maxdepth: 3
-   
+   :maxdepth: 1
+
    libstdc++_2_9_1/index
    Operator_overloading/index
    access_modifiers
+   inheritance_access
    references
-   const 
+   const
    functemplate
    passarguments
    friend
    abstract
    copyconstructor
+   const_function
    rvalue
    lvalue_and_rvalue
    placement_new
@@ -25,5 +27,7 @@ Cplus
    decltype
    explicit_implicit
    constructor
-   typedef_typename   
+   typedef_typename
+   pointer_size
+   inline_function
 

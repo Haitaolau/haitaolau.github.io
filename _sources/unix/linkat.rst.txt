@@ -1,0 +1,88 @@
+================
+LINKAT
+================
+
+
+SYNOPSIS
+===========
+
+.. code-block::
+
+   #include <fcntl.h>           /* Definition of AT_* constants */
+   #include <unistd.h>
+
+   int linkat(int olddirfd, const char *oldpath,
+             int newdirfd, const char *newpath, int flags);
+
+
+
+Example
+========
+
+
+
+.. code-block:: c++
+
+
+   #include <iostream>
+   #include <fcntl.h>
+   #include <unistd.h>
+
+
+   int main(int argc, char ** argv)
+   {
+
+       int olddirfd, newdirfd;
+       int result;
+
+       // Open directories (replace with your actual paths)
+       olddirfd = open(".", O_RDONLY); // Use current directory for olddirfd
+       newdirfd = open("new_dir", O_RDONLY | O_DIRECTORY); // Open directory for new links
+
+       if (olddirfd == -1 || newdirfd == -1) {
+           std::cout << "open error" << std::endl;
+           return 1;
+       }
+
+       // Create a hard link (or symbolic link with AT_SYMLINK_FOLLOW)
+       result = linkat(olddirfd, "existing_file.txt", newdirfd, "new_link.txt", 0); // Create a hard link
+
+       if (result == -1) {
+           std::cout << "linkat error" << std::endl;
+           return 1;
+       }
+
+     std::cout << "Link created successfully." << std::endl;
+
+       close(olddirfd);
+       close(newdirfd);
+
+     return 0;
+
+   }
+
+
+
+Create a **hard link** named **new_link.txt** in the **new_dir directory** that
+
+points to **existing_file.txt** in the **current directory**.
+
+
+Result
+-------
+
+
+
+
+.. code-block::
+
+   wrsadmin@pek-hliu4-d2:~/workspace/test/linkat$ tree
+   .
+   ├── existing_file.txt
+   ├── linkat
+   ├── linkat.cpp
+   └── new_dir
+       └── new_link.txt
+
+   2 directories, 4 files
+   wrsadmin@pek-hliu4-d2:~/workspace/test/linkat$

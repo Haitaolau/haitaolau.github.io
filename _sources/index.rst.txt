@@ -9,6 +9,7 @@ Welcome to Gdocs's documentation!
 .. toctree::
    :maxdepth: 3
 
+   links
    corp
    cmds/index
    kernel/index
@@ -25,6 +26,9 @@ Welcome to Gdocs's documentation!
    licence/index
    bochs/index
    system/index
+   unix/index
+   math/index
+   todo
    
 .. * :ref:`corp_index`
    * :ref:`python_index`

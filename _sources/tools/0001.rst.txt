@@ -1,0 +1,28 @@
+==========================================================
+A tool on Linux that can convert an image to a text file
+==========================================================
+
+
+there are several tools on Linux that can convert an image to a text file using Optical
+
+Character Recognition (OCR). The most popular and well-regarded is Tesseract
+
+
+Tesseract OCR
+=============
+
+Tesseract is a free, open-source OCR engine maintained by Google. It's a command-line tool,
+
+but it's very powerful and accurate. You can install it on most Linux distributions using the package manager.
+
+**Basic usage:**
+
+
+.. code-block:: console
+
+   tesseract input_image.png output_text_file
+
+
+This will create a new file named output_text_file.txt containing the text it recognized
+
+from the image. You can also specify the language for better accuracy.

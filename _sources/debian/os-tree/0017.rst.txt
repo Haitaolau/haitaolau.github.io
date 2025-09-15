@@ -1,0 +1,13 @@
+========
+Ostree
+========
+
+
+
+
+References:
+=============
+
+
+API Reference - https://ostreedev.github.io/ostree/reference/reference.html
+Aktualizr - https://developer.toradex.com/torizon/torizon-platform/torizon-updates/aktualizr-modifying-the-settings-of-torizon-ota-client/

@@ -1,0 +1,34 @@
+=======================================================
+Build a Debian package directly from a Git repository
+=======================================================
+
+
+
+
+
+Create the tarball from Git
+===========================
+
+
+.. code-block::
+
+   hliu4@pek-lpd-susbld:workspace$cd openssl/
+   hliu4@pek-lpd-susbld:openssl$ls
+   ACKNOWLEDGEMENTS.md  CHANGES.md          Configurations   demos     fuzz         ms                NOTES-PERL.md      os-dep             README-PROVIDERS.md  util
+   apps                 CODE-OF-CONDUCT.md  Configure        doc       HACKING.md   NEWS.md           NOTES-UNIX.md      providers          ssl                  VERSION.dat
+   appveyor.yml         config              CONTRIBUTING.md  engines   include      NOTES-ANDROID.md  NOTES-VALGRIND.md  README-ENGINES.md  SUPPORT.md           VMS
+   AUTHORS.md           config.com          crypto           external  INSTALL.md   NOTES-DJGPP.md    NOTES-VMS.md       README-FIPS.md     test
+   build.info           configdata.pm.in    debian           FAQ.md    LICENSE.txt  NOTES-NONSTOP.md  NOTES-WINDOWS.md   README.md          tools
+   hliu4@pek-lpd-susbld:openssl$
+   hliu4@pek-lpd-susbld:openssl$git archive --prefix=openssl_3.1.2/ -o ../openssl_3.1.2.orig.tar.gz HEAD
+   hliu4@pek-lpd-susbld:openssl$ls ../openssl_3.1.2.orig.tar.gz  -lh
+   -rw-r--r-- 1 hliu4 users 16M Jul 14 11:17 ../openssl_3.1.2.orig.tar.gz
+
+
+Build the package
+=================
+
+
+.. code-block::
+
+   dpkg-buildpackage -us -uc

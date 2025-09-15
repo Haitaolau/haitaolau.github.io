@@ -17,8 +17,8 @@
     <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="ESL" href="../els/index.html" />
-    <link rel="prev" title="Constructor" href="constructor.html" />
+    <link rel="next" title="Size of Pointers" href="pointer_size.html" />
+    <link rel="prev" title="Types of Constructors in C++" href="constructor.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -37,12 +37,84 @@
           <div class="body" role="main">
             
   <section id="typedef-typename">
-<h1>typedef typename<a class="headerlink" href="#typedef-typename" title="Permalink to this heading">¶</a></h1>
+<h1><a class="toc-backref" href="#id1" role="doc-backlink">typedef typename</a><a class="headerlink" href="#typedef-typename" title="Permalink to this heading">¶</a></h1>
+<nav class="contents" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#typedef-typename" id="id1">typedef typename</a></p>
+<ul>
+<li><p><a class="reference internal" href="#typdef-typename" id="id2">typdef typename</a></p></li>
+<li><p><a class="reference internal" href="#typedef" id="id3">typedef</a></p>
+<ul>
+<li><p><a class="reference internal" href="#using-typedef-with-predefined-data-types" id="id4">Using typedef with predefined data types</a></p></li>
+<li><p><a class="reference internal" href="#using-typedef-with-stl-data-structures" id="id5">Using typedef with STL data structures</a></p></li>
+<li><p><a class="reference internal" href="#using-typedef-with-arrays" id="id6">Using typedef with arrays</a></p></li>
+<li><p><a class="reference internal" href="#using-typedef-with-data-pointers" id="id7">Using typedef with data pointers</a></p></li>
+<li><p><a class="reference internal" href="#using-typedef-with-function-pointers" id="id8">Using typedef with function pointers</a></p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+<section id="typdef-typename">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">typdef typename</a><a class="headerlink" href="#typdef-typename" title="Permalink to this heading">¶</a></h2>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="n">typename</span><span class="w"> </span><span class="n">__type_traits</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="o">&gt;::</span><span class="n">has_trivial_destructor</span><span class="w"> </span><span class="n">_Trivial_destructor</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 <p>typedef 创建了类型别名: __type_traits&lt;_Tp&gt;::has_trivial_destructor 是类型,别名是 _Trivial_destructor
 typename 告诉编译器__type_traits&lt;_Tp&gt;::has_trivial_destructor 是个类型不是一个成员</p>
+</section>
+<section id="typedef">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">typedef</a><a class="headerlink" href="#typedef" title="Permalink to this heading">¶</a></h2>
+<section id="using-typedef-with-predefined-data-types">
+<h3><a class="toc-backref" href="#id4" role="doc-backlink">Using typedef with predefined data types</a><a class="headerlink" href="#using-typedef-with-predefined-data-types" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span> <span class="n">Giving</span> <span class="n">the</span> <span class="n">new</span> <span class="n">name</span> <span class="n">to</span>
+<span class="o">//</span> <span class="n">predefined</span> <span class="n">data</span> <span class="nb">type</span>
+<span class="n">typedef</span> <span class="n">long</span> <span class="n">long</span> <span class="n">ulli</span><span class="p">;</span>
+</pre></div>
+</div>
+</section>
+<section id="using-typedef-with-stl-data-structures">
+<h3><a class="toc-backref" href="#id5" role="doc-backlink">Using typedef with STL data structures</a><a class="headerlink" href="#using-typedef-with-stl-data-structures" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span> <span class="n">Give</span> <span class="n">the</span> <span class="n">new</span> <span class="n">name</span> <span class="n">to</span>
+<span class="o">//</span> <span class="nb">map</span><span class="o">&lt;</span><span class="nb">int</span><span class="p">,</span> <span class="n">string</span><span class="o">&gt;</span>
+<span class="n">typedef</span> <span class="nb">map</span><span class="o">&lt;</span><span class="nb">int</span><span class="p">,</span> <span class="n">string</span><span class="o">&gt;</span> <span class="n">mp</span><span class="p">;</span>
+</pre></div>
+</div>
+</section>
+<section id="using-typedef-with-arrays">
+<h3><a class="toc-backref" href="#id6" role="doc-backlink">Using typedef with arrays</a><a class="headerlink" href="#using-typedef-with-arrays" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">typedef</span> <span class="nb">int</span> <span class="n">arr</span><span class="p">[</span><span class="mi">3</span><span class="p">];</span>
+
+<span class="o">//</span> <span class="n">Making</span> <span class="n">new</span> <span class="mi">1</span><span class="n">D</span> <span class="n">array</span>
+<span class="n">arr</span> <span class="n">array1</span><span class="p">{</span> <span class="mi">1</span> <span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">};</span>
+</pre></div>
+</div>
+</section>
+<section id="using-typedef-with-data-pointers">
+<h3><a class="toc-backref" href="#id7" role="doc-backlink">Using typedef with data pointers</a><a class="headerlink" href="#using-typedef-with-data-pointers" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span> <span class="n">typedef</span> <span class="k">with</span> <span class="n">pointers</span>
+<span class="n">typedef</span> <span class="nb">int</span><span class="o">*</span> <span class="n">iPtr</span><span class="p">;</span>
+
+<span class="n">iPtr</span> <span class="n">pointer_to_a</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">a</span><span class="p">;</span>
+</pre></div>
+</div>
+</section>
+<section id="using-typedef-with-function-pointers">
+<h3><a class="toc-backref" href="#id8" role="doc-backlink">Using typedef with function pointers</a><a class="headerlink" href="#using-typedef-with-function-pointers" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span> <span class="n">Normal</span> <span class="n">pointer</span> <span class="n">to</span> <span class="n">a</span> <span class="n">function</span>
+<span class="nb">int</span> <span class="p">(</span><span class="o">*</span><span class="n">func_ptr1</span><span class="p">)(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">);</span>
+<span class="o">//</span> <span class="n">Using</span> <span class="n">typedef</span> <span class="k">with</span> <span class="n">pointer</span>
+<span class="o">//</span> <span class="n">to</span> <span class="n">a</span> <span class="n">function</span>
+<span class="n">typedef</span> <span class="nb">int</span> <span class="p">(</span><span class="o">*</span><span class="n">func_ptr2</span><span class="p">)(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">);</span>
+
+<span class="o">//</span> <span class="n">Function</span> <span class="n">to</span> <span class="n">multiply</span> <span class="n">two</span> <span class="n">numbers</span>
+<span class="nb">int</span> <span class="n">product</span><span class="p">(</span><span class="nb">int</span> <span class="n">u</span><span class="p">,</span> <span class="nb">int</span> <span class="n">v</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="n">u</span> <span class="o">*</span> <span class="n">v</span><span class="p">;</span> <span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
 </section>
 
 
@@ -63,6 +135,7 @@ typename 告诉编译器__type_traits&lt;_Tp&gt;::has_trivial_destructor 是个�
 
 <h3>Navigation</h3>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../links.html">Links</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../corp.html">Corporation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../cmds/index.html">Commands</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../kernel/index.html">Linux Kernel</a></li>
@@ -72,6 +145,7 @@ typename 告诉编译器__type_traits&lt;_Tp&gt;::has_trivial_destructor 是个�
 <li class="toctree-l2"><a class="reference internal" href="libstdc%2B%2B_2_9_1/index.html">Libstd c++ 2.9.1</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Operator_overloading/index.html">C++ Operator overloading</a></li>
 <li class="toctree-l2"><a class="reference internal" href="access_modifiers.html">Access Modifiers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inheritance_access.html">Inheritance Access</a></li>
 <li class="toctree-l2"><a class="reference internal" href="references.html">References (or Aliases)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="const.html">const</a></li>
 <li class="toctree-l2"><a class="reference internal" href="functemplate.html">Function template</a></li>
@@ -79,6 +153,7 @@ typename 告诉编译器__type_traits&lt;_Tp&gt;::has_trivial_destructor 是个�
 <li class="toctree-l2"><a class="reference internal" href="friend.html">Friend class and function</a></li>
 <li class="toctree-l2"><a class="reference internal" href="abstract.html">Abstract Class</a></li>
 <li class="toctree-l2"><a class="reference internal" href="copyconstructor.html">Copy constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="const_function.html">Const member functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="rvalue.html">Cplus Rvalue</a></li>
 <li class="toctree-l2"><a class="reference internal" href="lvalue_and_rvalue.html">lvalue &amp;&amp; rvalue</a></li>
 <li class="toctree-l2"><a class="reference internal" href="placement_new.html">Placement new operator</a></li>
@@ -86,8 +161,14 @@ typename 告诉编译器__type_traits&lt;_Tp&gt;::has_trivial_destructor 是个�
 <li class="toctree-l2"><a class="reference internal" href="cast/index.html">C++ Cast</a></li>
 <li class="toctree-l2"><a class="reference internal" href="decltype.html">Decltype</a></li>
 <li class="toctree-l2"><a class="reference internal" href="explicit_implicit.html">Explicit and Implicit</a></li>
-<li class="toctree-l2"><a class="reference internal" href="constructor.html">Constructor</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">typedef typename</a></li>
+<li class="toctree-l2"><a class="reference internal" href="constructor.html">Types of Constructors in C++</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">typedef typename</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#typdef-typename">typdef typename</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#typedef">typedef</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pointer_size.html">Size of Pointers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inline_function.html">Inline Function</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../els/index.html">ESL</a></li>
@@ -100,6 +181,9 @@ typename 告诉编译器__type_traits&lt;_Tp&gt;::has_trivial_destructor 是个�
 <li class="toctree-l1"><a class="reference internal" href="../licence/index.html">OpenSource License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../bochs/index.html">Bochs IA-32 Emulator</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../system/index.html">System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../unix/index.html">UNIX</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../math/index.html">Math</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../todo.html">To Do</a></li>
 </ul>
 
 <div class="relations">
@@ -107,8 +191,8 @@ typename 告诉编译器__type_traits&lt;_Tp&gt;::has_trivial_destructor 是个�
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
   <li><a href="index.html">Cplus</a><ul>
-      <li>Previous: <a href="constructor.html" title="previous chapter">Constructor</a></li>
-      <li>Next: <a href="../els/index.html" title="next chapter">ESL</a></li>
+      <li>Previous: <a href="constructor.html" title="previous chapter">Types of Constructors in C++</a></li>
+      <li>Next: <a href="pointer_size.html" title="next chapter">Size of Pointers</a></li>
   </ul></li>
   </ul></li>
 </ul>

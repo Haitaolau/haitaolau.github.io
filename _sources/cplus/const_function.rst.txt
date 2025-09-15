@@ -1,0 +1,17 @@
+========================
+ Const member functions
+========================
+
+
+
+Syntax
+======
+
+
+.. code-block::
+
+   return_type function_name() const;
+
+
+Examples of Const Member Functions
+==================================

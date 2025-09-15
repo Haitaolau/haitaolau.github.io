@@ -1,0 +1,14 @@
+============================
+ intermediate value theorem
+============================
+
+
+
+
+.. image:: ../_static/image/Intermediate-Value-Theorem.svg
+
+
+价值定理：
+
+如果f在[a,b]上连续，并且f(a) < 0 且 f(b) > 0, 那么在区间(a,b)上至少有一点c,使得f(c)=0.
+代之以f(a)>0且f(b)<0,同样成立.

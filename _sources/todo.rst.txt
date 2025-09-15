@@ -1,0 +1,18 @@
+==========
+To Do
+==========
+
+
+
+
+fs-verity
+------------
+
+
+* `fs-verity support in btrfs: Detect tampering in critical read-only files <https://developers.facebook.com/blog/post/2021/10/19/fs-verity-support-in-btrfs/>`_
+
+* `Andriod a userspace utility for fs-verity <https://android.googlesource.com/platform/external/fsverity-utils/+/refs/heads/android10-c2f2-release/README.md>`_
+
+* `fs-verity: read-only file-based authenticity protection <https://docs.kernel.org/filesystems/fsverity.html>`_
+
+* `man fsverity <https://manpages.debian.org/testing/fsverity/fsverity.1.en.html>`_

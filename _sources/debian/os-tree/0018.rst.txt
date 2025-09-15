@@ -1,0 +1,763 @@
+===============================================
+A Deep Dive into OSTree Commit Implementation
+===============================================
+
+
+
+.. contents:: Table of Contents
+
+
+
+1. Environment Setup
+====================
+
+1.1 Build the repo
+------------------
+
+
+.. code-block::
+
+   mkdir -p repo
+   ostree init --repo ./repo --mode archive-z2
+
+-------------------
+
+.. code-block::
+
+   root@localhost:~/example# tree repo/
+   repo/
+   ├── config
+   ├── extensions
+   ├── objects
+   ├── refs
+   │   ├── heads
+   │   ├── mirrors
+   │   └── remotes
+   ├── state
+   └── tmp
+       └── cache
+
+   10 directories, 1 file
+
+1.2 Creating a simple rootfs
+----------------------------
+
+
+.. code-block::
+
+   mkdir -p rootfs/usr/
+   echo "Hello, I am test 1" > rootfs/1.txt
+   echo "Hello, I am test 2" > rootfs/usr/2.txt
+
+
+.. code-block::
+
+   root@localhost:~/example# tree rootfs/
+   rootfs/
+   ├── 1.txt
+   └── usr
+       └── 2.txt
+
+   2 directories, 2 files
+   root@localhost:~/example#
+
+1.3 Debuging with gdb
+---------------------
+
+.. code-block::
+
+   cd rootfs/
+   gdb --args ostree commit /root/example/rootfs/ --repo=/root/example/repo --branch=main/test --subject="Initial commit"
+
+
+is a shorthand for explicitly using **--tree=dir=/root/example/rootfs/**
+
+.. code-block::
+
+   gdb --args ostree commit --tree=dir=/root/example/rootfs/ --repo=/root/example/repo --branch=main/test --subject="Initial commit"
+
+
+
+2. Parse commandline option
+===========================
+
+
+The usage of ostree commit:
+
+.. code-block::
+
+   root@localhost:~# ostree commit --help
+   Usage:
+   ostree commit [OPTION…] [PATH]
+
+2.1 Parse [OPTION...]
+----------------------
+
+
+.. code-block::
+
+   (gdb) bt
+   #0  g_option_context_parse at ../../../glib/goption.c:1960
+   #1  ostree_option_context_parse at src/ostree/ot-main.c:493
+   #2  ostree_builtin_commit at src/ostree/ot-builtin-commit.c:463
+   #3  ostree_run at src/ostree/ot-main.c:319
+   #4  ostree_main at src/ostree/ot-main.c:155
+   #5  main at src/ostree/main.c:95
+
+Refer to: https://docs.gtk.org/glib/struct.OptionEntry.html
+
+https://gnome.pages.gitlab.gnome.org/libsoup/glib/glib-Commandline-option-parser.html
+
+
+**g_option_context_parse** just parse:
+
+* **Long options**: These start with two dashes (--), e.g., --output, --verbose.
+
+* **Short options**: These start with a single dash (-), e.g., -o, -v. Multiple short options without arguments can often be grouped together (e.g., -vb is equivalent to -v -b).
+
+
+Here, **g_option_context_parse** would :
+
+* 1. Recognize --repo=/root/example/repo ,--branch=main/test and --subject='Initial commit
+
+* 2. Set the corresponding variables.
+
+  opt_repo -> /root/example/repo
+
+  opt_branch -> main/text
+
+  opt_subject -> Initial commit
+
+* 3. Leave "/root/example/rootfs/" in argv as "rest" arguments.
+
+
+2.2 Parse [PATH]
+----------------
+
+The **/root/example/rootfs/** is recongnized here:
+
+src/ostree/ot-builtin-commit.c
+
+.. code-block::
+
+    /* Convert implicit . or explicit path via argv into
+     * --tree=dir= so that we only have one primary code path below.
+     */
+    if (opt_trees == NULL || opt_trees[0] == NULL)
+      {
+        char *path;
+        if (argc <= 1)
+          path = ".";
+        else
+          path = argv[1];
+        opt_trees = g_new0 (char *, 2);
+        opt_trees[0] = g_strconcat ("dir=", path, NULL);
+      }
+
+At last the opt_trees is /root/example/rootfs.
+
+
+The definition of ostree_repo_class_init
+========================================
+
+
+.. code-block::
+
+   (gdb) bt
+   #0  ostree_repo_class_init at src/libostree/ostree-repo.c:1231
+   #1  ostree_repo_class_intern_init at src/libostree/ostree-repo.c:163
+   #2  type_class_init_Wm at ../../../gobject/gtype.c:2299
+   #3  g_type_class_ref at ../../../gobject/gtype.c:3014
+   #4  g_object_new_valist at ../../../gobject/gobject.c:2499
+   #5  g_object_new at ../../../gobject/gobject.c:2040
+   #6  ostree_repo_new at src/libostree/ostree-repo.c:1352
+   #7  parse_repo_option at src/ostree/ot-main.c:369
+   #8  parse_repo_option_and_maybe_remount at src/ostree/ot-main.c:387
+   #9  ostree_option_context_parse at src/ostree/ot-main.c:540
+   #10 ostree_builtin_commit at src/ostree/ot-builtin-commit.c:463
+   #11 ostree_run at src/ostree/ot-main.c:319
+   #12 ostree_main at src/ostree/ot-main.c:155
+   #13 main at src/ostree/main.c:95
+
+
+
+
+
+
+The Definition of ostree_repo_init
+==================================
+
+
+ostree_repo_init is responsible for initializing the OstreeRepo structure
+
+.. code-block::
+
+   (gdb) bt
+   #0  ostree_repo_init at src/libostree/ostree-repo.c:1304
+   #1  g_type_create_instance at ../../../gobject/gtype.c:1931
+   #2  g_object_new_internal at ../../../gobject/gobject.c:2228
+   #3  g_object_new_valist at ../../../gobject/gobject.c:2567
+   #4  g_object_new at ../../../gobject/gobject.c:2040
+   #5  ostree_repo_new at src/libostree/ostree-repo.c:1352
+   #6  parse_repo_option at src/ostree/ot-main.c:369
+   #7  parse_repo_option_and_maybe_remount at src/ostree/ot-main.c:387
+   #8  ostree_option_context_parse at src/ostree/ot-main.c:540
+   #9  ostree_builtin_commit at src/ostree/ot-builtin-commit.c:463
+   #10 ostree_run at src/ostree/ot-main.c:319
+   #11 ostree_main at src/ostree/ot-main.c:155
+   #12 main at src/ostree/main.c:95
+
+
+
+
+
+The Definition of ostree_repo_finalize
+======================================
+
+
+.. code-block::
+
+   (gdb) bt
+   #0  ostree_repo_finalize at src/libostree/ostree-repo.c:1140
+   #1  g_object_unref at ../../../gobject/gobject.c:3909
+   #2  g_object_unref at ../../../gobject/gobject.c:3784
+   #3  glib_autoptr_clear_OstreeRepo at ./src/libostree/ostree-autocleanups.h:55
+   #4  glib_autoptr_cleanup_OstreeRepo at ./src/libostree/ostree-autocleanups.h:55
+   #5  ostree_builtin_commit at src/ostree/ot-builtin-commit.c:437
+   #6  ostree_run at src/ostree/ot-main.c:319
+   #7  ostree_main at src/ostree/ot-main.c:155
+   #8  main at src/ostree/main.c:95
+
+
+To ensure proper resource management, ostree_builtin_commit uses the g_autoptr macro
+
+for the OstreeRepo struct. This clever macro automates cleanup by calling g_object_unref,
+
+which subsequently executes the ostree_repo_finalize function. The ostree_repo_finalize function
+
+is crucial for safely releasing all resources tied to the OstreeRepo struct, including memory,
+
+open file descriptors, mutex locks, and various pointers.
+
+
+.. code-block::
+
+    gboolean
+    ostree_builtin_commit (int argc, char **argv, OstreeCommandInvocation *invocation,
+                        GCancellable *cancellable, GError **error)
+       g_autoptr (OstreeRepo) repo = NULL;
+
+
+
+
+Refer to :https://docs.gtk.org/glib/auto-cleanup.html
+
+
+
+The Definition of ostree_repo_open
+==================================
+
+
+.. code-block::
+
+   (gdb) bt
+   #0  ostree_repo_open at src/libostree/ostree-repo.c:3381
+   #1  parse_repo_option at src/ostree/ot-main.c:372
+   #2  parse_repo_option_and_maybe_remount at src/ostree/ot-main.c:387
+   #3  ostree_option_context_parse at src/ostree/ot-main.c:540
+   #4  ostree_builtin_commit at src/ostree/ot-builtin-commit.c:463
+   #5  ostree_run at src/ostree/ot-main.c:319
+   #6  ostree_main at src/ostree/ot-main.c:155
+   #7  main at src/ostree/main.c:95
+   (gdb)
+
+
+
+This function is responsible for initializing an OStree repository by setting up various directory file descriptors and preparing for configuration loading.
+
+.. code-block::
+
+    gboolean
+    ostree_repo_open (OstreeRepo *self, GCancellable *cancellable, GError **error)
+    {
+    ....
+    ....
+          {
+            if (!g_file_get_contents ("/proc/sys/kernel/random/boot_id", &boot_id, NULL, error))
+              return FALSE;
+            g_strdelimit (boot_id, "\n", '\0');
+          }
+
+        self->stagedir_prefix = g_strconcat (OSTREE_REPO_TMPDIR_STAGING, boot_id, "-", NULL);
+    ....
+    ....
+      if (self->repo_dir_fd == -1)
+        {
+          g_assert (self->repodir);
+          if (!glnx_opendirat (AT_FDCWD, gs_file_get_path_cached (self->repodir), TRUE,
+                               &self->repo_dir_fd, error))
+            return FALSE;
+        }
+    ....
+    ....
+      if (!glnx_opendirat (self->repo_dir_fd, "objects", TRUE, &self->objects_dir_fd, error))
+        return FALSE;
+    ....
+    ....
+          if (mkdirat (self->repo_dir_fd, "tmp", DEFAULT_DIRECTORY_MODE) == -1)
+    ....
+    ....
+      if (!glnx_opendirat (self->repo_dir_fd, "tmp", TRUE, &self->tmp_dir_fd, error))
+        return FALSE;
+      if (self->writable && getenv ("OSTREE_SKIP_CACHE") == NULL)
+        {
+          if (!glnx_shutil_mkdir_p_at (self->tmp_dir_fd, _OSTREE_CACHE_DIR, DEFAULT_DIRECTORY_MODE,
+                                       cancellable, error))
+            return FALSE;
+
+          if (!glnx_opendirat (self->tmp_dir_fd, _OSTREE_CACHE_DIR, TRUE, &self->cache_dir_fd, error))
+            return FALSE;
+        }
+      if (!ostree_repo_reload_config (self, cancellable, error))
+        return FALSE;
+
+
+Setting the stagedir_prefix
+---------------------------
+
+The first step involves defining the stagedir_prefix. This value is dynamically generated and combines a fixed string "staging-",
+
+the system's unique boot_id, and a trailing hyphen "-".
+
+To get the boot_id, the function reads the content of /proc/sys/kernel/random/boot_id. For example,
+
+if the boot_id is bc397e63-98be-4e0f-9e37-d512375fe7cf, the resulting stagedir_prefix would be
+
+staging-bc397e63-98be-4e0f-9e37-d512375fe7cf-.
+
+This unique prefix is crucial for distinguishing operations related to a specific boot session.
+
+Setting repo_dir_fd
+-------------------
+
+Next, the function sets the repo_dir_fd, which is a file descriptor pointing to the base directory
+
+of your OStree repository. This is achieved by using opendirat() to open the specified repository directory
+
+
+A typical example would be opening /root/example/repo. This file descriptor provides
+
+direct access to the repository's root, enabling subsequent operations.
+
+
+Setting objects_dir_fd
+----------------------
+
+
+Following the repo_dir_fd, the objects_dir_fd is set. This file descriptor points to the objects/
+
+subdirectory within the repository. Like repo_dir_fd, it's opened using opendirat(). For instance,
+
+if your repository is at /root/example/repo, this step would open /root/example/repo/objects/.
+
+This directory is where OStree stores its immutable content objects.
+
+Setting tmp_dir_fd
+------------------
+
+
+To handle temporary files generated during repository operations, a temporary directory is created,
+
+and its file descriptor is assigned to tmp_dir_fd. The process involves creating a new temporary directory
+
+(often in /root/example/repo/tmp/ with a unique name) and then using opendirat() to open it,
+
+returning its file descriptor.
+
+
+Setting cache_dir_fd
+--------------------
+
+
+Similarly, a dedicated cache directory is created, and its file descriptor is assigned to cache_dir_fd.
+
+This directory is used for caching data to speed up future operations. The process mirrors that of
+
+tmp_dir_fd: a new cache directory is created, and opendirat() is used to open it and obtain its file descriptor.
+
+
+.. code-block::
+
+   (gdb) ! ls repo/
+   config  extensions  objects  refs  state  tmp
+   (gdb) ! tree
+   .
+   ├── repo
+   │   ├── config
+   │   ├── extensions
+   │   ├── objects
+   │   ├── refs
+   │   │   ├── heads
+   │   │   ├── mirrors
+   │   │   └── remotes
+   │   ├── state
+   │   └── tmp
+   │       └── cache
+   └── rootfs
+       ├── 1.txt
+       └── usr
+           └── 2.txt
+   13 directories, 3 files
+
+
+
+Reloading Configuration
+-----------------------
+
+
+Finally, after all necessary directories are opened and their file descriptors are set,
+
+ostree_repo_open() calls ostree_repo_reload_config(). This function's purpose is to load
+
+and cache the remote configuration and the repository's own local configuration data.
+
+
+
+Write object
+============
+
+
+**ostree_repo_write_dfd_to_mtree** takes a file descriptor pointing to a directory, reads its contents,
+
+and then generates an mtree representation of that directory and its subdirectories/files. This is a core
+
+operation for creating new OSTree commits, as a commit essentially captures the state of a filesystem tree
+
+**"dfd"** stands for "directory file descriptor."
+
+
+writing a metadata (non-content) object
+----------------------------------------
+
+The **write_metadata_object** is responsible for handling the directory, while the
+**write_content_object** is resonsible for handling the regular file.
+
+.. code-block::
+
+   (gdb) bt
+   #0 write_metadata_object at src/libostree/ostree-repo-commit.c:1307
+   #1 ostree_repo_write_metadata at src/libostree/ostree-repo-commit.c:2414
+   #2 _ostree_repo_write_directory_meta at src/libostree/ostree-repo-commit.c:2589
+   #3 _ostree_repo_write_directory_meta at src/libostree/ostree-repo-commit.c:2581
+   #4 write_dfd_iter_to_mtree_internal at src/libostree/ostree-repo-commit.c:3841
+   #5 ostree_repo_write_dfd_to_mtree at src/libostree/ostree-repo-commit.c:3972
+   #6 ostree_builtin_commit at src/ostree/ot-builtin-commit.c:736
+   #7 ostree_run at src/ostree/ot-main.c:319
+   #8 ostree_main at src/ostree/ot-main.c:155
+   #9 main at src/ostree/main.c:95
+
+
+
+After _ostree_repo_commit_tmpf_final executes, the file is moved to the temporary directory.
+
+
+.. code-block::
+
+   _ostree_repo_commit_tmpf_final
+       |
+       v
+       glnx_link_tmpfile_at
+           |
+           v
+           linkat()
+
+
+.. code-block::
+
+   1389    in src/libostree/ostree-repo-commit.c
+   (gdb) ! tree
+   .
+   ├── repo
+   │   ├── config
+   │   ├── extensions
+   │   ├── objects
+   │   ├── refs
+   │   │   ├── heads
+   │   │   ├── mirrors
+   │   │   └── remotes
+   │   ├── state
+   │   └── tmp
+   │       ├── cache
+   │       ├── staging-bc397e63-98be-4e0f-9e37-d512375fe7cf-QXtGGj
+   │       └── staging-bc397e63-98be-4e0f-9e37-d512375fe7cf-QXtGGj-lock
+   └── rootfs
+       ├── 1.txt
+       └── usr
+           └── 2.txt
+
+   14 directories, 4 files
+
+   (gdb) n
+   1392    in src/libostree/ostree-repo-commit.c
+   (gdb) ! tree
+   .
+   ├── repo
+   │   ├── config
+   │   ├── extensions
+   │   ├── objects
+   │   ├── refs
+   │   │   ├── heads
+   │   │   ├── mirrors
+   │   │   └── remotes
+   │   ├── state
+   │   └── tmp
+   │       ├── cache
+   │       ├── staging-bc397e63-98be-4e0f-9e37-d512375fe7cf-QXtGGj
+   │       │   └── 44
+   │       │       └── 6a0ef11b7cc167f3b603e585c7eeeeb675faa412d5ec73f62988eb0b6c5488.dirmeta
+   │       └── staging-bc397e63-98be-4e0f-9e37-d512375fe7cf-QXtGGj-lock
+   └── rootfs
+       ├── 1.txt
+       └── usr
+           └── 2.txt
+
+   15 directories, 5 files
+
+
+
+writing a content (regfile or symlink) object
+---------------------------------------------
+
+
+.. code-block::
+
+   (gdb) bt
+   #0  write_content_object at src/libostree/ostree-repo-commit.c:865
+   #1 write_content_to_mtree_internal at src/libostree/ostree-repo-commit.c:3671
+   #2 write_dfd_iter_to_mtree_internal at src/libostree/ostree-repo-commit.c:3899
+   #3 ostree_repo_write_dfd_to_mtree at src/libostree/ostree-repo-commit.c:3972
+   #4 ostree_builtin_commit at src/ostree/ot-builtin-commit.c:736
+   #5 ostree_run at src/ostree/ot-main.c:319
+   #6 ostree_main at src/ostree/ot-main.c:155
+   #7 main at src/ostree/main.c:95
+
+
+.. code-block::
+
+   (gdb) ! tree
+   .
+   ├── repo
+   │   ├── config
+   │   ├── extensions
+   │   ├── objects
+   │   ├── refs
+   │   │   ├── heads
+   │   │   ├── mirrors
+   │   │   └── remotes
+   │   ├── state
+   │   └── tmp
+   │       ├── cache
+   │       ├── staging-bc397e63-98be-4e0f-9e37-d512375fe7cf-yUluyP
+   │       │   ├── 44
+   │       │   │   └── 6a0ef11b7cc167f3b603e585c7eeeeb675faa412d5ec73f62988eb0b6c5488.dirmeta
+   │       │   └── 6c
+   │       │       └── 831d80a881b19956ee7142b13bf4f40b51010b9910f0d56b50c7370184db53.filez
+   │       └── staging-bc397e63-98be-4e0f-9e37-d512375fe7cf-yUluyP-lock
+   └── rootfs
+       ├── 1.txt
+       └── usr
+           └── 2.txt
+
+Synchronize the directories holding the objects
+-----------------------------------------------
+
+
+.. code-block::
+
+   (gdb) bt
+   #0 fsync_object_dirs at src/libostree/ostree-repo-commit.c:1698
+   #1 ostree_repo_commit_transaction at  src/libostree/ostree-repo-commit.c:2242
+   #2 ostree_builtin_commit at src/ostree/ot-builtin-commit.c:1004
+   #3 ostree_run at src/ostree/ot-main.c:319
+   #4 ostree_main at src/ostree/ot-main.c:155
+   #5 main at src/ostree/main.c:95
+
+
+**fsync_object_dirs** is responsible for moving the files from the **tmp** directory to
+
+**repo/objects**.
+
+
+
+
+.. code-block::
+
+   (gdb) ! tree
+   .
+   ├── repo
+   │   ├── config
+   │   ├── extensions
+   │   ├── objects
+   │   │   ├── 40
+   │   │   │   └── 3d95b798b0e96134398823c1a1250487494d2ab6bf8b88d2525e1cfee9c8ad.filez
+   │   │   ├── 44
+   │   │   │   └── 6a0ef11b7cc167f3b603e585c7eeeeb675faa412d5ec73f62988eb0b6c5488.dirmeta
+   │   │   ├── 53
+   │   │   │   └── 94163738a8738d0791e9f930dde52033ecadffcf703e5e8a9e6f09ef54a4d5.dirtree
+   │   │   ├── 6c
+   │   │   │   ├── 831d80a881b19956ee7142b13bf4f40b51010b9910f0d56b50c7370184db53.filez
+   │   │   │   └── 98ac5c696d590767a93807acf1324c9cd0c4fbb521430c64b6e7fc9719fd47.commit
+   │   │   └── ca
+   │   │       └── 9bd21e8c309356f27c64ccffbc6cdfd4cee7fb9dab428f08f5c44b7af5398b.dirtree
+   │   ├── refs
+   │   │   ├── heads
+   │   │   ├── mirrors
+   │   │   └── remotes
+   │   ├── state
+   │   └── tmp
+   │       ├── cache
+   │       ├── staging-bc397e63-98be-4e0f-9e37-d512375fe7cf-dAz1fq
+   │       │   ├── 40
+   │       │   ├── 44
+   │       │   ├── 53
+   │       │   ├── 6c
+   │       │   └── ca
+   │       └── staging-bc397e63-98be-4e0f-9e37-d512375fe7cf-dAz1fq-lock
+   └── rootfs
+       ├── 1.txt
+       └── usr
+           └── 2.txt
+
+   24 directories, 10 files
+
+
+Deallocate a tmpdir
+-------------------
+
+
+.. code-block::
+
+   (gdb) bt
+   #0 glnx_tmpdir_delete at libglnx/glnx-dirfd.c:426
+   #1 ostree_repo_commit_transaction at  src/libostree/ostree-repo-commit.c:2243
+   #2 ostree_builtin_commit at src/ostree/ot-builtin-commit.c:1004
+   #3 ostree_run at src/ostree/ot-main.c:319
+   #4 ostree_main at src/ostree/ot-main.c:155
+   #5 main at src/ostree/main.c:95
+
+
+
+.. code-block::
+
+   (gdb) ! tree
+   .
+   ├── repo
+   │   ├── config
+   │   ├── extensions
+   │   ├── objects
+   │   │   ├── 40
+   │   │   │   └── 3d95b798b0e96134398823c1a1250487494d2ab6bf8b88d2525e1cfee9c8ad.filez
+   │   │   ├── 44
+   │   │   │   └── 6a0ef11b7cc167f3b603e585c7eeeeb675faa412d5ec73f62988eb0b6c5488.dirmeta
+   │   │   ├── 53
+   │   │   │   └── 94163738a8738d0791e9f930dde52033ecadffcf703e5e8a9e6f09ef54a4d5.dirtree
+   │   │   ├── 6c
+   │   │   │   ├── 831d80a881b19956ee7142b13bf4f40b51010b9910f0d56b50c7370184db53.filez
+   │   │   │   └── 98ac5c696d590767a93807acf1324c9cd0c4fbb521430c64b6e7fc9719fd47.commit
+   │   │   └── ca
+   │   │       └── 9bd21e8c309356f27c64ccffbc6cdfd4cee7fb9dab428f08f5c44b7af5398b.dirtree
+   │   ├── refs
+   │   │   ├── heads
+   │   │   ├── mirrors
+   │   │   └── remotes
+   │   ├── state
+   │   └── tmp
+   │       ├── cache
+   │       └── staging-bc397e63-98be-4e0f-9e37-d512375fe7cf-dAz1fq-lock
+   └── rootfs
+       ├── 1.txt
+       └── usr
+           └── 2.txt
+
+   18 directories, 10 files
+
+tmpdir cleanup
+--------------
+
+**cleanup_tmpdir** would delete some older files like **tmp/staging-bc397e63-98be-4e0f-9e37-d512375fe7cf-dAz1fq-lock**
+
+.. code-block::
+
+   (gdb) bt
+   #0 cleanup_tmpdir at src/libostree/ostree-repo-commit.c:1855
+   #1 ostree_repo_commit_transaction at  src/libostree/ostree-repo-commit.c:2248
+   #2 ostree_builtin_commit at src/ostree/ot-builtin-commit.c:1004
+   #3 ostree_run at src/ostree/ot-main.c:319
+   #4 ostree_main at src/ostree/ot-main.c:155
+   #5 main at src/ostree/main.c:95
+
+
+
+.. code-block::
+
+   (gdb) !tree
+   .
+   ├── repo
+   │   ├── config
+   │   ├── extensions
+   │   ├── objects
+   │   │   ├── 40
+   │   │   │   └── 3d95b798b0e96134398823c1a1250487494d2ab6bf8b88d2525e1cfee9c8ad.filez
+   │   │   ├── 44
+   │   │   │   └── 6a0ef11b7cc167f3b603e585c7eeeeb675faa412d5ec73f62988eb0b6c5488.dirmeta
+   │   │   ├── 53
+   │   │   │   └── 94163738a8738d0791e9f930dde52033ecadffcf703e5e8a9e6f09ef54a4d5.dirtree
+   │   │   ├── 6c
+   │   │   │   ├── 831d80a881b19956ee7142b13bf4f40b51010b9910f0d56b50c7370184db53.filez
+   │   │   │   └── 98ac5c696d590767a93807acf1324c9cd0c4fbb521430c64b6e7fc9719fd47.commit
+   │   │   └── ca
+   │   │       └── 9bd21e8c309356f27c64ccffbc6cdfd4cee7fb9dab428f08f5c44b7af5398b.dirtree
+   │   ├── refs
+   │   │   ├── heads
+   │   │   ├── mirrors
+   │   │   └── remotes
+   │   ├── state
+   │   └── tmp
+   │       └── cache
+   └── rootfs
+       ├── 1.txt
+       └── usr
+           └── 2.txt
+
+   18 directories, 9 files
+
+
+
+Update refs
+-----------
+
+The **_ostree_repo_update_refs** is responsible for updating the refs.
+
+.. code-block::
+
+   (gdb) bt
+   #0 _ostree_repo_update_refs at src/libostree/ostree-repo-refs.c:1124
+   #1 ostree_repo_commit_transaction at  src/libostree/ostree-repo-commit.c:2255
+   #2 ostree_builtin_commit at src/ostree/ot-builtin-commit.c:1004
+   #3 ostree_run at src/ostree/ot-main.c:319
+   #4 ostree_main at src/ostree/ot-main.c:155
+   #5 main at src/ostree/main.c:95
+
+
+
+
+Example:
+
+.. code-block::
+
+   │   ├── refs
+   │   │   ├── heads
+   │   │   │   └── main
+   │   │   │       └── test
+   │   │   ├── mirrors
+   │   │   └── remotes

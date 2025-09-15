@@ -1,0 +1,31 @@
+========================================
+Remove a branch from your fork (remote)
+========================================
+
+
+If you just want to remove a branch from your fork (remote)
+
+1. Delete locally and remotely
+===============================
+
+Checkout to the target branch
+
+.. code-block:: bash 
+
+   hliu4@pek-lpd-susbld:linux$git checkout hliu4/dev_fips
+   Branch 'hliu4/dev_fips' set up to track remote branch 'hliu4/dev_fips' from 'origin'.
+   Switched to a new branch 'hliu4/dev_fips'
+   hliu4@pek-lpd-susbld:linux$git branch
+
+
+Remove the branch locally and remotely 
+
+.. code-block:: bash 
+
+   hliu4@pek-lpd-susbld:linux$git branch -D hliu4/dev_fips
+   Deleted branch hliu4/dev_fips (was 9a99ce61a3e7).
+   hliu4@pek-lpd-susbld:linux$git push origin --delete hliu4/dev_fips
+   To https://gitlab.com/haitailau/linux.git
+     - [deleted]                   hliu4/dev_fips
+   hliu4@pek-lpd-susbld:linux$
+

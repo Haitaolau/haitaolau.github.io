@@ -2,7 +2,11 @@
 typedef typename
 =======================
 
+.. contents:: Table of Contents
 
+
+typdef typename
+=================
 
 .. code-block:: c
 
@@ -11,3 +15,70 @@ typedef typename
 
 typedef 创建了类型别名: __type_traits<_Tp>::has_trivial_destructor 是类型,别名是 _Trivial_destructor 
 typename 告诉编译器__type_traits<_Tp>::has_trivial_destructor 是个类型不是一个成员
+
+
+
+
+typedef 
+===========
+
+Using typedef with predefined data types
+-----------------------------------------
+
+.. code-block::
+
+    // Giving the new name to
+    // predefined data type
+    typedef long long ulli;
+
+
+
+Using typedef with STL data structures
+--------------------------------------
+
+
+.. code-block::
+
+    // Give the new name to
+    // map<int, string>
+    typedef map<int, string> mp;
+
+
+Using typedef with arrays
+--------------------------
+
+.. code-block::
+
+    typedef int arr[3];
+
+    // Making new 1D array
+    arr array1{ 1 , 1, 1};
+
+Using typedef with data pointers
+--------------------------------
+
+
+.. code-block:: 
+
+    // typedef with pointers
+    typedef int* iPtr;
+
+    iPtr pointer_to_a = &a;
+
+Using typedef with function pointers
+-------------------------------------
+
+
+.. code-block::
+
+   // Normal pointer to a function
+   int (*func_ptr1)(int, int);
+   // Using typedef with pointer
+   // to a function
+   typedef int (*func_ptr2)(int, int);
+
+   // Function to multiply two numbers
+   int product(int u, int v) { return u * v; }
+
+
+

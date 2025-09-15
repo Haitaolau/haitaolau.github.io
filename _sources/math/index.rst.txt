@@ -1,0 +1,10 @@
+======
+Math
+======
+
+
+
+
+.. toctree::
+   
+   intermediate_value_theorem

@@ -1,0 +1,277 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>The difference between dracut and dracut-core &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="How to apply the patches from a package’s debian/patches directory" href="../0017.html" />
+    <link rel="prev" title="initramfs" href="index.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="the-difference-between-dracut-and-dracut-core">
+<h1>The difference between dracut and dracut-core<a class="headerlink" href="#the-difference-between-dracut-and-dracut-core" title="Permalink to this heading">¶</a></h1>
+<section id="content-of-dracut-core">
+<h2>Content of dracut-core<a class="headerlink" href="#content-of-dracut-core" title="Permalink to this heading">¶</a></h2>
+<p><strong>dracut-core</strong> is the foundational package of the dracut system. It provides</p>
+<p>the complete dracut framework including: the core executable, all standard modules,</p>
+<p>systemd integration units, manual pages, kernel installation hooks (install.d scripts),</p>
+<p>configuration files from /etc/dracut.conf.d/, and the primary dracut command-line interface.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>hliu4@pek-lpd-susbld:workspace$dpkg-deb -c dracut-core_106-5i+elxrpro+fips_amd64.deb
+drwxr-xr-x root/root         0 2025-07-07 22:24 ./
+drwxr-xr-x root/root         0 2025-07-07 22:24 ./etc/
+-rw-r--r-- root/root       117 2025-07-07 22:24 ./etc/dracut.conf
+drwxr-xr-x root/root         0 2025-07-07 22:24 ./etc/dracut.conf.d/
+drwxr-xr-x root/root         0 2025-07-07 22:24 ./etc/logrotate.d/
+-rw-r--r-- root/root        82 2025-07-07 22:24 ./etc/logrotate.d/dracut-core
+drwxr-xr-x root/root         0 2025-07-07 22:24 ./lib/
+drwxr-xr-x root/root         0 2025-07-07 22:24 ./lib/systemd/
+drwxr-xr-x root/root         0 2025-07-07 22:24 ./lib/systemd/system/
+drwxr-xr-x root/root         0 2025-07-07 22:24 ./lib/systemd/system/initrd.target.wants/
+drwxr-xr-x root/root         0 2025-07-07 22:24 ./lib/systemd/system/sysinit.target.wants/
+drwxr-xr-x root/root         0 2025-07-07 22:24 ./usr/
+drwxr-xr-x root/root         0 2025-07-07 22:24 ./usr/bin/
+-rwxr-xr-x root/root     98106 2025-07-07 22:24 ./usr/bin/dracut
+-rwxr-xr-x root/root      3650 2025-07-07 22:24 ./usr/bin/dracut-catimages
+-rwxr-xr-x root/root     16206 2025-07-07 22:24 ./usr/bin/lsinitrd
+drwxr-xr-x root/root         0 2025-07-07 22:24 ./usr/lib/
+drwxr-xr-x root/root         0 2025-07-07 22:24 ./usr/lib/dracut/
+-rwxr-xr-x root/root     31412 2025-07-07 22:24 ./usr/lib/dracut/dracut-functions.sh
+-rwxr-xr-x root/root     34901 2025-07-07 22:24 ./usr/lib/dracut/dracut-init.sh
+-rwxr-xr-x root/root      4060 2025-07-07 22:24 ./usr/lib/dracut/dracut-initramfs-restore
+-rwxr-xr-x root/root     13844 2025-07-07 22:24 ./usr/lib/dracut/dracut-logger.sh
+-rwxr-xr-x root/root     14576 2025-07-07 22:24 ./usr/lib/dracut/dracut-util
+-rwxr-xr-x root/root        45 2025-07-07 22:24 ./usr/lib/dracut/dracut-version.sh
+drwxr-xr-x root/root         0 2025-07-07 22:24 ./usr/lib/dracut/dracut.conf.d/
+drwxr-xr-x root/root         0 2025-07-07 22:24 ./usr/lib/dracut/dracut.conf.d/fips/
+-rw-r--r-- root/root        50 2025-07-07 22:24 ./usr/lib/dracut/dracut.conf.d/fips/50-fips.conf
+....
+....
+....
+
+lrwxrwxrwx root/root         0 2025-07-07 22:24 ./lib/systemd/system/initrd.target.wants/dracut-mount.service -&gt; ../dracut-mount.service
+lrwxrwxrwx root/root         0 2025-07-07 22:24 ./lib/systemd/system/initrd.target.wants/dracut-pre-mount.service -&gt; ../dracut-pre-mount.service
+lrwxrwxrwx root/root         0 2025-07-07 22:24 ./lib/systemd/system/initrd.target.wants/dracut-pre-pivot.service -&gt; ../dracut-pre-pivot.service
+lrwxrwxrwx root/root         0 2025-07-07 22:24 ./lib/systemd/system/initrd.target.wants/dracut-pre-trigger.service -&gt; ../dracut-pre-trigger.service
+lrwxrwxrwx root/root         0 2025-07-07 22:24 ./lib/systemd/system/initrd.target.wants/dracut-pre-udev.service -&gt; ../dracut-pre-udev.service
+lrwxrwxrwx root/root         0 2025-07-07 22:24 ./lib/systemd/system/sysinit.target.wants/dracut-shutdown.service -&gt; ../dracut-shutdown.service
+lrwxrwxrwx root/root         0 2025-07-07 22:24 ./usr/lib/dracut/dracut-functions -&gt; dracut-functions.sh
+</pre></div>
+</div>
+</section>
+<section id="content-of-dracut">
+<h2>Content of dracut<a class="headerlink" href="#content-of-dracut" title="Permalink to this heading">¶</a></h2>
+<p>The <strong>dracut</strong> package primarily includes kernel integration hooks (/etc/kernel/postinst.d/dracut</p>
+<p>and /etc/kernel/postrm.d/dracut) along with package documentation (changelog and copyright files).</p>
+<p>Unlike dracut-core, it doesn’t contain the core framework or modules.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>hliu4@pek-lpd-susbld:workspace$dpkg-deb -c dracut_106-5i+elxrpro+fips_all.deb
+drwxr-xr-x root/root         0 2025-07-07 22:24 ./
+drwxr-xr-x root/root         0 2025-07-07 22:24 ./etc/
+drwxr-xr-x root/root         0 2025-07-07 22:24 ./etc/kernel/
+drwxr-xr-x root/root         0 2025-07-07 22:24 ./etc/kernel/postinst.d/
+-rwxr-xr-x root/root       989 2025-07-07 22:24 ./etc/kernel/postinst.d/dracut
+drwxr-xr-x root/root         0 2025-07-07 22:24 ./etc/kernel/postrm.d/
+-rwxr-xr-x root/root       500 2025-07-07 22:24 ./etc/kernel/postrm.d/dracut
+drwxr-xr-x root/root         0 2025-07-07 22:24 ./usr/
+drwxr-xr-x root/root         0 2025-07-07 22:24 ./usr/share/
+drwxr-xr-x root/root         0 2025-07-07 22:24 ./usr/share/doc/
+drwxr-xr-x root/root         0 2025-07-07 22:24 ./usr/share/doc/dracut/
+-rw-r--r-- root/root       440 2025-07-07 22:24 ./usr/share/doc/dracut/NEWS.Debian.gz
+-rw-r--r-- root/root      4816 2025-07-07 22:24 ./usr/share/doc/dracut/changelog.Debian.gz
+-rw-r--r-- root/root      3871 2025-07-07 22:24 ./usr/share/doc/dracut/copyright
+</pre></div>
+</div>
+<p>When installing the dracut package, dracut-core is installed first as a dependency. This dependency</p>
+<p>relationship can be verified by examining the package metadata:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ dpkg -I dracut_106-5i+elxrpro+fips_all.deb <span class="p">|</span> grep Depends
+  Depends: dracut-core <span class="o">(</span><span class="s">&lt;&lt; 106-5i+elxrpro+fips+b+~),</span>
+<span class="s">      dracut-core (&gt;= 106</span>-5i+elxrpro+fips<span class="o">)</span>,
+      linux-base
+</pre></div>
+</div>
+<p>According to debian/dracut-core.README.Debian, you can use dracut functionality without removing</p>
+<p>initramfs-tools by installing only the dracut-core package on Debian or Ubuntu systems.</p>
+</section>
+<section id="dracut-for-debian">
+<h2>Dracut for Debian<a class="headerlink" href="#dracut-for-debian" title="Permalink to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p>Give it a try</p></li>
+</ol>
+<p>Currently dracut is not the default initrd creation tool in Debian.
+You can try dracut without removing initramfs-tools from your machine
+by following these steps:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># apt-get --no-install-recommends install dracut-core</span>
+
+<span class="n">cd</span> <span class="o">/</span><span class="n">boot</span>
+<span class="n">cp</span> <span class="o">-</span><span class="n">p</span> <span class="n">vmlinuz</span><span class="o">-</span><span class="mf">4.0.9</span><span class="o">-</span><span class="mi">6</span><span class="o">-</span><span class="n">amd64</span> <span class="n">vmlinuz</span><span class="o">-</span><span class="mf">4.0.9</span><span class="o">-</span><span class="mi">6</span><span class="o">-</span><span class="n">amd64</span><span class="o">~</span><span class="n">dracut</span>
+<span class="n">dracut</span> <span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">initrd</span><span class="o">.</span><span class="n">img</span><span class="o">-</span><span class="mf">4.0.9</span><span class="o">-</span><span class="mi">6</span><span class="o">-</span><span class="n">amd64</span><span class="o">~</span><span class="n">dracut</span>
+<span class="n">update</span><span class="o">-</span><span class="n">grub</span>
+</pre></div>
+</div>
+<p>You will get a new grub menu entry under advanced boot options, which you can boot then</p>
+<p>Select: Advanced options for Debian GNU/Linux
+Then: Debian GNU/Linux, with Linux 4.0.9-6-amd64~dracut</p>
+<p>The initrd created by initramfs-tools will remain the default boot entry of grub.</p>
+<p>If the new initrd works for you, you can switch from initramfs-tools to dracut
+by installing the package dracut. This will then replace initramfs-tools.</p>
+<ol class="arabic simple" start="2">
+<li><p>Check the content of the dracut initrd</p></li>
+</ol>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lsinitrd</span> <span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">initrd</span><span class="o">.</span><span class="n">img</span><span class="o">-</span><span class="mf">4.0.9</span><span class="o">-</span><span class="mi">6</span><span class="o">-</span><span class="n">amd64</span><span class="o">~</span><span class="n">dracut</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../links.html">Links</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cplus/index.html">Cplus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Debian</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../0014.html">Debian Useful Resources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../0005.html">Launch up Debian VM with Qemu</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../debian-installer/index.html">Debian Installer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../debian-command/index.html">Debian command</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../live-cd/index.html">Debian Live CD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../elxr_edge/index.html">eLxr Edge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../os-tree/index.html">OS tree</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../0001.html">Ruck: build pablo with minimal ostree rootfs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../0002.html">How to build deb package for libxfce4ui</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../0003.html">How to Search for Debian package?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../0004.html">How to Check Debian package version?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../0006.html">How to download deb packages using apt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../0007.html">E: You must put some ‘source’ URIs in your sources.list</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../0008.html">How can I specify the repository from which a package will be installed?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../0009.html">How to install build dependencies for packages ?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../0010.html">Create orig tarballs from git</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../0011.html">Debian: Building the package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pipeline/index.html">Debian Pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../0012.html">Build and Test STIG</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../0013.html">Change the mirror for elxr docker image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../0015.html">build an ARM64 Debian package on an AMD64 server using sbuild</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../0016.html">Build a Debian package directly from a Git repository</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">initramfs</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">The difference between dracut and dracut-core</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../0017.html">How to apply the patches from a package’s debian/patches directory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../0018.html">steps to build unsigned eLxr kernel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../0019.html">Steps to build signed eLxr kernel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../0020.html">Remove a branch from your fork (remote)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../0021.html">git: update your fork project (kernel)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../licence/index.html">OpenSource License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bochs/index.html">Bochs IA-32 Emulator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../system/index.html">System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../unix/index.html">UNIX</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../math/index.html">Math</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../todo.html">To Do</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Debian</a><ul>
+  <li><a href="index.html">initramfs</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">initramfs</a></li>
+      <li>Next: <a href="../0017.html" title="next chapter">How to apply the patches from a package’s debian/patches directory</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../../_sources/debian/initramfs/0001.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,360 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Inheritance Access &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="References (or Aliases)" href="references.html" />
+    <link rel="prev" title="Access Modifiers" href="access_modifiers.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="inheritance-access">
+<h1><a class="toc-backref" href="#id1" role="doc-backlink">Inheritance Access</a><a class="headerlink" href="#inheritance-access" title="Permalink to this heading">¶</a></h1>
+<nav class="contents" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#inheritance-access" id="id1">Inheritance Access</a></p>
+<ul>
+<li><p><a class="reference internal" href="#public-inheritance" id="id2">public Inheritance</a></p></li>
+<li><p><a class="reference internal" href="#protected-inheritance" id="id3">Protected Inheritance</a></p></li>
+<li><p><a class="reference internal" href="#private-inheritance" id="id4">Private Inheritance</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<p>public, protected, and private inheritance have the following features:</p>
+<ul class="simple">
+<li><p><strong>public inheritance</strong>  makes public members of the base class public in the derived class, and the protected members of the base class remain protected in the derived class.</p></li>
+<li><p><strong>protected inheritance</strong> makes the public and protected members of the base class protected in the derived class.</p></li>
+<li><p><strong>private inheritance</strong> makes the public and protected members of the base class private in the derived class.</p></li>
+</ul>
+<img alt="../_images/inherance_access.jpg" src="../_images/inherance_access.jpg" />
+<section id="public-inheritance">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">public Inheritance</a><a class="headerlink" href="#public-inheritance" title="Permalink to this heading">¶</a></h2>
+<p>Public Visibility mode: If we derive a subclass from a public base class. Then the public member of the</p>
+<p>base class will become public in the derived class and protected members of the base class will become protected in the derived class.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;bits/stdc++.h&gt;</span><span class="cp"></span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">std</span><span class="p">;</span><span class="w"></span>
+<span class="k">class</span><span class="w"> </span><span class="nc">A</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">;</span><span class="w"></span>
+<span class="k">protected</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">y</span><span class="p">;</span><span class="w"></span>
+<span class="k">private</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">z</span><span class="p">;</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">B</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">B</span><span class="w"> </span><span class="n">b</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="c1">// x is public and it will remain public</span>
+<span class="w">    </span><span class="c1">// so its value will be printed</span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="c1">// y is protected and it will remain protected</span>
+<span class="w">    </span><span class="c1">// so it will give visibility error</span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="c1">// z is not accessible from B as</span>
+<span class="w">    </span><span class="c1">// z is private and it will remain private</span>
+<span class="w">    </span><span class="c1">// so it will give visibility error</span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">z</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>inherrace_access1.cpp: In function ‘int main()’:
+inherrace_access1.cpp:37:15: error: ‘int A::y’ is protected within this context
+   37 |     cout &lt;&lt; b.y &lt;&lt; endl;
+      |               ^
+inherrace_access1.cpp:14:9: note: declared protected here
+   14 |     int y;
+      |         ^
+inherrace_access1.cpp:42:15: error: ‘int A::z’ is private within this context
+   42 |     cout &lt;&lt; b.z &lt;&lt; endl;
+      |               ^
+inherrace_access1.cpp:17:9: note: declared private here
+   17 |     int z;
+      |         ^
+</pre></div>
+</div>
+</section>
+<section id="protected-inheritance">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">Protected Inheritance</a><a class="headerlink" href="#protected-inheritance" title="Permalink to this heading">¶</a></h2>
+<p>Protected Visibility mode: If we derive a subclass from a Protected base class. Then both public member</p>
+<p>and protected members of the base class will become protected in the derived class.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">B</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">protected</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+</pre></div>
+</div>
+<p>output:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">  inherrace_access1.cpp: In function ‘int main()’:</span>
+<span class="go">  inherrace_access1.cpp:33:15: error: ‘int A::x’ is inaccessible within this context</span>
+<span class="go">     33 |     cout &lt;&lt; b.x &lt;&lt; endl;</span>
+<span class="go">        |               ^</span>
+<span class="go">  inherrace_access1.cpp:11:9: note: declared here</span>
+<span class="go">     11 |     int x;</span>
+<span class="go">        |         ^</span>
+<span class="go">  inherrace_access1.cpp:37:15: error: ‘int A::y’ is protected within this context</span>
+<span class="go">     37 |     cout &lt;&lt; b.y &lt;&lt; endl;</span>
+<span class="go">        |               ^</span>
+<span class="go">  inherrace_access1.cpp:14:9: note: declared protected here</span>
+<span class="go">     14 |     int y;</span>
+<span class="go">        |         ^</span>
+<span class="go">  inherrace_access1.cpp:42:15: error: ‘int A::z’ is private within this context</span>
+<span class="go">     42 |     cout &lt;&lt; b.z &lt;&lt; endl;</span>
+<span class="go">        |               ^</span>
+<span class="go">  inherrace_access1.cpp:17:9: note: declared private here</span>
+<span class="go">     17 |     int z;</span>
+<span class="go">        |         ^</span>
+
+
+<span class="go">We know that protected members can only be accessed from the Derived class. These members cannot be</span>
+
+<span class="go">directly accessed from outside the class. So we cannot use **b.x** to access this member.</span>
+</pre></div>
+</div>
+<p>However, we could define a function to  access it.</p>
+<blockquote>
+<div><div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="w"> </span><span class="c1">// Derived class</span>
+<span class="c1">// Class B will inherit Class A</span>
+<span class="c1">// using Public Visibility mode</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">B</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">protected</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">                </span><span class="kt">int</span><span class="w"> </span><span class="n">getX</span><span class="p">(){</span><span class="k">return</span><span class="w"> </span><span class="n">x</span><span class="p">;}</span><span class="w"></span>
+<span class="w">                </span><span class="kt">int</span><span class="w"> </span><span class="n">getY</span><span class="p">(){</span><span class="k">return</span><span class="w"> </span><span class="n">y</span><span class="p">;}</span><span class="w"></span>
+
+<span class="p">};</span><span class="w"></span>
+</pre></div>
+</div>
+</div></blockquote>
+</section>
+<section id="private-inheritance">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">Private Inheritance</a><a class="headerlink" href="#private-inheritance" title="Permalink to this heading">¶</a></h2>
+<p><strong>Private Visibility mode</strong>: If we derive a subclass from a Private base class. Then both public</p>
+<p>member and protected members of the base class will become Private in the derived class.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">B</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">private</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">inherrace_access1.cpp: In function ‘int main()’:</span>
+<span class="go">inherrace_access1.cpp:35:15: error: ‘int A::x’ is inaccessible within this context</span>
+<span class="go">   35 |     cout &lt;&lt; b.x &lt;&lt; endl;</span>
+<span class="go">      |               ^</span>
+<span class="go">inherrace_access1.cpp:11:9: note: declared here</span>
+<span class="go">   11 |     int x;</span>
+<span class="go">      |         ^</span>
+<span class="go">inherrace_access1.cpp:36:19: error: ‘int A::y’ is protected within this context</span>
+<span class="go">   36 |         cout &lt;&lt; b.y &lt;&lt; endl;</span>
+<span class="go">      |                   ^</span>
+<span class="go">inherrace_access1.cpp:14:9: note: declared protected here</span>
+<span class="go">   14 |     int y;</span>
+<span class="go">      |         ^</span>
+<span class="go">inherrace_access1.cpp:37:19: error: ‘int A::z’ is private within this context</span>
+<span class="go">   37 |         cout &lt;&lt; b.z &lt;&lt; endl;</span>
+<span class="go">      |                   ^</span>
+<span class="go">inherrace_access1.cpp:17:9: note: declared private here</span>
+<span class="go">   17 |     int z;</span>
+<span class="go">      |         ^</span>
+</pre></div>
+</div>
+<p>We know that private members cannot be accessed from the Derived class. These members</p>
+<p>cannot be directly accessed from outside the class.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;bits/stdc++.h&gt;</span><span class="cp"></span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">std</span><span class="p">;</span><span class="w"></span>
+
+<span class="c1">// Base class</span>
+<span class="c1">// Class A will be inherited</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">A</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="k">protected</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">y</span><span class="p">;</span><span class="w"></span>
+
+<span class="k">private</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">z</span><span class="p">;</span><span class="w"></span>
+<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="nf">getZ</span><span class="p">(){</span><span class="k">return</span><span class="w"> </span><span class="n">z</span><span class="p">;}</span><span class="w"></span>
+
+
+<span class="p">};</span><span class="w"></span>
+
+<span class="c1">// Derived class</span>
+<span class="c1">// Class B will inherit Class A</span>
+<span class="c1">// using Public Visibility mode</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">B</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">private</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">                </span><span class="kt">int</span><span class="w"> </span><span class="n">getX</span><span class="p">(){</span><span class="k">return</span><span class="w"> </span><span class="n">x</span><span class="p">;}</span><span class="w"></span>
+<span class="w">                </span><span class="kt">int</span><span class="w"> </span><span class="n">getY</span><span class="p">(){</span><span class="k">return</span><span class="w"> </span><span class="n">y</span><span class="p">;}</span><span class="w"></span>
+<span class="w">                </span><span class="kt">int</span><span class="w"> </span><span class="n">getZ</span><span class="p">(){</span><span class="k">return</span><span class="w"> </span><span class="n">A</span><span class="o">::</span><span class="n">getZ</span><span class="p">();}</span><span class="w"></span>
+
+<span class="p">};</span><span class="w"></span>
+
+<span class="c1">// main function</span>
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">B</span><span class="w"> </span><span class="n">b</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">getX</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">getY</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">getZ</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+
+<span class="p">};</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../links.html">Links</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Cplus</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="libstdc%2B%2B_2_9_1/index.html">Libstd c++ 2.9.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Operator_overloading/index.html">C++ Operator overloading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="access_modifiers.html">Access Modifiers</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Inheritance Access</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#public-inheritance">public Inheritance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#protected-inheritance">Protected Inheritance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#private-inheritance">Private Inheritance</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="references.html">References (or Aliases)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="const.html">const</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functemplate.html">Function template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="passarguments.html">Pass arguments to function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="friend.html">Friend class and function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="abstract.html">Abstract Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="copyconstructor.html">Copy constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="const_function.html">Const member functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rvalue.html">Cplus Rvalue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lvalue_and_rvalue.html">lvalue &amp;&amp; rvalue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="placement_new.html">Placement new operator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="template/index.html">Template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cast/index.html">C++ Cast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="decltype.html">Decltype</a></li>
+<li class="toctree-l2"><a class="reference internal" href="explicit_implicit.html">Explicit and Implicit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="constructor.html">Types of Constructors in C++</a></li>
+<li class="toctree-l2"><a class="reference internal" href="typedef_typename.html">typedef typename</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pointer_size.html">Size of Pointers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inline_function.html">Inline Function</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licence/index.html">OpenSource License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bochs/index.html">Bochs IA-32 Emulator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../system/index.html">System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../unix/index.html">UNIX</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../math/index.html">Math</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../todo.html">To Do</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Cplus</a><ul>
+      <li>Previous: <a href="access_modifiers.html" title="previous chapter">Access Modifiers</a></li>
+      <li>Next: <a href="references.html" title="next chapter">References (or Aliases)</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/cplus/inheritance_access.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,82 @@
+====================================================================
+ How to apply the patches from a package’s debian/patches directory
+====================================================================
+
+
+
+If you want to manually apply the patches from a package’s debian/patches directory,
+
+you can use either quilt or dpkg-source, depending on whether you want to apply them
+
+one-by-one for development or all at once for a build.
+
+
+1. Using quilt
+==============
+
+
+quilt is designed for applying, editing, and unapplying patches interactively.
+
+Steps
+-----
+
+    1. Install quilt (if not already installed):
+
+
+       .. code-block:: bash
+
+          sudo apt install quilt
+
+    2. Enter the source directory:
+
+
+       .. code-block:: bash
+
+          cd path/to/package-source
+
+    3. Ensure quilt knows where patches are
+
+       In Debian source packages, debian/patches/series lists the patch order. You can tell quilt:
+
+       .. code-block:: bash
+
+          export QUILT_PATCHES=debian/patches
+
+    4. Apply all patches:
+
+       .. code-block:: bash
+
+          quilt push -a
+
+2. Using dpkg-source
+====================
+
+
+If you have a Debian source package (.dsc + .orig.tar.* + .debian.tar.*), dpkg-source can unpack and apply patches automatically.
+
+2.1 Steps
+---------
+
+    1. Extract with patches applied:
+
+       .. code-block:: bash
+
+          dpkg-source -x package.dsc
+
+       This will automatically apply all patches from debian/patches/series using quilt.
+
+    2. Re-apply patches after unapplying:
+
+       .. code-block:: bash
+
+          dpkg-source --before-build .
+
+       This runs quilt behind the scenes to apply all patches.
+
+    3. Unapply all patches:
+
+       .. code-block:: bash
+
+          dpkg-source --after-build .
+
+       This pops all applied patches (restores the pristine state).
