@@ -1,5 +1,5 @@
 ====================================
-Steps to build signed eLxr kernel
+Steps to build signed kernel
 ====================================
 
 
@@ -21,7 +21,7 @@ Steps to build signed eLxr kernel
 .. code-block:: bash 
 
    /usr/src/kernel-team/scripts/debian-test-sign \
-           /usr/src/linux_6.1.140-elxr1-1+exlrpro+fips_amd64.changes  \
+           /usr/src/linux_6.1.140-1-1+exlrpro+fips_amd64.changes  \
            debian/certs/ci-test-sign/ci-test-sign-key.pem \
            debian/certs/ci-test-sign/ci-test-sign.pem
 
@@ -31,7 +31,7 @@ Steps to build signed eLxr kernel
 
    BUILD_ARCH=amd64
 
-   dpkg-source -x /usr/src/linux-signed-amd64_6.1.140+elxr1+1+exlrpro+fips.dsc
+   dpkg-source -x /usr/src/linux-signed-amd64_6.1.140+1+1+exlrpro+fips.dsc
 
    apt-get install --no-install-recommends -y \
    ${WORKING_DIR}/linux-image-*-unsigned_*_${BUILD_ARCH}.deb \
@@ -42,7 +42,7 @@ Steps to build signed eLxr kernel
 
 .. code-block:: bash 
 
-   cd linux-signed-amd64-6.1.140+elxr1+1+exlrpro+fips/
+   cd linux-signed-amd64-6.1.140+1+1+exlrpro+fips/
 
    apt build-dep --no-install-recommends -y .
 

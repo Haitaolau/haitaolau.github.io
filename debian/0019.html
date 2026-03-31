@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Steps to build signed eLxr kernel &#8212; GDocs 0.1 documentation</title>
+    <title>Steps to build signed kernel &#8212; GDocs 0.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
@@ -18,7 +18,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Remove a branch from your fork (remote)" href="0020.html" />
-    <link rel="prev" title="steps to build unsigned eLxr kernel" href="0018.html" />
+    <link rel="prev" title="steps to build unsigned kernel" href="0018.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -36,8 +36,8 @@
 
           <div class="body" role="main">
             
-  <section id="steps-to-build-signed-elxr-kernel">
-<h1>Steps to build signed eLxr kernel<a class="headerlink" href="#steps-to-build-signed-elxr-kernel" title="Permalink to this heading">¶</a></h1>
+  <section id="steps-to-build-signed-kernel">
+<h1>Steps to build signed kernel<a class="headerlink" href="#steps-to-build-signed-kernel" title="Permalink to this heading">¶</a></h1>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">BUILD_ARCH</span><span class="o">=</span>amd64
 apt-get install --no-install-recommends -y dpkg-dev git openssl python3 python3-debian sbsigntool
 apt-get install --no-install-recommends -y <span class="si">${</span><span class="nv">WORKING_DIR</span><span class="si">}</span>/linux-kbuild-*<span class="o">[</span><span class="m">0</span>-9<span class="o">]</span>_*_<span class="si">${</span><span class="nv">BUILD_ARCH</span><span class="si">}</span>.deb
@@ -47,14 +47,14 @@ apt-get install --no-install-recommends -y <span class="si">${</span><span class
 </pre></div>
 </div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>/usr/src/kernel-team/scripts/debian-test-sign <span class="se">\</span>
-        /usr/src/linux_6.1.140-elxr1-1+exlrpro+fips_amd64.changes  <span class="se">\</span>
+        /usr/src/linux_6.1.140-1-1+exlrpro+fips_amd64.changes  <span class="se">\</span>
         debian/certs/ci-test-sign/ci-test-sign-key.pem <span class="se">\</span>
         debian/certs/ci-test-sign/ci-test-sign.pem
 </pre></div>
 </div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">BUILD_ARCH</span><span class="o">=</span>amd64
 
-dpkg-source -x /usr/src/linux-signed-amd64_6.1.140+elxr1+1+exlrpro+fips.dsc
+dpkg-source -x /usr/src/linux-signed-amd64_6.1.140+1+1+exlrpro+fips.dsc
 
 apt-get install --no-install-recommends -y <span class="se">\</span>
 <span class="si">${</span><span class="nv">WORKING_DIR</span><span class="si">}</span>/linux-image-*-unsigned_*_<span class="si">${</span><span class="nv">BUILD_ARCH</span><span class="si">}</span>.deb <span class="se">\</span>
@@ -62,7 +62,7 @@ apt-get install --no-install-recommends -y <span class="se">\</span>
 <span class="si">${</span><span class="nv">WORKING_DIR</span><span class="si">}</span>/linux-support-*_all.deb
 </pre></div>
 </div>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> linux-signed-amd64-6.1.140+elxr1+1+exlrpro+fips/
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> linux-signed-amd64-6.1.140+1+1+exlrpro+fips/
 
 apt build-dep --no-install-recommends -y .
 </pre></div>
@@ -105,28 +105,19 @@ apt build-dep --no-install-recommends -y .
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Debian</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="0014.html">Debian Useful Resources</a></li>
 <li class="toctree-l2"><a class="reference internal" href="0005.html">Launch up Debian VM with Qemu</a></li>
-<li class="toctree-l2"><a class="reference internal" href="debian-installer/index.html">Debian Installer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="debian-command/index.html">Debian command</a></li>
-<li class="toctree-l2"><a class="reference internal" href="live-cd/index.html">Debian Live CD</a></li>
-<li class="toctree-l2"><a class="reference internal" href="0001.html">Ruck: build pablo with minimal ostree rootfs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="0002.html">How to build deb package for libxfce4ui</a></li>
 <li class="toctree-l2"><a class="reference internal" href="0003.html">How to Search for Debian package?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="0004.html">How to Check Debian package version?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="0006.html">How to download deb packages using apt</a></li>
 <li class="toctree-l2"><a class="reference internal" href="0007.html">E: You must put some ‘source’ URIs in your sources.list</a></li>
-<li class="toctree-l2"><a class="reference internal" href="0008.html">How can I specify the repository from which a package will be installed?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="0009.html">How to install build dependencies for packages ?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="0010.html">Create orig tarballs from git</a></li>
 <li class="toctree-l2"><a class="reference internal" href="0011.html">Debian: Building the package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pipeline/index.html">Debian Pipeline</a></li>
-<li class="toctree-l2"><a class="reference internal" href="0012.html">Build and Test STIG</a></li>
-<li class="toctree-l2"><a class="reference internal" href="0013.html">Change the mirror for elxr docker image</a></li>
 <li class="toctree-l2"><a class="reference internal" href="0015.html">build an ARM64 Debian package on an AMD64 server using sbuild</a></li>
 <li class="toctree-l2"><a class="reference internal" href="0016.html">Build a Debian package directly from a Git repository</a></li>
-<li class="toctree-l2"><a class="reference internal" href="initramfs/index.html">initramfs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="0017.html">How to apply the patches from a package’s debian/patches directory</a></li>
-<li class="toctree-l2"><a class="reference internal" href="0018.html">steps to build unsigned eLxr kernel</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Steps to build signed eLxr kernel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0018.html">steps to build unsigned kernel</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Steps to build signed kernel</a></li>
 <li class="toctree-l2"><a class="reference internal" href="0020.html">Remove a branch from your fork (remote)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="0021.html">git: update your fork project (kernel)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="0022.html">To remove the stale remote tracking branch</a></li>
@@ -147,7 +138,7 @@ apt build-dep --no-install-recommends -y .
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
   <li><a href="index.html">Debian</a><ul>
-      <li>Previous: <a href="0018.html" title="previous chapter">steps to build unsigned eLxr kernel</a></li>
+      <li>Previous: <a href="0018.html" title="previous chapter">steps to build unsigned kernel</a></li>
       <li>Next: <a href="0020.html" title="next chapter">Remove a branch from your fork (remote)</a></li>
   </ul></li>
   </ul></li>

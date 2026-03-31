@@ -29,7 +29,7 @@ The result:
 
 .. code-block:: bash 
 
-   wrsadmin@pek-hliu4-d2:~/workspace/dist2elxr$ git branch -r
+   wrsadmin@pek-hliu4-d2:~/workspace/dist2$ git branch -r
    origin/HEAD -> origin/main
    origin/aria
    origin/hliu4/aria
@@ -39,11 +39,11 @@ The result:
    upstream/aria
    upstream/main
    upstream/wentao-dev
-   wrsadmin@pek-hliu4-d2:~/workspace/dist2elxr$ git remote prune origin
+   wrsadmin@pek-hliu4-d2:~/workspace/dist2$ git remote prune origin
    Pruning origin
-   URL: https://gitlab.com/haitailau/dist2elxr.git
+   URL: https://gitlab.com/haitailau/dist2.git
    * [pruned] origin/hliu4/dev
-   wrsadmin@pek-hliu4-d2:~/workspace/dist2elxr$ git branch -r
+   wrsadmin@pek-hliu4-d2:~/workspace/dist2$ git branch -r
    origin/HEAD -> origin/main
    origin/aria
    origin/hliu4/aria
@@ -52,5 +52,5 @@ The result:
    upstream/aria
    upstream/main
    upstream/wentao-dev
-   wrsadmin@pek-hliu4-d2:~/workspace/dist2elxr$ 
+   wrsadmin@pek-hliu4-d2:~/workspace/dist2$ 
 

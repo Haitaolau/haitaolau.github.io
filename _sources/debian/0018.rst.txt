@@ -1,5 +1,5 @@
 ====================================
-steps to build unsigned eLxr kernel
+steps to build unsigned kernel
 ====================================
 
 .. contents:: Tables of Content
@@ -22,7 +22,7 @@ Build container
            -v /sys:/sys      \
            -v /var/tmp:/var/tmp \
            --name "kernel-`date +%+4Y-%m-%d-%k-%M-%S`" \
-           registry.gitlab.com/elxr/ci/pipeline/base:bookworm
+           registry.gitlab.com//ci/pipeline/base:bookworm
 
 
 Prepare the compilation environment
@@ -31,7 +31,7 @@ Prepare the compilation environment
 
 .. code-block:: bash
 
-   echo "deb [trusted=yes] https://mirror.elxr.dev/elxr aria  main" >> /etc/apt/sources.list.d/0000elxr.list
+   echo "deb [trusted=yes] https://mirror..dev/ aria  main" >> /etc/apt/sources.list.d/0000.list
    echo "deb-src http://deb.debian.org/debian bookworm main" >> /etc/apt/sources.list.d/bookworm-src.list
 
    apt update
@@ -48,7 +48,7 @@ Clone the kernel source
 
 .. code-block:: bash
 
-   git clone https://gitlab.com/elxrpro/Kernel/linux.git
+   git clone https://gitlab.com/pro/Kernel/linux.git
 
 
 
@@ -86,7 +86,7 @@ or using tar tools
 
 .. code-block:: bash 
 
-   tar --exclude=.git --exclude=debian/build -czf ../linux_6.1.140-elxr1.orig.tar.gz .
+   tar --exclude=.git --exclude=debian/build -czf ../linux_6.1.140-1.orig.tar.gz .
 
 (optional)Apply the patches from debian/patches
 =================================================

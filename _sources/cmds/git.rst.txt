@@ -51,6 +51,6 @@ Example:
 
 .. code-block::
 
-   hliu4@pek-lpd-susbld:elxr-config$git log --oneline --left-right hliu4/dev...main
+   hliu4@pek-lpd-susbld:-config$git log --oneline --left-right hliu4/dev...main
    > 5a69196 (origin/main, origin/HEAD, main) Change "suite" to aria
    > 1917129 Fix ostree minimal image

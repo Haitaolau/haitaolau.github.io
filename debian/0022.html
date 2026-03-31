@@ -52,7 +52,7 @@ repository.</p>
 <p>After running either command, git branch -r should no longer show origin/hliu4/dev.</p>
 <p>The git remote prune origin approach is generally preferred as it cleans up all stale remote tracking branches at once.</p>
 <p>The result:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wrsadmin@pek-hliu4-d2:~/workspace/dist2elxr$ git branch -r
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wrsadmin@pek-hliu4-d2:~/workspace/dist2$ git branch -r
 origin/HEAD -&gt; origin/main
 origin/aria
 origin/hliu4/aria
@@ -62,11 +62,11 @@ origin/wentao-dev
 upstream/aria
 upstream/main
 upstream/wentao-dev
-wrsadmin@pek-hliu4-d2:~/workspace/dist2elxr$ git remote prune origin
+wrsadmin@pek-hliu4-d2:~/workspace/dist2$ git remote prune origin
 Pruning origin
-URL: https://gitlab.com/haitailau/dist2elxr.git
+URL: https://gitlab.com/haitailau/dist2.git
 * <span class="o">[</span>pruned<span class="o">]</span> origin/hliu4/dev
-wrsadmin@pek-hliu4-d2:~/workspace/dist2elxr$ git branch -r
+wrsadmin@pek-hliu4-d2:~/workspace/dist2$ git branch -r
 origin/HEAD -&gt; origin/main
 origin/aria
 origin/hliu4/aria
@@ -75,7 +75,7 @@ origin/wentao-dev
 upstream/aria
 upstream/main
 upstream/wentao-dev
-wrsadmin@pek-hliu4-d2:~/workspace/dist2elxr$
+wrsadmin@pek-hliu4-d2:~/workspace/dist2$
 </pre></div>
 </div>
 </section>
@@ -113,28 +113,19 @@ wrsadmin@pek-hliu4-d2:~/workspace/dist2elxr$
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Debian</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="0014.html">Debian Useful Resources</a></li>
 <li class="toctree-l2"><a class="reference internal" href="0005.html">Launch up Debian VM with Qemu</a></li>
-<li class="toctree-l2"><a class="reference internal" href="debian-installer/index.html">Debian Installer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="debian-command/index.html">Debian command</a></li>
-<li class="toctree-l2"><a class="reference internal" href="live-cd/index.html">Debian Live CD</a></li>
-<li class="toctree-l2"><a class="reference internal" href="0001.html">Ruck: build pablo with minimal ostree rootfs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="0002.html">How to build deb package for libxfce4ui</a></li>
 <li class="toctree-l2"><a class="reference internal" href="0003.html">How to Search for Debian package?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="0004.html">How to Check Debian package version?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="0006.html">How to download deb packages using apt</a></li>
 <li class="toctree-l2"><a class="reference internal" href="0007.html">E: You must put some ‘source’ URIs in your sources.list</a></li>
-<li class="toctree-l2"><a class="reference internal" href="0008.html">How can I specify the repository from which a package will be installed?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="0009.html">How to install build dependencies for packages ?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="0010.html">Create orig tarballs from git</a></li>
 <li class="toctree-l2"><a class="reference internal" href="0011.html">Debian: Building the package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pipeline/index.html">Debian Pipeline</a></li>
-<li class="toctree-l2"><a class="reference internal" href="0012.html">Build and Test STIG</a></li>
-<li class="toctree-l2"><a class="reference internal" href="0013.html">Change the mirror for elxr docker image</a></li>
 <li class="toctree-l2"><a class="reference internal" href="0015.html">build an ARM64 Debian package on an AMD64 server using sbuild</a></li>
 <li class="toctree-l2"><a class="reference internal" href="0016.html">Build a Debian package directly from a Git repository</a></li>
-<li class="toctree-l2"><a class="reference internal" href="initramfs/index.html">initramfs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="0017.html">How to apply the patches from a package’s debian/patches directory</a></li>
-<li class="toctree-l2"><a class="reference internal" href="0018.html">steps to build unsigned eLxr kernel</a></li>
-<li class="toctree-l2"><a class="reference internal" href="0019.html">Steps to build signed eLxr kernel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0018.html">steps to build unsigned kernel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0019.html">Steps to build signed kernel</a></li>
 <li class="toctree-l2"><a class="reference internal" href="0020.html">Remove a branch from your fork (remote)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="0021.html">git: update your fork project (kernel)</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">To remove the stale remote tracking branch</a></li>

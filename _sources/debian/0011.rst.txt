@@ -52,8 +52,8 @@ This will do everything to make full binary and source packages for you. It will
    dpkg-source: warning: upstream signing key but no upstream tarball signature
    dpkg-source: info: building libgcrypt20 using existing ./libgcrypt20_1.10.1.orig.tar.bz2
    dpkg-source: info: using patch list from debian/patches/series
-   dpkg-source: info: building libgcrypt20 in libgcrypt20_1.10.1-3elxr1.debian.tar.xz
-   dpkg-source: info: building libgcrypt20 in libgcrypt20_1.10.1-3elxr1.dsc
+   dpkg-source: info: building libgcrypt20 in libgcrypt20_1.10.1-31.debian.tar.xz
+   dpkg-source: info: building libgcrypt20 in libgcrypt20_1.10.1-31.dsc
 
 The dpkg-source would apply the patches from debian/patches and generate xxxx.debian.tar.xz and xxxx.dsc file.
 
@@ -61,7 +61,7 @@ The dpkg-source would apply the patches from debian/patches and generate xxxx.de
 .. code-block:: bash
 
    root@33f22f60cb16:/usr/src/work-ssl/tmp/libgcrypt-1.10.1# ls ../
-   libgcrypt  libgcrypt-1.10.1  libgcrypt20_1.10.1-3elxr1.debian.tar.xz  libgcrypt20_1.10.1-3elxr1.dsc  libgcrypt20_1.10.1.orig.tar.bz2
+   libgcrypt  libgcrypt-1.10.1  libgcrypt20_1.10.1-31.debian.tar.xz  libgcrypt20_1.10.1-31.dsc  libgcrypt20_1.10.1.orig.tar.bz2
 
 dpkg-source
 ~~~~~~~~~~~
@@ -80,7 +80,7 @@ The **/usr/bin/dpkg-source** is provided by dpkg-dev package.
 make the .dsc file
 ~~~~~~~~~~~~~~~~~~
 
-The **libgcrypt20_1.10.1-3elxr1.dsc** is a summary of the contents of the source code. The file is generated from your control file, and is used when unpacking the source with dpkg-source.
+The **libgcrypt20_1.10.1-31.dsc** is a summary of the contents of the source code. The file is generated from your control file, and is used when unpacking the source with dpkg-source.
 
 `dsc - Debian source package control file format <https://manpages.debian.org/testing/dpkg-dev/dsc.5.en.html>`_
 
@@ -90,7 +90,7 @@ make the .debian.tar.gz file
 
 This compressed tarball contains your debian directory contents. Each and every addition you made to the original source code is stored as a quilt patch in debian/patches.
 
-If someone else wants to re-create your package from scratch, they can easily do so using the above three files. The extraction procedure is trivial: just copy the three files somewhere else and run **dpkg-source -x libgcrypt20_1.10.1-3elxr1.dsc**
+If someone else wants to re-create your package from scratch, they can easily do so using the above three files. The extraction procedure is trivial: just copy the three files somewhere else and run **dpkg-source -x libgcrypt20_1.10.1-31.dsc**
 
 
 
@@ -261,14 +261,14 @@ dh_builddeb: https://salsa.debian.org/debian/debhelper/-/blob/main/dh_builddeb?r
 .. code-block:: bash
 
    root@33f22f60cb16:/usr/src/work-ssl/tmp/libgcrypt-1.10.1# dh_builddeb -O--builddirectory=build
-   dpkg-deb: building package 'libgcrypt20-doc' in '../libgcrypt20-doc_1.10.1-3elxr1_all.deb'.
-   dpkg-deb: building package 'libgcrypt20-dev' in '../libgcrypt20-dev_1.10.1-3elxr1_amd64.deb'.
-   dpkg-deb: building package 'libgcrypt20-dev-dbgsym' in '../libgcrypt20-dev-dbgsym_1.10.1-3elxr1_amd64.deb'.
-   dpkg-deb: building package 'libgcrypt20' in '../libgcrypt20_1.10.1-3elxr1_amd64.deb'.
-   dpkg-deb: building package 'libgcrypt20-dbgsym' in '../libgcrypt20-dbgsym_1.10.1-3elxr1_amd64.deb'.
-   dpkg-deb: building package 'libgcrypt20-udeb' in 'debian/.debhelper/scratch-space/build-libgcrypt20-udeb/libgcrypt20-udeb_1.10.1-3elxr1_amd64.deb'.
-           Renaming libgcrypt20-udeb_1.10.1-3elxr1_amd64.deb to libgcrypt20-udeb_1.10.1-3elxr1_amd64.udeb
-   dpkg-deb: building package 'libgcrypt-mingw-w64-dev' in '../libgcrypt-mingw-w64-dev_1.10.1-3elxr1_all.deb'.
+   dpkg-deb: building package 'libgcrypt20-doc' in '../libgcrypt20-doc_1.10.1-31_all.deb'.
+   dpkg-deb: building package 'libgcrypt20-dev' in '../libgcrypt20-dev_1.10.1-31_amd64.deb'.
+   dpkg-deb: building package 'libgcrypt20-dev-dbgsym' in '../libgcrypt20-dev-dbgsym_1.10.1-31_amd64.deb'.
+   dpkg-deb: building package 'libgcrypt20' in '../libgcrypt20_1.10.1-31_amd64.deb'.
+   dpkg-deb: building package 'libgcrypt20-dbgsym' in '../libgcrypt20-dbgsym_1.10.1-31_amd64.deb'.
+   dpkg-deb: building package 'libgcrypt20-udeb' in 'debian/.debhelper/scratch-space/build-libgcrypt20-udeb/libgcrypt20-udeb_1.10.1-31_amd64.deb'.
+           Renaming libgcrypt20-udeb_1.10.1-31_amd64.deb to libgcrypt20-udeb_1.10.1-31_amd64.udeb
+   dpkg-deb: building package 'libgcrypt-mingw-w64-dev' in '../libgcrypt-mingw-w64-dev_1.10.1-31_all.deb'.
    		
 
 The **/usr/bin/dpkg-deb** is provided by dpkg package.
@@ -289,7 +289,7 @@ Refer to https://dyn.manpages.debian.org/testing/dpkg-dev/dpkg-genbuildinfo.1.en
 
 .. code-block:: bash
 
-   dpkg-genbuildinfo -O../libgcrypt20_1.10.1-3elxr1_amd64.buildinfo		
+   dpkg-genbuildinfo -O../libgcrypt20_1.10.1-31_amd64.buildinfo		
 
    
 .buildinfo: https://dyn.manpages.debian.org/testing/dpkg-dev/deb-buildinfo.5.en.html
@@ -311,7 +311,7 @@ Refer to https://dyn.manpages.debian.org/testing/dpkg-dev/dpkg-genchanges.1.en.h
 
 .. code-block:: bash
 
-   dpkg-genchanges -O../libgcrypt20_1.10.1-3elxr1_amd64.changes
+   dpkg-genchanges -O../libgcrypt20_1.10.1-31_amd64.changes
 
 .changes: https://dyn.manpages.debian.org/testing/dpkg-dev/deb-changes.5.en.html
 

@@ -7,25 +7,16 @@ Debian
 
    0014
    0005
-   debian-installer/index
-   debian-command/index
-   live-cd/index
-   0001
    0002
    0003
    0004
    0006
    0007
-   0008
    0009
    0010
    0011
-   pipeline/index
-   0012
-   0013
    0015
    0016
-   initramfs/index
    0017
    0018
    0019
