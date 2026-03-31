@@ -1,0 +1,51 @@
+=====================
+SHA-2
+=====================
+
+
+
+
+
+SHA-2算法由NSA发明并在2001年由NIST进行了标准化。
+
+SHA-2算法在设计上借鉴了由NIST标准化过的SHA-1算法。
+
+SHA-2算法族共有4个不同的版本，它们分别产生224、256、384和512比特的输出。
+
+此外，SHA-512/224和SHA-512/256算法是通过截断SHA-512算法的输出产生的两个变种算法，
+
+它们分别提供224比特和256比特的输出。
+
+
+.. code-block:: bash 
+
+
+   wruser@pek-hliu4-l2:~/Pictures/Screenshots$ echo "hello world" | openssl dgst -sha224
+   SHA2-224(stdin)= 95041dd60ab08c0bf5636d50be85fe9790300f39eb84602858a9b430
+   wruser@pek-hliu4-l2:~/Pictures/Screenshots$ echo "hello world" | openssl dgst -sha256
+   SHA2-256(stdin)= a948904f2f0f479b8f8197694b30184b0d2ed1c1cd2a1ec0fb85d299a192a447
+   wruser@pek-hliu4-l2:~/Pictures/Screenshots$ echo "hello world" | openssl dgst -sha384
+   SHA2-384(stdin)= 6b3b69ff0a404f28d75e98a066d3fc64fffd9940870cc68bece28545b9a75086b343d7a1366838083e4b8f3ca6fd3c80
+   wruser@pek-hliu4-l2:~/Pictures/Screenshots$ echo "hello world" | openssl dgst -sha512
+   SHA2-512(stdin)= db3974a97f2407b7cae1ae637c0030687a11913274d578492558e39c16c017de84eacdc8c62fe34ee4e12b4b1428817f09b6a2760c3f8a664ceae94d2434a593
+
+
+
+The implementation of libgcrypt: https://github.com/gpg/libgcrypt/blob/master/cipher/sha256.c
+FIPS 180-2: https://csrc.nist.gov/files/pubs/fips/180-2/upd1/final/docs/fips180-2withchangenotice.pdf
+C++ sha256 function: http://www.zedwood.com/article/cpp-sha256-function
+
+
+SHA-2的执行过程分为以下两个步骤。首先，我们对需要进行哈希运算的输入做填充，然后将填充后的
+输入划分为等长的分组，每个分组的长度等于压缩函数的输入长度。填充是指在输入中添加特定的字
+节，使输入的长度变成分组大小的整数倍。这样一来，我们就可以把上述分组作为压缩函数的第一个
+输入参数。例如，SHA-256算法输入的分组大小为512比特
+
+.. image:: ../../_static/image/hash_sha2_1.png
+
+
+第一步是对输入消息进行填充。填充后消息的长度应该是压缩函数输入长度的倍数（例如，8字节）。
+
+为了做到这一点，我们在输入的消息中额外加入5字节，使其成为32字节，然后我们把消息划分为4个8字节的分组
+
+.. image:: ../../_static/image/hash_sha2_2.png

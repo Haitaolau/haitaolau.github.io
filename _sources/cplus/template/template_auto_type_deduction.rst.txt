@@ -1,0 +1,54 @@
+==========================
+auto 类型推导
+==========================
+
+.. contents:: Table of Contents
+
+概述
+--------------
+
+``auto`` 的类型推导规则与模板类型推导几乎完全一致，区别仅在于对 ``std::initializer_list`` 的处理。
+
+* auto 的自动类型推断发生在编译期间。
+* auto 定义变量必须立即初始化。
+
+基本规则
+--------------
+
+.. code-block:: cpp
+
+    auto x = 27;            // x 是 int
+    const auto cx = x;      // cx 是 const int
+    const auto& rx = x;     // rx 是 const int&
+
+    auto&& uref1 = x;       // x 是左值，uref1 是 int&（万能引用）
+    auto&& uref2 = 27;      // 27 是右值，uref2 是 int&&（万能引用）
+
+与模板推导的区别
+====================
+
+auto 可以从花括号初始化列表推导出 ``std::initializer_list`` ，而模板不行：
+
+.. code-block:: cpp
+
+    auto x = {1, 2, 3};     // x 是 std::initializer_list<int>
+
+    template<typename T>
+    void f(T param);
+    // f({1, 2, 3});        // 编译错误：模板无法推导花括号列表
+
+C++14 中的 auto
+====================
+
+C++14 允许 auto 作为函数返回值类型和 lambda 参数类型，但此时使用的是模板推导规则（不支持花括号列表）：
+
+.. code-block:: cpp
+
+    // auto 作为返回值类型（C++14）
+    auto createList() {
+        // return {1, 2, 3};    // 编译错误：不能推导花括号列表
+        return std::vector<int>{1, 2, 3};   // 正确
+    }
+
+    // auto 作为 lambda 参数（C++14）
+    auto lambda = [](auto x) { return x * 2; };

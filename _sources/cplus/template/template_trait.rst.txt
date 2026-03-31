@@ -1,0 +1,394 @@
+==========================
+Traits（萃取）
+==========================
+
+.. contents:: Table of Contents
+
+概述
+--------------
+
+Traits（类型萃取）是一种模板编程技术，通过模板特化为不同类型提供不同的类型信息或行为，使泛型代码能够根据类型做出不同的决策。
+
+工作原理
+^^^^^^^^^^
+
+Traits 的本质是利用模板特化（详见 :doc:`template_specialization`）在 **编译期** 完成类型到类型的映射。其模式为：
+
+1. 定义一个 traits 类模板（主模板，可以不提供实现）
+2. 为需要的类型提供全特化或偏特化，在其中定义类型别名或常量
+3. 在泛型代码中通过 ``Traits<T>::类型别名`` 获取编译期的类型信息
+
+整个过程在编译期完成，没有运行时开销。
+
+问题引入
+====================
+
+.. code-block:: cpp
+
+    #include <iostream>
+    using namespace std;
+
+    template <typename T>
+    T funcsum(const T* begin, const T* end)
+    {
+        T sum{};
+        for(;;)
+        {
+            sum += (*begin);
+            if (begin == end) break;
+            ++begin;
+        }
+        return sum;
+    }
+
+    int main(int argc, const char * argv[])
+    {
+        int myintarray1[] = {10, 15, 20};
+        int myintarray2[] = {1000000000, 1500000000, 2000000000};
+        char mychararray[] = "abc";     // 97, 98, 99
+        cout << funcsum(&myintarray1[0], &myintarray1[2]) << endl;
+        cout << funcsum(&myintarray2[0], &myintarray2[2]) << endl;
+        cout << (int)(funcsum(&mychararray[0], &mychararray[2])) << endl;
+        return 0;
+    }
+
+输出：
+
+.. code-block:: console
+
+    45
+    205032704
+    38
+
+只有第 1 行结果正确，第 2 行 int 溢出，第 3 行 char 溢出。问题在于返回值类型 T 与输入类型相同，无法容纳更大的求和结果。
+
+方案1：手动指定返回类型
+==========================
+
+新引入一个类型模板参数 U，用于指定结果类型：
+
+.. code-block:: cpp
+
+    template <typename U, typename T>
+    U funcsum(const T* begin, const T* end)
+    {
+        U sum{};
+        for(;;)
+        {
+            sum += (*begin);
+            if (begin == end) break;
+            ++begin;
+        }
+        return sum;
+    }
+
+    int main()
+    {
+        int myintarray2[] = {1000000000, 1500000000, 2000000000};
+        char mychararray[] = "abc";
+        cout << funcsum<std::int64_t>(&myintarray2[0], &myintarray2[2]) << endl;
+        cout << (int)(funcsum<int>(&mychararray[0], &mychararray[2])) << endl;
+        return 0;
+    }
+
+输出：
+
+.. code-block:: console
+
+    4500000000
+    294
+
+缺点：每次调用都需要手动指定返回类型。
+
+方案2：使用固定萃取类模板
+==========================
+
+通过编写一个 trait 类模板，自动根据输入类型确定合适的返回类型：
+
+.. code-block:: cpp
+
+    #include <iostream>
+    using namespace std;
+
+    // 固定萃取类模板（主模板，不提供定义）
+    template <typename T>
+    struct SumFixedTraits;
+
+    // 针对 char 的特化：求和结果用 int
+    template <>
+    struct SumFixedTraits<char>
+    {
+        using sumT = int;
+    };
+
+    // 针对 int 的特化：求和结果用 int64_t
+    template<>
+    struct SumFixedTraits<int>
+    {
+        using sumT = std::int64_t;
+    };
+
+    template<typename T>
+    auto funcsum(const T* begin, const T* end)
+    {
+        using sumT = typename SumFixedTraits<T>::sumT;  // 萃取合适的返回类型
+        sumT sum{};
+        for (;;)
+        {
+            sum += (*begin);
+            if (begin == end) break;
+            ++begin;
+        }
+        return sum;
+    }
+
+    int main(int argc, const char* argv[])
+    {
+        int myintarray1[] = {10, 15, 20};
+        int myintarray2[] = {1000000000, 1500000000, 2000000000};
+        char mychararray[] = "abc";
+        cout << funcsum(&myintarray1[0], &myintarray1[2]) << endl;
+        cout << funcsum(&myintarray2[0], &myintarray2[2]) << endl;
+        cout << (int)(funcsum(&mychararray[0], &mychararray[2])) << endl;
+        return 0;
+    }
+
+输出：
+
+.. code-block:: console
+
+    45
+    4500000000
+    294
+
+* 传入 int 类型时，固定萃取类模板返回 int64_t 类型来保存求和结果。
+* 传入 char 类型时，固定萃取类模板返回 int 类型来保存求和结果。
+
+iterator_traits
+====================
+
+STL 中的 ``std::iterator_traits`` 是 traits 技术的经典应用，用于萃取迭代器的类型信息。
+
+定义（位于 ``<stl_iterator_base_types.h>`` ）：
+
+.. code-block:: cpp
+
+    template<typename _Iterator>
+    struct iterator_traits {
+        typedef typename _Iterator::iterator_category iterator_category;
+        typedef typename _Iterator::value_type        value_type;
+        typedef typename _Iterator::difference_type   difference_type;
+        typedef typename _Iterator::pointer           pointer;
+        typedef typename _Iterator::reference          reference;
+    };
+
+    // 针对原生指针的偏特化
+    template<typename _Tp>
+    struct iterator_traits<_Tp*> {
+        using iterator_category = random_access_iterator_tag;
+        using value_type        = remove_cv_t<_Tp>;
+        using difference_type   = ptrdiff_t;
+        using pointer           = _Tp*;
+        using reference         = _Tp&;
+    };
+
+示例：通过 iterator_traits 获取迭代器类别：
+
+.. code-block:: cpp
+
+    #include <iostream>
+    #include <vector>
+    #include <list>
+    using namespace std;
+
+    void _display_category(random_access_iterator_tag)
+    { cout << "random_access_iterator_tag" << endl; }
+
+    void _display_category(bidirectional_iterator_tag)
+    { cout << "bidirectional_iterator_tag" << endl; }
+
+    template <typename T>
+    void display_category(T iter)
+    {
+        typename std::iterator_traits<T>::iterator_category cagy;
+        _display_category(cagy);
+    }
+
+    int main()
+    {
+        display_category(std::vector<int>::iterator());
+        display_category(std::list<int>::iterator());
+        return 0;
+    }
+
+输出：
+
+.. code-block:: console
+
+    random_access_iterator_tag
+    bidirectional_iterator_tag
+
+vector 容器对应的迭代器种类是 random_access_iterator_tag，list 容器对应的迭代器种类是 bidirectional_iterator_tag。
+
+为什么需要对原生指针做偏特化？
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+STL 的迭代器类都在内部定义了 ``value_type`` 、 ``iterator_category`` 等类型别名，主模板可以直接通过 ``_Iterator::value_type`` 获取。但原生指针（如 ``int*`` ）不是类，没有这些内部类型定义。通过偏特化 ``iterator_traits<T*>`` ，让原生指针也能像迭代器一样被统一处理：
+
+.. code-block:: cpp
+
+    int arr[] = {1, 2, 3};
+    // int* 没有 value_type 成员，但通过偏特化可以获取
+    using ValType = std::iterator_traits<int*>::value_type;  // int
+
+标准库中的 type_traits
+==========================
+
+C++11 引入了 ``<type_traits>`` 头文件，提供了大量预定义的 traits，用于在编译期查询和变换类型。
+
+类型判断
+^^^^^^^^^^^^^^^^
+
+.. code-block:: cpp
+
+    #include <iostream>
+    #include <type_traits>
+    using namespace std;
+
+    template<typename T>
+    void check_type(T val)
+    {
+        if constexpr (std::is_integral_v<T>)
+            cout << val << " 是整数类型" << endl;
+        else if constexpr (std::is_floating_point_v<T>)
+            cout << val << " 是浮点类型" << endl;
+        else
+            cout << "其他类型" << endl;
+    }
+
+    int main()
+    {
+        check_type(42);       // 42 是整数类型
+        check_type(3.14);     // 3.14 是浮点类型
+        return 0;
+    }
+
+常用的类型判断 traits：
+
+.. list-table::
+    :header-rows: 1
+    :widths: 40 60
+
+    * - Trait
+      - 说明
+    * - ``std::is_integral<T>``
+      - T 是否为整数类型
+    * - ``std::is_floating_point<T>``
+      - T 是否为浮点类型
+    * - ``std::is_pointer<T>``
+      - T 是否为指针类型
+    * - ``std::is_reference<T>``
+      - T 是否为引用类型
+    * - ``std::is_same<T, U>``
+      - T 和 U 是否为同一类型
+    * - ``std::is_class<T>``
+      - T 是否为类类型
+
+类型变换
+^^^^^^^^^^^^^^^^
+
+.. code-block:: cpp
+
+    #include <type_traits>
+    using namespace std;
+
+    // 移除引用
+    static_assert(is_same_v<remove_reference_t<int&>, int>);
+    static_assert(is_same_v<remove_reference_t<int&&>, int>);
+
+    // 移除 const
+    static_assert(is_same_v<remove_const_t<const int>, int>);
+
+    // 添加指针
+    static_assert(is_same_v<add_pointer_t<int>, int*>);
+
+常用的类型变换 traits：
+
+.. list-table::
+    :header-rows: 1
+    :widths: 40 60
+
+    * - Trait
+      - 说明
+    * - ``std::remove_reference<T>``
+      - 移除引用，得到原始类型
+    * - ``std::remove_const<T>``
+      - 移除 const 限定符
+    * - ``std::remove_cv<T>``
+      - 移除 const 和 volatile
+    * - ``std::add_pointer<T>``
+      - 添加指针
+    * - ``std::add_lvalue_reference<T>``
+      - 添加左值引用
+    * - ``std::decay<T>``
+      - 模拟值传递的类型退化（去除引用、cv、数组退化为指针）
+
+配合 std::enable_if 实现条件编译
+==========================================
+
+Traits 最常见的用法之一是配合 ``std::enable_if`` ，根据类型条件启用或禁用某个函数模板（SFINAE 机制）：
+
+.. code-block:: cpp
+
+    #include <iostream>
+    #include <type_traits>
+    using namespace std;
+
+    // 只接受整数类型
+    template<typename T>
+    typename enable_if<is_integral_v<T>, T>::type
+    safe_divide(T a, T b)
+    {
+        if (b == 0) {
+            cout << "除数不能为 0" << endl;
+            return 0;
+        }
+        return a / b;
+    }
+
+    // 只接受浮点类型
+    template<typename T>
+    typename enable_if<is_floating_point_v<T>, T>::type
+    safe_divide(T a, T b)
+    {
+        return a / b;   // 浮点除以 0 产生 inf，不会崩溃
+    }
+
+    int main()
+    {
+        cout << safe_divide(10, 3) << endl;       // 3（整数版本）
+        cout << safe_divide(10.0, 3.0) << endl;   // 3.33333（浮点版本）
+        cout << safe_divide(10, 0) << endl;       // 除数不能为 0
+        // safe_divide("hello", "world");          // 编译错误：没有匹配的函数
+        return 0;
+    }
+
+当 ``enable_if`` 的条件为 false 时，该模板会被从候选集中移除（而不是报错），这就是 SFINAE（Substitution Failure Is Not An Error）原则。
+
+总结
+--------------
+
+.. list-table::
+    :header-rows: 1
+    :widths: 30 70
+
+    * - 技术
+      - 说明
+    * - 自定义 Traits
+      - 通过模板特化定义类型映射，如 ``SumFixedTraits``
+    * - ``iterator_traits``
+      - STL 中统一获取迭代器类型信息，通过偏特化支持原生指针
+    * - ``<type_traits>``
+      - C++11 标准库提供的类型判断和变换工具
+    * - ``std::enable_if``
+      - 配合 traits 实现基于类型条件的函数重载（SFINAE）

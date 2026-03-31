@@ -1,0 +1,122 @@
+=============================================
+智能指针——重载解引用与箭头运算符（* 和 ->）
+=============================================
+
+.. contents:: Table of Contents
+
+悬空指针问题
+====================
+
+.. code-block:: cpp
+
+    #include<iostream>
+    #include<string>
+    using namespace std;
+    class Data
+    {
+    public:
+        Data(string str):_str(str)
+        {
+            cout<<"Data类构造函数"<<endl;
+        }
+        ~Data()
+        {
+            cout<<"Data类析构函数"<<endl;
+        }
+        void dis()
+        {
+            cout<<_str<<endl;
+        }
+    private:
+        string _str;
+    };
+    int main()
+    {
+        Data *pstr1=new Data("I Love China");
+        Data *pstr2=pstr1;
+        Data *pstr3=pstr1;
+        pstr1->dis();
+        delete pstr1;
+        pstr2->dis();       // 悬空指针：pstr1 已释放，pstr2 仍在访问
+        return 0;
+    }
+
+指针 pstr1、pstr2、pstr3 共享同一个对象，若释放 pstr1 指向的对象，pstr2 和 pstr3 仍然在使用该对象，将造成 pstr2 和 pstr3 无法访问资源，成为悬空指针。
+
+重载 * 和 -> 运算符
+====================
+
+下面通过案例演示使用引用计数解决悬空指针的问题，通过重载 ``*`` 和 ``->`` 运算符实现内存的自动管理。
+
+.. code-block:: cpp
+
+    #include<iostream>
+    #include<string>
+    using namespace std;
+
+    class Data { /* ...同上... */ };
+
+    class Count     // 用于存储指向同一资源的指针数量
+    {
+    public:
+        friend class SmartPtr;
+        Count(Data *pdata):_pdata(pdata),_count(1)
+        {
+            cout<<"Count类构造函数"<<endl;
+        }
+        ~Count()
+        {
+            cout<<"Count类析构函数"<<endl;
+            delete _pdata;
+        }
+    private:
+        Data *_pdata;
+        int _count;
+    };
+
+    class SmartPtr   // 对指向 Data 类对象的指针实现智能管理
+    {
+    public:
+        SmartPtr(Data* pdata):_reNum(new Count(pdata))
+        {
+            cout<<"创建基类对象"<<endl;
+        }
+        SmartPtr(const SmartPtr& another):_reNum(another._reNum)
+        {
+            ++_reNum->_count;
+            cout<<"SmartPtr类复制构造函数"<<endl;
+        }
+        ~SmartPtr()
+        {
+            if(--_reNum->_count==0)
+            {
+                delete _reNum;
+                cout<<"SmartPtr类析构函数"<<endl;
+            }
+        }
+        Data* operator->()
+        {
+            return _reNum->_pdata;
+        }
+        Data& operator*()
+        {
+            return *_reNum->_pdata;
+        }
+        int disCount()
+        {
+            return _reNum->_count;
+        }
+    private:
+        Count *_reNum;
+    };
+
+    int main()
+    {
+        Data *pstr1=new Data("I Love China!");
+        SmartPtr pstr2=pstr1;
+        (*pstr1).dis();
+        SmartPtr pstr3=pstr2;
+        pstr2->dis();
+        cout<<"使用基类对象的指针数量："<<pstr2.disCount()<<endl;
+        return 0;
+    }

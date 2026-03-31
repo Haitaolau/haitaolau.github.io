@@ -1,0 +1,114 @@
+==========================
+多态（Polymorphism）
+==========================
+
+.. contents:: Table of Contents
+
+概述
+--------------
+
+C++中的多态分为静态多态和动态多态。静态多态是函数重载，在编译阶段就能确定调用哪个函数。动态多态是由继承产生的，指同一个属性或行为在基类及其各派生类中具有不同的语义，不同的对象根据所接收的消息做出不同的响应，这种现象称为动态多态。
+
+面向对象程序设计中所说的多态通常指的是动态多态。在C++中，"消息"就是对类的成员函数的调用，不同的行为代表函数的不同实现方式，因此，多态的本质是函数的多种实现形态。多态的实现需要满足3个条件：
+
+* 基类声明虚函数。
+* 派生类重写基类的虚函数。
+* 将基类指针指向派生类对象，通过基类指针访问虚函数。
+
+动态多态（Runtime Polymorphism）
+==================================
+
+虚函数
+-----------
+
+.. code-block:: text
+
+    class 类名
+    {
+    权限控制符：
+        virtual 函数返回值类型 函数名(参数列表);
+        // ...其他成员
+    };
+
+声明虚函数时，有以下3点需要注意：
+
+* 构造函数不能声明为虚函数，但析构函数可以声明为虚函数。
+* 虚函数不能是静态成员函数。
+* 友元函数不能声明为虚函数，但虚函数可以作为另一个类的友元函数。
+
+虚函数只能是类的成员函数，不能将类外的普通函数声明为虚函数，即 virtual 关键字只能修饰类中的成员函数，不能修饰类外的普通函数。因为虚函数的作用是让派生类对虚函数重新定义，它只能存在于类的继承层次结构中。若类中声明了虚函数，并且派生类重新定义了虚函数，当使用基类指针或基类引用操作派生类对象调用函数时，系统会自动调用派生类中的虚函数代替基类虚函数。
+
+示例
+-----------
+
+.. code-block:: cpp
+
+    #include<iostream>
+    using namespace std;
+    class Animal
+    {
+    public:
+        virtual void speak();
+    };
+    void Animal::speak()
+    {
+        cout<<"动物叫声"<<endl;
+    }
+    class Cat:public Animal
+    {
+    public:
+        virtual void speak();
+    };
+    void Cat::speak()
+    {
+        cout<<"猫的叫声：喵喵"<<endl;
+    }
+    class Dog:public Animal
+    {
+    public:
+        virtual void speak();
+    };
+    void Dog::speak()
+    {
+        cout<<"狗的叫声：汪汪"<<endl;
+    }
+    int main()
+    {
+        Cat cat;
+        Animal *pA=&cat;
+        pA->speak();        // 调用 Cat::speak()
+        Dog dog;
+        Animal *pB=&dog;
+        pB->speak();        // 调用 Dog::speak()
+        return 0;
+    }
+
+输出：
+
+.. code-block:: text
+
+    猫的叫声：喵喵
+    狗的叫声：汪汪
+
+.. note::
+
+    在类外实现虚函数时，返回值类型前不能添加 virtual 关键字。
+
+.. note::
+
+    派生类对基类虚函数重写时，必须与基类中虚函数的原型完全一致，派生类中重写的虚函数前是否添加 virtual，均被视为虚函数。
+
+.. code-block:: cpp
+
+    class Base {
+    public:
+        virtual void func() { }
+    };
+
+    class Derived : public Base {
+    public:
+        // 以下三种写法都是等价的
+        void func() { }                    // 隐式虚函数
+        virtual void func() { }            // 显式虚函数
+        void func() override { }           // 推荐写法
+    };

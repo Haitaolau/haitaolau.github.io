@@ -177,6 +177,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="cplus/index.html">Cplus</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="cplus/libstdc%2B%2B_2_9_1/index.html">Libstd c++ 2.9.1</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/libstdc%2B%2B_2_9_1/alloc.html">空间分配器 (Allocator)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="cplus/libstdc%2B%2B_2_9_1/vector/index.html">Vector</a></li>
 <li class="toctree-l3"><a class="reference internal" href="cplus/libstdc%2B%2B_2_9_1/list/index.html">List</a></li>
 <li class="toctree-l3"><a class="reference internal" href="cplus/libstdc%2B%2B_2_9_1/deque/index.html">Double Ended Queue</a></li>
@@ -184,29 +185,179 @@
 <li class="toctree-l3"><a class="reference internal" href="cplus/libstdc%2B%2B_2_9_1/tree/index.html">Tree</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="cplus/Operator_overloading/index.html">C++ Operator overloading</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="cplus/Operator_overloading/increment.html">Increment(++)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/class_this_pointer.html">this 指针</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_this_pointer.html#id1">概述</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_this_pointer.html#id2">示例</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_this_pointer.html#id3">汇编分析</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_this_pointer.html#id4">总结</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="cplus/access_modifiers.html">Access Modifiers</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cplus/inheritance_access.html">Inheritance Access</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="cplus/inheritance_access.html#public-inheritance">public Inheritance</a></li>
-<li class="toctree-l3"><a class="reference internal" href="cplus/inheritance_access.html#protected-inheritance">Protected Inheritance</a></li>
-<li class="toctree-l3"><a class="reference internal" href="cplus/inheritance_access.html#private-inheritance">Private Inheritance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/class_constructor_type.html">构造函数的类型</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_constructor_type.html#id2">概述</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_constructor_type.html#id9">总结</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="cplus/references.html">References (or Aliases)</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="cplus/references.html#syntax">Syntax</a></li>
-<li class="toctree-l3"><a class="reference internal" href="cplus/references.html#example">Example</a></li>
-<li class="toctree-l3"><a class="reference internal" href="cplus/references.html#the-nature-of-reference">The nature of reference</a></li>
-<li class="toctree-l3"><a class="reference internal" href="cplus/references.html#notes">Notes</a></li>
-<li class="toctree-l3"><a class="reference internal" href="cplus/references.html#reference-vs-pointer">Reference vs pointer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/class_constructor.html">构造函数</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_constructor.html#id2">概述</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_constructor.html#id5">2.1 自定义无参构造函数</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_constructor.html#id6">2.2 自定义有参构造函数</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_constructor.html#id7">2.3 列表初始化</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="cplus/const.html">const</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="cplus/const.html#char-const-p">char *const p</a></li>
-<li class="toctree-l3"><a class="reference internal" href="cplus/const.html#const-char-p">const char * p</a></li>
-<li class="toctree-l3"><a class="reference internal" href="cplus/const.html#allocate-memory">allocate memory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/class_destructor.html">析构函数</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_destructor.html#id2">概述</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_destructor.html#id3">析构函数的调用情况</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_destructor.html#id4">示例</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/class_copyconstructor.html">拷贝构造函数</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_copyconstructor.html#id2">概述</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_copyconstructor.html#id3">示例</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_copyconstructor.html#id4">拷贝构造函数的调用时机</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/class_const_member.html">const</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_const_member.html#cplus-const-pointer">const 指针</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_const_member.html#id2">const 引用</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_const_member.html#id3">const 内存分配</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_const_member.html#id4">const 成员变量</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_const_member.html#id5">const 成员函数</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_const_member.html#const-static">const static 成员</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/class_static_member.html">static 成员</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_static_member.html#id1">概述</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/class_friend_member.html">友元（Friend）</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_friend_member.html#id1">友元函数</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_friend_member.html#id4">友元类</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/Operator_overloading/index.html">运算符重载</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/Operator_overloading/overview.html">运算符重载概述</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/Operator_overloading/input_output.html">重载输入/输出运算符（&lt;&lt; 和 &gt;&gt;）</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/Operator_overloading/comparison.html">重载关系运算符</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/Operator_overloading/assignment.html">重载赋值运算符</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/Operator_overloading/subscript.html">重载下标运算符（[]）</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/Operator_overloading/typecast.html">重载类型转换运算符</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/Operator_overloading/smartpointer.html">智能指针——重载解引用与箭头运算符（* 和 -&gt;）</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/Operator_overloading/increment.html">重载递增运算符（++）</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/class_inheritance.html">继承</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_inheritance.html#id2">概述</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_inheritance.html#id3">继承的注意事项</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_inheritance.html#id4">示例</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/class_access_modifiers.html">访问修饰符</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_access_modifiers.html#id2">概述</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/class_inheritance_access.html">继承访问控制</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_inheritance_access.html#id2">概述</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/class_object_slicing.html">对象切片（Object Slicing）</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_object_slicing.html#id1">概述</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_object_slicing.html#id2">示例</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/class_derived_class.html">派生类</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_derived_class.html#id2">派生类的构造函数与析构函数</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_derived_class.html#id4">隐藏基类成员函数</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/class_multile_inheritance.html">多继承</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_multile_inheritance.html#id2">语法</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_multile_inheritance.html#id4">语法</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_multile_inheritance.html#id5">示例</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/class_multile_inheritance_Ambiguity.html">多继承的二义性</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_multile_inheritance_Ambiguity.html#id2">同名成员冲突</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_multile_inheritance_Ambiguity.html#diamond-problem">菱形继承问题（Diamond Problem）</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/class_virtual_Inheritance.html">虚继承</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_virtual_Inheritance.html#id2">概述</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_virtual_Inheritance.html#id3">示例</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/class_polymorphism.html">多态（Polymorphism）</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_polymorphism.html#id1">概述</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_polymorphism.html#id2">虚函数</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_polymorphism.html#id3">示例</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/class_override_specifier.html">override 说明符</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_override_specifier.html#id1">概述</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_override_specifier.html#id2">示例</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/class_final_specifier.html">final 说明符</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_final_specifier.html#id1">概述</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_final_specifier.html#id2">修饰类</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_final_specifier.html#id3">修饰虚函数</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/class_vtable.html">虚函数表机制（Virtual Function Table）</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_vtable.html#id1">概述</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_vtable.html#vtable">1. 虚函数表（vtable）</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_vtable.html#vptr">2. 虚函数指针（vptr）</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_vtable.html#id2">3. 继承中的虚函数表</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_vtable.html#id3">4. 虚函数调用过程</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_vtable.html#id4">5. 内存布局示例</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_vtable.html#id5">6. 多继承中的虚函数表</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_vtable.html#id6">7. 虚函数表生成时机</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_vtable.html#id7">8. 性能开销</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_vtable.html#id8">9. 构造和析构中的虚函数</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/class_vtable2.html">类层次与虚函数表（Class Hierarchy and VTable）</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_vtable2.html#id1">概述</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_vtable2.html#id2">源代码</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_vtable2.html#base1">Base1 的虚函数表</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_vtable2.html#base2">Base2 的虚函数表</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_vtable2.html#derived">Derived 的虚函数表</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_vtable2.html#dynamic-cast">1. dynamic_cast 实现</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_vtable2.html#typeid">2. typeid 运算符</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/class_virtual_destructor.html">虚析构函数</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_virtual_destructor.html#id2">概述</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_virtual_destructor.html#id5">总结</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/class_private_destructor.html">私有析构函数</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_private_destructor.html#id2">概述</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_private_destructor.html#id3">私有析构函数的限制</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_private_destructor.html#id9">总结</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/class_abstract_class.html">抽象类（Abstract Class）</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_abstract_class.html#id1">纯虚函数</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_abstract_class.html#id2">抽象类</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_abstract_class.html#id3">定义</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_abstract_class.html#id4">示例</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/class_itanium_abi_destruction.html">Itanium C++ ABI 析构函数机制</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_itanium_abi_destruction.html#id1">概述</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_itanium_abi_destruction.html#id2">示例代码</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_itanium_abi_destruction.html#zn7derivedd1ev"><code class="docutils literal notranslate"><span class="pre">_ZN7DerivedD1Ev</span></code> 解码</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_itanium_abi_destruction.html#zthn16-n7derivedd1ev"><code class="docutils literal notranslate"><span class="pre">_ZThn16_N7DerivedD1Ev</span></code> 解码</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_itanium_abi_destruction.html#id6">总结</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/class_references.html">引用（References）</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_references.html#id1">概述</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_references.html#id2">语法</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_references.html#id3">基本示例</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_references.html#id4">引用的本质</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_references.html#id5">引用的规则</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/class_references.html#const">const 引用</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="cplus/functemplate.html">Function template</a><ul>
@@ -221,48 +372,41 @@
 <li class="toctree-l3"><a class="reference internal" href="cplus/passarguments.html#take-reference-as-parameter">take reference as parameter</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="cplus/friend.html">Friend class and function</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="cplus/friend.html#friend-function">Friend function</a></li>
-<li class="toctree-l3"><a class="reference internal" href="cplus/friend.html#friend-class">Friend Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/rvalue.html">右值引用与移动语义</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/rvalue.html#id2">概述</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/rvalue.html#id3">右值引用</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/rvalue.html#std-move">std::move</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/rvalue.html#id4">移动构造函数</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/rvalue.html#id5">移动赋值运算符</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/rvalue.html#rule-of-five">Rule of Five</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/rvalue.html#id6">移动语义的实际应用</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/rvalue.html#id9">注意事项</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="cplus/abstract.html">Abstract Class</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="cplus/abstract.html#defination">Defination</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/lvalue_and_rvalue.html">左值与右值</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/lvalue_and_rvalue.html#id2">概述</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/lvalue_and_rvalue.html#id3">常见表达式的值类别</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/lvalue_and_rvalue.html#c-11">C++11 的值类别体系</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/lvalue_and_rvalue.html#id5">左值引用</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="cplus/copyconstructor.html">Copy constructor</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="cplus/copyconstructor.html#example">Example</a></li>
-<li class="toctree-l3"><a class="reference internal" href="cplus/copyconstructor.html#id1">拷贝构造函数调用时机</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="cplus/const_function.html">Const member functions</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="cplus/const_function.html#syntax">Syntax</a></li>
-<li class="toctree-l3"><a class="reference internal" href="cplus/const_function.html#examples-of-const-member-functions">Examples of Const Member Functions</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="cplus/rvalue.html">Cplus Rvalue</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="cplus/rvalue.html#introduction">Introduction</a></li>
-<li class="toctree-l3"><a class="reference internal" href="cplus/rvalue.html#rvalue-references">Rvalue References</a></li>
-<li class="toctree-l3"><a class="reference internal" href="cplus/rvalue.html#move-constructor">Move constructor</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="cplus/lvalue_and_rvalue.html">lvalue &amp;&amp; rvalue</a></li>
 <li class="toctree-l2"><a class="reference internal" href="cplus/placement_new.html">Placement new operator</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="cplus/placement_new.html#syntax">Syntax</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="cplus/template/index.html">Template</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="cplus/template/instantiation.html">Instantiation</a></li>
-<li class="toctree-l3"><a class="reference internal" href="cplus/template/parameter_deduction.html">Parameter Deduction</a></li>
-<li class="toctree-l3"><a class="reference internal" href="cplus/template/overide.html">Overide</a></li>
-<li class="toctree-l3"><a class="reference internal" href="cplus/template/variadic_function.html">Variadic function templates</a></li>
-<li class="toctree-l3"><a class="reference internal" href="cplus/template/fold_expressions.html">Fold Expressions</a></li>
-<li class="toctree-l3"><a class="reference internal" href="cplus/template/universal_references.html">Universal References</a></li>
-<li class="toctree-l3"><a class="reference internal" href="cplus/template/type_deduction.html">Type Deduction</a></li>
-<li class="toctree-l3"><a class="reference internal" href="cplus/template/ref_and_cref.html">std::ref and std::cref</a></li>
-<li class="toctree-l3"><a class="reference internal" href="cplus/template/auto_type_deduction.html">Auto type deduction</a></li>
-<li class="toctree-l3"><a class="reference internal" href="cplus/template/perfect_forwarding.html">Perfect Forwarding</a></li>
-<li class="toctree-l3"><a class="reference internal" href="cplus/template/trait.html">Traits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/template/index.html">模板（Template）</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/template/template_instantiation.html">模板实例化</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/template/template_specialization.html">模板特化（全特化与偏特化）</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/template/template_parameter_deduction.html">模板参数推导</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/template/template_overload.html">函数模板重载</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/template/template_variadic_function.html">可变参函数模板</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/template/template_fold_expressions.html">折叠表达式</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/template/template_universal_references.html">万能引用</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/template/template_type_deduction.html">模板类型推导</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/template/template_auto_type_deduction.html">auto 类型推导</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/template/template_ref_and_cref.html">std::ref 和 std::cref</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/template/template_perfect_forwarding.html">完美转发</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cplus/template/template_trait.html">Traits（萃取）</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="cplus/cast/index.html">C++ Cast</a><ul>
@@ -279,10 +423,6 @@
 <li class="toctree-l3"><a class="reference internal" href="cplus/explicit_implicit.html#explic">Explic</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="cplus/constructor.html">Types of Constructors in C++</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="cplus/constructor.html#default-constructor">Default Constructor</a></li>
-</ul>
-</li>
 <li class="toctree-l2"><a class="reference internal" href="cplus/typedef_typename.html">typedef typename</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="cplus/typedef_typename.html#typdef-typename">typdef typename</a></li>
 <li class="toctree-l3"><a class="reference internal" href="cplus/typedef_typename.html#typedef">typedef</a></li>
@@ -292,6 +432,10 @@
 <li class="toctree-l2"><a class="reference internal" href="cplus/inline_function.html">Inline Function</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="cplus/inline_function.html#syntax">Syntax</a></li>
 <li class="toctree-l3"><a class="reference internal" href="cplus/inline_function.html#example">Example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cplus/math/index.html">Math</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cplus/math/cube_root.html">Cube root</a></li>
 </ul>
 </li>
 </ul>
@@ -567,33 +711,6 @@
 <li class="toctree-l3"><a class="reference internal" href="debian/live-cd/0002.html">lb_build</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="debian/elxr_edge/index.html">eLxr Edge</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="debian/elxr_edge/0001.html">Simplify Ruckstack with shell script</a></li>
-<li class="toctree-l3"><a class="reference internal" href="debian/elxr_edge/0002.html">How to Start Edge on NXP i.MX8 EVK</a></li>
-<li class="toctree-l3"><a class="reference internal" href="debian/elxr_edge/0003.html">Troubleshooting and Debugging apt-ostree on ELXR Edge OS</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="debian/os-tree/index.html">OS tree</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="debian/os-tree/0017.html">Ostree</a></li>
-<li class="toctree-l3"><a class="reference internal" href="debian/os-tree/0008.html">Ostree FileSystem Layout</a></li>
-<li class="toctree-l3"><a class="reference internal" href="debian/os-tree/0001.html">ostree init</a></li>
-<li class="toctree-l3"><a class="reference internal" href="debian/os-tree/0002.html">ostree admin init-fs</a></li>
-<li class="toctree-l3"><a class="reference internal" href="debian/os-tree/0003.html">ostree pull-local</a></li>
-<li class="toctree-l3"><a class="reference internal" href="debian/os-tree/0004.html">ostree log</a></li>
-<li class="toctree-l3"><a class="reference internal" href="debian/os-tree/0005.html">ostree summary</a></li>
-<li class="toctree-l3"><a class="reference internal" href="debian/os-tree/0006.html">ostree admin os-init</a></li>
-<li class="toctree-l3"><a class="reference internal" href="debian/os-tree/0007.html">ostree admin deploy</a></li>
-<li class="toctree-l3"><a class="reference internal" href="debian/os-tree/0009.html">Steps to Build dbgsym Package for ostree</a></li>
-<li class="toctree-l3"><a class="reference internal" href="debian/os-tree/0010.html">Ostree startup procedure</a></li>
-<li class="toctree-l3"><a class="reference internal" href="debian/os-tree/0014.html">Ostree systemd generator</a></li>
-<li class="toctree-l3"><a class="reference internal" href="debian/os-tree/0011.html">Systemd initrd</a></li>
-<li class="toctree-l3"><a class="reference internal" href="debian/os-tree/0012.html">systemd.generator - systemd unit generators</a></li>
-<li class="toctree-l3"><a class="reference internal" href="debian/os-tree/0013.html">How to Debug the initrd ?</a></li>
-<li class="toctree-l3"><a class="reference internal" href="debian/os-tree/0015.html">How to Grub2 load the Ostree</a></li>
-<li class="toctree-l3"><a class="reference internal" href="debian/os-tree/0016.html">ostree-boot: grub2-15_ostree</a></li>
-<li class="toctree-l3"><a class="reference internal" href="debian/os-tree/0018.html">A Deep Dive into OSTree Commit Implementation</a></li>
-</ul>
-</li>
 <li class="toctree-l2"><a class="reference internal" href="debian/0001.html">Ruck: build pablo with minimal ostree rootfs</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="debian/0001.html#load-configuration"><strong>1. Load Configuration</strong></a></li>
 </ul>
@@ -687,6 +804,7 @@
 <li class="toctree-l3"><a class="reference internal" href="debian/0021.html#push-updates-back-to-your-fork">4.Push updates back to your fork</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="debian/0022.html">To remove the stale remote tracking branch</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="tools/index.html">Tools</a><ul>
@@ -700,6 +818,14 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="tools/0001.html">A tool on Linux that can convert an image to a text file</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="tools/0001.html#tesseract-ocr">Tesseract OCR</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tools/0002.html">Taskwarrior Basic Usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tools/0002.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tools/0002.html#basic-operations">Basic Operations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tools/0002.html#task-attributes">Task Attributes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tools/0002.html#common-commands">Common Commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tools/0002.html#filtering-and-searching">Filtering and Searching</a></li>
 </ul>
 </li>
 </ul>
@@ -770,6 +896,21 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="math/index.html">Math</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="math/intermediate_value_theorem.html">intermediate value theorem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="math/right_rotate.html">Right Rotate</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="math/right_rotate.html#syntax">Syntax</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="crypto/index.html">Crypto</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="crypto/libgcrpt.html">Libgcrypt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="crypto/aes.html">ADVANCED ENCRYPTION STANDARD (AES)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="crypto/fips.html">Fips</a></li>
+<li class="toctree-l2"><a class="reference internal" href="crypto/hash/index.html">Hashing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="crypto/hash/overview.html">Hashing Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crypto/hash/SHA-2.html">SHA-2</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="todo.html">To Do</a><ul>
@@ -817,6 +958,7 @@
 <li class="toctree-l1"><a class="reference internal" href="system/index.html">System</a></li>
 <li class="toctree-l1"><a class="reference internal" href="unix/index.html">UNIX</a></li>
 <li class="toctree-l1"><a class="reference internal" href="math/index.html">Math</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crypto/index.html">Crypto</a></li>
 <li class="toctree-l1"><a class="reference internal" href="todo.html">To Do</a></li>
 </ul>
 

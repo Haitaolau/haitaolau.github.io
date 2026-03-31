@@ -1,0 +1,29 @@
+====================
+Fips
+====================
+
+
+Here are the key NIST resources:
+
+1. FIPS 140-3 Implementation Guidance 
+
+   - Lists approved security functions and modes.
+   - References supporting documents like SP 800-140x series.
+   - https://csrc.nist.gov/csrc/media/Projects/cryptographic-module-validation-program/documents/fips%20140-3/FIPS%20140-3%20IG.pdf
+
+
+2. Cryptographic Algorithm Validation Program(CAVP): 
+
+   - Provides validation testing for individual algorithms.
+   - Includes searchable lists of validated algorithm implementations.
+   - https://csrc.nist.gov/Projects/Cryptographic-Algorithm-Validation-Program 
+
+2.1 Advanced Encryption Standard Algorithm Validation System(AESAVS): 
+
+   - https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Algorithm-Validation-Program/documents/aes/AESAVS.pdf 
+
+3. FIPS PUB 140-3 Standard 
+
+   - Defines the security requirements for cryptographic modules.
+   - Points to ISO/IEC standards and NIST SP 800-140x documents for algorithm specifics.
+   - https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.140-3.pdf

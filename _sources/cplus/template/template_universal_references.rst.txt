@@ -1,0 +1,196 @@
+==========================
+万能引用
+==========================
+
+.. contents:: Table of Contents
+
+概述
+--------------
+
+.. note::
+
+    T&& Doesn't Always Mean "Rvalue Reference"
+
+万能引用（Universal References）是 Scott Meyers 提出的术语（C++17 标准中称为转发引用 Forwarding References）。在 C++11 中，形如 ``T&&`` 的类型有两种情况：
+
+* 普通的右值引用（rvalue reference）
+* 万能引用（universal reference），既可能表示左值引用，也可能表示右值引用
+
+判断规则
+--------------
+
+1. 如果一个 **函数模板参数的类型为** ``T&&`` ，其中 T 是需要 **推导的类型** ，那么此处的 ``T&&`` 指代万能引用。若不严格满足 ``T&&`` 类型或没有发生类型推导，则 ``T&&`` 指代右值引用。
+
+.. code-block:: cpp
+
+    template<typename T>
+    void f(T&& param);      // param 是万能引用
+
+2. 如果一个对象的类型被定义为 ``auto&&`` ，则此对象为万能引用。
+
+.. code-block:: cpp
+
+    auto&& f = g();         // f 是万能引用
+
+万能引用的绑定规则：
+
+* 如果万能引用是通过右值初始化的，那么它就对应一个右值引用。
+* 如果万能引用是通过左值初始化的，那么它就对应一个左值引用。
+
+万能引用既可以接收左值也可以接收右值
+==========================================
+
+万能引用的核心特性是：同一个函数模板既可以接收左值，也可以接收右值，而普通的左值引用或右值引用做不到这一点。
+
+.. code-block:: cpp
+
+    #include <iostream>
+    using namespace std;
+
+    template <typename T>
+    void process(T&& arg)
+    {
+        cout << "value: " << arg << endl;
+    }
+
+    int main()
+    {
+        int a = 42;
+        process(a);             // 传入左值，T 推导为 int&，arg 为 int&
+        process(100);           // 传入右值，T 推导为 int，arg 为 int&&
+        process(std::move(a));  // 传入右值，T 推导为 int，arg 为 int&&
+
+        string s = "hello";
+        process(s);             // 传入左值，T 推导为 string&
+        process(string("world")); // 传入右值，T 推导为 string
+        return 0;
+    }
+
+输出：
+
+.. code-block:: console
+
+    value: 42
+    value: 100
+    value: 42
+    value: hello
+    value: world
+
+如果把参数改为普通的右值引用 ``void process(int&& arg)`` ，则无法接收左值；如果改为左值引用 ``void process(int& arg)`` ，则无法接收右值。万能引用通过引用折叠机制，让一个函数同时处理两种情况。
+
+不是万能引用的情况
+====================
+
+类模板成员函数中的 T&&
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: cpp
+
+    template <typename T>
+    class mytestc {
+    public:
+        void testfunc(T&& x) {};
+    };
+
+    int main(int argc, char const *argv[])
+    {
+        mytestc<int> mc;
+        int i = 100;
+        mc.testfunc(i);     // 编译错误
+        return 0;
+    }
+
+.. code-block:: console
+
+    error: cannot bind rvalue reference of type 'int&&' to lvalue of type 'int'
+
+因为 testfunc() 成员函数本身没有涉及类型推断。 ``mytestc<int> mc;`` 实例化完成后，testfunc() 已经确定为 ``void testfunc(int&& x)`` ，所以形参 x 是右值引用，不是万能引用。
+
+加了 cv 限定符的 T&&
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+``T&&`` 加上 cv qualifiers（如 const）就不是万能引用：
+
+.. code-block:: cpp
+
+    template<typename T>
+    void f(const T&& param);    // param 是右值引用，不是万能引用
+
+.. code-block:: cpp
+
+    #include <iostream>
+
+    template <typename T>
+    void myfunc(const T&& tmprv)
+    {
+        std::cout << tmprv << std::endl;
+    }
+
+    int main(int argc, char const *argv[])
+    {
+        int i = 100;
+        // myfunc(i);          // 编译错误：不能将左值绑定到 const int&&
+        myfunc(std::move(i));   // 正确：std::move 转换为右值
+        return 0;
+    }
+
+const 修饰词会剥夺一个引用成为万能引用的资格，此时 ``const T&&`` 就是一个普通的右值引用，只能绑定右值。
+
+为什么 ``std::move(i)`` 可以编译通过？
+
+``std::move(i)`` 的作用是把 i 从左值 **无条件转换为右值** （准确说是亡值 xvalue），它本身不移动任何东西，只是做了一个类型转换，等价于 ``static_cast<int&&>(i)`` 。
+
+* ``myfunc(i)`` ：i 是左值，右值引用不能绑定左值 → 编译错误
+* ``myfunc(std::move(i))`` ： ``std::move(i)`` 返回 ``int&&`` （右值），右值引用可以绑定右值 → 编译通过，T 推导为 ``int`` ，形参类型为 ``const int&&``
+
+万能引用的类型推导示例
+========================
+
+.. code-block:: cpp
+
+    #include <iostream>
+    #include <boost/type_index.hpp>
+
+    template <typename T>
+    void myfunc(T&& tmprv)
+    {
+        using boost::typeindex::type_id_with_cvr;
+        std::cout << "T=" << type_id_with_cvr<T>().pretty_name() << std::endl;
+        std::cout << "tmprv=" << type_id_with_cvr<decltype(tmprv)>().pretty_name() << std::endl;
+    }
+
+    int main(int argc, char const *argv[])
+    {
+        int i = 18;
+        const int j = i;
+        const int& k = i;
+        myfunc(i);      // i 是左值：T=int&, tmprv=int&
+        myfunc(j);      // j 是左值：T=int const&, tmprv=int const&
+        myfunc(k);      // k 是左值：T=int const&, tmprv=int const&
+        myfunc(100);    // 100 是右值：T=int, tmprv=int&&
+        return 0;
+    }
+
+输出：
+
+.. code-block:: console
+
+    T=int&
+    tmprv=int&
+    T=int const&
+    tmprv=int const&
+    T=int const&
+    tmprv=int const&
+    T=int
+    tmprv=int&&
+
+万能引用保留 const 属性
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+上面的结果中，传入 ``j`` （``const int``）和 ``k`` （``const int&``）时，tmprv 都被推导为 ``int const&`` ，const 属性被完整保留了下来。
+
+* ``myfunc(i)`` ：i 是 ``int`` （非 const）→ T = ``int&`` ，tmprv = ``int&``
+* ``myfunc(j)`` ：j 是 ``const int`` → T = ``const int&`` ，tmprv = ``const int&``
+* ``myfunc(k)`` ：k 是 ``const int&`` ，引用被忽略后还是 ``const int`` → T = ``const int&`` ，tmprv = ``const int&``
+
+这是合理的设计——如果调用者传入的是 const 对象，函数内部也不应该能修改它。万能引用会忠实地把 const 信息传递进来，保证 const 正确性。这也是万能引用配合 ``std::forward`` 做完美转发的关键：不仅保留左值/右值属性，还保留 cv 限定符，让被转发的函数能收到与原始调用完全一致的类型信息。

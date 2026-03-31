@@ -28,6 +28,7 @@ Welcome to Gdocs's documentation!
    system/index
    unix/index
    math/index
+   crypto/index
    todo
    
 .. * :ref:`corp_index`

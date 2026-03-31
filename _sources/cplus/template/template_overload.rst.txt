@@ -1,0 +1,220 @@
+==========================
+函数模板重载
+==========================
+
+.. contents:: Table of Contents
+
+概述
+--------------
+
+函数模板的重载与函数的重载比较类似，函数（函数模板）重载的概念是：函数（函数模板）名字相同，但参数数量或参数类型不同。编译器会根据调用时给出的具体实参，选择一个编译器认为最合适的函数模板实例化和调用。
+
+函数模板之间的重载
+====================
+
+.. code-block:: cpp
+
+    #include <iostream>
+
+    template<typename T>
+    void myfunc(T tmpvalue){
+        std::cout << "myfunc(T tmpvalue) executed" << std::endl;
+    }
+
+    template<typename T>
+    void myfunc(T* tmpvalue){
+        std::cout << "myfunc(T* tmpvalue) executed" << std::endl;
+    }
+
+    int main(int argc, char* argv[]){
+        myfunc(12);             // 调用 myfunc(T)
+        char* p = nullptr;
+        myfunc(p);              // 调用 myfunc(T*)
+        return 0;
+    }
+
+输出：
+
+.. code-block:: console
+
+    myfunc(T tmpvalue) executed
+    myfunc(T* tmpvalue) executed
+
+当调用 ``myfunc(p)`` 时，编译器执行的是形参为 ``T*`` 类型的函数模板，因为它更匹配指针类型的实参。
+
+函数模板与普通函数的重载
+==========================
+
+函数模板和普通函数可以同时存在，此时普通函数也是一种重载。当普通函数和函数模板都比较合适的时候，编译器会优先选择普通函数执行。
+
+.. code-block:: cpp
+
+    #include <iostream>
+
+    void myfunc(int tmpvalue){
+        std::cout << "myfunc(int tmpvalue) executed" << std::endl;
+    }
+
+    template<typename T>
+    void myfunc(T tmpvalue){
+        std::cout << "myfunc(T tmpvalue) executed" << std::endl;
+    }
+
+    template<typename T>
+    void myfunc(T* tmpvalue){
+        std::cout << "myfunc(T* tmpvalue) executed" << std::endl;
+    }
+
+    int main(int argc, char* argv[]){
+        myfunc(12);             // 优先调用普通函数
+        char* p = nullptr;
+        myfunc(p);              // 调用 myfunc(T*)
+        return 0;
+    }
+
+输出：
+
+.. code-block:: console
+
+    myfunc(int tmpvalue) executed
+    myfunc(T* tmpvalue) executed
+
+重载决议规则
+--------------
+
+* 普通函数优先于函数模板（完全匹配时）。
+* 更特化的函数模板优先于更泛化的函数模板。
+* 如果需要类型转换才能匹配普通函数，而函数模板可以精确匹配，则优先选择函数模板。
+
+模板与自动类型转换
+==========================
+
+函数模板在推导类型时 **不会进行自动类型转换** （隐式类型转换），而普通函数可以。这是两者在重载决议中的一个重要区别。
+
+问题示例
+^^^^^^^^^^
+
+.. code-block:: cpp
+
+    #include <iostream>
+    using namespace std;
+
+    template <typename T>
+    T myAdd(T a, T b)
+    {
+        return a + b;
+    }
+
+    int main()
+    {
+        int a = 10;
+        double b = 3.14;
+        // myAdd(a, b);     // 编译错误！
+        return 0;
+    }
+
+.. code-block:: console
+
+    error: no matching function for call to 'myAdd(int&, double&)'
+    note: deduced conflicting types for parameter 'T' ('int' and 'double')
+
+编译器从实参 a 推导 T=int，从实参 b 推导 T=double，两者矛盾，编译器不会自动将 int 转换为 double（或反过来），因此报错。
+
+解决方案
+^^^^^^^^^^
+
+**方案 1：显式指定模板参数**
+
+.. code-block:: cpp
+
+    myAdd<double>(a, b);    // T=double，a 被隐式转换为 double
+
+显式指定 T=double 后，编译器不再推导，而是将 a 隐式转换为 double。
+
+**方案 2：使用两个类型参数**
+
+.. code-block:: cpp
+
+    template <typename T1, typename T2>
+    auto myAdd(T1 a, T2 b)
+    {
+        return a + b;
+    }
+
+    myAdd(a, b);    // T1=int, T2=double，返回 double
+
+每个参数独立推导，不存在冲突。
+
+**方案 3：提供普通函数重载**
+
+.. code-block:: cpp
+
+    // 普通函数可以进行自动类型转换
+    double myAdd(double a, double b)
+    {
+        return a + b;
+    }
+
+    myAdd(a, b);    // a 被自动转换为 double，调用普通函数
+
+普通函数允许隐式类型转换，所以 int 类型的 a 会被自动转换为 double。
+
+完整对比示例
+^^^^^^^^^^^^^^^^
+
+.. code-block:: cpp
+
+    #include <iostream>
+    using namespace std;
+
+    // 普通函数
+    int myAdd(int a, int b)
+    {
+        cout << "普通函数" << endl;
+        return a + b;
+    }
+
+    // 函数模板
+    template <typename T>
+    T myAdd(T a, T b)
+    {
+        cout << "函数模板" << endl;
+        return a + b;
+    }
+
+    int main()
+    {
+        int a = 10;
+        int b = 20;
+        double c = 3.14;
+        char d = 'A';       // ASCII 65
+
+        myAdd(a, b);        // 普通函数（完全匹配，普通函数优先）
+        myAdd(c, c);        // 函数模板（T=double，精确匹配）
+        myAdd(a, d);        // 普通函数（char->int 自动转换，模板无法推导）
+        // myAdd(a, c);     // 编译错误：模板无法推导，普通函数也不匹配
+        myAdd<double>(a, c); // 显式指定 T=double，模板可以调用
+
+        return 0;
+    }
+
+输出：
+
+.. code-block:: console
+
+    普通函数
+    函数模板
+    普通函数
+    函数模板
+
+关键点：
+
+* ``myAdd(a, b)`` ：普通函数和模板都能匹配，普通函数优先。
+* ``myAdd(c, c)`` ：普通函数需要 double->int 转换，模板可以精确匹配 T=double，模板优先。
+* ``myAdd(a, d)`` ：模板推导 T 时 int 和 char 冲突，模板失败；普通函数可以将 char 自动转换为 int，所以调用普通函数。
+* ``myAdd(a, c)`` ：模板推导失败（int vs double），普通函数也不匹配（没有 int+double 的普通函数），编译错误。
+* ``myAdd<double>(a, c)`` ：显式指定 T=double，编译器不再推导，a 被隐式转换为 double。
+
+.. note::
+
+    总结：函数模板在类型推导时不允许隐式类型转换，所有参数必须精确匹配。如果需要不同类型的参数混合调用，可以：（1）显式指定模板参数；（2）使用多个类型参数的模板；（3）提供普通函数重载（普通函数允许隐式转换）。

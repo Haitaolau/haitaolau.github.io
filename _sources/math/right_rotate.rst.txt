@@ -1,0 +1,86 @@
+======================
+Right Rotate
+======================
+
+
+
+Syntax
+=======
+
+
+The rotate right (circular right shift) operation ROTR n(x), where x is a w-bit word
+and n is an integer with 0 £ n < w, is defined by
+
+.. code-block::
+
+   ROTRn(x)=(x >> n) v (x << w - n).
+
+
+.. code-block:: cpp
+
+   #include <bit>
+   #include <bitset>
+   #include <cstdint>
+   #include <iostream>
+
+   int main(int argc, char**argv)
+   {
+    	unsigned char x = 0b11100101;
+    	unsigned char result = std::rotr(x,3);
+    	std::cout << "input  is:" << std::bitset<8>(x) << std::endl;
+    	std::cout << "Result is:" << std::bitset<8>(result) << std::endl;
+    	return 0;
+   }
+
+
+.. note::
+
+   Compiling with c++20, g++ -std=c++20 
+
+Result:
+
+.. code-block:: bash 
+
+   wruser@pek-hliu4-l2:~/workspace/test$ ./a.out 
+   input  is:11100101
+   Result is:10111100
+   wruser@pek-hliu4-l2:~/workspace/test$
+
+
+
+Explanation of the bit shift:
+
+*    Original: 11100101
+*    Right shift by 3: The last three bits 101 are moved to the front.
+*    Result: 10111100 
+
+
+
+.. code-block:: cpp
+
+    #include <bit>
+    #include <bitset>
+    #include <cstdint>
+    #include <iostream>
+   
+    int main(int argc, char**argv)
+    {
+    	unsigned char x = 0b11100101;
+    	unsigned char result = std::rotr(x,3);
+    	std::cout << "input  is :" << std::bitset<8>(x) << std::endl;
+    	std::cout << "a=x>>3    :" << std::bitset<8>(x>>3) << std::endl;
+    	std::cout << "b=x>>(8-3):" << std::bitset<8>(x<<5) << std::endl;
+    	std::cout << "Result is :" << std::bitset<8>((x>>3)|(x<<5)) << std::endl;
+    	return 0;
+    }
+   
+Result:
+
+  .. code-block::
+
+     wruser@pek-hliu4-l2:~/workspace/test$ ./a.out 
+     input  is :11100101
+     a=x>>3    :00011100
+     b=x>>(8-3):10100000
+     Result is :10111100
+     wruser@pek-hliu4-l2:~/workspace/test/$ 

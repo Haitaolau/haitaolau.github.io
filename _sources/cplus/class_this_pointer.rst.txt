@@ -1,0 +1,92 @@
+====================
+this 指针
+====================
+
+.. contents:: Table of Contents
+
+概述
+--------------
+
+this 指针是 C++ 实现封装的一种机制，它将对象和对象调用的非静态成员函数联系在一起，从外部看来，每个对象都拥有自己的成员函数。当创建一个对象时，编译器会初始化一个 this 指针，指向创建的对象，this 指针并不存储在对象内部，而是作为所有非静态成员函数的隐含参数。
+
+示例
+--------------
+
+.. code-block:: cpp
+
+    #include <iostream>
+    using namespace std;
+
+    class Student {
+        int age;
+    public:
+        Student(int age) {
+            // "this->age" refers to the data member
+            this->age = age;
+        }
+
+        void display() const {
+            cout << "Age: " << this->age << endl;
+        }
+    };
+
+    int main() {
+        Student s1(20);
+        s1.display();
+        return 0;
+    }
+
+汇编分析
+--------------
+
+使用以下命令生成汇编代码：
+
+.. code-block:: bash
+
+    g++ -O0 -S -fverbose-asm -g this_pointer.cpp -o this_pointer.s
+
+构造函数中，this 指针通过 ``%rdi`` 寄存器传入，age 参数通过 ``%esi`` 传入：
+
+.. code-block:: asm
+
+    _ZN7StudentC2Ei:                        # Student::Student(int)
+        movq    %rdi, -8(%rbp)              # this, this
+        movl    %esi, -12(%rbp)             # age, age
+    # this_pointer.cpp:10:  this->age = age;
+        movq    -8(%rbp), %rax              # this, tmp82
+        movl    -12(%rbp), %edx             # age, tmp83
+        movl    %edx, (%rax)                # tmp83, this->age
+
+display 函数中，同样通过 ``%rdi`` 接收 this 指针，再通过 ``(%rax)`` 解引用访问成员：
+
+.. code-block:: asm
+
+    _ZNK7Student7displayEv:                 # Student::display() const
+        movq    %rdi, -8(%rbp)              # this, this
+    # this_pointer.cpp:15:  cout << "Age: " << this->age << endl;
+        movq    -8(%rbp), %rax              # this, tmp87
+        movl    (%rax), %eax                # this->age, _2
+
+main 函数中，对象地址通过 ``%rdi`` 传递给成员函数：
+
+.. code-block:: asm
+
+    main:
+    # Student s1(20);
+        leaq    -12(%rbp), %rax             # &s1
+        movl    $20, %esi                   # age = 20
+        movq    %rax, %rdi                  # this = &s1
+        call    _ZN7StudentC1Ei             # Student::Student(int)
+    # s1.display();
+        leaq    -12(%rbp), %rax             # &s1
+        movq    %rax, %rdi                  # this = &s1
+        call    _ZNK7Student7displayEv      # Student::display() const
+
+总结
+--------------
+
+从汇编代码可以看出：
+
+* this 指针通过 ``%rdi`` 寄存器（x86-64 调用约定的第一个参数）隐式传递给每个非静态成员函数。
+* 成员变量的访问实际上是通过 this 指针的偏移来实现的，例如 ``(%rax)`` 即 ``this->age`` 。
+* 调用成员函数时，编译器自动将对象地址作为第一个参数传入。

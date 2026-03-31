@@ -1,0 +1,76 @@
+==================================
+重载赋值运算符
+==================================
+
+.. contents:: Table of Contents
+
+概述
+--------------
+
+对于赋值运算符来说，如果不重载，类会自动提供一个赋值运算符。这个默认的赋值运算符和默认的拷贝构造函数一样，实现的是浅拷贝。若数据成员中有指针，则默认的赋值运算符不能满足要求，会出现重析构的现象，这时就需要重载赋值运算符，实现深拷贝。
+
+示例
+--------------
+
+.. code-block:: cpp
+
+    #include<string.h>
+    #include<iostream>
+    using namespace std;
+    class Assign
+    {
+    public:
+        char* name;
+        char* url;
+    public:
+        Assign(const char* name,const char* url);
+        Assign(const Assign& temp);
+        ~Assign()
+        {
+            delete[]name;
+            delete[]url;
+        }
+        Assign& operator=(Assign& temp);
+    };
+    Assign::Assign(const char* name,const char* url)
+    {
+        this->name=new char[strlen(name)+1];
+        this->url=new char[strlen(url)+1];
+        if(name)
+            strcpy(this->name,name);
+        if(url)
+            strcpy(this->url,url);
+    }
+    Assign::Assign(const Assign& temp)
+    {
+        this->name=new char[strlen(temp.name)+1];
+        this->url=new char[strlen(temp.url)+1];
+        if(name)
+            strcpy(this->name,temp.name);
+        if(url)
+            strcpy(this->url,temp.url);
+    }
+    Assign& Assign::operator=(Assign& temp)
+    {
+        delete[]name;
+        delete[]url;            // 先释放原来空间，再重新申请
+        this->name=new char[strlen(temp.name)+1];
+        this->url=new char[strlen(temp.url)+1];
+        if(name)
+            strcpy(this->name,temp.name);
+        if(url)
+            strcpy(this->url,temp.url);
+        return *this;
+    }
+    int main()
+    {
+        Assign a("baidu", "http://www.baidu.com/");
+        cout<<"a对象："<<a.name<<" "<<a.url<<endl;
+        Assign b(a);            // 用a对象初始化b，调用拷贝构造函数
+        cout<<"b对象："<<b.name<<" "<<b.url<<endl;
+        Assign c("google", "http://www.google.com/");
+        cout<<"c对象："<<c.name<<" "<<c.url<<endl;
+        b=c;                    // 调用赋值重载函数
+        cout<<"b对象："<<b.name<<" "<<b.url<<endl;
+        return 0;
+    }

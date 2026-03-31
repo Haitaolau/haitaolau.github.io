@@ -1,0 +1,87 @@
+==========================
+可变参函数模板
+==========================
+
+.. contents:: Table of Contents
+
+概述
+--------------
+
+可变参模板（Variadic Templates，C++11）可以接受任意数量（零个或多个）的模板参数。
+
+定义格式：
+
+.. code-block:: cpp
+
+    template <typename... Args>
+    void func(Args... args);
+
+* ``typename...`` 表示模板参数包（template parameter pack），可以匹配零个或多个类型。
+* ``Args...`` 表示函数参数包（function parameter pack），对应模板参数包中的每个类型。
+* ``sizeof...(args)`` 用于获取参数包中的参数个数。
+
+示例
+--------------
+
+.. code-block:: cpp
+
+    #include <iostream>
+
+    template <typename T, typename... U>
+    void myvtfunct(T firstarg, U... otherargs)
+    {
+        std::cout << "Firstargs: " << firstarg << std::endl;
+        if constexpr(sizeof...(otherargs) > 0)  // C++17 编译期 if
+        {
+            myvtfunct(otherargs...);
+        }
+    }
+
+    int main(int argc, char **argv)
+    {
+        myvtfunct(10, 25.8, "abc", 68);
+        return 0;
+    }
+
+输出：
+
+.. code-block:: console
+
+    Firstargs: 10
+    Firstargs: 25.8
+    Firstargs: abc
+    Firstargs: 68
+
+要点
+--------------
+
+* ``typename...`` 中的三个点表示参数包，修饰类型模板参数 T。
+* args 一般称为一包参数，每个参数的类型可以各不相同，可以容纳 0 到多个参数。
+* ``sizeof...`` 是 C++11 引入的固定语法，用于获取可变参数包中的参数个数，后面的圆括号中可以是函数参数包（args）或类型参数包（T）。
+* ``if constexpr`` （C++17）在编译期判断，避免递归终止时的编译错误。
+
+递归展开参数包
+====================
+
+C++11 中没有 ``if constexpr`` ，通常使用递归 + 终止函数的方式展开参数包：
+
+.. code-block:: cpp
+
+    #include <iostream>
+
+    // 递归终止函数
+    void print() {}
+
+    // 递归展开
+    template <typename T, typename... Args>
+    void print(T first, Args... rest)
+    {
+        std::cout << first << std::endl;
+        print(rest...);     // 递归调用，参数包逐步减少
+    }
+
+    int main()
+    {
+        print(1, 2.5, "hello", 'c');
+        return 0;
+    }

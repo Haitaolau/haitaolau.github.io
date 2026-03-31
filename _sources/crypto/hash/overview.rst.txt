@@ -1,0 +1,62 @@
+=================
+Hashing Overview
+=================
+
+
+
+Properties of a Hash Function
+==================================
+
+
+1.抗第一原像性(Pre-image Resistance)
+----------------------------------------
+  
+  这一属性表示无法根据哈希函数的输出恢复其对应的输入.
+
+  it is computationally infeasible to find any input which hashes to that output.
+
+
+2.抗第二原像性(Second Pre-image Resistance)
+------------------------------------------------
+
+  给定一个输入和它的哈希值，无法找到一个不同于该输入的新输入，使得这两个输入产生一样的哈希值.
+
+  It is computationally infeasible to find any second input which has the same output as any specified input
+
+  .. image:: ../../_static/image/hash_second_preimage_resistance.png 
+
+  第一个输入是固定的，我们只能控制第二个输入。这对于理解哈希函数的下一个安全性质很重要。
+
+3.抗碰撞性(Collision Resistance)
+--------------------------------------------
+
+  这个性质保证不能够产生哈希值相同的两个不同的输入
+
+  it is computationally infeasible to find any two distinct inputs which hash to the same output.
+
+  .. image:: ../../_static/image/hash_collision_resistance.png
+
+  无法找到哈希值（右侧）相同的两个不同的输入（在左侧表示为两个随机数据块)。这种安全属性称为抗碰撞性
+
+
+实际上，当我们从2N种可能性的空间中随机生成字符串时，在已经生成大约2N/2个字符串后，发现碰撞的概率为50%。
+
+如果哈希函数产生256比特的随机输出，那么所有输出的空间大小为2256。这意味着，在生成了2128个摘要后
+
+（由于生日界限），发现碰撞的概率就很高了。
+
+但2128就是我们想要达到安全目标所需要的最大操作次数。这就是哈希函数至少要提供256比特输出的原因
+
+
+* ● 为了满足抗碰撞性，摘要长度至少是256比特；
+
+* ● 为了满足抗第一原像性和抗第二原像性，摘要长度至少是128比特。
+
+
+References
+==============
+
+
+Hash Functions: https://csrc.nist.gov/projects/hash-functions
+
+

@@ -1,0 +1,476 @@
+==========================
+构造函数的类型
+==========================
+
+.. contents:: Table of Contents
+
+概述
+--------------
+
+C++ 中的构造函数根据使用场景可以分为以下几种类型：
+
+1. 默认构造函数（Default Constructor）
+2. 有参构造函数（Parameterized Constructor）
+3. 拷贝构造函数（Copy Constructor）
+4. 移动构造函数（Move Constructor）
+5. 委托构造函数（Delegating Constructor，C++11）
+6. 转换构造函数（Converting Constructor）
+
+默认构造函数
+====================
+
+默认构造函数是没有参数（或所有参数都有默认值）的构造函数。如果程序员没有定义任何构造函数，编译器会自动生成一个默认构造函数，使用默认值初始化成员变量。但如果程序员定义了任何构造函数，编译器就不再自动生成默认构造函数。
+
+定义格式：
+
+.. code-block:: cpp
+
+    class ClassName {
+    public:
+        ClassName();                    // 无参默认构造函数
+        ClassName() = default;          // 显式要求编译器生成（C++11）
+        ClassName() = delete;           // 禁止默认构造（C++11）
+    };
+
+示例：
+
+.. code-block:: cpp
+
+    #include <iostream>
+    using namespace std;
+
+    class Point {
+        int x, y;
+    public:
+        Point() {               // 默认构造函数
+            x = 0;
+            y = 0;
+            cout << "Default: (" << x << "," << y << ")" << endl;
+        }
+    };
+
+    int main() {
+        Point p;                // 调用默认构造函数
+        return 0;
+    }
+
+输出：
+
+.. code-block:: console
+
+    Default: (0,0)
+
+如果定义了有参构造函数但仍需要默认构造函数，可以使用 ``= default`` （C++11）：
+
+.. code-block:: cpp
+
+    class Point {
+        int x, y;
+    public:
+        Point() = default;              // 显式要求编译器生成默认构造函数
+        Point(int x, int y) : x(x), y(y) {}
+    };
+
+有参构造函数
+====================
+
+有参构造函数接受一个或多个参数，用于在创建对象时传入初始值。参数可以有默认值，但至少有一个参数没有默认值（否则就是默认构造函数）。
+
+定义格式：
+
+.. code-block:: cpp
+
+    class ClassName {
+    public:
+        ClassName(type1 param1, type2 param2, ...);             // 声明
+        ClassName(type1 param1, type2 param2, ...)
+            : member1(param1), member2(param2) {}               // 列表初始化
+    };
+
+创建对象的几种语法：
+
+.. code-block:: cpp
+
+    ClassName obj(arg1, arg2);          // 直接初始化
+    ClassName obj = ClassName(arg1);    // 显式调用
+    ClassName obj{arg1, arg2};          // 列表初始化（C++11）
+    ClassName obj = {arg1, arg2};       // 拷贝列表初始化（C++11）
+
+示例：
+
+.. code-block:: cpp
+
+    #include <iostream>
+    using namespace std;
+
+    class Time {
+        int hour, minute, second;
+    public:
+        Time(int h, int m, int s) : hour(h), minute(m), second(s) {
+            cout << "Time: " << hour << ":" << minute << ":" << second << endl;
+        }
+    };
+
+    int main() {
+        Time t1(12, 13, 52);            // 直接初始化
+        Time t2 = Time(20, 50, 12);     // 显式调用
+        Time t3{14, 19, 5};             // 列表初始化（C++11）
+        Time t4 = {10, 45, 19};         // 拷贝列表初始化（C++11）
+        return 0;
+    }
+
+输出：
+
+.. code-block:: console
+
+    Time: 12:13:52
+    Time: 20:50:12
+    Time: 14:19:5
+    Time: 10:45:19
+
+拷贝构造函数
+====================
+
+拷贝构造函数使用同类型的另一个对象来初始化新对象。参数为本类对象的 const 引用。如果未定义，编译器会生成一个默认的拷贝构造函数，执行浅拷贝（逐成员复制）。当类中有指针成员时，浅拷贝会导致多个对象共享同一块内存，需要自定义拷贝构造函数实现深拷贝。
+
+定义格式：
+
+.. code-block:: cpp
+
+    class ClassName {
+    public:
+        ClassName(const ClassName& other);           // 拷贝构造函数
+        ClassName(const ClassName& other) = default; // 使用编译器生成的浅拷贝（C++11）
+        ClassName(const ClassName& other) = delete;  // 禁止拷贝（C++11）
+    };
+
+* 参数必须是 **const 引用** ，如果是值传递会导致无限递归调用拷贝构造函数。
+* 编译器默认生成的拷贝构造函数执行浅拷贝，对于含有指针成员的类需要自定义深拷贝。
+
+示例：
+
+.. code-block:: cpp
+
+    #include <iostream>
+    #include <cstring>
+    using namespace std;
+
+    class MyString {
+        char* data;
+        int len;
+    public:
+        MyString(const char* s) {
+            len = strlen(s);
+            data = new char[len + 1];
+            strcpy(data, s);
+            cout << "构造: " << data << endl;
+        }
+
+        // 拷贝构造函数（深拷贝）
+        MyString(const MyString& other) {
+            len = other.len;
+            data = new char[len + 1];
+            strcpy(data, other.data);
+            cout << "拷贝构造: " << data << endl;
+        }
+
+        ~MyString() {
+            cout << "析构: " << data << endl;
+            delete[] data;
+        }
+
+        void print() const { cout << data << endl; }
+    };
+
+    int main() {
+        MyString s1("Hello");
+        MyString s2 = s1;       // 调用拷贝构造函数
+        MyString s3(s1);        // 调用拷贝构造函数
+
+        s1.print();
+        s2.print();
+        s3.print();
+        return 0;
+    }
+
+输出：
+
+.. code-block:: console
+
+    构造: Hello
+    拷贝构造: Hello
+    拷贝构造: Hello
+    Hello
+    Hello
+    Hello
+    析构: Hello
+    析构: Hello
+    析构: Hello
+
+拷贝构造函数的调用时机：
+
+* 用一个对象初始化另一个对象：``MyString s2 = s1;``
+* 对象作为函数参数按值传递
+* 函数返回值为对象（可能被编译器优化为 RVO/NRVO）
+
+移动构造函数
+====================
+
+移动构造函数（C++11）通过"窃取"临时对象的资源来初始化新对象，避免不必要的深拷贝，提升性能。参数为本类对象的右值引用（ ``&&`` ）。
+
+定义格式：
+
+.. code-block:: cpp
+
+    class ClassName {
+    public:
+        ClassName(ClassName&& other) noexcept;           // 移动构造函数
+        ClassName(ClassName&& other) noexcept = default;  // 使用编译器生成的（C++11）
+        ClassName(ClassName&& other) = delete;            // 禁止移动（C++11）
+    };
+
+示例：
+
+.. code-block:: cpp
+
+    #include <iostream>
+    #include <cstring>
+    using namespace std;
+
+    class MyString {
+        char* data;
+        int len;
+    public:
+        MyString(const char* s) {
+            len = strlen(s);
+            data = new char[len + 1];
+            strcpy(data, s);
+            cout << "构造: " << data << endl;
+        }
+
+        // 拷贝构造函数
+        MyString(const MyString& other) {
+            len = other.len;
+            data = new char[len + 1];
+            strcpy(data, other.data);
+            cout << "拷贝构造: " << data << endl;
+        }
+
+        // 移动构造函数
+        MyString(MyString&& other) noexcept {
+            data = other.data;          // 窃取资源
+            len = other.len;
+            other.data = nullptr;       // 将源对象置空，防止重复释放
+            other.len = 0;
+            cout << "移动构造: " << data << endl;
+        }
+
+        ~MyString() {
+            if (data) {
+                cout << "析构: " << data << endl;
+                delete[] data;
+            } else {
+                cout << "析构: (moved)" << endl;
+            }
+        }
+    };
+
+    int main() {
+        MyString s1("Hello");
+        MyString s2 = std::move(s1);    // 调用移动构造函数
+
+        return 0;
+    }
+
+输出：
+
+.. code-block:: console
+
+    构造: Hello
+    移动构造: Hello
+    析构: (moved)
+    析构: Hello
+
+拷贝构造 vs 移动构造：
+
+.. list-table::
+    :header-rows: 1
+    :widths: 20 40 40
+
+    * -
+      - 拷贝构造
+      - 移动构造
+    * - 参数
+      - ``const T&`` （左值引用）
+      - ``T&&`` （右值引用）
+    * - 操作
+      - 分配新内存，复制数据
+      - 窃取源对象的资源指针
+    * - 源对象
+      - 不受影响
+      - 资源被转移，处于空状态
+    * - 性能
+      - O(n)，需要复制所有数据
+      - O(1)，只转移指针
+
+委托构造函数
+====================
+
+委托构造函数（C++11）允许一个构造函数在初始化列表中调用同类的另一个构造函数，避免初始化代码重复。
+
+定义格式：
+
+.. code-block:: cpp
+
+    class ClassName {
+    public:
+        ClassName(type1 p1, type2 p2, type3 p3);         // 主构造函数
+        ClassName(type1 p1, type2 p2)
+            : ClassName(p1, p2, defaultVal) {}            // 委托给主构造函数
+        ClassName(type1 p1)
+            : ClassName(p1, defaultVal2, defaultVal3) {}  // 委托给主构造函数
+        ClassName()
+            : ClassName(def1, def2, def3) {}              // 委托给主构造函数
+    };
+
+* 委托构造函数的初始化列表中 **只能有一个委托调用** ，不能同时初始化其他成员变量。
+* 委托调用形成链式关系，但不能形成循环（A 委托 B，B 又委托 A）。
+
+示例：
+
+.. code-block:: cpp
+
+    #include <iostream>
+    using namespace std;
+
+    class Time {
+        int hour, minute, second;
+    public:
+        // 主构造函数
+        Time(int h, int m, int s) : hour(h), minute(m), second(s) {
+            cout << hour << ":" << minute << ":" << second << endl;
+        }
+
+        // 委托构造函数：调用主构造函数
+        Time(int h, int m) : Time(h, m, 0) {}
+        Time(int h) : Time(h, 0, 0) {}
+        Time() : Time(0, 0, 0) {}
+    };
+
+    int main() {
+        Time t1;                // 0:0:0
+        Time t2(10);            // 10:0:0
+        Time t3(10, 30);        // 10:30:0
+        Time t4(10, 30, 45);    // 10:30:45
+        return 0;
+    }
+
+输出：
+
+.. code-block:: console
+
+    0:0:0
+    10:0:0
+    10:30:0
+    10:30:45
+
+转换构造函数
+====================
+
+转换构造函数只有一个参数（且参数不是本类的 const 引用），编译器可以利用它将其他类型隐式转换为本类类型。使用 ``explicit`` 关键字可以禁止隐式转换。
+
+定义格式：
+
+.. code-block:: cpp
+
+    class ClassName {
+    public:
+        ClassName(OtherType value);              // 允许隐式转换：OtherType -> ClassName
+        explicit ClassName(OtherType value);     // 禁止隐式转换，只能显式构造
+    };
+
+* 没有 ``explicit`` 时，编译器会在需要时自动调用转换构造函数进行隐式类型转换。
+* 加上 ``explicit`` 后，只能通过直接初始化（ ``ClassName obj(value)`` ）或显式构造（ ``ClassName(value)`` ）来调用。
+* C++11 起 ``explicit`` 也可以用于多参数构造函数，禁止列表初始化的隐式转换。
+
+示例：
+
+.. code-block:: cpp
+
+    #include <iostream>
+    using namespace std;
+
+    class Distance {
+        double meters;
+    public:
+        // 转换构造函数：允许 double -> Distance 隐式转换
+        Distance(double m) : meters(m) {
+            cout << "Distance: " << meters << "m" << endl;
+        }
+        double get() const { return meters; }
+    };
+
+    void print(Distance d) {
+        cout << "距离: " << d.get() << "m" << endl;
+    }
+
+    int main() {
+        Distance d1 = 3.14;    // 隐式转换：double -> Distance
+        print(100.0);           // 隐式转换：double -> Distance
+        return 0;
+    }
+
+输出：
+
+.. code-block:: console
+
+    Distance: 3.14m
+    Distance: 100m
+    距离: 100m
+
+使用 ``explicit`` 禁止隐式转换：
+
+.. code-block:: cpp
+
+    class Distance {
+        double meters;
+    public:
+        explicit Distance(double m) : meters(m) {}
+        double get() const { return meters; }
+    };
+
+    int main() {
+        // Distance d1 = 3.14;     // 错误：explicit 禁止隐式转换
+        Distance d2(3.14);          // 正确：显式调用
+        Distance d3 = Distance(3.14); // 正确：显式构造
+        return 0;
+    }
+
+总结
+--------------
+
+.. list-table::
+    :header-rows: 1
+    :widths: 20 40 40
+
+    * - 构造函数类型
+      - 参数形式
+      - 用途
+    * - 默认构造函数
+      - 无参数或所有参数有默认值
+      - 创建对象时使用默认值初始化
+    * - 有参构造函数
+      - 自定义参数列表
+      - 创建对象时传入初始值
+    * - 拷贝构造函数
+      - ``const T&``
+      - 用已有对象初始化新对象（深拷贝）
+    * - 移动构造函数
+      - ``T&&``
+      - 窃取临时对象资源，避免拷贝开销
+    * - 委托构造函数
+      - 调用同类其他构造函数
+      - 避免初始化代码重复
+    * - 转换构造函数
+      - 单参数（非本类引用）
+      - 实现其他类型到本类的隐式/显式转换

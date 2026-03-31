@@ -1,0 +1,164 @@
+==========================
+派生类
+==========================
+
+.. contents:: Table of Contents
+
+派生类的构造函数与析构函数
+============================
+
+* 派生类构造函数与基类构造函数的调用顺序是，先调用基类构造函数再调用派生类构造函数。
+* 派生类构造函数的参数列表中需要包含派生类新增成员变量和基类成员变量的参数值。调用基类构造函数时，基类构造函数从派生类的参数列表中获取实参，因此不需要类型名。
+* 如果基类没有构造函数或仅存在无参构造函数，则在定义派生类构造函数时可以省略对基类构造函数的调用。
+* 如果基类定义了有参构造函数，派生类必须定义构造函数，提供基类构造函数的参数，完成基类成员变量的初始化。
+
+当派生类含有成员对象时，派生类构造函数除了负责基类成员变量的初始化和本类新增成员变量的初始化，还要负责成员对象的初始化，其定义格式如下所示：
+
+.. code-block:: cpp
+
+    派生类构造函数(参数列表):基类构造函数(基类构造函数参数列表),成员对象(参数列表)
+    {
+        派生类新增成员的初始化语句
+    }
+
+当创建派生类对象时，各个构造函数的调用顺序为：先调用基类构造函数，再调用成员对象的构造函数，最后调用派生类构造函数。基类构造函数与成员对象的构造函数的先后顺序不影响构造函数的调用顺序。
+
+示例
+--------------
+
+.. code-block:: cpp
+
+    #include<iostream>
+    using namespace std;
+    class Engine
+    {
+    public:
+        Engine(string type,int power);
+        void show();
+        ~Engine();
+    private:
+        string _type;
+        int _power;
+    };
+    Engine::Engine(string type, int power)
+    {
+        cout<<"调用发动机Engine构造函数"<<endl;
+        _type=type;
+        _power=power;
+    }
+    void Engine::show()
+    {
+        cout<<"发动机型号："<<_type<<"，发动机功率："<<_power<<endl;
+    }
+    Engine::~Engine()
+    {
+        cout<<"调用发动机Engine析构函数"<<endl;
+    }
+    class Vehicle
+    {
+    public:
+        Vehicle(string name);
+        void run();
+        string getName();
+        ~Vehicle();
+    private:
+        string _name;
+    };
+    Vehicle::Vehicle(string name)
+    {
+        cout<<"调用交通工具Vehicle构造函数"<<endl;
+        _name=name;
+    }
+    void Vehicle::run()
+    {
+        cout<<_name<<"正在行驶中"<<endl;
+    }
+    string Vehicle::getName()
+    {
+        return _name;
+    }
+    Vehicle::~Vehicle()
+    {
+        cout<<"调用交通工具Vehicle析构函数"<<endl;
+    }
+    class Car :public Vehicle
+    {
+    public:
+        Car(int seats,string color,string type, int power,string name);
+        void brake();
+        void display();
+        ~Car();
+        Engine engine;
+    private:
+        int _seats;
+        string _color;
+    };
+    Car::Car(int seats, string color, string type, int power, string name):
+        engine(type,power),Vehicle(name)
+    {
+        cout<<"调用小汽车Car构造函数"<<endl;
+        _seats=seats;
+        _color=color;
+    }
+    void Car::brake()
+    {
+        cout<<getName()<<"停车"<<endl;
+    }
+    void Car::display()
+    {
+        cout<<getName()<<"有"<<_seats<<"个座位，"<<"颜色为"<<_color<<endl;
+    }
+    Car::~Car()
+    {
+        cout<<"调用小汽车Car析构函数"<<endl;
+    }
+    int main()
+    {
+        Car car(5,"red","EA113",130,"passat");
+        car.run();
+        car.brake();
+        car.display();
+        car.engine.show();
+        return 0;
+    }
+
+隐藏基类成员函数
+====================
+
+在派生类中重新定义基类同名函数，基类同名函数在派生类中被隐藏，通过派生类对象调用同名函数时，调用的是改写后的派生类成员函数，基类同名函数不会被调用。如果想通过派生类对象调用基类的同名函数，需要使用作用域限定符 ``::`` 指定要调用的函数，或者根据类型兼容规则，通过基类指针调用同名成员函数。
+
+.. code-block:: cpp
+
+    #include<iostream>
+    using namespace std;
+    class Vehicle
+    {
+    public:
+        void run();
+    };
+    void Vehicle::run()
+    {
+        cout<<"基类run()函数：行驶"<<endl;
+    }
+    class Car :public Vehicle
+    {
+    public:
+        void run();
+    };
+    void Car::run()
+    {
+        cout<<"小汽车需要燃烧汽油,行驶速度快"<<endl;
+    }
+    int main()
+    {
+        Car car;
+        car.run();              // 调用派生类的run()
+        car.Vehicle::run();     // 通过作用域限定符调用基类run()
+        Vehicle* pv=&car;
+        pv->run();              // 基类指针调用基类run()
+        return 0;
+    }
+
+.. note::
+
+    只要是同名函数，无论参数列表和返回值类型是否相同，基类同名函数都会被隐藏。若基类中有多个重载函数，派生类中有同名函数，则基类中所有同名函数在派生类中都会被隐藏。

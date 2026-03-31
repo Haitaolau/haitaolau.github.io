@@ -8,3 +8,4 @@ Math
 .. toctree::
    
    intermediate_value_theorem
+   right_rotate

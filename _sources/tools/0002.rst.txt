@@ -1,0 +1,114 @@
+=======================
+Taskwarrior Basic Usage
+=======================
+
+Taskwarrior is a powerful command-line task management tool. Here are the basic usage methods:
+
+Installation
+------------
+
+.. code-block:: bash
+
+   # Ubuntu/Debian
+   sudo apt install taskwarrior
+
+   # CentOS/RHEL
+   sudo yum install task
+
+   # macOS
+   brew install task
+
+Basic Operations
+----------------
+
+**Adding Tasks:**
+
+.. code-block:: bash
+
+   task add "Complete project report"
+   task add "Buy groceries" due:tomorrow
+   task add "Meeting" project:work priority:H
+
+**Viewing Tasks:**
+
+.. code-block:: bash
+
+   task list          # View all pending tasks
+   task              # Default shows pending tasks
+   task all          # View all tasks (including completed)
+   task next         # View most important tasks
+
+**Completing Tasks:**
+
+.. code-block:: bash
+
+   task 1 done       # Complete task with ID 1
+   task done 1 2 3   # Complete multiple tasks
+
+**Modifying Tasks:**
+
+.. code-block:: bash
+
+   task 1 modify "New task description"
+   task 1 modify due:friday
+   task 1 modify priority:L
+
+Task Attributes
+---------------
+
+**Priority:**
+
+.. code-block:: bash
+
+   task add "Important task" priority:H    # High
+   task add "Normal task" priority:M       # Medium  
+   task add "Low priority" priority:L      # Low
+
+**Due Dates:**
+
+.. code-block:: bash
+
+   task add "Task" due:2024-12-20
+   task add "Task" due:tomorrow
+   task add "Task" due:friday
+   task add "Task" due:eom          # end of month
+
+**Project Classification:**
+
+.. code-block:: bash
+
+   task add "Write code" project:website
+   task add "Test features" project:website
+   task list project:website        # View specific project
+
+**Tags:**
+
+.. code-block:: bash
+
+   task add "Learn Python" +programming +learning
+   task list +programming           # View tasks with specific tags
+
+Common Commands
+---------------
+
+.. code-block:: bash
+
+   task summary      # Task statistics
+   task projects     # View all projects
+   task tags         # View all tags
+   task burndown     # Burndown chart
+   task calendar     # Calendar view
+   task 1 delete     # Delete task
+   task undo         # Undo last operation
+
+Filtering and Searching
+-----------------------
+
+.. code-block:: bash
+
+   task list due:today              # Tasks due today
+   task list priority:H             # High priority tasks
+   task list project:work status:pending  # Pending work project tasks
+   task list /report/               # Search tasks containing "report"
+
+These basic commands are sufficient to start using Taskwarrior for daily task management.

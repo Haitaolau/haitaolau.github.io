@@ -10,8 +10,6 @@ Debian
    debian-installer/index
    debian-command/index
    live-cd/index
-   elxr_edge/index
-   os-tree/index
    0001
    0002
    0003
@@ -33,4 +31,5 @@ Debian
    0019
    0020
    0021
+   0022
 

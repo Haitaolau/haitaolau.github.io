@@ -1,0 +1,283 @@
+==========================
+完美转发
+==========================
+
+.. contents:: Table of Contents
+
+概述
+--------------
+
+* **直接调用** ：从 main() 主函数中直接调用 funcLast() 函数。
+* **转发** ：从 main() 中调用 funcMiddle()，通过 funcMiddle() 调用 funcLast()。funcMiddle() 被当作一个跳板函数，参数需要通过它中转，间接传递给 funcLast()。
+* **完美转发** ：在转发过程中，参数的类型信息（const 属性、左值/右值属性）原封不动地从 funcMiddle() 转发到 funcLast()，这种转发就叫作完美转发。
+
+问题：不完美的转发
+====================
+
+.. code-block:: cpp
+
+    #include <iostream>
+    using namespace std;
+
+    void funcLast2(int v1, int& v2)
+    {
+        ++v2;
+        cout << v1 << endl;
+        cout << v2 << endl;
+    }
+
+    template <typename F, typename T1, typename T2>
+    void funcMiddle(F f, T1 t1, T2 t2)
+    {
+        f(t1, t2);
+    }
+
+    int main(int argc, char const *argv[])
+    {
+        int j = 70;
+        funcMiddle(funcLast2, 20, j);
+        cout << "j=" << j << endl;      // j 仍然是 70，没有被修改！
+        return 0;
+    }
+
+输出：
+
+.. code-block:: console
+
+    20
+    71
+    j=70
+
+j 没有变成 71，因为 funcMiddle 的参数是值传递，t2 是 j 的副本，funcLast2 修改的是副本而非原始的 j。
+
+使用万能引用转发
+====================
+
+将 funcMiddle 的参数改为万能引用 ``T&&`` ：
+
+.. code-block:: cpp
+
+    void funcLast2(int&& v1, int& v2)
+    {
+        cout << v1 << endl;
+        cout << v2 << endl;
+    }
+
+    template <typename F, typename T1, typename T2>
+    void funcMiddle(F f, T1&& t1, T2&& t2)
+    {
+        f(t1, t2);      // 编译错误！
+    }
+
+    int main(int argc, char const *argv[])
+    {
+        int j = 70;
+        funcMiddle(funcLast2, 20, j);
+        return 0;
+    }
+
+.. code-block:: console
+
+    error: cannot bind rvalue reference of type 'int&&' to lvalue of type 'int'
+
+分析：
+
+* ``funcMiddle(funcLast2, 20, j)`` 中，20 是右值，j 是左值。
+* 万能引用推导后：T1=int, t1 的类型为 int&&；T2=int&, t2 的类型为 int&。
+* 但在 funcMiddle 内部，t1 是一个具名变量，**具名的右值引用是左值** ，所以 ``f(t1, t2)`` 中 t1 是左值，无法绑定到 funcLast2 的 ``int&&`` 参数。
+
+std::forward 实现完美转发
+==========================
+
+``std::forward<T>`` 能够保持参数的原始值类别（左值/右值），实现完美转发：
+
+.. code-block:: cpp
+
+    #include <iostream>
+    #include <utility>
+    using namespace std;
+
+    void funcLast(int&& v1, int& v2)
+    {
+        ++v2;
+        cout << "v1=" << v1 << endl;
+        cout << "v2=" << v2 << endl;
+    }
+
+    template <typename F, typename T1, typename T2>
+    void funcMiddle(F f, T1&& t1, T2&& t2)
+    {
+        f(std::forward<T1>(t1), std::forward<T2>(t2));  // 完美转发
+    }
+
+    int main()
+    {
+        int j = 70;
+        funcMiddle(funcLast, 20, j);
+        cout << "j=" << j << endl;      // j 变成了 71
+        return 0;
+    }
+
+输出：
+
+.. code-block:: console
+
+    v1=20
+    v2=71
+    j=71
+
+std::forward 的工作原理
+--------------------------
+
+``std::forward<T>(t)`` 的行为：
+
+* 当 T 被推导为左值引用（如 ``int&`` ）时，``std::forward`` 返回左值引用，参数保持左值。
+* 当 T 被推导为非引用类型（如 ``int`` ）时，``std::forward`` 返回右值引用，参数恢复为右值。
+
+简化实现：
+
+.. code-block:: cpp
+
+    template<typename T>
+    T&& forward(typename std::remove_reference<T>::type& t) noexcept
+    {
+        return static_cast<T&&>(t);
+    }
+
+关键在于 ``static_cast<T&&>(t)`` ，它配合引用折叠规则工作（详见 :doc:`template_type_deduction`）。以上面的例子为例，逐步推导：
+
+**情况 1：转发右值（t1，原始实参是 20）**
+
+.. code-block:: text
+
+    T1 = int（传入右值时，万能引用推导 T 为非引用类型）
+    std::forward<int>(t1)
+    → static_cast<int&&>(t1)
+    → 返回 int&&（右值引用）
+    → t1 被转换回右值，成功绑定到 funcLast 的 int&& 参数
+
+**情况 2：转发左值（t2，原始实参是 j）**
+
+.. code-block:: text
+
+    T2 = int&（传入左值时，万能引用推导 T 为左值引用类型）
+    std::forward<int&>(t2)
+    → static_cast<int& &&>(t2)
+    → 引用折叠：int& && → int&
+    → 返回 int&（左值引用）
+    → t2 保持左值，成功绑定到 funcLast 的 int& 参数
+
+所以 ``std::forward`` 的本质是：根据 T 的类型，通过 ``static_cast`` 和引用折叠， **有条件地** 把参数转回它原来的值类别。
+
+为什么具名的右值引用是左值？
+----------------------------
+
+这是理解完美转发的关键。C++ 的规则是： **只要一个表达式有名字，它就是左值** ，无论它的类型是什么。
+
+.. code-block:: cpp
+
+    void foo(int&& x)
+    {
+        // x 的类型是 int&&（右值引用）
+        // 但 x 本身是一个具名变量，所以 x 是左值
+        // bar(x);           // x 作为左值传入
+        // bar(std::move(x)); // 显式转为右值
+    }
+
+这个设计是为了安全：如果具名的右值引用自动被当作右值，那么在函数体内多次使用 x 时，第一次使用就可能把资源移走了，后续使用就会出问题。所以 C++ 要求必须显式地用 ``std::move`` 或 ``std::forward`` 来表明意图。
+
+std::forward vs std::move
+----------------------------
+
+.. list-table::
+    :header-rows: 1
+    :widths: 20 40 40
+
+    * -
+      - std::move
+      - std::forward
+    * - 作用
+      - 无条件转换为右值
+      - 有条件地保持原始值类别
+    * - 使用场景
+      - 明确要转移资源所有权时
+      - 在模板中转发参数时
+    * - 参数要求
+      - 任意类型
+      - 需要配合万能引用 ``T&&``
+
+代码对比：
+
+.. code-block:: cpp
+
+    template<typename T>
+    void wrapper(T&& arg)
+    {
+        // std::move：无论 arg 原来是左值还是右值，都转为右值
+        foo(std::move(arg));
+
+        // std::forward：arg 原来是左值就保持左值，原来是右值就转回右值
+        foo(std::forward<T>(arg));
+    }
+
+实际应用场景
+====================
+
+工厂函数
+^^^^^^^^^^^^^^^^
+
+完美转发最典型的应用是工厂函数，将参数原封不动地转发给构造函数：
+
+.. code-block:: cpp
+
+    #include <iostream>
+    #include <memory>
+    #include <utility>
+    using namespace std;
+
+    class MyClass {
+    public:
+        MyClass(const string& s) { cout << "拷贝构造: " << s << endl; }
+        MyClass(string&& s)      { cout << "移动构造: " << s << endl; }
+    };
+
+    template<typename T, typename... Args>
+    unique_ptr<T> my_make_unique(Args&&... args)
+    {
+        return unique_ptr<T>(new T(std::forward<Args>(args)...));
+    }
+
+    int main()
+    {
+        string s = "hello";
+        auto p1 = my_make_unique<MyClass>(s);            // 传入左值，调用拷贝构造
+        auto p2 = my_make_unique<MyClass>(string("world")); // 传入右值，调用移动构造
+        return 0;
+    }
+
+输出：
+
+.. code-block:: console
+
+    拷贝构造: hello
+    移动构造: world
+
+如果不用 ``std::forward`` ，传入右值时也会调用拷贝构造（因为具名参数是左值），损失了移动语义带来的性能优化。
+
+emplace_back
+^^^^^^^^^^^^^^^^
+
+标准库中 ``std::vector::emplace_back`` 就是完美转发的典型应用，它将参数直接转发给元素的构造函数，避免了不必要的拷贝或移动：
+
+.. code-block:: cpp
+
+    #include <vector>
+    #include <string>
+    using namespace std;
+
+    vector<string> v;
+    string s = "hello";
+
+    v.push_back(s);             // 拷贝 s 到 vector 中
+    v.emplace_back(s);          // 同样拷贝，但直接在 vector 内存中构造
+    v.emplace_back("world");    // 直接用 const char* 构造 string，无临时对象

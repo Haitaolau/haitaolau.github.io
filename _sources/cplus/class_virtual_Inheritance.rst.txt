@@ -1,0 +1,66 @@
+==========================
+虚继承
+==========================
+
+.. contents:: Table of Contents
+
+概述
+--------------
+
+在程序设计过程中，通常希望间接基类的成员变量在底层派生类中只有一份拷贝，从而避免成员访问的二义性。通过虚继承可以达到这样的目的，虚继承就是在派生类继承基类时，在权限控制符前加上 virtual 关键字，其格式如下所示：
+
+.. code-block:: cpp
+
+    class 派生类名 : virtual 权限控制符 基类名
+    {
+        派生类成员
+    };
+
+在上述格式中，在权限控制符前面添加了 virtual 关键字，就表明派生类虚继承了基类。被虚继承的基类通常称为虚基类，虚基类只是针对虚继承，而不是针对基类本身。在普通继承中，该基类并不称为虚基类。
+
+示例
+--------------
+
+.. code-block:: cpp
+
+    class A {
+    public:
+        A(int val) { /* ... */ }
+    };
+
+    class B : public virtual A {
+    public:
+        B(int val) : A(val) { /* ... */ }  // 构造 D 时此调用被忽略
+    };
+
+    class C : public virtual A {
+    public:
+        C(int val) : A(val) { /* ... */ }  // 构造 D 时此调用被忽略
+    };
+
+    class D : public B, public C {
+    public:
+        D(int val) : A(val), B(val), C(val) { /* ... */ }  // D 负责构造 A
+    };
+
+需要注意的是，在虚继承中，底层派生类的构造函数不仅负责调用直接基类的构造函数，还负责调用间接基类的构造函数。在整个对象的创建过程中，间接基类的构造函数只会调用一次。
+
+如果将 D 的构造函数中的 ``A(val)`` 去掉，编译器会报错：
+
+.. code-block:: cpp
+
+    class D : public B, public C {
+    public:
+        D(int val) : B(val), C(val) { /* ... */ }  // 缺少 A(val)
+    };
+
+输出：
+
+.. code-block:: console
+
+    class_virtual_base_class.cpp: In constructor 'D::D(int)':
+    class_virtual_base_class.cpp:26:30: error: no matching function for call to 'A::A()'
+       26 |     D(int val) :B(val), C(val)
+          |                              ^
+
+In this example, when a D object is created, its constructor ``D(int val)`` is responsible for explicitly calling the ``A(val)`` constructor in its initialization list. The calls to ``A(val)`` within B's and C's constructors are effectively bypassed when a D object is being constructed, preventing multiple constructions of the single A instance.

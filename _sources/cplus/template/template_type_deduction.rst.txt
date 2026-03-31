@@ -1,0 +1,367 @@
+==========================
+模板类型推导
+==========================
+
+.. contents:: Table of Contents
+
+概述
+--------------
+
+.. note::
+
+    T 是类型模板参数，tmprv 是函数模板 myfunc() 的形参。
+
+模板类型推导的结果取决于函数模板形参的声明方式，主要分为三种场景：
+
+.. list-table::
+    :header-rows: 1
+    :widths: 25 35 40
+
+    * - 形参声明
+      - 场景
+      - 推导特点
+    * - ``T tmprv``
+      - 值传递
+      - 产生副本，丢弃引用和顶层 const
+    * - ``T& tmprv`` / ``T* tmprv``
+      - 引用/指针传递
+      - 保留 const，丢弃引用部分
+    * - ``T&& tmprv``
+      - 万能引用
+      - 左值推导为左值引用，右值推导为非引用类型
+
+使用 Boost 库查看编译器推导的类型：
+
+.. code-block:: cpp
+
+    #include <iostream>
+    #include <boost/type_index.hpp>
+
+    template <typename T>
+    void myfunc(T&& tmprv)
+    {
+        using boost::typeindex::type_id_with_cvr;
+        std::cout << "T=" << type_id_with_cvr<T>().pretty_name() << std::endl;
+        std::cout << "tmprv=" << type_id_with_cvr<decltype(tmprv)>().pretty_name() << std::endl;
+    }
+
+    int main(int argc, char const *argv[])
+    {
+        int i = 100;
+        myfunc(i);      // i 是左值
+        myfunc(100);    // 100 是右值
+        return 0;
+    }
+
+输出：
+
+.. code-block:: console
+
+    T=int&
+    tmprv=int&
+    T=int
+    tmprv=int&&
+
+为什么传入左值时 T 会被推导为 int& ？
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+这是万能引用（``T&&``）独有的行为。普通模板函数中，T 永远不会被推导为引用类型，但万能引用是个例外——当传入左值时，T 会被推导为左值引用类型，然后通过 **引用折叠（Reference Collapsing）** 规则确定形参的最终类型。
+
+引用折叠规则：
+
+.. list-table::
+    :header-rows: 1
+    :widths: 35 25 40
+
+    * - 组合
+      - 折叠结果
+      - 说明
+    * - ``T& &`` → ``T&``
+      - 左值引用
+      - Lvalue + Lvalue = Lvalue
+    * - ``T& &&`` → ``T&``
+      - 左值引用
+      - Lvalue + Rvalue = Lvalue
+    * - ``T&& &`` → ``T&``
+      - 左值引用
+      - Rvalue + Lvalue = Lvalue
+    * - ``T&& &&`` → ``T&&``
+      - 右值引用
+      - Rvalue + Rvalue = Rvalue
+
+简单记忆：只有 ``&& + &&`` 才折叠为右值引用，只要有一个 ``&`` 就折叠为左值引用。
+
+.. note::
+
+    在万能引用的自动推导中，T 只会被推导为左值引用类型（如 ``int&``）或非引用类型（如 ``int``），T 永远不会被推导为右值引用类型（如 ``int&&``）。上表中 ``T&& &`` 和 ``T&& &&`` 的情况不会在万能引用的自动推导中出现，但在 typedef 或 using 别名等场景下可能触发。
+
+所以上面的例子中：
+
+* ``myfunc(i)`` ：i 是左值 → T = ``int&`` → ``T&&`` = ``int& &&`` → 折叠为 ``int&``
+* ``myfunc(100)`` ：100 是右值 → T = ``int`` → ``T&&`` = ``int&&``
+
+这就是万能引用能同时接收左值和右值的底层机制。
+
+函数模板会被实例化为以下两个函数（可通过 `cppinsights.io <https://cppinsights.io/>`_ 验证）：
+
+.. code-block:: cpp
+
+    template<>
+    void myfunc<int &>(int & tmprv) { ... }
+
+    template<>
+    void myfunc<int>(int && tmprv) { ... }
+
+引用类型实参的推导
+--------------------------
+
+规则：若实参是引用类型，则引用部分会被忽略掉，T 不会被推导为引用类型。
+
+形参为 T& 时
+^^^^^^^^^^^^^^^^
+
+.. code-block:: cpp
+
+    template <typename T>
+    void myfunc(T& tmprv) { ... }
+
+    int main() {
+        int i = 100;
+        const int& k = i;
+        myfunc(k);      // T=int const, tmprv=int const&
+    }
+
+形参为 T（值传递）时
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: cpp
+
+    template <typename T>
+    void myfunc(T tmprv) { ... }
+
+    int main() {
+        int i = 100;
+        const int& k = i;
+        myfunc(k);      // T=int, tmprv=int（引用和 const 都被丢弃）
+    }
+
+k 的类型是 ``const int&`` ，而 T 被推导为 int，引用和 const 都被丢弃了。这是因为值传递的语义是“复制一份全新的对象”，新副本和原对象完全独立：
+
+* **引用被丢弃** ：k 是 i 的别名，传值时复制的是 i 的值，不是引用本身。编译器先去掉引用，看到的是 ``const int`` 。
+* **const 被丢弃** ：原对象是 const 只是说“不能修改原对象”，但副本是全新的对象，修改副本不会影响原对象，所以没必要让副本也是 const。最终 T 推导为 ``int`` 。
+
+这也是值传递和引用传递的核心区别：值传递 ``T tmprv`` 丢弃 const 和引用（因为是副本），引用传递 ``T& tmprv`` 保留 const（因为直接操作原对象，需要保证 const 正确性）。
+
+const 与类型推导
+--------------------------
+
+规则：如果函数模板参数中没有被 const 修饰，则实参中的 const 会被代入 T 类型；如果有 const 修饰，则 T 类型中不会带 const。
+
+形参为 T* 时
+^^^^^^^^^^^^^^^^
+
+.. code-block:: cpp
+
+    template <typename T>
+    void myfunc(T* tmprv) { ... }
+
+    int main() {
+        int i = 18;
+        const int* pi = &i;
+        myfunc(&i);     // T=int, tmprv=int*
+        myfunc(pi);     // T=int const, tmprv=int const*
+    }
+
+.. list-table::
+    :header-rows: 1
+    :widths: 40 30 30
+
+    * - 实参
+      - T
+      - tmprv
+    * - ``&i`` （int*）
+      - int
+      - int*
+    * - ``pi`` （const int*）
+      - int const
+      - int const*
+
+形参为 const T* 时
+^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: cpp
+
+    template <typename T>
+    void myfunc(const T* tmprv) { ... }
+
+    int main() {
+        int i = 18;
+        const int* pi = &i;
+        myfunc(&i);     // T=int, tmprv=int const*
+        myfunc(pi);     // T=int, tmprv=int const*
+    }
+
+.. list-table::
+    :header-rows: 1
+    :widths: 40 30 30
+
+    * - 实参
+      - T
+      - tmprv
+    * - ``&i`` （int*）
+      - int
+      - int const*
+    * - ``pi`` （const int*）
+      - int
+      - int const*
+
+值传递的推导规则
+--------------------------
+
+常规的传值方式，将对象作为实参传递到函数中，传递进去的是一个对象副本（全新的对象）。
+
+.. code-block:: cpp
+
+    template <typename T>
+    void myfunc(T tmprv) { ... }
+
+    int main() {
+        int i = 18;
+        const int j = i;
+        const int& k = i;
+        myfunc(i);      // T=int, tmprv=int
+        myfunc(j);      // T=int, tmprv=int（const 被丢弃，因为是新副本）
+        myfunc(k);      // T=int, tmprv=int（const 和引用都被丢弃）
+
+        char mystr[] = "I Love China!";
+        const char* const p = mystr;
+        myfunc(p);      // T=char const*, tmprv=char const*
+    }
+
+关于 ``const char* const p`` 的推导：p 的类型是“指向 const char 的 const 指针”，其中有两个 const：
+
+* 第一个 ``const`` （修饰 char）：表示指向的内容不可修改，这是指针指向的类型的一部分， **保留**
+* 第二个 ``const`` （修饰 p 本身）：表示指针本身不可重新指向，但副本是新的指针，与原指针无关， **丢弃**
+
+所以 T 推导为 ``char const*`` （保留了底层 const，丢弃了顶层 const）。
+
+总结：
+
+* 若实参是引用类型，则引用部分会被忽略，T 不会被推导为引用类型。
+* 若实参是 const 类型，则 const 部分会被忽略掉，T 不会被推导为 const 类型（因为产生的是新副本）。
+* 如果传递的是 ``const char*`` 或 ``const char[]`` 数组，那么 const 会被保留。
+
+数组类型的推导
+--------------------------
+
+数组名代表数组首地址。数组在模板推导中的行为取决于形参是值传递还是引用传递。
+
+值传递时，数组退化为指针（这是 C/C++ 的通用规则，数组不能被拷贝，所以退化为指向首元素的指针）：
+
+.. code-block:: cpp
+
+    template <typename T>
+    void myfunc(T tmprv) { ... }
+
+    const char mystr[] = "I Love China!";
+    myfunc(mystr);  // T=char const*, tmprv=char const*
+
+引用传递时，保留完整的数组类型（包括长度信息），因为引用直接绑定原对象，不需要拷贝：
+
+.. code-block:: cpp
+
+    template <typename T>
+    void myfunc(T& tmprv) { ... }
+
+    const char mystr[] = "I Love China!";
+    myfunc(mystr);  // T=char const [14], tmprv=char const (&) [14]
+
+函数名的推导
+--------------------------
+
+函数名的推导规则与数组类似：值传递时退化为函数指针，引用传递时保留函数类型（推导为函数引用）。
+
+.. code-block:: cpp
+
+    void testFunc() {}
+
+    template <typename T> void myfunc(T tmprv) { ... }
+    template <typename T> void myfunc2(T& tmprv) { ... }
+
+    myfunc(testFunc);   // 值传递，退化为函数指针：T=void (*)(), tmprv=void (*)()
+    myfunc2(testFunc);  // 引用传递，保留函数类型：T=void (), tmprv=void (&)()
+
+initializer_list 的推导
+------------------------------
+
+``std::initializer_list<T>`` 是 C++11 引入的轻量级容器，用于表示一组相同类型的值的列表。它通常由花括号 ``{}`` 初始化：
+
+.. code-block:: cpp
+
+    #include <iostream>
+    #include <initializer_list>
+    using namespace std;
+
+    void print(std::initializer_list<int> list)
+    {
+        for (auto val : list)
+            cout << val << " ";
+        cout << endl;
+    }
+
+    int main()
+    {
+        print({1, 2, 3});           // 1 2 3
+        print({10, 20, 30, 40});    // 10 20 30 40
+        return 0;
+    }
+
+在模板推导中，如果形参显式声明为 ``std::initializer_list<T>`` ，编译器可以从花括号列表中推导 T：
+
+.. code-block:: cpp
+
+    template <typename T>
+    void myfunc(std::initializer_list<T> tmprv) { ... }
+
+    myfunc({1, 2, 3});     // T=int, tmprv=std::initializer_list<int>
+
+.. note::
+
+    如果形参是 ``T tmprv`` 而非 ``std::initializer_list<T> tmprv`` ，则 ``myfunc({1,2,3})`` 会编译失败，因为花括号列表不是一个表达式，没有类型，模板推导无法处理。但 ``auto`` 可以：
+
+    .. code-block:: cpp
+
+        auto x = {1, 2, 3};    // x 的类型是 std::initializer_list<int>
+        // T y = {1, 2, 3};    // 编译错误：模板参数 T 无法推导
+
+推导规则总结
+--------------------------
+
+.. list-table::
+    :header-rows: 1
+    :widths: 20 25 55
+
+    * - 形参声明
+      - 实参类型
+      - 推导结果
+    * - ``T tmprv``
+      - 任意类型
+      - 丢弃引用、丢弃顶层 const，数组/函数退化为指针
+    * - ``T& tmprv``
+      - 引用类型
+      - 丢弃引用，保留 const，数组/函数保留原始类型
+    * - ``T& tmprv``
+      - const 类型
+      - const 代入 T（如 T=const int）
+    * - ``const T& tmprv``
+      - const 类型
+      - T 不带 const（const 已由形参提供）
+    * - ``T* tmprv``
+      - 指针类型
+      - 与 ``T&`` 类似，保留底层 const
+    * - ``T&& tmprv``
+      - 左值
+      - T 推导为左值引用（如 ``int&``），经引用折叠后 tmprv 为左值引用
+    * - ``T&& tmprv``
+      - 右值
+      - T 推导为非引用类型（如 ``int``），tmprv 为右值引用

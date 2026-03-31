@@ -1,0 +1,217 @@
+==================================
+std::ref 和 std::cref
+==================================
+
+.. contents:: Table of Contents
+
+概述
+--------------
+
+* ``std::ref`` ：创建一个可修改的引用包装器，函数内部可以修改原对象的值。
+* ``std::cref`` ：创建一个只读的引用包装器，相当于 const 引用，函数内部不能修改原对象的值。
+
+为什么需要 std::ref ？
+========================
+
+在模板类型推导中，值传递会丢弃引用和 const（详见 :doc:`template_type_deduction`）。即使调用者想传引用，模板也会把它推导为值类型，产生一份副本：
+
+.. code-block:: cpp
+
+    #include <iostream>
+    using namespace std;
+
+    template<typename T>
+    void myfunc(T val)
+    {
+        val = val + 1;
+    }
+
+    int main()
+    {
+        int m = 180;
+        myfunc(m);
+        cout << "m=" << m << endl;  // 180，m 没有被修改
+        return 0;
+    }
+
+这里 T 被推导为 ``int`` ，val 是 m 的副本，修改 val 不影响 m。
+
+如果把形参改为 ``T&`` 当然可以解决，但有些场景下我们无法修改函数模板的签名（比如 ``std::thread`` 、 ``std::bind`` 的内部实现都是值传递）。这时就需要 ``std::ref`` 。
+
+工作原理
+--------------
+
+``std::ref(m)`` 并不是直接传引用，而是创建了一个 ``std::reference_wrapper<int>`` 类型的对象。这个对象：
+
+1. 内部持有指向原始变量 m 的指针
+2. 按值传递给函数模板（所以模板推导不会出问题）
+3. 通过隐式类型转换运算符 ``operator T&()`` ，在需要时自动转换为原始类型的引用
+
+简化的实现原理：
+
+.. code-block:: cpp
+
+    // std::reference_wrapper 的简化实现
+    template<typename T>
+    class reference_wrapper {
+        T* ptr;
+    public:
+        reference_wrapper(T& ref) : ptr(&ref) {}
+
+        // 隐式转换：reference_wrapper<T> -> T&
+        operator T&() const { return *ptr; }
+
+        // 获取引用
+        T& get() const { return *ptr; }
+    };
+
+所以调用过程是：
+
+.. code-block:: text
+
+    myfunc(std::ref(m))
+    → T 推导为 std::reference_wrapper<int>
+    → val 是 reference_wrapper<int> 类型的副本（但内部指向 m）
+    → val = val + 1 触发隐式转换，实际修改的是 m
+
+std::ref 示例
+====================
+
+.. code-block:: cpp
+
+    #include <iostream>
+    #include <functional>
+    using namespace std;
+
+    template<typename T>
+    void myfunc(T val)
+    {
+        val = val + 1;
+    }
+
+    int main()
+    {
+        int m = 180;
+
+        myfunc(m);                  // 值传递，T=int，m 不变
+        cout << "m=" << m << endl;  // 180
+
+        myfunc(std::ref(m));        // T=reference_wrapper<int>，m 被修改
+        cout << "m=" << m << endl;  // 181
+
+        return 0;
+    }
+
+std::cref 示例
+====================
+
+``std::cref`` 创建的是 ``std::reference_wrapper<const T>`` ，相当于 const 引用，函数内部不能修改原对象：
+
+.. code-block:: cpp
+
+    #include <iostream>
+    #include <functional>
+    using namespace std;
+
+    template<typename T>
+    void print_val(T val)
+    {
+        cout << "value=" << val << endl;
+        // val = val + 1;  // 如果 T 是 reference_wrapper<const int>，
+                           // 隐式转换为 const int&，赋值会编译错误
+    }
+
+    int main()
+    {
+        int m = 180;
+
+        print_val(std::cref(m));    // T=reference_wrapper<const int>
+        cout << "m=" << m << endl;  // 180，m 不会被修改
+
+        return 0;
+    }
+
+常见使用场景
+====================
+
+std::thread
+^^^^^^^^^^^^^^^^
+
+``std::thread`` 内部会拷贝所有参数，如果需要让线程函数操作原始变量，必须使用 ``std::ref`` ：
+
+.. code-block:: cpp
+
+    #include <iostream>
+    #include <thread>
+    #include <functional>
+    using namespace std;
+
+    void increment(int& val)
+    {
+        val += 1;
+    }
+
+    int main()
+    {
+        int m = 100;
+
+        // thread(increment, m);           // 编译错误：thread 内部拷贝 m，无法绑定到 int&
+        thread t(increment, std::ref(m));   // 正确：传递 m 的引用包装器
+        t.join();
+
+        cout << "m=" << m << endl;          // 101
+        return 0;
+    }
+
+std::bind
+^^^^^^^^^^^^^^^^
+
+``std::bind`` 默认也是拷贝参数，使用 ``std::ref`` 可以绑定引用：
+
+.. code-block:: cpp
+
+    #include <iostream>
+    #include <functional>
+    using namespace std;
+
+    void add(int& a, int b)
+    {
+        a += b;
+    }
+
+    int main()
+    {
+        int m = 100;
+
+        auto f1 = bind(add, m, 10);
+        f1();
+        cout << "m=" << m << endl;          // 100（m 没变，bind 拷贝了 m）
+
+        auto f2 = bind(add, std::ref(m), 10);
+        f2();
+        cout << "m=" << m << endl;          // 110（m 被修改）
+
+        return 0;
+    }
+
+总结
+--------------
+
+.. list-table::
+    :header-rows: 1
+    :widths: 25 35 40
+
+    * - 方式
+      - T 的推导结果
+      - 效果
+    * - ``myfunc(m)``
+      - ``int``
+      - 值传递，产生副本，不影响原对象
+    * - ``myfunc(std::ref(m))``
+      - ``reference_wrapper<int>``
+      - 通过引用包装器间接修改原对象
+    * - ``myfunc(std::cref(m))``
+      - ``reference_wrapper<const int>``
+      - 只读引用包装器，不能修改原对象
+
+``std::ref`` 和 ``std::cref`` 的核心价值在于：当函数模板使用值传递且无法修改其签名时（如 ``std::thread`` 、 ``std::bind``），通过引用包装器实现引用语义。如果可以直接修改函数模板的形参为引用类型（ ``T&`` 或 ``const T&`` ），则不需要使用它们。

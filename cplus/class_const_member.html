@@ -1,0 +1,426 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>const &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="static 成员" href="class_static_member.html" />
+    <link rel="prev" title="拷贝构造函数" href="class_copyconstructor.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="const">
+<h1><a class="toc-backref" href="#id6" role="doc-backlink">const</a><a class="headerlink" href="#const" title="Permalink to this heading">¶</a></h1>
+<nav class="contents" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#const" id="id6">const</a></p>
+<ul>
+<li><p><a class="reference internal" href="#cplus-const-pointer" id="id7">const 指针</a></p>
+<ul>
+<li><p><a class="reference internal" href="#char-const-p" id="id8">char *const p</a></p></li>
+<li><p><a class="reference internal" href="#const-char-p" id="id9">const char * p</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id2" id="id10">const 引用</a></p>
+<ul>
+<li><p><a class="reference internal" href="#const-int-k" id="id11">const int&amp; k</a></p>
+<ul>
+<li><p><a class="reference internal" href="#int-const" id="id12">int&amp; const 是非法的</a></p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id3" id="id13">const 内存分配</a></p></li>
+<li><p><a class="reference internal" href="#id4" id="id14">const 成员变量</a></p></li>
+<li><p><a class="reference internal" href="#id5" id="id15">const 成员函数</a></p></li>
+<li><p><a class="reference internal" href="#const-static" id="id16">const static 成员</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<section id="cplus-const-pointer">
+<span id="id1"></span><h2><a class="toc-backref" href="#id7" role="doc-backlink">const 指针</a><a class="headerlink" href="#cplus-const-pointer" title="Permalink to this heading">¶</a></h2>
+<section id="char-const-p">
+<h3><a class="toc-backref" href="#id8" role="doc-backlink">char *const p</a><a class="headerlink" href="#char-const-p" title="Permalink to this heading">¶</a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>p is a const pointer to char</p>
+</div>
+<p>const 修饰 p，说明 p 是一个 read-only 的变量，而 p 是 <code class="docutils literal notranslate"><span class="pre">char</span> <span class="pre">*</span></code> 类型的，是一个字符指针。</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">**</span><span class="n">argv</span><span class="p">){</span><span class="w"></span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sc">&#39;a&#39;</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sc">&#39;b&#39;</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="k">const</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">a</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">b</span><span class="p">;</span><span class="w">     </span><span class="c1">// 错误：p 是只读的</span>
+
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="o">*</span><span class="n">p</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>输出：</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">const1.cc: In function &#39;int main(int, char**)&#39;:</span>
+<span class="go">const1.cc:9:7: error: assignment of read-only variable &#39;p&#39;</span>
+<span class="go">p = &amp;b;</span>
+<span class="go">     ^</span>
+</pre></div>
+</div>
+</section>
+<section id="const-char-p">
+<span id="cplus-pointer-const"></span><h3><a class="toc-backref" href="#id9" role="doc-backlink">const char * p</a><a class="headerlink" href="#const-char-p" title="Permalink to this heading">¶</a></h3>
+<p>const 修饰的是 <code class="docutils literal notranslate"><span class="pre">char</span> <span class="pre">*</span></code> 而不是 p，即指针指向的内容不可修改。</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">**</span><span class="n">argv</span><span class="p">){</span><span class="w"></span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sc">&#39;a&#39;</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sc">&#39;b&#39;</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">a</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="o">*</span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sc">&#39;c&#39;</span><span class="p">;</span><span class="w">   </span><span class="c1">// 错误：指向的内容是只读的</span>
+
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="o">*</span><span class="n">p</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>输出：</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">const2.cc: In function &#39;int main(int, char**)&#39;:</span>
+<span class="go">const2.cc:9:7: error: assignment of read-only location &#39;* p&#39;</span>
+<span class="go">*p = &#39;c&#39;;</span>
+<span class="go">     ^~~</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id2">
+<h2><a class="toc-backref" href="#id10" role="doc-backlink">const 引用</a><a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<section id="const-int-k">
+<h3><a class="toc-backref" href="#id11" role="doc-backlink">const int&amp; k</a><a class="headerlink" href="#const-int-k" title="Permalink to this heading">¶</a></h3>
+<p>const 修饰的是引用所指向的对象，意思是“通过 k 不能修改所引用的对象”：</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w"></span>
+<span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i</span><span class="p">;</span><span class="w">   </span><span class="c1">// k 是 i 的 const 引用</span>
+
+<span class="n">k</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">200</span><span class="p">;</span><span class="w">    </span><span class="c1">// 编译错误：不能通过 k 修改</span>
+<span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">200</span><span class="p">;</span><span class="w">    </span><span class="c1">// 正确：i 本身不是 const，可以直接修改</span>
+</pre></div>
+</div>
+<p>k 只是一个“只读视角”，不影响原对象本身的可修改性。</p>
+<section id="int-const">
+<h4><a class="toc-backref" href="#id12" role="doc-backlink">int&amp; const 是非法的</a><a class="headerlink" href="#int-const" title="Permalink to this heading">¶</a></h4>
+<p>与指针不同，引用没有 <code class="docutils literal notranslate"><span class="pre">int&amp;</span> <span class="pre">const</span></code> 这种写法。因为引用一旦初始化就永远指向同一个对象，天生就不可重新绑定，所以“const 引用本身”没有意义。</p>
+<p>对比指针的两个层面：</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// 指针有两个层面的 const</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">p1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">i</span><span class="p">;</span><span class="w">        </span><span class="c1">// 指向 const int 的指针，不能通过 p1 修改值，但 p1 可以指向别处</span>
+<span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">p2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">i</span><span class="p">;</span><span class="w">        </span><span class="c1">// const 指针，p2 不能指向别处，但可以通过 p2 修改值</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">p3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">i</span><span class="p">;</span><span class="w">  </span><span class="c1">// 两者都不能改</span>
+
+<span class="c1">// 引用只有一种形式</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i</span><span class="p">;</span><span class="w">          </span><span class="c1">// 不能通过 k 修改值（类似 const int*）</span>
+<span class="c1">// int&amp; const k = i;       // 非法！引用天生不可重新绑定，无需这种写法</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>引用没有指针那样的两层 const 区分。引用天生就是 “const” 的（不能重新绑定），所以只需要 <code class="docutils literal notranslate"><span class="pre">const</span> <span class="pre">int&amp;</span></code> 这一种形式来表示“不能通过引用修改值”。</p>
+</div>
+</section>
+</section>
+</section>
+<section id="id3">
+<h2><a class="toc-backref" href="#id13" role="doc-backlink">const 内存分配</a><a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
+<p>C 语言中，const 修饰的变量是伪常量，编译器会分配内存；C++ 中，const 不会分配内存。</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">m_b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">m_b</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="o">*</span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">200</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;m_b = &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">m_b</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; *p is &quot;</span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="o">*</span><span class="n">p</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;&amp;m_b is &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="o">&amp;</span><span class="n">m_b</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; p is &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>输出：</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">m_b = 100 *p is 200</span>
+<span class="go">&amp;m_b is 000000F808F6F924 p is 000000F808F6F924</span>
+</pre></div>
+</div>
+</section>
+<section id="id4">
+<h2><a class="toc-backref" href="#id14" role="doc-backlink">const 成员变量</a><a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h2>
+<p>使用 const 修饰的成员变量称为常成员变量。对于常成员变量，仅仅可以读取第一次初始化的数据，之后是不能修改的。常成员变量通常使用有参构造函数进行初始化。</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">std</span><span class="p">;</span><span class="w"></span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Person</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">Person</span><span class="p">(</span><span class="n">string</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="kt">int</span><span class="w"> </span><span class="n">age</span><span class="p">,</span><span class="n">string</span><span class="w"> </span><span class="n">addr</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">string</span><span class="w"> </span><span class="n">_addr</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="o">~</span><span class="n">Person</span><span class="p">();</span><span class="w"></span>
+<span class="k">private</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">string</span><span class="w"> </span><span class="n">_name</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">_age</span><span class="p">;</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+<span class="n">Person</span><span class="o">::</span><span class="n">Person</span><span class="p">(</span><span class="n">string</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="kt">int</span><span class="w"> </span><span class="n">age</span><span class="p">,</span><span class="n">string</span><span class="w"> </span><span class="n">addr</span><span class="p">)</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">_name</span><span class="p">(</span><span class="n">name</span><span class="p">),</span><span class="n">_age</span><span class="p">(</span><span class="n">age</span><span class="p">),</span><span class="n">_addr</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&quot;初始化const修饰的成员变量&quot;</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&quot;name:&quot;</span><span class="o">&lt;&lt;</span><span class="n">_name</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&quot;age:&quot;</span><span class="o">&lt;&lt;</span><span class="n">_age</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&quot;addr:&quot;</span><span class="o">&lt;&lt;</span><span class="n">_addr</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+<span class="n">Person</span><span class="o">::~</span><span class="n">Person</span><span class="p">(){}</span><span class="w"></span>
+<span class="kt">int</span><span class="w"> </span><span class="n">main</span><span class="p">()</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">Person</span><span class="w"> </span><span class="n">p1</span><span class="p">(</span><span class="s">&quot;张三&quot;</span><span class="p">,</span><span class="mi">18</span><span class="p">,</span><span class="s">&quot;北大街&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">p1</span><span class="p">.</span><span class="n">_addr</span><span class="o">=</span><span class="s">&quot;南大街&quot;</span><span class="p">;</span><span class="w">  </span><span class="c1">// 编译错误：常成员变量不能修改</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>创建对象后初始化常成员变量的唯一机会是在构造函数的初始化列表中，常成员变量一旦初始化就不能再改变。</p>
+</section>
+<section id="id5">
+<h2><a class="toc-backref" href="#id15" role="doc-backlink">const 成员函数</a><a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h2>
+<p>使用 const 修饰的成员函数称为常成员函数。与修饰成员变量不同的是，修饰成员函数时，const 位于成员函数的后面，其格式如下：</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>返回值类型 函数名() const;
+</pre></div>
+</div>
+<p>在常成员函数内部，只能访问类的成员变量，而不能修改类的成员变量；并且，常成员函数只能调用类的常成员函数，而不能调用类的非常成员函数。类中定义的成员函数若与常成员函数名相同则构成重载，常成员函数只能由 const 修饰的对象进行访问。</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">std</span><span class="p">;</span><span class="w"></span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Person</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">Person</span><span class="p">(</span><span class="n">string</span><span class="w"> </span><span class="p">,</span><span class="kt">int</span><span class="p">,</span><span class="n">string</span><span class="p">,</span><span class="n">string</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="o">~</span><span class="n">Person</span><span class="p">();</span><span class="w"></span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">string</span><span class="w"> </span><span class="n">_addr</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">myInfor</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w">   </span><span class="c1">// 常成员函数</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">myInfor</span><span class="p">();</span><span class="w">         </span><span class="c1">// 普通成员函数（构成重载）</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">place</span><span class="p">();</span><span class="w"></span>
+<span class="k">private</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">string</span><span class="w"> </span><span class="n">_name</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">_age</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">string</span><span class="w"> </span><span class="n">_favFruit</span><span class="p">;</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+<span class="n">Person</span><span class="o">::</span><span class="n">Person</span><span class="p">(</span><span class="n">string</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="kt">int</span><span class="w"> </span><span class="n">age</span><span class="p">,</span><span class="n">string</span><span class="w"> </span><span class="n">addr</span><span class="p">,</span><span class="n">string</span><span class="w"> </span><span class="n">favFruit</span><span class="p">)</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">_name</span><span class="p">(</span><span class="n">name</span><span class="p">),</span><span class="w"> </span><span class="n">_age</span><span class="p">(</span><span class="n">age</span><span class="p">),</span><span class="n">_addr</span><span class="p">(</span><span class="n">addr</span><span class="p">),</span><span class="n">_favFruit</span><span class="p">(</span><span class="n">favFruit</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="n">Person</span><span class="o">::</span><span class="n">myInfor</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// _favFruit=&quot;榴莲&quot;;  // 错误：常成员函数不能修改成员变量</span>
+<span class="w">    </span><span class="c1">// place();           // 错误：常成员函数不能调用非常成员函数</span>
+<span class="w">    </span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&quot;我叫&quot;</span><span class="o">&lt;&lt;</span><span class="n">_name</span><span class="o">&lt;&lt;</span><span class="s">&quot;今年&quot;</span><span class="o">&lt;&lt;</span><span class="n">_age</span><span class="o">&lt;&lt;</span><span class="s">&quot;岁&quot;</span><span class="o">&lt;&lt;</span><span class="s">&quot;我喜欢吃&quot;</span><span class="o">&lt;&lt;</span><span class="n">_favFruit</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+<span class="n">Person</span><span class="o">::~</span><span class="n">Person</span><span class="p">(){}</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="n">Person</span><span class="o">::</span><span class="n">myInfor</span><span class="p">()</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">_favFruit</span><span class="o">=</span><span class="s">&quot;桃子&quot;</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&quot;我叫&quot;</span><span class="o">&lt;&lt;</span><span class="n">_name</span><span class="o">&lt;&lt;</span><span class="s">&quot;今年&quot;</span><span class="o">&lt;&lt;</span><span class="n">_age</span><span class="o">&lt;&lt;</span><span class="s">&quot;岁&quot;</span><span class="o">&lt;&lt;</span><span class="s">&quot;我喜欢吃&quot;</span><span class="o">&lt;&lt;</span><span class="n">_favFruit</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">place</span><span class="p">();</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="n">Person</span><span class="o">::</span><span class="n">place</span><span class="p">()</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&quot;我住在&quot;</span><span class="o">&lt;&lt;</span><span class="n">_addr</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+<span class="kt">int</span><span class="w"> </span><span class="n">main</span><span class="p">()</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">Person</span><span class="w"> </span><span class="n">p1</span><span class="p">(</span><span class="s">&quot;张三&quot;</span><span class="p">,</span><span class="mi">18</span><span class="p">,</span><span class="s">&quot;北大街&quot;</span><span class="p">,</span><span class="s">&quot;苹果&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">p1</span><span class="p">.</span><span class="n">myInfor</span><span class="p">();</span><span class="w">       </span><span class="c1">// 调用普通成员函数</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">Person</span><span class="w"> </span><span class="n">p2</span><span class="p">(</span><span class="s">&quot;李四&quot;</span><span class="p">,</span><span class="mi">18</span><span class="p">,</span><span class="s">&quot;南大街&quot;</span><span class="p">,</span><span class="s">&quot;橘子&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">p2</span><span class="p">.</span><span class="n">myInfor</span><span class="p">();</span><span class="w">       </span><span class="c1">// 调用常成员函数</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>类的常成员函数不能修改成员变量的值，也不能调用非常成员函数。</p>
+</div>
+</section>
+<section id="const-static">
+<h2><a class="toc-backref" href="#id16" role="doc-backlink">const static 成员</a><a class="headerlink" href="#const-static" title="Permalink to this heading">¶</a></h2>
+<p>使用 <code class="docutils literal notranslate"><span class="pre">static</span> <span class="pre">const</span></code> 修饰符组合修饰类成员，既实现了数据共享又达到了数据不被改变的目的。修饰成员函数与修饰普通函数格式一样，修饰成员变量必须在类的内部进行初始化。</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Point</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">getLen</span><span class="p">();</span><span class="w"></span>
+<span class="k">private</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">area</span><span class="p">;</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+<span class="k">const</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">Point</span><span class="o">::</span><span class="n">area</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3600</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../links.html">Links</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Cplus</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="libstdc%2B%2B_2_9_1/index.html">Libstd c++ 2.9.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="class_this_pointer.html">this 指针</a></li>
+<li class="toctree-l2"><a class="reference internal" href="class_constructor_type.html">构造函数的类型</a></li>
+<li class="toctree-l2"><a class="reference internal" href="class_constructor.html">构造函数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="class_destructor.html">析构函数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="class_copyconstructor.html">拷贝构造函数</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">const</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#cplus-const-pointer">const 指针</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">const 引用</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">const 内存分配</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">const 成员变量</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5">const 成员函数</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#const-static">const static 成员</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="class_static_member.html">static 成员</a></li>
+<li class="toctree-l2"><a class="reference internal" href="class_friend_member.html">友元（Friend）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Operator_overloading/index.html">运算符重载</a></li>
+<li class="toctree-l2"><a class="reference internal" href="class_inheritance.html">继承</a></li>
+<li class="toctree-l2"><a class="reference internal" href="class_access_modifiers.html">访问修饰符</a></li>
+<li class="toctree-l2"><a class="reference internal" href="class_inheritance_access.html">继承访问控制</a></li>
+<li class="toctree-l2"><a class="reference internal" href="class_object_slicing.html">对象切片（Object Slicing）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="class_derived_class.html">派生类</a></li>
+<li class="toctree-l2"><a class="reference internal" href="class_multile_inheritance.html">多继承</a></li>
+<li class="toctree-l2"><a class="reference internal" href="class_multile_inheritance_Ambiguity.html">多继承的二义性</a></li>
+<li class="toctree-l2"><a class="reference internal" href="class_virtual_Inheritance.html">虚继承</a></li>
+<li class="toctree-l2"><a class="reference internal" href="class_polymorphism.html">多态（Polymorphism）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="class_override_specifier.html">override 说明符</a></li>
+<li class="toctree-l2"><a class="reference internal" href="class_final_specifier.html">final 说明符</a></li>
+<li class="toctree-l2"><a class="reference internal" href="class_vtable.html">虚函数表机制（Virtual Function Table）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="class_vtable2.html">类层次与虚函数表（Class Hierarchy and VTable）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="class_virtual_destructor.html">虚析构函数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="class_private_destructor.html">私有析构函数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="class_abstract_class.html">抽象类（Abstract Class）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="class_itanium_abi_destruction.html">Itanium C++ ABI 析构函数机制</a></li>
+<li class="toctree-l2"><a class="reference internal" href="class_references.html">引用（References）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functemplate.html">Function template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="passarguments.html">Pass arguments to function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rvalue.html">右值引用与移动语义</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lvalue_and_rvalue.html">左值与右值</a></li>
+<li class="toctree-l2"><a class="reference internal" href="placement_new.html">Placement new operator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="template/index.html">模板（Template）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cast/index.html">C++ Cast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="decltype.html">Decltype</a></li>
+<li class="toctree-l2"><a class="reference internal" href="explicit_implicit.html">Explicit and Implicit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="typedef_typename.html">typedef typename</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pointer_size.html">Size of Pointers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inline_function.html">Inline Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="math/index.html">Math</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licence/index.html">OpenSource License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bochs/index.html">Bochs IA-32 Emulator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../system/index.html">System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../unix/index.html">UNIX</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../math/index.html">Math</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../crypto/index.html">Crypto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../todo.html">To Do</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Cplus</a><ul>
+      <li>Previous: <a href="class_copyconstructor.html" title="previous chapter">拷贝构造函数</a></li>
+      <li>Next: <a href="class_static_member.html" title="next chapter">static 成员</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/cplus/class_const_member.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

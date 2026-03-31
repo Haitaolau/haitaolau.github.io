@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Template &#8212; GDocs 0.1 documentation</title>
+    <title>模板（Template） &#8212; GDocs 0.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
@@ -17,7 +17,7 @@
     <script src="../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Instantiation" href="instantiation.html" />
+    <link rel="next" title="模板实例化" href="template_instantiation.html" />
     <link rel="prev" title="Placement new operator" href="../placement_new.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
@@ -37,48 +37,185 @@
           <div class="body" role="main">
             
   <section id="template">
-<span id="cplus-template-index"></span><h1>Template<a class="headerlink" href="#template" title="Permalink to this heading">¶</a></h1>
+<span id="cplus-template-index"></span><h1>模板（Template）<a class="headerlink" href="#template" title="Permalink to this heading">¶</a></h1>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="instantiation.html">Instantiation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="parameter_deduction.html">Parameter Deduction</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="parameter_deduction.html#auto-type-deduction">Auto type deduction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="parameter_deduction.html#specify-template-parameters">Specify template parameters</a></li>
-<li class="toctree-l2"><a class="reference internal" href="parameter_deduction.html#specify-empty-template-parameter">Specify empty template parameter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="template_instantiation.html">模板实例化</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="template_instantiation.html#id2">概述</a></li>
+<li class="toctree-l2"><a class="reference internal" href="template_instantiation.html#id3">示例</a></li>
+<li class="toctree-l2"><a class="reference internal" href="template_instantiation.html#id4">显式实例化</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="overide.html">Overide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="variadic_function.html">Variadic function templates</a></li>
-<li class="toctree-l1"><a class="reference internal" href="fold_expressions.html">Fold Expressions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="universal_references.html">Universal References</a></li>
-<li class="toctree-l1"><a class="reference internal" href="type_deduction.html">Type Deduction</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="type_deduction.html#how-to-find-out-what-the-type-the-compiler-deducted">How to find out what the type the compiler deducted?</a></li>
-<li class="toctree-l2"><a class="reference internal" href="type_deduction.html#reference">Reference</a></li>
-<li class="toctree-l2"><a class="reference internal" href="type_deduction.html#point">Point</a></li>
-<li class="toctree-l2"><a class="reference internal" href="type_deduction.html#universal-references">Universal References</a></li>
-<li class="toctree-l2"><a class="reference internal" href="type_deduction.html#pass-by-value">pass by value</a></li>
-<li class="toctree-l2"><a class="reference internal" href="type_deduction.html#array">Array</a></li>
-<li class="toctree-l2"><a class="reference internal" href="type_deduction.html#function-name">Function name</a></li>
-<li class="toctree-l2"><a class="reference internal" href="type_deduction.html#initializer-lists">initializer lists</a></li>
+<li class="toctree-l1"><a class="reference internal" href="template_specialization.html">模板特化（全特化与偏特化）</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="template_specialization.html#id2">概述</a></li>
+<li class="toctree-l2"><a class="reference internal" href="template_specialization.html#id3">全特化的定义格式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="template_specialization.html#id4">问题引入</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="template_specialization.html#id5">使用全特化解决</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_specialization.html#id6">类模板的特化</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="template_specialization.html#id7">全特化</a></li>
+<li class="toctree-l4"><a class="reference internal" href="template_specialization.html#id8">偏特化（部分特化）</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="ref_and_cref.html">std::ref and std::cref</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="ref_and_cref.html#how-it-works">How it works</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_specialization.html#id9">全特化与函数模板重载的区别</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="template_specialization.html#id10">对比</a></li>
+<li class="toctree-l4"><a class="reference internal" href="template_specialization.html#id11">示例对比</a></li>
+<li class="toctree-l4"><a class="reference internal" href="template_specialization.html#id12">重载决议的陷阱</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="auto_type_deduction.html">Auto type deduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="perfect_forwarding.html">Perfect Forwarding</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="perfect_forwarding.html#concepts">Concepts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="perfect_forwarding.html#std-forward">std::forward</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="trait.html">Traits</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="trait.html#introduce-the-problem">1. Introduce the problem</a></li>
-<li class="toctree-l2"><a class="reference internal" href="trait.html#iterator-traits">2. iterator_traits</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="trait.html#defination">Defination</a></li>
-<li class="toctree-l3"><a class="reference internal" href="trait.html#list-iterator-category">List iterator_category</a></li>
+<li class="toctree-l2"><a class="reference internal" href="template_specialization.html#id13">总结</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="template_parameter_deduction.html">模板参数推导</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="template_parameter_deduction.html#id2">概述</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="template_parameter_deduction.html#id3">自动推导</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_parameter_deduction.html#id4">显式指定模板参数</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_parameter_deduction.html#id5">空模板参数列表</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="template_overload.html">函数模板重载</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="template_overload.html#id2">概述</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="template_overload.html#id3">函数模板之间的重载</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_overload.html#id4">函数模板与普通函数的重载</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="template_overload.html#id5">重载决议规则</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="template_overload.html#id6">模板与自动类型转换</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="template_overload.html#id7">问题示例</a></li>
+<li class="toctree-l4"><a class="reference internal" href="template_overload.html#id8">解决方案</a></li>
+<li class="toctree-l4"><a class="reference internal" href="template_overload.html#id9">完整对比示例</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="template_variadic_function.html">可变参函数模板</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="template_variadic_function.html#id2">概述</a></li>
+<li class="toctree-l2"><a class="reference internal" href="template_variadic_function.html#id3">示例</a></li>
+<li class="toctree-l2"><a class="reference internal" href="template_variadic_function.html#id4">要点</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="template_variadic_function.html#id5">递归展开参数包</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="template_fold_expressions.html">折叠表达式</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="template_fold_expressions.html#id2">概述</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="template_fold_expressions.html#id3">一元折叠</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_fold_expressions.html#id4">二元折叠</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="template_universal_references.html">万能引用</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="template_universal_references.html#id2">概述</a></li>
+<li class="toctree-l2"><a class="reference internal" href="template_universal_references.html#id3">判断规则</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="template_universal_references.html#id4">万能引用既可以接收左值也可以接收右值</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_universal_references.html#id5">不是万能引用的情况</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="template_universal_references.html#t">类模板成员函数中的 T&amp;&amp;</a></li>
+<li class="toctree-l4"><a class="reference internal" href="template_universal_references.html#cv-t">加了 cv 限定符的 T&amp;&amp;</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="template_universal_references.html#id6">万能引用的类型推导示例</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="template_universal_references.html#const">万能引用保留 const 属性</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="template_type_deduction.html">模板类型推导</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="template_type_deduction.html#id2">概述</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="template_type_deduction.html#t-int">为什么传入左值时 T 会被推导为 int&amp; ？</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="template_type_deduction.html#id3">引用类型实参的推导</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="template_type_deduction.html#t">形参为 T&amp; 时</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_type_deduction.html#id4">形参为 T（值传递）时</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="template_type_deduction.html#const">const 与类型推导</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="template_type_deduction.html#id5">形参为 T* 时</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_type_deduction.html#const-t">形参为 const T* 时</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="template_type_deduction.html#id6">值传递的推导规则</a></li>
+<li class="toctree-l2"><a class="reference internal" href="template_type_deduction.html#id7">数组类型的推导</a></li>
+<li class="toctree-l2"><a class="reference internal" href="template_type_deduction.html#id8">函数名的推导</a></li>
+<li class="toctree-l2"><a class="reference internal" href="template_type_deduction.html#initializer-list">initializer_list 的推导</a></li>
+<li class="toctree-l2"><a class="reference internal" href="template_type_deduction.html#id9">推导规则总结</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="template_auto_type_deduction.html">auto 类型推导</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="template_auto_type_deduction.html#id1">概述</a></li>
+<li class="toctree-l2"><a class="reference internal" href="template_auto_type_deduction.html#id2">基本规则</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="template_auto_type_deduction.html#id3">与模板推导的区别</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_auto_type_deduction.html#c-14-auto">C++14 中的 auto</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="template_ref_and_cref.html">std::ref 和 std::cref</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="template_ref_and_cref.html#id1">概述</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="template_ref_and_cref.html#std-ref">为什么需要 std::ref ？</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="template_ref_and_cref.html#id2">工作原理</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="template_ref_and_cref.html#id3">std::ref 示例</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_ref_and_cref.html#std-cref">std::cref 示例</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_ref_and_cref.html#id4">常见使用场景</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="template_ref_and_cref.html#std-thread">std::thread</a></li>
+<li class="toctree-l4"><a class="reference internal" href="template_ref_and_cref.html#std-bind">std::bind</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="template_ref_and_cref.html#id5">总结</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="template_perfect_forwarding.html">完美转发</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="template_perfect_forwarding.html#id2">概述</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="template_perfect_forwarding.html#id3">问题：不完美的转发</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_perfect_forwarding.html#id4">使用万能引用转发</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_perfect_forwarding.html#std-forward">std::forward 实现完美转发</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="template_perfect_forwarding.html#id5">std::forward 的工作原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="template_perfect_forwarding.html#id6">为什么具名的右值引用是左值？</a></li>
+<li class="toctree-l2"><a class="reference internal" href="template_perfect_forwarding.html#std-forward-vs-std-move">std::forward vs std::move</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="template_perfect_forwarding.html#id7">实际应用场景</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="template_perfect_forwarding.html#id8">工厂函数</a></li>
+<li class="toctree-l4"><a class="reference internal" href="template_perfect_forwarding.html#emplace-back">emplace_back</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="template_trait.html">Traits（萃取）</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="template_trait.html#id1">概述</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="template_trait.html#id2">工作原理</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="template_trait.html#id3">问题引入</a></li>
+<li class="toctree-l4"><a class="reference internal" href="template_trait.html#id4">方案1：手动指定返回类型</a></li>
+<li class="toctree-l4"><a class="reference internal" href="template_trait.html#id5">方案2：使用固定萃取类模板</a></li>
+<li class="toctree-l4"><a class="reference internal" href="template_trait.html#iterator-traits">iterator_traits</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="template_trait.html#id6">为什么需要对原生指针做偏特化？</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="template_trait.html#type-traits">标准库中的 type_traits</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="template_trait.html#id7">类型判断</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_trait.html#id8">类型变换</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="template_trait.html#std-enable-if">配合 std::enable_if 实现条件编译</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="template_trait.html#id9">总结</a></li>
 </ul>
 </li>
 </ul>
@@ -111,41 +248,60 @@
 <li class="toctree-l1"><a class="reference internal" href="../../binaryAnalysis.html">BinaryAnalysis</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">Cplus</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../libstdc%2B%2B_2_9_1/index.html">Libstd c++ 2.9.1</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../Operator_overloading/index.html">C++ Operator overloading</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../access_modifiers.html">Access Modifiers</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../inheritance_access.html">Inheritance Access</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../references.html">References (or Aliases)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../const.html">const</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_this_pointer.html">this 指针</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_constructor_type.html">构造函数的类型</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_constructor.html">构造函数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_destructor.html">析构函数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_copyconstructor.html">拷贝构造函数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_const_member.html">const</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_static_member.html">static 成员</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_friend_member.html">友元（Friend）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Operator_overloading/index.html">运算符重载</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_inheritance.html">继承</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_access_modifiers.html">访问修饰符</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_inheritance_access.html">继承访问控制</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_object_slicing.html">对象切片（Object Slicing）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_derived_class.html">派生类</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_multile_inheritance.html">多继承</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_multile_inheritance_Ambiguity.html">多继承的二义性</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_virtual_Inheritance.html">虚继承</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_polymorphism.html">多态（Polymorphism）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_override_specifier.html">override 说明符</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_final_specifier.html">final 说明符</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_vtable.html">虚函数表机制（Virtual Function Table）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_vtable2.html">类层次与虚函数表（Class Hierarchy and VTable）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_virtual_destructor.html">虚析构函数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_private_destructor.html">私有析构函数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_abstract_class.html">抽象类（Abstract Class）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_itanium_abi_destruction.html">Itanium C++ ABI 析构函数机制</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_references.html">引用（References）</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../functemplate.html">Function template</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../passarguments.html">Pass arguments to function</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../friend.html">Friend class and function</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../abstract.html">Abstract Class</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../copyconstructor.html">Copy constructor</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../const_function.html">Const member functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rvalue.html">Cplus Rvalue</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../lvalue_and_rvalue.html">lvalue &amp;&amp; rvalue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rvalue.html">右值引用与移动语义</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../lvalue_and_rvalue.html">左值与右值</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../placement_new.html">Placement new operator</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Template</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="instantiation.html">Instantiation</a></li>
-<li class="toctree-l3"><a class="reference internal" href="parameter_deduction.html">Parameter Deduction</a></li>
-<li class="toctree-l3"><a class="reference internal" href="overide.html">Overide</a></li>
-<li class="toctree-l3"><a class="reference internal" href="variadic_function.html">Variadic function templates</a></li>
-<li class="toctree-l3"><a class="reference internal" href="fold_expressions.html">Fold Expressions</a></li>
-<li class="toctree-l3"><a class="reference internal" href="universal_references.html">Universal References</a></li>
-<li class="toctree-l3"><a class="reference internal" href="type_deduction.html">Type Deduction</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ref_and_cref.html">std::ref and std::cref</a></li>
-<li class="toctree-l3"><a class="reference internal" href="auto_type_deduction.html">Auto type deduction</a></li>
-<li class="toctree-l3"><a class="reference internal" href="perfect_forwarding.html">Perfect Forwarding</a></li>
-<li class="toctree-l3"><a class="reference internal" href="trait.html">Traits</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">模板（Template）</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="template_instantiation.html">模板实例化</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_specialization.html">模板特化（全特化与偏特化）</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_parameter_deduction.html">模板参数推导</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_overload.html">函数模板重载</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_variadic_function.html">可变参函数模板</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_fold_expressions.html">折叠表达式</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_universal_references.html">万能引用</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_type_deduction.html">模板类型推导</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_auto_type_deduction.html">auto 类型推导</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_ref_and_cref.html">std::ref 和 std::cref</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_perfect_forwarding.html">完美转发</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_trait.html">Traits（萃取）</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../cast/index.html">C++ Cast</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../decltype.html">Decltype</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../explicit_implicit.html">Explicit and Implicit</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../constructor.html">Types of Constructors in C++</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../typedef_typename.html">typedef typename</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../pointer_size.html">Size of Pointers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../inline_function.html">Inline Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../math/index.html">Math</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../els/index.html">ESL</a></li>
@@ -160,6 +316,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../system/index.html">System</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../unix/index.html">UNIX</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../math/index.html">Math</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crypto/index.html">Crypto</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../todo.html">To Do</a></li>
 </ul>
 
@@ -169,7 +326,7 @@
   <li><a href="../../index.html">Documentation overview</a><ul>
   <li><a href="../index.html">Cplus</a><ul>
       <li>Previous: <a href="../placement_new.html" title="previous chapter">Placement new operator</a></li>
-      <li>Next: <a href="instantiation.html" title="next chapter">Instantiation</a></li>
+      <li>Next: <a href="template_instantiation.html" title="next chapter">模板实例化</a></li>
   </ul></li>
   </ul></li>
 </ul>

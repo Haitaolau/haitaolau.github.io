@@ -1,0 +1,103 @@
+==========================
+折叠表达式
+==========================
+
+.. contents:: Table of Contents
+
+概述
+--------------
+
+折叠表达式（Fold Expressions）是 C++17 引入的特性，主要目的是对可变参数包中的所有参数进行统一计算（如求和、求差等）。
+
+参考：`fold expression - cppreference.com <https://en.cppreference.com/w/cpp/language/fold>`_
+
+折叠表达式有 4 种格式：
+
+.. list-table::
+    :header-rows: 1
+    :widths: 25 35 40
+
+    * - 名称
+      - 语法
+      - 展开形式
+    * - 一元左折（Unary Left Fold）
+      - ``(... op args)``
+      - ``((a1 op a2) op a3) op a4``
+    * - 一元右折（Unary Right Fold）
+      - ``(args op ...)``
+      - ``a1 op (a2 op (a3 op a4))``
+    * - 二元左折（Binary Left Fold）
+      - ``(init op ... op args)``
+      - ``((init op a1) op a2) op a3``
+    * - 二元右折（Binary Right Fold）
+      - ``(args op ... op init)``
+      - ``a1 op (a2 op (a3 op init))``
+
+所谓左折就是参数从左侧开始计算；所谓右折就是参数从右侧开始计算。
+
+一元折叠
+====================
+
+.. code-block:: cpp
+
+    #include <iostream>
+
+    template<typename... T>
+    auto sub_val_left(T... args)
+    {
+        return (... - args);        // 一元左折
+    }
+
+    template<typename... T>
+    auto sub_val_right(T... args)
+    {
+        return (args - ...);        // 一元右折
+    }
+
+    int main(int argc, char const *argv[])
+    {
+        std::cout << sub_val_left(10, 20, 30, 40) << std::endl;
+        std::cout << sub_val_right(10, 20, 30, 40) << std::endl;
+        return 0;
+    }
+
+输出：
+
+.. code-block:: console
+
+    -80
+    -20
+
+* ``sub_val_left(10, 20, 30, 40)`` → ``((10-20)-30)-40`` = -80
+* ``sub_val_right(10, 20, 30, 40)`` → ``10-(20-(30-40))`` = -20
+
+二元折叠
+====================
+
+.. code-block:: cpp
+
+    #include <iostream>
+    using namespace std;
+
+    template <typename... T>
+    auto sub_val_left_b(T... args) { return (220 - ... - args); }   // 二元左折
+
+    template <typename... T>
+    auto sub_val_right_b(T... args) { return (args - ... - 220); }  // 二元右折
+
+    int main(int argc, char const *argv[])
+    {
+        cout << sub_val_left_b(10, 20, 30, 40) << endl;
+        cout << sub_val_right_b(10, 20, 30, 40) << endl;
+        return 0;
+    }
+
+输出：
+
+.. code-block:: console
+
+    120
+    200
+
+* ``sub_val_left_b(10, 20, 30, 40)`` → ``(((220-10)-20)-30)-40`` = 120
+* ``sub_val_right_b(10, 20, 30, 40)`` → ``10-(20-(30-(40-220)))`` = 200

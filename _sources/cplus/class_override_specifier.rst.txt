@@ -1,0 +1,36 @@
+==========================
+override 说明符
+==========================
+
+.. contents:: Table of Contents
+
+概述
+--------------
+
+Specifies that a virtual function overrides another virtual function. override 关键字的作用是检查派生类中函数是否在重写基类虚函数，如果不是重写基类虚函数，编译器就会报错。
+
+示例
+--------------
+
+.. code-block:: cpp
+
+    class Base
+    {
+    public:
+        virtual void func();
+        void show();
+    };
+    class Derive:public Base
+    {
+    public:
+        void func() override;   // 可通过编译
+        void show() override;   // 不能通过编译：show() 不是虚函数
+    };
+
+输出：
+
+.. code-block:: console
+
+    class_overiding.cpp:15:7: error: 'void Derive::show()' marked 'override', but does not override
+       15 |  void show() override;
+          |       ^~~~

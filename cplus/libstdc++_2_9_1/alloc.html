@@ -1,0 +1,870 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>空间分配器 (Allocator) &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Vector" href="vector/index.html" />
+    <link rel="prev" title="Libstd c++ 2.9.1" href="index.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="allocator">
+<h1><a class="toc-backref" href="#id7" role="doc-backlink">空间分配器 (Allocator)</a><a class="headerlink" href="#allocator" title="Permalink to this heading">¶</a></h1>
+<nav class="contents" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#allocator" id="id7">空间分配器 (Allocator)</a></p>
+<ul>
+<li><p><a class="reference internal" href="#id1" id="id8">概述</a></p></li>
+<li><p><a class="reference internal" href="#malloc-alloc-template" id="id9">第一级分配器：__malloc_alloc_template</a></p>
+<ul>
+<li><p><a class="reference internal" href="#oom" id="id10">OOM 处理机制</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#default-alloc-template" id="id11">第二级分配器：__default_alloc_template</a></p>
+<ul>
+<li><p><a class="reference internal" href="#id2" id="id12">核心常量与数据结构</a></p></li>
+<li><p><a class="reference internal" href="#id3" id="id13">辅助函数</a></p></li>
+<li><p><a class="reference internal" href="#allocate" id="id14">allocate 分配流程</a></p></li>
+<li><p><a class="reference internal" href="#deallocate" id="id15">deallocate 释放流程</a></p></li>
+<li><p><a class="reference internal" href="#s-refill" id="id16">_S_refill 重新填充</a></p></li>
+<li><p><a class="reference internal" href="#s-chunk-alloc" id="id17">_S_chunk_alloc 内存池管理</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#simple-alloc" id="id18">simple_alloc 接口包装</a></p></li>
+<li><p><a class="reference internal" href="#alloc-traits" id="id19">_Alloc_traits 分配器萃取</a></p>
+<ul>
+<li><p><a class="reference internal" href="#id4" id="id20">容器如何使用 _Alloc_traits</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id5" id="id21">标准 allocator 接口</a></p></li>
+<li><p><a class="reference internal" href="#debug-alloc" id="id22">debug_alloc 调试分配器</a></p></li>
+<li><p><a class="reference internal" href="#id6" id="id23">整体架构总结</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<section id="id1">
+<h2><a class="toc-backref" href="#id8" role="doc-backlink">概述</a><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<p>SGI STL 的空间分配器实现在 <code class="docutils literal notranslate"><span class="pre">&lt;bits/stl_alloc.h&gt;</span></code> 中，采用 <strong>双层分配器</strong> 架构：</p>
+<ul class="simple">
+<li><p><strong>第一级分配器</strong> （ <code class="docutils literal notranslate"><span class="pre">__malloc_alloc_template</span></code> ）：直接封装 malloc/free，处理大块内存（&gt; 128 bytes）和 OOM（Out Of Memory）情况</p></li>
+<li><p><strong>第二级分配器</strong> （ <code class="docutils literal notranslate"><span class="pre">__default_alloc_template</span></code> ）：维护 16 条自由链表（free list），管理 ≤ 128 bytes 的小块内存，减少内存碎片和 malloc 调用开销</p></li>
+</ul>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 用户请求分配 n bytes
+         |
+         v
+ n &gt; 128 bytes ?
+   /           \
+ 是              否
+  |               |
+  v               v
+第一级分配器     第二级分配器
+malloc/free     free list 内存池
+</pre></div>
+</div>
+<p>默认情况下（未定义 <code class="docutils literal notranslate"><span class="pre">__USE_MALLOC</span></code> ），alloc 使用第二级分配器：</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifdef __USE_MALLOC</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">malloc_alloc</span><span class="w"> </span><span class="n">alloc</span><span class="p">;</span><span class="w">                                     </span><span class="c1">// 第一级</span>
+<span class="cp">#else</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">__default_alloc_template</span><span class="o">&lt;</span><span class="n">__NODE_ALLOCATOR_THREADS</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="o">&gt;</span><span class="w"> </span><span class="n">alloc</span><span class="p">;</span><span class="w">  </span><span class="c1">// 第二级</span>
+<span class="cp">#endif</span>
+</pre></div>
+</div>
+</section>
+<section id="malloc-alloc-template">
+<h2><a class="toc-backref" href="#id9" role="doc-backlink">第一级分配器：__malloc_alloc_template</a><a class="headerlink" href="#malloc-alloc-template" title="Permalink to this heading">¶</a></h2>
+<p>第一级分配器直接封装 C 的 malloc/free/realloc，并提供 OOM 处理机制。</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">int</span><span class="w"> </span><span class="n">__inst</span><span class="o">&gt;</span><span class="w"></span>
+<span class="k">class</span><span class="w"> </span><span class="nc">__malloc_alloc_template</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="k">private</span><span class="o">:</span><span class="w"></span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">_S_oom_malloc</span><span class="p">(</span><span class="kt">size_t</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="nf">_S_oom_realloc</span><span class="p">(</span><span class="kt">void</span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="w"> </span><span class="n">__malloc_alloc_oom_handler</span><span class="p">)();</span><span class="w"></span>
+
+<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">allocate</span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">__n</span><span class="p">)</span><span class="w"></span>
+<span class="w">  </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">__result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">malloc</span><span class="p">(</span><span class="n">__n</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="mi">0</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">__result</span><span class="p">)</span><span class="w"> </span><span class="n">__result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_S_oom_malloc</span><span class="p">(</span><span class="n">__n</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__result</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">deallocate</span><span class="p">(</span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">__p</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="cm">/* __n */</span><span class="p">)</span><span class="w"></span>
+<span class="w">  </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">free</span><span class="p">(</span><span class="n">__p</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">reallocate</span><span class="p">(</span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">__p</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="cm">/* old_sz */</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">__new_sz</span><span class="p">)</span><span class="w"></span>
+<span class="w">  </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">__result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">realloc</span><span class="p">(</span><span class="n">__p</span><span class="p">,</span><span class="w"> </span><span class="n">__new_sz</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="mi">0</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">__result</span><span class="p">)</span><span class="w"> </span><span class="n">__result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_S_oom_realloc</span><span class="p">(</span><span class="n">__p</span><span class="p">,</span><span class="w"> </span><span class="n">__new_sz</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__result</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="w"> </span><span class="n">__set_malloc_handler</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">__f</span><span class="p">)()))()</span><span class="w"></span>
+<span class="w">  </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="w"> </span><span class="n">__old</span><span class="p">)()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__malloc_alloc_oom_handler</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">__malloc_alloc_oom_handler</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__f</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="p">(</span><span class="n">__old</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="n">__malloc_alloc_template</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">&gt;</span><span class="w"> </span><span class="n">malloc_alloc</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+<p>模板参数 <code class="docutils literal notranslate"><span class="pre">__inst</span></code> 没有实际用途，仅用于允许创建多个实例（实际只使用 <code class="docutils literal notranslate"><span class="pre">__inst</span> <span class="pre">=</span> <span class="pre">0</span></code> ）。</p>
+<p>所有成员函数都是 static 的——第一级分配器没有任何实例状态，本质上是一个函数集合。</p>
+<section id="oom">
+<h3><a class="toc-backref" href="#id10" role="doc-backlink">OOM 处理机制</a><a class="headerlink" href="#oom" title="Permalink to this heading">¶</a></h3>
+<p>当 malloc 返回 0（分配失败）时，不是直接抛异常，而是进入 OOM 处理循环：</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">int</span><span class="w"> </span><span class="n">__inst</span><span class="o">&gt;</span><span class="w"></span>
+<span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">__malloc_alloc_template</span><span class="o">&lt;</span><span class="n">__inst</span><span class="o">&gt;::</span><span class="n">_S_oom_malloc</span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">__n</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="w"> </span><span class="n">__my_malloc_handler</span><span class="p">)();</span><span class="w"></span>
+<span class="w">    </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">__result</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(;;)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">__my_malloc_handler</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__malloc_alloc_oom_handler</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="mi">0</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">__my_malloc_handler</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">__throw_bad_alloc</span><span class="p">();</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="p">(</span><span class="o">*</span><span class="n">__my_malloc_handler</span><span class="p">)();</span><span class="w">   </span><span class="c1">// 调用用户设置的处理函数，尝试释放内存</span>
+<span class="w">        </span><span class="n">__result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">malloc</span><span class="p">(</span><span class="n">__n</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">__result</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">(</span><span class="n">__result</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>处理流程：</p>
+<ol class="arabic simple">
+<li><p>如果用户没有设置 OOM handler（ <code class="docutils literal notranslate"><span class="pre">__malloc_alloc_oom_handler</span> <span class="pre">==</span> <span class="pre">0</span></code> ），直接抛出 <code class="docutils literal notranslate"><span class="pre">bad_alloc</span></code> 异常</p></li>
+<li><p>如果设置了 handler，调用它（期望 handler 能释放一些内存），然后重试 malloc</p></li>
+<li><p>不断循环，直到 malloc 成功或 handler 未设置时抛异常</p></li>
+</ol>
+<p>这个设计模仿了 C++ 的 <code class="docutils literal notranslate"><span class="pre">std::set_new_handler</span></code> 机制。用户可以通过 <code class="docutils literal notranslate"><span class="pre">__set_malloc_handler</span></code> 注册自定义的 OOM 处理函数：</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">my_oom_handler</span><span class="p">()</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// 尝试释放一些缓存内存</span>
+<span class="w">    </span><span class="c1">// 如果无法释放，可以设置 handler 为 nullptr 让下次循环抛异常</span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="n">__malloc_alloc_template</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">&gt;::</span><span class="n">__set_malloc_handler</span><span class="p">(</span><span class="n">my_oom_handler</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>SGI STL 没有使用 C++ 的 <code class="docutils literal notranslate"><span class="pre">::operator</span> <span class="pre">new</span></code> 来分配内存，而是直接使用 C 的 malloc。因此不能使用 <code class="docutils literal notranslate"><span class="pre">std::set_new_handler</span></code> ，需要自己实现一套类似的 OOM 处理机制。</p>
+</div>
+</section>
+</section>
+<section id="default-alloc-template">
+<h2><a class="toc-backref" href="#id11" role="doc-backlink">第二级分配器：__default_alloc_template</a><a class="headerlink" href="#default-alloc-template" title="Permalink to this heading">¶</a></h2>
+<p>第二级分配器是 SGI STL 分配器的核心，采用 <strong>内存池 + 自由链表</strong> 的策略来管理小块内存。</p>
+<p>设计动机：小对象频繁调用 malloc/free 会带来两个问题：</p>
+<ol class="arabic simple">
+<li><p><strong>额外开销</strong> ：每次 malloc 都会附带管理信息（cookie），对于 8 字节的小对象，cookie 可能就占了 8~16 字节，内存利用率极低</p></li>
+<li><p><strong>内存碎片</strong> ：大量小块内存的分配和释放会导致堆碎片化</p></li>
+</ol>
+<section id="id2">
+<h3><a class="toc-backref" href="#id12" role="doc-backlink">核心常量与数据结构</a><a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">bool</span><span class="w"> </span><span class="n">threads</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">inst</span><span class="o">&gt;</span><span class="w"></span>
+<span class="k">class</span><span class="w"> </span><span class="nc">__default_alloc_template</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="k">private</span><span class="o">:</span><span class="w"></span>
+<span class="w">  </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span><span class="n">_ALIGN</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">8</span><span class="p">};</span><span class="w">            </span><span class="c1">// 对齐边界：所有分配大小向上对齐到 8 的倍数</span>
+<span class="w">  </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span><span class="n">_MAX_BYTES</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">128</span><span class="p">};</span><span class="w">      </span><span class="c1">// 小块内存上限：超过 128 bytes 转交第一级分配器</span>
+<span class="w">  </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span><span class="n">_NFREELISTS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">16</span><span class="p">};</span><span class="w">      </span><span class="c1">// 自由链表数量：128 / 8 = 16 条</span>
+
+<span class="w">  </span><span class="c1">// 内存池状态</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">_S_start_free</span><span class="p">;</span><span class="w">   </span><span class="c1">// 内存池空闲区起始地址</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">_S_end_free</span><span class="p">;</span><span class="w">     </span><span class="c1">// 内存池空闲区结束地址</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">_S_heap_size</span><span class="p">;</span><span class="w">   </span><span class="c1">// 累计从系统获取的堆内存总量</span>
+<span class="p">};</span><span class="w"></span>
+</pre></div>
+</div>
+<p>自由链表节点使用 union 实现，巧妙地复用了内存：</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">union</span><span class="w"> </span><span class="nc">_Obj</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">union</span><span class="w"> </span><span class="nc">_Obj</span><span class="o">*</span><span class="w"> </span><span class="n">_M_free_list_link</span><span class="p">;</span><span class="w">  </span><span class="c1">// 空闲时：指向下一个空闲块</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">_M_client_data</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span><span class="w">         </span><span class="c1">// 使用时：客户端数据的起始地址</span>
+<span class="p">};</span><span class="w"></span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">_Obj</span><span class="o">*</span><span class="w"> </span><span class="n">__STL_VOLATILE</span><span class="w"> </span><span class="n">_S_free_list</span><span class="p">[</span><span class="n">_NFREELISTS</span><span class="p">];</span><span class="w"></span>
+</pre></div>
+</div>
+<p>当一个内存块空闲时，它的前几个字节被当作指针，指向链表中的下一个空闲块；当内存块被分配给用户后，整块内存都归用户使用。这样空闲块不需要额外的管理空间。</p>
+<p>16 条自由链表分别管理大小为 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128 bytes 的内存块：</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>_S_free_list[0]  → 8 bytes 的空闲块链表
+_S_free_list[1]  → 16 bytes 的空闲块链表
+_S_free_list[2]  → 24 bytes 的空闲块链表
+...
+_S_free_list[15] → 128 bytes 的空闲块链表
+</pre></div>
+</div>
+</section>
+<section id="id3">
+<h3><a class="toc-backref" href="#id13" role="doc-backlink">辅助函数</a><a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h3>
+<p><strong>_S_round_up</strong> ：将请求大小向上对齐到 8 的倍数</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="nf">_S_round_up</span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">__bytes</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="p">(((</span><span class="n">__bytes</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="p">)</span><span class="w"> </span><span class="n">_ALIGN</span><span class="mi">-1</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="o">~</span><span class="p">((</span><span class="kt">size_t</span><span class="p">)</span><span class="w"> </span><span class="n">_ALIGN</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">));</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>使用位运算实现对齐。例如请求 13 bytes → <code class="docutils literal notranslate"><span class="pre">(13</span> <span class="pre">+</span> <span class="pre">7)</span> <span class="pre">&amp;</span> <span class="pre">~7</span></code> = <code class="docutils literal notranslate"><span class="pre">20</span> <span class="pre">&amp;</span> <span class="pre">0xFFF...F8</span></code> = 16 bytes。</p>
+<p><strong>_S_freelist_index</strong> ：根据请求大小计算对应的自由链表索引</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="nf">_S_freelist_index</span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">__bytes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">(((</span><span class="n">__bytes</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="p">)</span><span class="n">_ALIGN</span><span class="mi">-1</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="kt">size_t</span><span class="p">)</span><span class="n">_ALIGN</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>例如请求 13 bytes → <code class="docutils literal notranslate"><span class="pre">(13</span> <span class="pre">+</span> <span class="pre">7)</span> <span class="pre">/</span> <span class="pre">8</span> <span class="pre">-</span> <span class="pre">1</span></code> = 1，对应 <code class="docutils literal notranslate"><span class="pre">_S_free_list[1]</span></code> （16 bytes 链表）。</p>
+</section>
+<section id="allocate">
+<h3><a class="toc-backref" href="#id14" role="doc-backlink">allocate 分配流程</a><a class="headerlink" href="#allocate" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="nf">allocate</span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">__n</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">__ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">__n</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="p">)</span><span class="w"> </span><span class="n">_MAX_BYTES</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">__ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">malloc_alloc</span><span class="o">::</span><span class="n">allocate</span><span class="p">(</span><span class="n">__n</span><span class="p">);</span><span class="w">       </span><span class="c1">// 大于 128 bytes，转交第一级分配器</span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">_Obj</span><span class="o">*</span><span class="w"> </span><span class="n">__STL_VOLATILE</span><span class="o">*</span><span class="w"> </span><span class="n">__my_free_list</span><span class="w"></span>
+<span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="n">_S_free_list</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">_S_freelist_index</span><span class="p">(</span><span class="n">__n</span><span class="p">);</span><span class="w"> </span><span class="c1">// 找到对应的自由链表</span>
+<span class="w">    </span><span class="n">_Obj</span><span class="o">*</span><span class="w"> </span><span class="n">__RESTRICT</span><span class="w"> </span><span class="n">__result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="n">__my_free_list</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">__result</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"></span>
+<span class="w">      </span><span class="n">__ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_S_refill</span><span class="p">(</span><span class="n">_S_round_up</span><span class="p">(</span><span class="n">__n</span><span class="p">));</span><span class="w">      </span><span class="c1">// 链表为空，重新填充</span>
+<span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="o">*</span><span class="n">__my_free_list</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__result</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">_M_free_list_link</span><span class="p">;</span><span class="w">  </span><span class="c1">// 取出链表头节点</span>
+<span class="w">      </span><span class="n">__ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__result</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">__ret</span><span class="p">;</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+</pre></div>
+</div>
+<p>流程图：</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> allocate(n)
+     |
+     v
+ n &gt; 128 ?
+   /       \
+ 是          否
+  |           |
+  v           v
+malloc    找到对应 free_list[index]
+          链表头 == NULL ?
+            /          \
+          是             否
+           |              |
+           v              v
+       _S_refill()    取出头节点返回
+       填充链表        （头节点摘除）
+</pre></div>
+</div>
+</section>
+<section id="deallocate">
+<h3><a class="toc-backref" href="#id15" role="doc-backlink">deallocate 释放流程</a><a class="headerlink" href="#deallocate" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">deallocate</span><span class="p">(</span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">__p</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">__n</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">__n</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="p">)</span><span class="w"> </span><span class="n">_MAX_BYTES</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="n">malloc_alloc</span><span class="o">::</span><span class="n">deallocate</span><span class="p">(</span><span class="n">__p</span><span class="p">,</span><span class="w"> </span><span class="n">__n</span><span class="p">);</span><span class="w">         </span><span class="c1">// 大块内存，直接 free</span>
+<span class="w">  </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">_Obj</span><span class="o">*</span><span class="w"> </span><span class="n">__STL_VOLATILE</span><span class="o">*</span><span class="w">  </span><span class="n">__my_free_list</span><span class="w"></span>
+<span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="n">_S_free_list</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">_S_freelist_index</span><span class="p">(</span><span class="n">__n</span><span class="p">);</span><span class="w"> </span><span class="c1">// 找到对应的自由链表</span>
+<span class="w">    </span><span class="n">_Obj</span><span class="o">*</span><span class="w"> </span><span class="n">__q</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">_Obj</span><span class="o">*</span><span class="p">)</span><span class="n">__p</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">__q</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">_M_free_list_link</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="n">__my_free_list</span><span class="p">;</span><span class="w">  </span><span class="c1">// 将归还的块插入链表头部</span>
+<span class="w">    </span><span class="o">*</span><span class="n">__my_free_list</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__q</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>释放时不调用 free，而是将内存块回收到对应的自由链表头部（头插法），供后续分配复用。这就是为什么第二级分配器能减少 malloc/free 调用次数。</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>回收的内存块不会归还给操作系统，而是留在自由链表中供后续复用。这是一种典型的空间换时间策略。</p>
+</div>
+</section>
+<section id="s-refill">
+<h3><a class="toc-backref" href="#id16" role="doc-backlink">_S_refill 重新填充</a><a class="headerlink" href="#s-refill" title="Permalink to this heading">¶</a></h3>
+<p>当某条自由链表为空时，allocate 会调用 _S_refill 来填充。默认一次申请 20 个块：</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">bool</span><span class="w"> </span><span class="n">__threads</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">__inst</span><span class="o">&gt;</span><span class="w"></span>
+<span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">__default_alloc_template</span><span class="o">&lt;</span><span class="n">__threads</span><span class="p">,</span><span class="w"> </span><span class="n">__inst</span><span class="o">&gt;::</span><span class="n">_S_refill</span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">__n</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">__nobjs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">20</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">__chunk</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_S_chunk_alloc</span><span class="p">(</span><span class="n">__n</span><span class="p">,</span><span class="w"> </span><span class="n">__nobjs</span><span class="p">);</span><span class="w">  </span><span class="c1">// 从内存池获取空间</span>
+<span class="w">    </span><span class="n">_Obj</span><span class="o">*</span><span class="w"> </span><span class="n">__STL_VOLATILE</span><span class="o">*</span><span class="w"> </span><span class="n">__my_free_list</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">_Obj</span><span class="o">*</span><span class="w"> </span><span class="n">__result</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">_Obj</span><span class="o">*</span><span class="w"> </span><span class="n">__current_obj</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">_Obj</span><span class="o">*</span><span class="w"> </span><span class="n">__next_obj</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">__i</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">__nobjs</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">(</span><span class="n">__chunk</span><span class="p">);</span><span class="w">  </span><span class="c1">// 只获得 1 个块，直接返回给用户</span>
+<span class="w">    </span><span class="n">__my_free_list</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_S_free_list</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">_S_freelist_index</span><span class="p">(</span><span class="n">__n</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="c1">// 第 1 个块返回给用户，剩余的串成自由链表</span>
+<span class="w">    </span><span class="n">__result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">_Obj</span><span class="o">*</span><span class="p">)</span><span class="n">__chunk</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="o">*</span><span class="n">__my_free_list</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__next_obj</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">_Obj</span><span class="o">*</span><span class="p">)(</span><span class="n">__chunk</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">__n</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">__i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="n">__i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">__current_obj</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__next_obj</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="n">__next_obj</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">_Obj</span><span class="o">*</span><span class="p">)((</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">__next_obj</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">__n</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">__nobjs</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">__i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">__current_obj</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">_M_free_list_link</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w">  </span><span class="c1">// 最后一个块，尾指针置空</span>
+<span class="w">            </span><span class="k">break</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">__current_obj</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">_M_free_list_link</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__next_obj</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="p">(</span><span class="n">__result</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>以请求 32 bytes 为例，_S_refill 的工作过程：</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>_S_chunk_alloc(32, 20) 从内存池获取 20 × 32 = 640 bytes 的连续空间
+
+chunk:
++--------+--------+--------+--------+-----+--------+
+| 块 0   | 块 1   | 块 2   | 块 3   | ... | 块 19  |
++--------+--------+--------+--------+-----+--------+
+↑ 返回给用户       ↑ 串成自由链表
+__result           *__my_free_list
+
+free_list[3]: → 块1 → 块2 → 块3 → ... → 块19 → NULL
+</pre></div>
+</div>
+</section>
+<section id="s-chunk-alloc">
+<h3><a class="toc-backref" href="#id17" role="doc-backlink">_S_chunk_alloc 内存池管理</a><a class="headerlink" href="#s-chunk-alloc" title="Permalink to this heading">¶</a></h3>
+<p>_S_chunk_alloc 是整个分配器最复杂的部分，负责从内存池中切割空间。内存池由 <code class="docutils literal notranslate"><span class="pre">_S_start_free</span></code> 和 <code class="docutils literal notranslate"><span class="pre">_S_end_free</span></code> 两个指针维护：</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">bool</span><span class="w"> </span><span class="n">__threads</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">__inst</span><span class="o">&gt;</span><span class="w"></span>
+<span class="kt">char</span><span class="o">*</span><span class="w"></span>
+<span class="n">__default_alloc_template</span><span class="o">&lt;</span><span class="n">__threads</span><span class="p">,</span><span class="w"> </span><span class="n">__inst</span><span class="o">&gt;::</span><span class="n">_S_chunk_alloc</span><span class="p">(</span><span class="w"></span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">__size</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">__nobjs</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">__result</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">__total_bytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__size</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">__nobjs</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">__bytes_left</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_S_end_free</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">_S_start_free</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">__bytes_left</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">__total_bytes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="c1">// 情况 1：内存池剩余空间完全满足需求</span>
+<span class="w">        </span><span class="n">__result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_S_start_free</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="n">_S_start_free</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">__total_bytes</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="p">(</span><span class="n">__result</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">__bytes_left</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">__size</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="c1">// 情况 2：内存池剩余空间不够 20 个块，但至少够 1 个块</span>
+<span class="w">        </span><span class="n">__nobjs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)(</span><span class="n">__bytes_left</span><span class="o">/</span><span class="n">__size</span><span class="p">);</span><span class="w">       </span><span class="c1">// 能分多少分多少</span>
+<span class="w">        </span><span class="n">__total_bytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__size</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">__nobjs</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="n">__result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_S_start_free</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="n">_S_start_free</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">__total_bytes</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="p">(</span><span class="n">__result</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="c1">// 情况 3：内存池剩余空间连 1 个块都不够</span>
+<span class="w">        </span><span class="kt">size_t</span><span class="w"> </span><span class="n">__bytes_to_get</span><span class="w"> </span><span class="o">=</span><span class="w"></span>
+<span class="w">          </span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">__total_bytes</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">_S_round_up</span><span class="p">(</span><span class="n">_S_heap_size</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="mi">4</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">        </span><span class="c1">// 将内存池残余零头编入对应的自由链表（不浪费）</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">__bytes_left</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">_Obj</span><span class="o">*</span><span class="w"> </span><span class="n">__STL_VOLATILE</span><span class="o">*</span><span class="w"> </span><span class="n">__my_free_list</span><span class="w"> </span><span class="o">=</span><span class="w"></span>
+<span class="w">                </span><span class="n">_S_free_list</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">_S_freelist_index</span><span class="p">(</span><span class="n">__bytes_left</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="p">((</span><span class="n">_Obj</span><span class="o">*</span><span class="p">)</span><span class="n">_S_start_free</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">_M_free_list_link</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="n">__my_free_list</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="o">*</span><span class="n">__my_free_list</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">_Obj</span><span class="o">*</span><span class="p">)</span><span class="n">_S_start_free</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">        </span><span class="c1">// 向系统申请新的大块内存</span>
+<span class="w">        </span><span class="n">_S_start_free</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="n">__bytes_to_get</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="mi">0</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">_S_start_free</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="c1">// malloc 失败，尝试从更大的自由链表中回收空间</span>
+<span class="w">            </span><span class="kt">size_t</span><span class="w"> </span><span class="n">__i</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="n">_Obj</span><span class="o">*</span><span class="w"> </span><span class="n">__STL_VOLATILE</span><span class="o">*</span><span class="w"> </span><span class="n">__my_free_list</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="n">_Obj</span><span class="o">*</span><span class="w"> </span><span class="n">__p</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">__i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__size</span><span class="p">;</span><span class="w"></span>
+<span class="w">                 </span><span class="n">__i</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="p">)</span><span class="w"> </span><span class="n">_MAX_BYTES</span><span class="p">;</span><span class="w"></span>
+<span class="w">                 </span><span class="n">__i</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="p">)</span><span class="w"> </span><span class="n">_ALIGN</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="n">__my_free_list</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_S_free_list</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">_S_freelist_index</span><span class="p">(</span><span class="n">__i</span><span class="p">);</span><span class="w"></span>
+<span class="w">                </span><span class="n">__p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="n">__my_free_list</span><span class="p">;</span><span class="w"></span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="mi">0</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">__p</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                    </span><span class="o">*</span><span class="n">__my_free_list</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__p</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">_M_free_list_link</span><span class="p">;</span><span class="w"></span>
+<span class="w">                    </span><span class="n">_S_start_free</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">__p</span><span class="p">;</span><span class="w"></span>
+<span class="w">                    </span><span class="n">_S_end_free</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_S_start_free</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">__i</span><span class="p">;</span><span class="w"></span>
+<span class="w">                    </span><span class="k">return</span><span class="p">(</span><span class="n">_S_chunk_alloc</span><span class="p">(</span><span class="n">__size</span><span class="p">,</span><span class="w"> </span><span class="n">__nobjs</span><span class="p">));</span><span class="w"></span>
+<span class="w">                </span><span class="p">}</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">            </span><span class="c1">// 所有自由链表都没有可用空间，最后的希望：第一级分配器的 OOM 机制</span>
+<span class="w">            </span><span class="n">_S_end_free</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="n">_S_start_free</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">malloc_alloc</span><span class="o">::</span><span class="n">allocate</span><span class="p">(</span><span class="n">__bytes_to_get</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="n">_S_heap_size</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">__bytes_to_get</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="n">_S_end_free</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_S_start_free</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">__bytes_to_get</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="p">(</span><span class="n">_S_chunk_alloc</span><span class="p">(</span><span class="n">__size</span><span class="p">,</span><span class="w"> </span><span class="n">__nobjs</span><span class="p">));</span><span class="w">  </span><span class="c1">// 递归调用，此时内存池已充足</span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>三种情况的处理逻辑：</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 10.0%" />
+<col style="width: 30.0%" />
+<col style="width: 60.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>情况</p></th>
+<th class="head"><p>条件</p></th>
+<th class="head"><p>处理</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>内存池剩余 ≥ 需求总量</p></td>
+<td><p>直接从内存池切割，返回</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>内存池剩余 ≥ 1 个块但 &lt; 需求总量</p></td>
+<td><p>尽可能多地切割（减少 <code class="docutils literal notranslate"><span class="pre">__nobjs</span></code> ），返回</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>内存池剩余 &lt; 1 个块</p></td>
+<td><p>残余编入自由链表 → malloc 新空间 → 失败则从更大链表回收 → 仍失败则调用第一级分配器的 OOM 机制</p></td>
+</tr>
+</tbody>
+</table>
+<p>情况 3 中新申请的大小为 <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">*</span> <span class="pre">__total_bytes</span> <span class="pre">+</span> <span class="pre">_S_round_up(_S_heap_size</span> <span class="pre">&gt;&gt;</span> <span class="pre">4)</span></code> ，即需求量的 2 倍再加上一个随累计分配量增长的附加量。这种策略使得内存池越用越大，后续分配越来越少地调用 malloc。</p>
+<p>情况 3 中 malloc 失败时的回收策略值得注意：它只向更大的自由链表寻找空间（ <code class="docutils literal notranslate"><span class="pre">for</span> <span class="pre">(__i</span> <span class="pre">=</span> <span class="pre">__size;</span> <span class="pre">__i</span> <span class="pre">&lt;=</span> <span class="pre">_MAX_BYTES;</span> <span class="pre">...)</span></code> ），不向更小的链表寻找。源码注释解释了原因：在多进程环境下，拆分小块内存容易引发问题。</p>
+</section>
+</section>
+<section id="simple-alloc">
+<h2><a class="toc-backref" href="#id18" role="doc-backlink">simple_alloc 接口包装</a><a class="headerlink" href="#simple-alloc" title="Permalink to this heading">¶</a></h2>
+<p>simple_alloc 是一个薄包装层，将底层分配器的”字节数”接口转换为”元素个数”接口：</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">_Tp</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">_Alloc</span><span class="o">&gt;</span><span class="w"></span>
+<span class="k">class</span><span class="w"> </span><span class="nc">simple_alloc</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">_Tp</span><span class="o">*</span><span class="w"> </span><span class="n">allocate</span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">__n</span><span class="p">)</span><span class="w"></span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">__n</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="n">_Tp</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="n">_Alloc</span><span class="o">::</span><span class="n">allocate</span><span class="p">(</span><span class="n">__n</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">sizeof</span><span class="w"> </span><span class="p">(</span><span class="n">_Tp</span><span class="p">));</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">_Tp</span><span class="o">*</span><span class="w"> </span><span class="n">allocate</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"></span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="n">_Tp</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="n">_Alloc</span><span class="o">::</span><span class="n">allocate</span><span class="p">(</span><span class="k">sizeof</span><span class="w"> </span><span class="p">(</span><span class="n">_Tp</span><span class="p">));</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">deallocate</span><span class="p">(</span><span class="n">_Tp</span><span class="o">*</span><span class="w"> </span><span class="n">__p</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">__n</span><span class="p">)</span><span class="w"></span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="mi">0</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">__n</span><span class="p">)</span><span class="w"> </span><span class="n">_Alloc</span><span class="o">::</span><span class="n">deallocate</span><span class="p">(</span><span class="n">__p</span><span class="p">,</span><span class="w"> </span><span class="n">__n</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">sizeof</span><span class="w"> </span><span class="p">(</span><span class="n">_Tp</span><span class="p">));</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">deallocate</span><span class="p">(</span><span class="n">_Tp</span><span class="o">*</span><span class="w"> </span><span class="n">__p</span><span class="p">)</span><span class="w"></span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="n">_Alloc</span><span class="o">::</span><span class="n">deallocate</span><span class="p">(</span><span class="n">__p</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="w"> </span><span class="p">(</span><span class="n">_Tp</span><span class="p">));</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+</pre></div>
+</div>
+<p>simple_alloc 的所有成员都是 static 的，不需要实例化对象，这使得容器不需要为分配器存储额外的成员变量。但容器并不直接使用 simple_alloc，而是通过 <code class="docutils literal notranslate"><span class="pre">_Alloc_traits</span></code> 来间接使用它。</p>
+</section>
+<section id="alloc-traits">
+<h2><a class="toc-backref" href="#id19" role="doc-backlink">_Alloc_traits 分配器萃取</a><a class="headerlink" href="#alloc-traits" title="Permalink to this heading">¶</a></h2>
+<p>容器实际上通过 <code class="docutils literal notranslate"><span class="pre">_Alloc_traits</span></code> 来使用分配器。_Alloc_traits 是连接容器与底层分配器的关键适配层，它解决了两个问题：</p>
+<ol class="arabic simple">
+<li><p><strong>兼容两套分配器接口</strong> ：让容器既能使用 SGI 风格的分配器（如 alloc、malloc_alloc），也能使用 C++ 标准的 allocator</p></li>
+<li><p><strong>优化无状态分配器</strong> ：如果分配器没有实例状态（所有实例等价），容器就不需要浪费一个成员变量来存储分配器对象</p></li>
+</ol>
+<p>通用版本（假设是标准 allocator，可能有实例状态）：</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">_Tp</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">_Allocator</span><span class="o">&gt;</span><span class="w"></span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">_Alloc_traits</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">_S_instanceless</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="k">typedef</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">_Allocator</span><span class="o">::</span><span class="k">template</span><span class="w"> </span><span class="n">rebind</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="o">&gt;::</span><span class="n">other</span><span class="w"> </span><span class="n">allocator_type</span><span class="p">;</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+</pre></div>
+</div>
+<p>针对默认 <code class="docutils literal notranslate"><span class="pre">allocator&lt;_Tp1&gt;</span></code> 的偏特化（无状态，可以走 static 接口）：</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">_Tp</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">_Tp1</span><span class="o">&gt;</span><span class="w"></span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">_Alloc_traits</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="w"> </span><span class="n">allocator</span><span class="o">&lt;</span><span class="n">_Tp1</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">_S_instanceless</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="k">typedef</span><span class="w"> </span><span class="n">simple_alloc</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="w"> </span><span class="n">alloc</span><span class="o">&gt;</span><span class="w"> </span><span class="n">_Alloc_type</span><span class="p">;</span><span class="w">   </span><span class="c1">// static 接口</span>
+<span class="w">  </span><span class="k">typedef</span><span class="w"> </span><span class="n">allocator</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="o">&gt;</span><span class="w"> </span><span class="n">allocator_type</span><span class="p">;</span><span class="w">           </span><span class="c1">// 标准接口</span>
+<span class="p">};</span><span class="w"></span>
+</pre></div>
+</div>
+<p>针对 SGI 风格分配器的偏特化：</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">_Tp</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">__threads</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">__inst</span><span class="o">&gt;</span><span class="w"></span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">_Alloc_traits</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="w"> </span><span class="n">__default_alloc_template</span><span class="o">&lt;</span><span class="n">__threads</span><span class="p">,</span><span class="w"> </span><span class="n">__inst</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">_S_instanceless</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="k">typedef</span><span class="w"> </span><span class="n">simple_alloc</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="w"> </span><span class="n">__default_alloc_template</span><span class="o">&lt;</span><span class="n">__threads</span><span class="p">,</span><span class="w"> </span><span class="n">__inst</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"></span>
+<span class="w">          </span><span class="n">_Alloc_type</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="k">typedef</span><span class="w"> </span><span class="n">__allocator</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="w"> </span><span class="n">__default_alloc_template</span><span class="o">&lt;</span><span class="n">__threads</span><span class="p">,</span><span class="w"> </span><span class="n">__inst</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"></span>
+<span class="w">          </span><span class="n">allocator_type</span><span class="p">;</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+</pre></div>
+</div>
+<p>关键成员：</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">_S_instanceless</span></code> ：是否无状态。为 true 时容器可以不存储分配器对象，直接通过 <code class="docutils literal notranslate"><span class="pre">_Alloc_type</span></code> 的 static 函数分配</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">_Alloc_type</span></code> ：仅当 <code class="docutils literal notranslate"><span class="pre">_S_instanceless</span> <span class="pre">==</span> <span class="pre">true</span></code> 时存在，是 <code class="docutils literal notranslate"><span class="pre">simple_alloc&lt;_Tp,</span> <span class="pre">底层分配器&gt;</span></code> 的 typedef，提供 static 的 allocate/deallocate</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">allocator_type</span></code> ：符合标准的分配器类型，用于 <code class="docutils literal notranslate"><span class="pre">get_allocator()</span></code> 返回值等场景</p></li>
+</ul>
+<section id="id4">
+<h3><a class="toc-backref" href="#id20" role="doc-backlink">容器如何使用 _Alloc_traits</a><a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h3>
+<p>以 vector 为例，容器通过 <code class="docutils literal notranslate"><span class="pre">_Alloc_traits::_S_instanceless</span></code> 在编译期选择不同的基类：</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// vector 的基类，根据 _S_instanceless 选择不同的特化</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">_Tp</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">_Alloc</span><span class="o">&gt;</span><span class="w"></span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">_Vector_base</span><span class="w"></span>
+<span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">_Vector_alloc_base</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="w"> </span><span class="n">_Alloc</span><span class="p">,</span><span class="w"></span>
+<span class="w">                              </span><span class="n">_Alloc_traits</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="w"> </span><span class="n">_Alloc</span><span class="o">&gt;::</span><span class="n">_S_instanceless</span><span class="o">&gt;</span><span class="w"></span>
+<span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">};</span><span class="w"></span>
+</pre></div>
+</div>
+<p>当 <code class="docutils literal notranslate"><span class="pre">_S_instanceless</span> <span class="pre">==</span> <span class="pre">true</span></code> （默认情况）时，使用无状态的特化版本：</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// 无状态分配器特化：不存储分配器对象，直接用 static 接口</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">_Tp</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">_Allocator</span><span class="o">&gt;</span><span class="w"></span>
+<span class="k">class</span><span class="w"> </span><span class="nc">_Vector_alloc_base</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="w"> </span><span class="n">_Allocator</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">  </span><span class="k">typedef</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">_Alloc_traits</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="w"> </span><span class="n">_Allocator</span><span class="o">&gt;::</span><span class="n">allocator_type</span><span class="w"></span>
+<span class="w">          </span><span class="n">allocator_type</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="n">allocator_type</span><span class="w"> </span><span class="nf">get_allocator</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">allocator_type</span><span class="p">();</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+
+<span class="k">protected</span><span class="o">:</span><span class="w"></span>
+<span class="w">  </span><span class="n">_Tp</span><span class="o">*</span><span class="w"> </span><span class="n">_M_start</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="n">_Tp</span><span class="o">*</span><span class="w"> </span><span class="n">_M_finish</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="n">_Tp</span><span class="o">*</span><span class="w"> </span><span class="n">_M_end_of_storage</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="c1">// 注意：没有 _M_data_allocator 成员！节省了一个指针的空间</span>
+
+<span class="w">  </span><span class="k">typedef</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">_Alloc_traits</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="w"> </span><span class="n">_Allocator</span><span class="o">&gt;::</span><span class="n">_Alloc_type</span><span class="w"> </span><span class="n">_Alloc_type</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="n">_Tp</span><span class="o">*</span><span class="w"> </span><span class="nf">_M_allocate</span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">__n</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">_Alloc_type</span><span class="o">::</span><span class="n">allocate</span><span class="p">(</span><span class="n">__n</span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w">          </span><span class="c1">// 调用 simple_alloc::allocate</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">_M_deallocate</span><span class="p">(</span><span class="n">_Tp</span><span class="o">*</span><span class="w"> </span><span class="n">__p</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">__n</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="n">_Alloc_type</span><span class="o">::</span><span class="n">deallocate</span><span class="p">(</span><span class="n">__p</span><span class="p">,</span><span class="w"> </span><span class="n">__n</span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w">          </span><span class="c1">// 调用 simple_alloc::deallocate</span>
+<span class="p">};</span><span class="w"></span>
+</pre></div>
+</div>
+<p>当 <code class="docutils literal notranslate"><span class="pre">_S_instanceless</span> <span class="pre">==</span> <span class="pre">false</span></code> （自定义有状态分配器）时，使用通用版本：</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// 有状态分配器：需要存储分配器对象</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">_Tp</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">_Allocator</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">_IsStatic</span><span class="o">&gt;</span><span class="w"></span>
+<span class="k">class</span><span class="w"> </span><span class="nc">_Vector_alloc_base</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">  </span><span class="k">typedef</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">_Alloc_traits</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="w"> </span><span class="n">_Allocator</span><span class="o">&gt;::</span><span class="n">allocator_type</span><span class="w"></span>
+<span class="w">          </span><span class="n">allocator_type</span><span class="p">;</span><span class="w"></span>
+
+<span class="k">protected</span><span class="o">:</span><span class="w"></span>
+<span class="w">  </span><span class="n">allocator_type</span><span class="w"> </span><span class="n">_M_data_allocator</span><span class="p">;</span><span class="w">     </span><span class="c1">// 存储分配器实例</span>
+<span class="w">  </span><span class="n">_Tp</span><span class="o">*</span><span class="w"> </span><span class="n">_M_start</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="n">_Tp</span><span class="o">*</span><span class="w"> </span><span class="n">_M_finish</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="n">_Tp</span><span class="o">*</span><span class="w"> </span><span class="n">_M_end_of_storage</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">  </span><span class="n">_Tp</span><span class="o">*</span><span class="w"> </span><span class="nf">_M_allocate</span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">__n</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">_M_data_allocator</span><span class="p">.</span><span class="n">allocate</span><span class="p">(</span><span class="n">__n</span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w">     </span><span class="c1">// 通过实例调用</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">_M_deallocate</span><span class="p">(</span><span class="n">_Tp</span><span class="o">*</span><span class="w"> </span><span class="n">__p</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">__n</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">__p</span><span class="p">)</span><span class="w"> </span><span class="n">_M_data_allocator</span><span class="p">.</span><span class="n">deallocate</span><span class="p">(</span><span class="n">__p</span><span class="p">,</span><span class="w"> </span><span class="n">__n</span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+</pre></div>
+</div>
+<p>list 容器也使用完全相同的模式：</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// list 的基类</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">_Tp</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">_Alloc</span><span class="o">&gt;</span><span class="w"></span>
+<span class="k">class</span><span class="w"> </span><span class="nc">_List_base</span><span class="w"></span>
+<span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">_List_alloc_base</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="w"> </span><span class="n">_Alloc</span><span class="p">,</span><span class="w"></span>
+<span class="w">                            </span><span class="n">_Alloc_traits</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="w"> </span><span class="n">_Alloc</span><span class="o">&gt;::</span><span class="n">_S_instanceless</span><span class="o">&gt;</span><span class="w"></span>
+<span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">};</span><span class="w"></span>
+
+<span class="c1">// 无状态特化中，list 通过 _Alloc_type 分配节点</span>
+<span class="k">typedef</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">_Alloc_traits</span><span class="o">&lt;</span><span class="n">_List_node</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">_Allocator</span><span class="o">&gt;::</span><span class="n">_Alloc_type</span><span class="w"></span>
+<span class="w">        </span><span class="n">_Alloc_type</span><span class="p">;</span><span class="w"></span>
+<span class="n">_List_node</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="o">&gt;*</span><span class="w"> </span><span class="n">_M_get_node</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">_Alloc_type</span><span class="o">::</span><span class="n">allocate</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="n">_M_put_node</span><span class="p">(</span><span class="n">_List_node</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="o">&gt;*</span><span class="w"> </span><span class="n">__p</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">_Alloc_type</span><span class="o">::</span><span class="n">deallocate</span><span class="p">(</span><span class="n">__p</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>注意 list 使用 <code class="docutils literal notranslate"><span class="pre">_Alloc_traits&lt;_List_node&lt;_Tp&gt;,</span> <span class="pre">_Allocator&gt;</span></code> 而非 <code class="docutils literal notranslate"><span class="pre">_Alloc_traits&lt;_Tp,</span> <span class="pre">_Allocator&gt;</span></code> ——因为 list 分配的是节点（包含前后指针 + 数据），不是裸数据。这正是 rebind 机制的用途：用户传入 <code class="docutils literal notranslate"><span class="pre">allocator&lt;int&gt;</span></code> ，容器内部通过 rebind 得到 <code class="docutils literal notranslate"><span class="pre">allocator&lt;_List_node&lt;int&gt;&gt;</span></code> 。</p>
+</section>
+</section>
+<section id="id5">
+<h2><a class="toc-backref" href="#id21" role="doc-backlink">标准 allocator 接口</a><a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">allocator&lt;_Tp&gt;</span></code> 是符合 C++ 标准的分配器接口，内部委托给 <code class="docutils literal notranslate"><span class="pre">alloc</span></code> （即第二级分配器）：</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">_Tp</span><span class="o">&gt;</span><span class="w"></span>
+<span class="k">class</span><span class="w"> </span><span class="nc">allocator</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="k">typedef</span><span class="w"> </span><span class="n">alloc</span><span class="w"> </span><span class="n">_Alloc</span><span class="p">;</span><span class="w">          </span><span class="c1">// 底层使用 alloc（第二级分配器）</span>
+<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">  </span><span class="k">typedef</span><span class="w"> </span><span class="kt">size_t</span><span class="w">     </span><span class="n">size_type</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="k">typedef</span><span class="w"> </span><span class="kt">ptrdiff_t</span><span class="w">  </span><span class="n">difference_type</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="k">typedef</span><span class="w"> </span><span class="n">_Tp</span><span class="o">*</span><span class="w">       </span><span class="n">pointer</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="k">typedef</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">_Tp</span><span class="o">*</span><span class="w"> </span><span class="n">const_pointer</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="k">typedef</span><span class="w"> </span><span class="n">_Tp</span><span class="o">&amp;</span><span class="w">       </span><span class="n">reference</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="k">typedef</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">_Tp</span><span class="o">&amp;</span><span class="w"> </span><span class="n">const_reference</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="k">typedef</span><span class="w"> </span><span class="n">_Tp</span><span class="w">        </span><span class="n">value_type</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">  </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">_Tp1</span><span class="o">&gt;</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">rebind</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">typedef</span><span class="w"> </span><span class="n">allocator</span><span class="o">&lt;</span><span class="n">_Tp1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">other</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="p">};</span><span class="w"></span>
+
+<span class="w">  </span><span class="n">_Tp</span><span class="o">*</span><span class="w"> </span><span class="nf">allocate</span><span class="p">(</span><span class="n">size_type</span><span class="w"> </span><span class="n">__n</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__n</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">_Alloc</span><span class="o">::</span><span class="n">allocate</span><span class="p">(</span><span class="n">__n</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">_Tp</span><span class="p">)))</span><span class="w"></span>
+<span class="w">                    </span><span class="o">:</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">deallocate</span><span class="p">(</span><span class="n">pointer</span><span class="w"> </span><span class="n">__p</span><span class="p">,</span><span class="w"> </span><span class="n">size_type</span><span class="w"> </span><span class="n">__n</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="n">_Alloc</span><span class="o">::</span><span class="n">deallocate</span><span class="p">(</span><span class="n">__p</span><span class="p">,</span><span class="w"> </span><span class="n">__n</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">_Tp</span><span class="p">));</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">  </span><span class="n">size_type</span><span class="w"> </span><span class="nf">max_size</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">__STL_NOTHROW</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="kt">size_t</span><span class="p">(</span><span class="mi">-1</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">_Tp</span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">construct</span><span class="p">(</span><span class="n">pointer</span><span class="w"> </span><span class="n">__p</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">_Tp</span><span class="o">&amp;</span><span class="w"> </span><span class="n">__val</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">new</span><span class="p">(</span><span class="n">__p</span><span class="p">)</span><span class="w"> </span><span class="n">_Tp</span><span class="p">(</span><span class="n">__val</span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="n">pointer</span><span class="w"> </span><span class="n">__p</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">__p</span><span class="o">-&gt;~</span><span class="n">_Tp</span><span class="p">();</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+</pre></div>
+</div>
+<p>注意 construct 和 destroy 的实现：</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">construct</span></code> ：使用 placement new 在已分配的内存上调用拷贝构造函数</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">destroy</span></code> ：显式调用析构函数（不释放内存）</p></li>
+</ul>
+<p>这体现了 SGI STL 的核心设计思想：<strong>内存分配与对象构造分离</strong> 。allocate/deallocate 负责内存，construct/destroy 负责对象生命周期。</p>
+</section>
+<section id="debug-alloc">
+<h2><a class="toc-backref" href="#id22" role="doc-backlink">debug_alloc 调试分配器</a><a class="headerlink" href="#debug-alloc" title="Permalink to this heading">¶</a></h2>
+<p>debug_alloc 是一个分配器适配器，在每次分配时额外分配 8 字节的头部空间来记录分配大小，释放时用 assert 校验：</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">_Alloc</span><span class="o">&gt;</span><span class="w"></span>
+<span class="k">class</span><span class="w"> </span><span class="nc">debug_alloc</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="k">private</span><span class="o">:</span><span class="w"></span>
+<span class="w">  </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span><span class="n">_S_extra</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">8</span><span class="p">};</span><span class="w"></span>
+
+<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">allocate</span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">__n</span><span class="p">)</span><span class="w"></span>
+<span class="w">  </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">__result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">_Alloc</span><span class="o">::</span><span class="n">allocate</span><span class="p">(</span><span class="n">__n</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="n">_S_extra</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="o">*</span><span class="p">(</span><span class="kt">size_t</span><span class="o">*</span><span class="p">)</span><span class="n">__result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__n</span><span class="p">;</span><span class="w">               </span><span class="c1">// 头部记录请求大小</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__result</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="n">_S_extra</span><span class="p">;</span><span class="w">       </span><span class="c1">// 返回头部之后的地址</span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">deallocate</span><span class="p">(</span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">__p</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">__n</span><span class="p">)</span><span class="w"></span>
+<span class="w">  </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">__real_p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">__p</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="n">_S_extra</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">assert</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="kt">size_t</span><span class="o">*</span><span class="p">)</span><span class="n">__real_p</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">__n</span><span class="p">);</span><span class="w">       </span><span class="c1">// 校验大小是否匹配</span>
+<span class="w">    </span><span class="n">_Alloc</span><span class="o">::</span><span class="n">deallocate</span><span class="p">(</span><span class="n">__real_p</span><span class="p">,</span><span class="w"> </span><span class="n">__n</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="n">_S_extra</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+</pre></div>
+</div>
+<p>内存布局：</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>+----------+---------------------------+
+| 8 bytes  |       n bytes             |
+|  size_t  |    用户数据区              |
++----------+---------------------------+
+↑ __real_p  ↑ 返回给用户的指针 __p
+</pre></div>
+</div>
+<p>如果释放时传入的大小与分配时记录的不一致，assert 会触发，帮助定位内存管理 bug。</p>
+</section>
+<section id="id6">
+<h2><a class="toc-backref" href="#id23" role="doc-backlink">整体架构总结</a><a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>+-----------------------------------------------------------+
+|              容器 (vector, list, deque, ...)               |
+|   typedef typename                                        |
+|     _Alloc_traits&lt;_Tp, _Alloc&gt;::allocator_type             |
+|     allocator_type;                                       |
++-----------------------------------------------------------+
+                        |
+                        v
++-----------------------------------------------------------+
+|   _Alloc_traits&lt;_Tp, _Allocator&gt;  (分配器萃取)             |
+|                                                           |
+|   _S_instanceless == true:                                |
+|     _Alloc_type = simple_alloc&lt;_Tp, 底层分配器&gt;             |
+|     → 通过 static 接口分配，容器不存储分配器对象             |
+|                                                           |
+|   _S_instanceless == false:                               |
+|     allocator_type = rebind 后的标准 allocator              |
+|     → 通过实例调用，容器存储分配器对象                       |
++-----------------------------------------------------------+
+                        |
+                        v
++-----------------------------------------------------------+
+|              simple_alloc&lt;_Tp, alloc&gt;                      |
+|          元素个数 × sizeof(_Tp) → 字节数                    |
++-----------------------------------------------------------+
+                        |
+                        v
++-----------------------------------------------------------+
+|                  alloc (第二级分配器)                       |
+|          __default_alloc_template&lt;threads, 0&gt;              |
+|                                                           |
+|   ≤ 128 bytes:                  &gt; 128 bytes:              |
+|   16 条自由链表 + 内存池          转交第一级分配器           |
++----------------------------+--------------------------+
+                             |
+                             v
++-----------------------------------------------------------+
+|                第一级分配器 (malloc_alloc)                  |
+|          __malloc_alloc_template&lt;0&gt;                        |
+|          malloc / free / realloc + OOM handler             |
++-----------------------------------------------------------+
+                        |
+                        v
++-----------------------------------------------------------+
+|                  操作系统 (malloc/free)                     |
++-----------------------------------------------------------+
+</pre></div>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../links.html">Links</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Cplus</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Libstd c++ 2.9.1</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">空间分配器 (Allocator)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="vector/index.html">Vector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="list/index.html">List</a></li>
+<li class="toctree-l3"><a class="reference internal" href="deque/index.html">Double Ended Queue</a></li>
+<li class="toctree-l3"><a class="reference internal" href="heap/index.html">Head</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tree/index.html">Tree</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../class_this_pointer.html">this 指针</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_constructor_type.html">构造函数的类型</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_constructor.html">构造函数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_destructor.html">析构函数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_copyconstructor.html">拷贝构造函数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_const_member.html">const</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_static_member.html">static 成员</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_friend_member.html">友元（Friend）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Operator_overloading/index.html">运算符重载</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_inheritance.html">继承</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_access_modifiers.html">访问修饰符</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_inheritance_access.html">继承访问控制</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_object_slicing.html">对象切片（Object Slicing）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_derived_class.html">派生类</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_multile_inheritance.html">多继承</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_multile_inheritance_Ambiguity.html">多继承的二义性</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_virtual_Inheritance.html">虚继承</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_polymorphism.html">多态（Polymorphism）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_override_specifier.html">override 说明符</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_final_specifier.html">final 说明符</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_vtable.html">虚函数表机制（Virtual Function Table）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_vtable2.html">类层次与虚函数表（Class Hierarchy and VTable）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_virtual_destructor.html">虚析构函数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_private_destructor.html">私有析构函数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_abstract_class.html">抽象类（Abstract Class）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_itanium_abi_destruction.html">Itanium C++ ABI 析构函数机制</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_references.html">引用（References）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../functemplate.html">Function template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../passarguments.html">Pass arguments to function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rvalue.html">右值引用与移动语义</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../lvalue_and_rvalue.html">左值与右值</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../placement_new.html">Placement new operator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../template/index.html">模板（Template）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cast/index.html">C++ Cast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decltype.html">Decltype</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../explicit_implicit.html">Explicit and Implicit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../typedef_typename.html">typedef typename</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pointer_size.html">Size of Pointers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../inline_function.html">Inline Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../math/index.html">Math</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../licence/index.html">OpenSource License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bochs/index.html">Bochs IA-32 Emulator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../system/index.html">System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../unix/index.html">UNIX</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../math/index.html">Math</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crypto/index.html">Crypto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../todo.html">To Do</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Cplus</a><ul>
+  <li><a href="index.html">Libstd c++ 2.9.1</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Libstd c++ 2.9.1</a></li>
+      <li>Next: <a href="vector/index.html" title="next chapter">Vector</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../../_sources/cplus/libstdc++_2_9_1/alloc.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

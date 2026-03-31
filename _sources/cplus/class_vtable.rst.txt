@@ -1,0 +1,187 @@
+============================================
+虚函数表机制（Virtual Function Table）
+============================================
+
+.. contents:: Table of Contents
+
+概述
+--------------
+
+当编译器在编译过程中遇到 virtual 关键字时，它不会对函数调用进行绑定，而是为包含虚函数的类建立一张虚函数表（Vtable）。在虚函数表中，编译器按照虚函数的声明顺序依次保存虚函数地址。同时，编译器会在类中添加一个隐藏的虚函数指针（VPTR），指向虚函数表。在创建对象时，将虚函数指针 VPTR 放置在对象的起始位置，为其分配空间，并调用构造函数将其初始化为虚函数表地址。需要注意的是，虚函数表不占用对象空间。
+
+派生类继承基类时，也继承了基类的虚函数指针。当创建派生类对象时，派生类对象中的虚函数指针指向自己的虚函数表。在派生类的虚函数表中，派生类虚函数会覆盖基类的同名虚函数。当通过基类指针或基类引用操作派生类对象时，以操作的对象内存为准，从对象中获取虚函数指针，通过虚函数指针找到虚函数表，调用对应的虚函数。
+
+1. 虚函数表（vtable）
+-----------------------
+
+每个包含虚函数的类都有一个虚函数表，存储虚函数地址：
+
+.. code-block:: cpp
+
+    class Base {
+    public:
+        virtual void func1() { }
+        virtual void func2() { }
+    };
+
+    // 编译器生成的虚函数表（概念）：
+    // Base_vtable:
+    // [0] -> Address of Base::func1
+    // [1] -> Address of Base::func2
+
+2. 虚函数指针（vptr）
+-----------------------
+
+每个对象包含一个虚函数指针，指向对应类的虚函数表：
+
+.. code-block:: cpp
+
+    class Base {
+    public:
+        virtual void func() { }
+        int data;
+    };
+
+    Base obj;
+    // 对象内存布局：
+    // [vptr 指向 Base_vtable][data]
+
+3. 继承中的虚函数表
+-----------------------
+
+.. code-block:: cpp
+
+    class Base {
+    public:
+        virtual void func1() { }
+        virtual void func2() { }
+    };
+
+    class Derived : public Base {
+    public:
+        void func1() override { }  // 重写
+        virtual void func3() { }   // 新增
+    };
+
+    // Base_vtable:        Derived_vtable:
+    // [0] -> Base::func1  [0] -> Derived::func1  (overridden)
+    // [1] -> Base::func2  [1] -> Base::func2     (inherited)
+    //                     [2] -> Derived::func3  (new)
+
+4. 虚函数调用过程
+-----------------------
+
+.. code-block:: cpp
+
+    Base* ptr = new Derived();
+    ptr->func1();
+
+    // 调用步骤：
+    // 1. 获取对象的 vptr: vptr = *(void**)ptr
+    // 2. 在 vtable 中查找函数: func_addr = vptr[0]
+    // 3. 调用函数: ((void(*)())func_addr)()
+
+5. 内存布局示例
+-----------------------
+
+.. code-block:: cpp
+
+    #include <iostream>
+    using namespace std;
+
+    class Base {
+    public:
+        virtual void func() { cout << "Base::func" << endl; }
+        int x = 10;
+    };
+
+    class Derived : public Base {
+    public:
+        void func() override { cout << "Derived::func" << endl; }
+        int y = 20;
+    };
+
+    int main() {
+        Base base;
+        Derived derived;
+
+        cout << "Base object size: " << sizeof(base) << endl;      // vptr + int
+        cout << "Derived object size: " << sizeof(derived) << endl; // vptr + int + int
+
+        void** base_vtable = *(void***)&base;
+        void** derived_vtable = *(void***)&derived;
+
+        cout << "Base vtable: " << base_vtable << endl;
+        cout << "Derived vtable: " << derived_vtable << endl;
+
+        return 0;
+    }
+
+6. 多继承中的虚函数表
+-----------------------
+
+.. code-block:: cpp
+
+    class Base1 {
+    public:
+        virtual void func1() { }
+    };
+
+    class Base2 {
+    public:
+        virtual void func2() { }
+    };
+
+    class Derived : public Base1, public Base2 {
+    public:
+        void func1() override { }
+        void func2() override { }
+    };
+
+    // Derived 对象有两个虚函数表指针：
+    // [vptr1 指向 Base1 部分 vtable][vptr2 指向 Base2 部分 vtable][其他数据]
+
+7. 虚函数表生成时机
+-----------------------
+
+.. code-block:: cpp
+
+    // 编译时：
+    // 1. 编译器为每个包含虚函数的类生成虚函数表
+    // 2. 虚函数表是静态数据，存储在程序的只读段
+
+    // 运行时：
+    // 1. 对象构造时，构造函数设置 vptr 指向对应的 vtable
+    // 2. 在继承中，先设置基类 vptr，再设置派生类 vptr
+
+8. 性能开销
+-----------------------
+
+.. code-block:: cpp
+
+    // 空间开销：
+    // - 每个对象增加一个指针大小（通常 8 字节）
+    // - 每个类一个虚函数表
+
+    // 时间开销：
+    // - 虚函数调用比普通函数调用多一次间接寻址
+    // - 通常比普通函数调用慢 10-20%
+
+9. 构造和析构中的虚函数
+--------------------------
+
+.. code-block:: cpp
+
+    class Base {
+    public:
+        Base() { func(); }  // 调用 Base::func，不是虚函数调用
+        virtual void func() { cout << "Base::func" << endl; }
+    };
+
+    class Derived : public Base {
+    public:
+        Derived() : Base() { }  // Base 构造期间，vptr 仍指向 Base 的 vtable
+        void func() override { cout << "Derived::func" << endl; }
+    };
+
+This mechanism enables C++ to call the correct function based on the object's actual type at runtime, implementing polymorphism.

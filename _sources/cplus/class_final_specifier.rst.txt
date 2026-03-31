@@ -1,0 +1,50 @@
+==========================
+final 说明符
+==========================
+
+.. contents:: Table of Contents
+
+概述
+--------------
+
+final 关键字有两种用法：修饰类、修饰虚函数。
+
+修饰类
+--------------
+
+当使用 final 关键字修饰类时，表示该类不可以被继承：
+
+.. code-block:: cpp
+
+    class Base final    // final 修饰类，Base 类不能被继承
+    {
+    public:
+        // ...
+    };
+    class Derive :public Base   // 编译错误
+    {
+    public:
+        // ...
+    };
+
+Base 类被 final 关键字修饰，就不能作为基类派生新类。
+
+修饰虚函数
+--------------
+
+当使用 final 关键字修饰虚函数时，虚函数不能在派生类中重写：
+
+.. code-block:: cpp
+
+    class Base
+    {
+    public:
+        virtual void func() final;
+    };
+    class Derive:public Base
+    {
+    public:
+        void func();    // 编译错误：不能重写 final 虚函数
+    };
+
+final 清晰地表达了"此方法/类不应被修改"的设计意图。

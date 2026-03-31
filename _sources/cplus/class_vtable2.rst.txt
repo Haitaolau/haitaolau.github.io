@@ -1,0 +1,196 @@
+======================================================
+类层次与虚函数表（Class Hierarchy and VTable）
+======================================================
+
+.. contents:: Table of Contents
+
+概述
+--------------
+
+使用 ``-fdump-lang-class`` 选项可以让 GCC 编译器输出类层次和虚函数表信息。
+
+源代码
+--------------
+
+.. code-block:: cpp
+
+    ptrdiff_t get_offset_to_top(void* obj) {
+        void** vptr = *(void***)obj;
+        return *(ptrdiff_t*)(vptr - 2);
+    }
+
+    struct Base1 {
+        virtual ~Base1() {}
+        virtual void Foo(){
+            std::cout << "Base1::Foo()" << std::endl;
+        }
+        double b1;
+    };
+
+    struct Base2 {
+        virtual ~Base2(){}
+        virtual void Bar()
+        {
+            std::cout << "Base2::Bar()" << std::endl;
+        }
+        double b2;
+    };
+
+    struct Derived: public Base1, public Base2 {
+        ~Derived() {}
+        void Foo() override
+        {
+            std::cout << "Derived::Foo()" << std::endl;
+        }
+        double d;
+    };
+
+    int main(int argc, char **argv)
+    {
+        Derived derived;
+        Base1 *base1 = &derived;
+        Base2 *base2 = &derived;
+
+        ptrdiff_t offset = get_offset_to_top((void*)base1);
+        std::cout << "Offset to top(base1): " << offset << std::endl;
+
+        offset = get_offset_to_top((void*)base2);
+        std::cout << "Offset to top(base2): " << offset << std::endl;
+
+        derived.Foo();  // Should call Derived::Foo()
+        derived.Bar();  // Should call Base2::Bar()
+
+        return 0;
+    }
+
+编译：
+
+.. code-block:: bash
+
+    g++ -g -fdump-lang-class -o virtual_table virtual_table4.cpp
+
+内存布局
+====================
+
+.. code-block:: bash
+
+    clang -Xclang -fdump-record-layouts -stdlib=libc++ -c virtual_table6.cpp
+
+.. code-block:: text
+
+    *** Dumping AST Record Layout
+             0 | struct Base1
+             0 |   (Base1 vtable pointer)
+             8 |   double b1
+               | [sizeof=16, dsize=16, align=8,
+               |  nvsize=16, nvalign=8]
+
+    *** Dumping AST Record Layout
+             0 | struct Base2
+             0 |   (Base2 vtable pointer)
+             8 |   double b2
+               | [sizeof=16, dsize=16, align=8,
+               |  nvsize=16, nvalign=8]
+
+    *** Dumping AST Record Layout
+             0 | struct Derived
+             0 |   struct Base1 (primary base)
+             0 |     (Base1 vtable pointer)
+             8 |     double b1
+            16 |   struct Base2 (base)
+            16 |     (Base2 vtable pointer)
+            24 |     double b2
+            32 |   double d
+               | [sizeof=40, dsize=40, align=8,
+               |  nvsize=40, nvalign=8]
+
+Base1 的虚函数表
+--------------------
+
+.. code-block:: text
+
+    Vtable for Base1
+    Base1::_ZTV5Base1: 5 entries
+    0     (int (*)(...))0
+    8     (int (*)(...))(& _ZTI5Base1)
+    16    (int (*)(...))Base1::~Base1
+    24    (int (*)(...))Base1::~Base1
+    32    (int (*)(...))Base1::Foo
+
+    Class Base1
+       size=16 align=8
+       base size=16 base align=8
+    Base1 (0x0x7763b73d1480) 0
+        vptr=((& Base1::_ZTV5Base1) + 16)
+
+Base2 的虚函数表
+--------------------
+
+.. code-block:: text
+
+    Vtable for Base2
+    Base2::_ZTV5Base2: 5 entries
+    0     (int (*)(...))0
+    8     (int (*)(...))(& _ZTI5Base2)
+    16    (int (*)(...))Base2::~Base2
+    24    (int (*)(...))Base2::~Base2
+    32    (int (*)(...))Base2::Bar
+
+    Class Base2
+       size=16 align=8
+       base size=16 base align=8
+    Base2 (0x0x7763b73d18a0) 0
+        vptr=((& Base2::_ZTV5Base2) + 16)
+
+Derived 的虚函数表
+---------------------
+
+.. code-block:: text
+
+    Vtable for Derived
+    Derived::_ZTV7Derived: 10 entries
+    0     (int (*)(...))0
+    8     (int (*)(...))(& _ZTI7Derived)
+    16    (int (*)(...))Derived::~Derived
+    24    (int (*)(...))Derived::~Derived
+    32    (int (*)(...))Derived::Foo
+    40    (int (*)(...))-16
+    48    (int (*)(...))(& _ZTI7Derived)
+    56    (int (*)(...))Derived::_ZThn16_N7DerivedD1Ev
+    64    (int (*)(...))Derived::_ZThn16_N7DerivedD0Ev
+    72    (int (*)(...))Base2::Bar
+
+    Class Derived
+       size=40 align=8
+       base size=40 base align=8
+    Derived (0x0x7763b7474d20) 0
+        vptr=((& Derived::_ZTV7Derived) + 16)
+    Base1 (0x0x7763b73d1b40) 0
+          primary-for Derived (0x0x7763b7474d20)
+    Base2 (0x0x7763b73d1ba0) 16
+          vptr=((& Derived::_ZTV7Derived) + 56)
+
+.. image:: ../_static/image/derived12_24.png
+
+offset_to_top
+====================
+
+offset_to_top is used by several C++ runtime components:
+
+1. dynamic_cast 实现
+-----------------------
+
+.. code-block:: cpp
+
+    Base2* b2 = &derived;
+    Derived* d = dynamic_cast<Derived*>(b2);
+    // 运行时使用 offset_to_top 找到完整对象进行类型检查
+
+2. typeid 运算符
+-----------------------
+
+.. code-block:: cpp
+
+    Base2* b2 = &derived;
+    const std::type_info& ti = typeid(*b2);
+    // 运行时使用 offset_to_top 找到完整对象的 type_info

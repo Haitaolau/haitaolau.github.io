@@ -1,0 +1,392 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>万能引用 &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="模板类型推导" href="template_type_deduction.html" />
+    <link rel="prev" title="折叠表达式" href="template_fold_expressions.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="id1">
+<h1><a class="toc-backref" href="#id7" role="doc-backlink">万能引用</a><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h1>
+<nav class="contents" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#id1" id="id7">万能引用</a></p>
+<ul>
+<li><p><a class="reference internal" href="#id2" id="id8">概述</a></p></li>
+<li><p><a class="reference internal" href="#id3" id="id9">判断规则</a></p>
+<ul>
+<li><p><a class="reference internal" href="#id4" id="id10">万能引用既可以接收左值也可以接收右值</a></p></li>
+<li><p><a class="reference internal" href="#id5" id="id11">不是万能引用的情况</a></p>
+<ul>
+<li><p><a class="reference internal" href="#t" id="id12">类模板成员函数中的 T&amp;&amp;</a></p></li>
+<li><p><a class="reference internal" href="#cv-t" id="id13">加了 cv 限定符的 T&amp;&amp;</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id6" id="id14">万能引用的类型推导示例</a></p>
+<ul>
+<li><p><a class="reference internal" href="#const" id="id15">万能引用保留 const 属性</a></p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+<section id="id2">
+<h2><a class="toc-backref" href="#id8" role="doc-backlink">概述</a><a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>T&amp;&amp; Doesn’t Always Mean “Rvalue Reference”</p>
+</div>
+<p>万能引用（Universal References）是 Scott Meyers 提出的术语（C++17 标准中称为转发引用 Forwarding References）。在 C++11 中，形如 <code class="docutils literal notranslate"><span class="pre">T&amp;&amp;</span></code> 的类型有两种情况：</p>
+<ul class="simple">
+<li><p>普通的右值引用（rvalue reference）</p></li>
+<li><p>万能引用（universal reference），既可能表示左值引用，也可能表示右值引用</p></li>
+</ul>
+</section>
+<section id="id3">
+<h2><a class="toc-backref" href="#id9" role="doc-backlink">判断规则</a><a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p>如果一个 <strong>函数模板参数的类型为</strong> <code class="docutils literal notranslate"><span class="pre">T&amp;&amp;</span></code> ，其中 T 是需要 <strong>推导的类型</strong> ，那么此处的 <code class="docutils literal notranslate"><span class="pre">T&amp;&amp;</span></code> 指代万能引用。若不严格满足 <code class="docutils literal notranslate"><span class="pre">T&amp;&amp;</span></code> 类型或没有发生类型推导，则 <code class="docutils literal notranslate"><span class="pre">T&amp;&amp;</span></code> 指代右值引用。</p></li>
+</ol>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="n">f</span><span class="p">(</span><span class="n">T</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">param</span><span class="p">);</span><span class="w">      </span><span class="c1">// param 是万能引用</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>如果一个对象的类型被定义为 <code class="docutils literal notranslate"><span class="pre">auto&amp;&amp;</span></code> ，则此对象为万能引用。</p></li>
+</ol>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">auto</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">g</span><span class="p">();</span><span class="w">         </span><span class="c1">// f 是万能引用</span>
+</pre></div>
+</div>
+<p>万能引用的绑定规则：</p>
+<ul class="simple">
+<li><p>如果万能引用是通过右值初始化的，那么它就对应一个右值引用。</p></li>
+<li><p>如果万能引用是通过左值初始化的，那么它就对应一个左值引用。</p></li>
+</ul>
+<section id="id4">
+<h3><a class="toc-backref" href="#id10" role="doc-backlink">万能引用既可以接收左值也可以接收右值</a><a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h3>
+<p>万能引用的核心特性是：同一个函数模板既可以接收左值，也可以接收右值，而普通的左值引用或右值引用做不到这一点。</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">std</span><span class="p">;</span><span class="w"></span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="n">process</span><span class="p">(</span><span class="n">T</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">arg</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;value: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">arg</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="kt">int</span><span class="w"> </span><span class="n">main</span><span class="p">()</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">42</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">process</span><span class="p">(</span><span class="n">a</span><span class="p">);</span><span class="w">             </span><span class="c1">// 传入左值，T 推导为 int&amp;，arg 为 int&amp;</span>
+<span class="w">    </span><span class="n">process</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span><span class="w">           </span><span class="c1">// 传入右值，T 推导为 int，arg 为 int&amp;&amp;</span>
+<span class="w">    </span><span class="n">process</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">a</span><span class="p">));</span><span class="w">  </span><span class="c1">// 传入右值，T 推导为 int，arg 为 int&amp;&amp;</span>
+
+<span class="w">    </span><span class="n">string</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;hello&quot;</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">process</span><span class="p">(</span><span class="n">s</span><span class="p">);</span><span class="w">             </span><span class="c1">// 传入左值，T 推导为 string&amp;</span>
+<span class="w">    </span><span class="n">process</span><span class="p">(</span><span class="n">string</span><span class="p">(</span><span class="s">&quot;world&quot;</span><span class="p">));</span><span class="w"> </span><span class="c1">// 传入右值，T 推导为 string</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>输出：</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">value: 42</span>
+<span class="go">value: 100</span>
+<span class="go">value: 42</span>
+<span class="go">value: hello</span>
+<span class="go">value: world</span>
+</pre></div>
+</div>
+<p>如果把参数改为普通的右值引用 <code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">process(int&amp;&amp;</span> <span class="pre">arg)</span></code> ，则无法接收左值；如果改为左值引用 <code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">process(int&amp;</span> <span class="pre">arg)</span></code> ，则无法接收右值。万能引用通过引用折叠机制，让一个函数同时处理两种情况。</p>
+</section>
+<section id="id5">
+<h3><a class="toc-backref" href="#id11" role="doc-backlink">不是万能引用的情况</a><a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h3>
+<section id="t">
+<h4><a class="toc-backref" href="#id12" role="doc-backlink">类模板成员函数中的 T&amp;&amp;</a><a class="headerlink" href="#t" title="Permalink to this heading">¶</a></h4>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"></span>
+<span class="k">class</span><span class="w"> </span><span class="nc">mytestc</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">testfunc</span><span class="p">(</span><span class="n">T</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{};</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">*</span><span class="n">argv</span><span class="p">[])</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">mytestc</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">mc</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">mc</span><span class="p">.</span><span class="n">testfunc</span><span class="p">(</span><span class="n">i</span><span class="p">);</span><span class="w">     </span><span class="c1">// 编译错误</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">error: cannot bind rvalue reference of type &#39;int&amp;&amp;&#39; to lvalue of type &#39;int&#39;</span>
+</pre></div>
+</div>
+<p>因为 testfunc() 成员函数本身没有涉及类型推断。 <code class="docutils literal notranslate"><span class="pre">mytestc&lt;int&gt;</span> <span class="pre">mc;</span></code> 实例化完成后，testfunc() 已经确定为 <code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">testfunc(int&amp;&amp;</span> <span class="pre">x)</span></code> ，所以形参 x 是右值引用，不是万能引用。</p>
+</section>
+<section id="cv-t">
+<h4><a class="toc-backref" href="#id13" role="doc-backlink">加了 cv 限定符的 T&amp;&amp;</a><a class="headerlink" href="#cv-t" title="Permalink to this heading">¶</a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">T&amp;&amp;</span></code> 加上 cv qualifiers（如 const）就不是万能引用：</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="n">f</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">param</span><span class="p">);</span><span class="w">    </span><span class="c1">// param 是右值引用，不是万能引用</span>
+</pre></div>
+</div>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="n">myfunc</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">tmprv</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">tmprv</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="kt">int</span><span class="w"> </span><span class="n">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">*</span><span class="n">argv</span><span class="p">[])</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// myfunc(i);          // 编译错误：不能将左值绑定到 const int&amp;&amp;</span>
+<span class="w">    </span><span class="n">myfunc</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">i</span><span class="p">));</span><span class="w">   </span><span class="c1">// 正确：std::move 转换为右值</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>const 修饰词会剥夺一个引用成为万能引用的资格，此时 <code class="docutils literal notranslate"><span class="pre">const</span> <span class="pre">T&amp;&amp;</span></code> 就是一个普通的右值引用，只能绑定右值。</p>
+<p>为什么 <code class="docutils literal notranslate"><span class="pre">std::move(i)</span></code> 可以编译通过？</p>
+<p><code class="docutils literal notranslate"><span class="pre">std::move(i)</span></code> 的作用是把 i 从左值 <strong>无条件转换为右值</strong> （准确说是亡值 xvalue），它本身不移动任何东西，只是做了一个类型转换，等价于 <code class="docutils literal notranslate"><span class="pre">static_cast&lt;int&amp;&amp;&gt;(i)</span></code> 。</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">myfunc(i)</span></code> ：i 是左值，右值引用不能绑定左值 → 编译错误</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">myfunc(std::move(i))</span></code> ： <code class="docutils literal notranslate"><span class="pre">std::move(i)</span></code> 返回 <code class="docutils literal notranslate"><span class="pre">int&amp;&amp;</span></code> （右值），右值引用可以绑定右值 → 编译通过，T 推导为 <code class="docutils literal notranslate"><span class="pre">int</span></code> ，形参类型为 <code class="docutils literal notranslate"><span class="pre">const</span> <span class="pre">int&amp;&amp;</span></code></p></li>
+</ul>
+</section>
+</section>
+<section id="id6">
+<h3><a class="toc-backref" href="#id14" role="doc-backlink">万能引用的类型推导示例</a><a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;boost/type_index.hpp&gt;</span><span class="cp"></span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="n">myfunc</span><span class="p">(</span><span class="n">T</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">tmprv</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">using</span><span class="w"> </span><span class="n">boost</span><span class="o">::</span><span class="n">typeindex</span><span class="o">::</span><span class="n">type_id_with_cvr</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;T=&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">type_id_with_cvr</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">().</span><span class="n">pretty_name</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;tmprv=&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">type_id_with_cvr</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">tmprv</span><span class="p">)</span><span class="o">&gt;</span><span class="p">().</span><span class="n">pretty_name</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="kt">int</span><span class="w"> </span><span class="n">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">*</span><span class="n">argv</span><span class="p">[])</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">18</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">myfunc</span><span class="p">(</span><span class="n">i</span><span class="p">);</span><span class="w">      </span><span class="c1">// i 是左值：T=int&amp;, tmprv=int&amp;</span>
+<span class="w">    </span><span class="n">myfunc</span><span class="p">(</span><span class="n">j</span><span class="p">);</span><span class="w">      </span><span class="c1">// j 是左值：T=int const&amp;, tmprv=int const&amp;</span>
+<span class="w">    </span><span class="n">myfunc</span><span class="p">(</span><span class="n">k</span><span class="p">);</span><span class="w">      </span><span class="c1">// k 是左值：T=int const&amp;, tmprv=int const&amp;</span>
+<span class="w">    </span><span class="n">myfunc</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span><span class="w">    </span><span class="c1">// 100 是右值：T=int, tmprv=int&amp;&amp;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>输出：</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">T=int&amp;</span>
+<span class="go">tmprv=int&amp;</span>
+<span class="go">T=int const&amp;</span>
+<span class="go">tmprv=int const&amp;</span>
+<span class="go">T=int const&amp;</span>
+<span class="go">tmprv=int const&amp;</span>
+<span class="go">T=int</span>
+<span class="go">tmprv=int&amp;&amp;</span>
+</pre></div>
+</div>
+<section id="const">
+<h4><a class="toc-backref" href="#id15" role="doc-backlink">万能引用保留 const 属性</a><a class="headerlink" href="#const" title="Permalink to this heading">¶</a></h4>
+<p>上面的结果中，传入 <code class="docutils literal notranslate"><span class="pre">j</span></code> （<code class="docutils literal notranslate"><span class="pre">const</span> <span class="pre">int</span></code>）和 <code class="docutils literal notranslate"><span class="pre">k</span></code> （<code class="docutils literal notranslate"><span class="pre">const</span> <span class="pre">int&amp;</span></code>）时，tmprv 都被推导为 <code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">const&amp;</span></code> ，const 属性被完整保留了下来。</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">myfunc(i)</span></code> ：i 是 <code class="docutils literal notranslate"><span class="pre">int</span></code> （非 const）→ T = <code class="docutils literal notranslate"><span class="pre">int&amp;</span></code> ，tmprv = <code class="docutils literal notranslate"><span class="pre">int&amp;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">myfunc(j)</span></code> ：j 是 <code class="docutils literal notranslate"><span class="pre">const</span> <span class="pre">int</span></code> → T = <code class="docutils literal notranslate"><span class="pre">const</span> <span class="pre">int&amp;</span></code> ，tmprv = <code class="docutils literal notranslate"><span class="pre">const</span> <span class="pre">int&amp;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">myfunc(k)</span></code> ：k 是 <code class="docutils literal notranslate"><span class="pre">const</span> <span class="pre">int&amp;</span></code> ，引用被忽略后还是 <code class="docutils literal notranslate"><span class="pre">const</span> <span class="pre">int</span></code> → T = <code class="docutils literal notranslate"><span class="pre">const</span> <span class="pre">int&amp;</span></code> ，tmprv = <code class="docutils literal notranslate"><span class="pre">const</span> <span class="pre">int&amp;</span></code></p></li>
+</ul>
+<p>这是合理的设计——如果调用者传入的是 const 对象，函数内部也不应该能修改它。万能引用会忠实地把 const 信息传递进来，保证 const 正确性。这也是万能引用配合 <code class="docutils literal notranslate"><span class="pre">std::forward</span></code> 做完美转发的关键：不仅保留左值/右值属性，还保留 cv 限定符，让被转发的函数能收到与原始调用完全一致的类型信息。</p>
+</section>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../links.html">Links</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Cplus</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../libstdc%2B%2B_2_9_1/index.html">Libstd c++ 2.9.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_this_pointer.html">this 指针</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_constructor_type.html">构造函数的类型</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_constructor.html">构造函数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_destructor.html">析构函数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_copyconstructor.html">拷贝构造函数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_const_member.html">const</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_static_member.html">static 成员</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_friend_member.html">友元（Friend）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Operator_overloading/index.html">运算符重载</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_inheritance.html">继承</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_access_modifiers.html">访问修饰符</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_inheritance_access.html">继承访问控制</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_object_slicing.html">对象切片（Object Slicing）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_derived_class.html">派生类</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_multile_inheritance.html">多继承</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_multile_inheritance_Ambiguity.html">多继承的二义性</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_virtual_Inheritance.html">虚继承</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_polymorphism.html">多态（Polymorphism）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_override_specifier.html">override 说明符</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_final_specifier.html">final 说明符</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_vtable.html">虚函数表机制（Virtual Function Table）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_vtable2.html">类层次与虚函数表（Class Hierarchy and VTable）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_virtual_destructor.html">虚析构函数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_private_destructor.html">私有析构函数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_abstract_class.html">抽象类（Abstract Class）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_itanium_abi_destruction.html">Itanium C++ ABI 析构函数机制</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_references.html">引用（References）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../functemplate.html">Function template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../passarguments.html">Pass arguments to function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rvalue.html">右值引用与移动语义</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../lvalue_and_rvalue.html">左值与右值</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../placement_new.html">Placement new operator</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">模板（Template）</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="template_instantiation.html">模板实例化</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_specialization.html">模板特化（全特化与偏特化）</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_parameter_deduction.html">模板参数推导</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_overload.html">函数模板重载</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_variadic_function.html">可变参函数模板</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_fold_expressions.html">折叠表达式</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">万能引用</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_type_deduction.html">模板类型推导</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_auto_type_deduction.html">auto 类型推导</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_ref_and_cref.html">std::ref 和 std::cref</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_perfect_forwarding.html">完美转发</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_trait.html">Traits（萃取）</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../cast/index.html">C++ Cast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decltype.html">Decltype</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../explicit_implicit.html">Explicit and Implicit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../typedef_typename.html">typedef typename</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pointer_size.html">Size of Pointers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../inline_function.html">Inline Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../math/index.html">Math</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../licence/index.html">OpenSource License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bochs/index.html">Bochs IA-32 Emulator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../system/index.html">System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../unix/index.html">UNIX</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../math/index.html">Math</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crypto/index.html">Crypto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../todo.html">To Do</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Cplus</a><ul>
+  <li><a href="index.html">模板（Template）</a><ul>
+      <li>Previous: <a href="template_fold_expressions.html" title="previous chapter">折叠表达式</a></li>
+      <li>Next: <a href="template_type_deduction.html" title="next chapter">模板类型推导</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../../_sources/cplus/template/template_universal_references.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

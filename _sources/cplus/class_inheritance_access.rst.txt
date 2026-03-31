@@ -1,0 +1,197 @@
+==========================
+继承访问控制
+==========================
+
+.. contents:: Table of Contents
+
+概述
+--------------
+
+public、protected 和 private 继承具有以下特点：
+
+* **public 继承** ：基类的 public 成员在派生类中仍为 public，protected 成员仍为 protected。
+* **protected 继承** ：基类的 public 和 protected 成员在派生类中都变为 protected。
+* **private 继承** ：基类的 public 和 protected 成员在派生类中都变为 private。
+
+.. image:: ../_static/image/inherance_access.jpg
+
+public 继承
+====================
+
+采用公有继承方式时，基类的公有成员和保护成员在派生类中仍然是公有成员和保护成员，其访问属性不变，可以使用派生类的对象访问基类公有成员。但是，基类的私有成员在派生类中变成了不可访问成员。如果基类中有从上层基类继承过来的不可访问成员，则基类的不可访问成员在它的派生类中同样是不可访问的。
+
+.. code-block:: cpp
+
+    #include <bits/stdc++.h>
+    using namespace std;
+    class A {
+    public:
+        int x;
+    protected:
+        int y;
+    private:
+        int z;
+    };
+
+    class B : public A {
+    };
+
+    int main()
+    {
+        B b;
+        cout << b.x << endl;   // OK：x 是 public，仍为 public
+        cout << b.y << endl;   // 错误：y 是 protected
+        cout << b.z << endl;   // 错误：z 是 private
+    };
+
+输出：
+
+.. code-block:: console
+
+    inherrace_access1.cpp: In function 'int main()':
+    inherrace_access1.cpp:37:15: error: 'int A::y' is protected within this context
+       37 |     cout << b.y << endl;
+          |               ^
+    inherrace_access1.cpp:42:15: error: 'int A::z' is private within this context
+       42 |     cout << b.z << endl;
+          |               ^
+
+完整示例：
+
+.. code-block:: cpp
+
+    #include<iostream>
+    using namespace std;
+    class Student
+    {
+    public:
+        void setGrade(string grade);
+        string getGrade();
+        void setName(string name);
+        string getName();
+    protected:
+        string _grade;
+    private:
+        string _name;
+    };
+    void Student::setGrade(string grade) { _grade=grade; }
+    string Student::getGrade() { return _grade; }
+    void Student::setName(string name) { _name=name; }
+    string Student::getName() { return _name; }
+
+    class Undergraduate:public Student
+    {
+    public:
+        Undergraduate(string major);
+        void show();
+    private:
+        string _major;
+    };
+    Undergraduate::Undergraduate(string major) { _major=major; }
+    void Undergraduate::show()
+    {
+        cout<<"姓名："<<getName()<<endl;     // 派生类调用基类成员函数
+        cout<<"年级："<<_grade<<endl;         // 派生类访问继承的保护成员
+        cout<<"专业："<<_major<<endl;         // 派生类访问新增成员
+    }
+    int main()
+    {
+        Undergraduate stu("计算机信息工程");
+        stu.setGrade("大三");
+        stu.setName("zhangsan");
+        stu.show();
+        return 0;
+    }
+
+.. image:: ../_static/image/public_inherace.png
+
+protected 继承
+====================
+
+采用保护继承方式时，基类的公有成员和保护成员在派生类中全部变成保护成员，派生类的其他成员可以直接访问它们，在派生类外无法访问。基类的私有成员和不可访问成员在派生类中的访问属性是不可访问。
+
+.. code-block:: cpp
+
+    class B : protected A {
+    };
+
+输出：
+
+.. code-block:: console
+
+    inherrace_access1.cpp: In function 'int main()':
+    inherrace_access1.cpp:33:15: error: 'int A::x' is inaccessible within this context
+       33 |     cout << b.x << endl;
+          |               ^
+    inherrace_access1.cpp:37:15: error: 'int A::y' is protected within this context
+       37 |     cout << b.y << endl;
+          |               ^
+    inherrace_access1.cpp:42:15: error: 'int A::z' is private within this context
+       42 |     cout << b.z << endl;
+          |               ^
+
+protected 成员只能在派生类内部访问，不能通过对象直接访问。因此不能使用 ``b.x`` 访问该成员，但可以定义成员函数来访问：
+
+.. code-block:: cpp
+
+    class B : protected A {
+    public:
+        int getX(){ return x; }
+        int getY(){ return y; }
+    };
+
+private 继承
+====================
+
+采用私有继承方式时，基类的公有成员和保护成员在派生类中全部变成私有成员，派生类的其他成员可以直接访问它们，在派生类外无法访问。基类的私有成员和不可访问成员在派生类中的访问属性是不可访问。
+
+.. code-block:: cpp
+
+    class B : private A {
+    };
+
+.. code-block:: console
+
+    inherrace_access1.cpp: In function 'int main()':
+    inherrace_access1.cpp:35:15: error: 'int A::x' is inaccessible within this context
+       35 |     cout << b.x << endl;
+          |               ^
+    inherrace_access1.cpp:36:19: error: 'int A::y' is protected within this context
+       36 |         cout << b.y << endl;
+          |                   ^
+    inherrace_access1.cpp:37:19: error: 'int A::z' is private within this context
+       37 |         cout << b.z << endl;
+          |                   ^
+
+private 成员不能从派生类外部访问，需要通过成员函数间接访问：
+
+.. code-block:: cpp
+
+    #include <bits/stdc++.h>
+    using namespace std;
+
+    class A {
+    protected:
+        int y;
+    private:
+        int z;
+    public:
+        int x;
+        int getZ(){ return z; }
+    };
+
+    class B : private A {
+    public:
+        int getX(){ return x; }
+        int getY(){ return y; }
+        int getZ(){ return A::getZ(); }
+    };
+
+    int main()
+    {
+        B b;
+        cout << b.getX() << endl;
+        cout << b.getY() << endl;
+        cout << b.getZ() << endl;
+        return 0;
+    };

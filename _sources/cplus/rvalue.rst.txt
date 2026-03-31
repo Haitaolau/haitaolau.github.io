@@ -1,219 +1,360 @@
-===================
-Cplus Rvalue
-===================
+==========================
+右值引用与移动语义
+==========================
 
-`Value categories <https://en.cppreference.com/w/cpp/language/value_category>`_
+.. contents:: Table of Contents
 
+概述
+--------------
 
+右值引用（Rvalue Reference）是 C++11 引入的核心特性，使用 ``&&`` 语法声明。它主要解决两个问题：
 
+* **移动语义（Move Semantics）** ：避免不必要的深拷贝，通过"窃取"临时对象的资源来提升性能
+* **完美转发（Perfect Forwarding）** ：在模板中保持参数的左值/右值属性（详见 :doc:`template/template_perfect_forwarding`）
 
-Introduction
-------------------
+.. note::
 
-Rvalue references are a feature of C++ that was added with the C++11 standard
-Rvalue references solve at least two problems:
+    关于左值和右值的基本概念，参见 :doc:`lvalue_and_rvalue` 。关于万能引用（``T&&``），参见 :doc:`template/template_universal_references` 。
 
-*  Implementing move semantics
-*  Perfect forwarding  
+右值引用
+--------------
 
-The original definition of lvalues and rvalues from the earliest days of C is as follows: 
-An lvalue is an expression e that may appear on the left or on the right hand side of 
-an assignment, 
-whereas an rvalue is an expression that can only appear on the right hand side of an assignment
-
-.. code-block:: cpp
- 
-  int a = 42;
-  int b = 43;
-
-  // a and b are both l-values:
-  a = b; // ok
-  b = a; // ok
-  a = a * b; // ok
-
-  // a * b is an rvalue:
-  int c = a * b; // ok, rvalue on right hand side of assignment
-  a * b = 42; // error, rvalue on left hand side of assignment
-
-
-Here is an alternate definition which, although it can still be argued with, will put you 
-in a position to tackle rvalue references: An lvalue is an expression that refers to a memory 
-location and allows us to take the address of that memory location via the & operator. An 
-rvalue is an expression that is not an lvalue.
-
-.. code-block:: cpp
-  
-  // lvalues:
-  //
-  int i = 42;
-  i = 43; // ok, i is an lvalue
-  int* p = &i; // ok, i is an lvalue
-  int& foo();
-  foo() = 42; // ok, foo() is an lvalue
-  int* p1 = &foo(); // ok, foo() is an lvalue
-
-  // rvalues:
-  //
-  int foobar();
-  int j = 0;
-  j = foobar(); // ok, foobar() is an rvalue
-  int* p2 = &foobar(); // error, cannot take the address of an rvalue
-  j = 42; // ok, 42 is an rvalue
-
-
-
-
-Rvalue References 
-------------------
-
-Prior to C++11, if you had a temporary object, you could use a "regular" or "lvalue reference" to bind it, but only if it was const:
+在 C++11 之前，只能用 const 左值引用绑定临时对象：
 
 .. code-block:: cpp
 
-   const string& name = getName(); // ok
-   string& name = getName(); // NOT ok
+    const std::string& name = getName();    // OK：const 左值引用可以绑定右值
+    std::string& name = getName();          // 错误：非 const 左值引用不能绑定右值
 
-The intuition here is that you cannot use a "mutable" reference because, if you did, you'd be able to modify some object that is about to disappear, and that would be dangerous. Notice, by the way, that holding on to a const reference to a temporary object ensures that the temporary object isn't immediately destructed. This is a nice guarantee of C++, but it is still a temporary object, so you don't want to modify it.
+这是因为临时对象即将销毁，允许通过非 const 引用修改它没有意义，还可能导致悬空引用。
 
-In C++11, however, there's a new kind of reference, an "rvalue reference", that will let you bind a mutable reference to an rvalue, but not an lvalue. In other words, rvalue references are perfect for detecting if a value is temporary object or not. Rvalue references use the && syntax instead of just &, and can be const and non-const, just like lvalue references, although you'll rarely see a const rvalue reference (as we'll see, mutable references are kind of the point):
-
-
-.. code-block:: cpp
-   
-   const string&& name = getName(); // ok
-   string&& name = getName(); // also ok - praise be!
-
-
-So far this is all well and good, but how does it help? The most important thing about lvalue references vs rvalue references is what happens when you write functions that take lvalue or rvalue references as arguments. Let's say we have two functions:
+C++11 引入了右值引用，允许绑定到右值（临时对象）：
 
 .. code-block:: cpp
 
-	printReference (const String& str)
-	{
-	        cout << str;
-	}
-	 
-	printReference (String&& str)
-	{
-	        cout << str;
-	}
+    std::string&& name = getName();         // OK：右值引用绑定右值
+    const std::string&& name = getName();   // OK，但很少使用
 
-Now the behavior gets interesting--the printReference function taking a const lvalue reference will accept any argument that it's given, whether it be an lvalue or an rvalue, and regardless of whether the lvalue or rvalue is mutable or not. However, in the presence of the second overload, printReference taking an rvalue reference, it will be given all values except mutable rvalue-references. In other words, if you write:
-	
-..code-block:: 
-
-	string me( "alex" );
-	printReference(  me ); // calls the first printReference function, taking an lvalue reference
-	 
-	printReference( getName() ); // calls the second printReference function, taking a mutable rvalue reference
-	
-
-
-Move constructor
-----------------
-
-The most common pattern you'll see when working with rvalue references is to create a move constructor and move assignment operator (which follows the same principles). A move constructor, like a copy constructor, takes an instance of an object as its argument and creates a new instance based on the original object. However, the move constructor can avoid memory reallocation because we know it has been provided a temporary object, so rather than copy the fields of the object, we will move them.
-
-What does it mean to move a field of the object? If the field is a primitive type, like int, we just copy it. It gets more interesting if the field is a pointer: here, rather than allocate and initialize new memory, we can simply steal the pointer and null out the pointer in the temporary object! We know the temporary object will no longer be needed, so we can take its pointer out from under it.
-
-Imagine that we have a simple ArrayWrapper class, like this:
+右值引用的关键用途不是直接声明变量，而是用于函数重载——让编译器区分传入的是左值还是右值，从而选择不同的处理策略：
 
 .. code-block:: cpp
 
-	class ArrayWrapper
-	{
-	    public:
-	        ArrayWrapper (int n)
-	            : _p_vals( new int[ n ] )
-	            , _size( n )
-	        {}
-	        // copy constructor
-	        ArrayWrapper (const ArrayWrapper& other)
-	            : _p_vals( new int[ other._size  ] )
-	            , _size( other._size )
-	        {
-	            for ( int i = 0; i < _size; ++i )
-	            {
-	                _p_vals[ i ] = other._p_vals[ i ];
-	            }
-	        }
-	        ~ArrayWrapper ()
-	        {
-	            delete [] _p_vals;
-	        }
-	    private:
-	    int *_p_vals;
-	    int _size;
-	};
+    void process(const std::string& str)    // 接收左值（和右值的兜底）
+    {
+        std::cout << "左值版本: " << str << std::endl;
+    }
 
-Notice that the copy constructor has to both allocate memory and copy every value from the array, one at a time! That's a lot of work for a copy. Let's add a move constructor and gain some massive efficiency.
+    void process(std::string&& str)         // 接收右值
+    {
+        std::cout << "右值版本: " << str << std::endl;
+    }
 
+    int main()
+    {
+        std::string s("hello");
+        process(s);             // 调用左值版本
+        process(getName());     // 调用右值版本（临时对象是右值）
+        process(std::move(s));  // 调用右值版本（std::move 将左值转为右值）
+        return 0;
+    }
+
+重载决议规则：当两个重载同时存在时，右值优先匹配右值引用版本；左值只能匹配左值引用版本。如果只有 ``const T&`` 版本，它可以同时接收左值和右值（兜底）。
+
+.. note::
+
+    具名的右值引用是左值。``std::string&& name = getName();`` 中，name 的类型是 ``std::string&&`` ，但 name 本身是一个有名字的变量，所以 name 是左值。这个规则在完美转发中非常重要，详见 :doc:`template/template_perfect_forwarding` 。
+
+std::move
+--------------
+
+``std::move`` 并不移动任何东西，它只是将参数无条件转换为右值引用，等价于 ``static_cast<T&&>`` 。真正的"移动"发生在移动构造函数或移动赋值运算符中。
+
+.. code-block:: cpp
+
+    #include <iostream>
+    #include <string>
+    #include <utility>
+    using namespace std;
+
+    int main()
+    {
+        string s1 = "Hello, World!";
+        cout << "移动前 s1: " << s1 << endl;
+
+        string s2 = std::move(s1);  // 触发 string 的移动构造函数
+        cout << "移动后 s1: " << s1 << endl;   // s1 处于有效但未指定的状态
+        cout << "移动后 s2: " << s2 << endl;
+        return 0;
+    }
+
+输出：
+
+.. code-block:: console
+
+    移动前 s1: Hello, World!
+    移动后 s1:
+    移动后 s2: Hello, World!
+
+``std::move(s1)`` 将 s1 转为右值，触发 string 的移动构造函数，s2 直接接管了 s1 内部的堆内存指针，而不是重新分配内存并逐字符拷贝。移动后 s1 处于 **有效但未指定的状态** （valid but unspecified state），通常为空字符串。
+
+.. warning::
+
+    对 std::move 后的对象，只能执行析构或重新赋值操作，不要依赖其具体值。
+
+移动构造函数
+--------------
+
+移动构造函数通过"窃取"源对象的资源来构造新对象，避免深拷贝。以一个简单的数组包装类为例：
 
 .. code-block:: cpp
 
     class ArrayWrapper
     {
-	public:
-	    // default constructor produces a moderately sized array
-	    ArrayWrapper ()
-	        : _p_vals( new int[ 64 ] )
-	        , _size( 64 )
-	    {}
-	 
-	    ArrayWrapper (int n)
-	        : _p_vals( new int[ n ] )
-	        , _size( n )
-	    {}
-	 
-	    // move constructor
-	    ArrayWrapper (ArrayWrapper&& other)
-	        : _p_vals( other._p_vals  )
-	        , _size( other._size )
-	    {
-	        other._p_vals = NULL;
-	        other._size = 0;
-	    }
-	 
-	    // copy constructor
-	    ArrayWrapper (const ArrayWrapper& other)
-	        : _p_vals( new int[ other._size  ] )
-	        , _size( other._size )
-	    {
-	        for ( int i = 0; i < _size; ++i )
-	        {
-	            _p_vals[ i ] = other._p_vals[ i ];
-	        }
-	    }
-	    ~ArrayWrapper ()
-	    {
-	        delete [] _p_vals;
-	    }
-	 
-	private:
-	    int *_p_vals;
-	    int _size;
-	};
+    public:
+        ArrayWrapper(int n)
+            : _p_vals(new int[n])
+            , _size(n)
+        {}
 
+        // 拷贝构造函数：分配新内存，逐元素拷贝
+        ArrayWrapper(const ArrayWrapper& other)
+            : _p_vals(new int[other._size])
+            , _size(other._size)
+        {
+            for (int i = 0; i < _size; ++i)
+                _p_vals[i] = other._p_vals[i];
+        }
 
-Wow, the move constructor is actually simpler than the copy constructor! That's quite a feat. The main things to notice are:
+        // 移动构造函数：直接窃取资源，无需分配和拷贝
+        ArrayWrapper(ArrayWrapper&& other) noexcept
+            : _p_vals(other._p_vals)
+            , _size(other._size)
+        {
+            other._p_vals = nullptr;
+            other._size = 0;
+        }
 
-    The parameter is a non-const rvalue reference
-    other._p_vals is set to NULL
+        ~ArrayWrapper()
+        {
+            delete[] _p_vals;
+        }
 
-The second observation explains the first--we couldn't set other._p_vals to NULL if we'd taken a const rvalue reference. 
+    private:
+        int* _p_vals;
+        int _size;
+    };
 
-But why do we need to set other._p_vals = NULL? The reason is the destructor--when the temporary object goes out of scope, just like all other C++ objects, its destructor will run. 
+移动构造函数的关键点：
 
-When its destructor runs, it will free _p_vals. The same _p_vals that we just copied! If we don't set other._p_vals to NULL, the move would not really be a move--it would just be a copy that introduces a crash later on once we start using freed memory. 
+* **参数是非 const 右值引用** ：需要修改源对象（置空指针），所以不能是 const
+* **必须将源对象的指针置为 nullptr** ：否则源对象析构时会释放已被窃取的内存，导致 double free
+* **标记 noexcept** ：标准库容器（如 ``std::vector`` 扩容时）只有在移动构造函数声明为 noexcept 时才会使用移动而非拷贝，这是为了保证异常安全
 
-This is the whole point of a move constructor: to avoid a copy by changing the original, temporary object!
+性能对比：
 
-Again, the overload rules work such that the move constructor is called only for a temporary object--and only a temporary object that can be modified. One thing this means is that if you have a function that returns a const object, it will cause the copy constructor to run instead of the move constructor--so don't write code like this:
+.. list-table::
+    :header-rows: 1
+    :widths: 30 35 35
 
+    * - 操作
+      - 拷贝构造
+      - 移动构造
+    * - 内存分配
+      - 需要 new（O(n)）
+      - 不需要（O(1)）
+    * - 数据复制
+      - 逐元素拷贝（O(n)）
+      - 仅拷贝指针（O(1)）
+    * - 源对象
+      - 不变
+      - 被置空
+
+移动赋值运算符
+-----------------
+
+与移动构造函数类似，移动赋值运算符用于将一个右值的资源转移给已存在的对象：
 
 .. code-block:: cpp
-   
-   const ArrayWrapper getArrayWrapper (); // makes the move constructor 
-                                          // useless, the temporary is const!
 
-   
+    class ArrayWrapper
+    {
+    public:
+        // ... 构造函数和析构函数同上 ...
+
+        // 拷贝赋值运算符
+        ArrayWrapper& operator=(const ArrayWrapper& other)
+        {
+            if (this != &other) {
+                delete[] _p_vals;
+                _size = other._size;
+                _p_vals = new int[_size];
+                for (int i = 0; i < _size; ++i)
+                    _p_vals[i] = other._p_vals[i];
+            }
+            return *this;
+        }
+
+        // 移动赋值运算符
+        ArrayWrapper& operator=(ArrayWrapper&& other) noexcept
+        {
+            if (this != &other) {
+                delete[] _p_vals;       // 释放当前资源
+                _p_vals = other._p_vals; // 窃取源对象资源
+                _size = other._size;
+                other._p_vals = nullptr; // 置空源对象
+                other._size = 0;
+            }
+            return *this;
+        }
+    };
+
+移动赋值运算符的要点：
+
+* **先释放自身资源** ：赋值目标已经持有资源，必须先释放
+* **自赋值检查** ：``if (this != &other)`` 防止 ``a = std::move(a)`` 导致资源被意外释放
+* **标记 noexcept** ：与移动构造函数相同的理由
+
+Rule of Five
+--------------
+
+C++11 之后，如果一个类需要自定义以下任何一个特殊成员函数，通常应该同时定义全部五个（Rule of Five）：
+
+1. 析构函数
+2. 拷贝构造函数
+3. 拷贝赋值运算符
+4. 移动构造函数
+5. 移动赋值运算符
+
+.. code-block:: cpp
+
+    class Resource
+    {
+    public:
+        Resource(int n) : _data(new int[n]), _size(n) {}
+
+        ~Resource()                                         // 1. 析构
+        { delete[] _data; }
+
+        Resource(const Resource& other)                     // 2. 拷贝构造
+            : _data(new int[other._size]), _size(other._size)
+        { std::copy(other._data, other._data + _size, _data); }
+
+        Resource& operator=(const Resource& other)          // 3. 拷贝赋值
+        {
+            if (this != &other) {
+                delete[] _data;
+                _size = other._size;
+                _data = new int[_size];
+                std::copy(other._data, other._data + _size, _data);
+            }
+            return *this;
+        }
+
+        Resource(Resource&& other) noexcept                 // 4. 移动构造
+            : _data(other._data), _size(other._size)
+        { other._data = nullptr; other._size = 0; }
+
+        Resource& operator=(Resource&& other) noexcept      // 5. 移动赋值
+        {
+            if (this != &other) {
+                delete[] _data;
+                _data = other._data;
+                _size = other._size;
+                other._data = nullptr;
+                other._size = 0;
+            }
+            return *this;
+        }
+
+    private:
+        int* _data;
+        int _size;
+    };
+
+.. tip::
+
+    如果类不管理资源（没有裸指针、文件句柄等），优先使用 Rule of Zero——不定义任何特殊成员函数，让编译器自动生成。使用智能指针（``std::unique_ptr`` 、 ``std::shared_ptr``）和标准容器可以避免手动管理资源。
+
+移动语义的实际应用
+--------------------
+
+返回值优化
+^^^^^^^^^^^^^^^^
+
+函数返回局部对象时，编译器通常会应用 RVO（Return Value Optimization）或 NRVO（Named RVO）直接在调用方的内存中构造对象，完全省略拷贝和移动。当 RVO 无法应用时，编译器会自动使用移动语义：
+
+.. code-block:: cpp
+
+    std::vector<int> createVector()
+    {
+        std::vector<int> v = {1, 2, 3, 4, 5};
+        return v;   // 优先 NRVO；若不能 NRVO，则自动移动（不需要 std::move）
+    }
+
+.. warning::
+
+    不要对返回的局部变量使用 ``std::move`` ，如 ``return std::move(v);`` ，这会阻止 RVO/NRVO 优化，反而降低性能。
+
+容器操作
+^^^^^^^^^^^^^^^^
+
+标准库容器大量使用移动语义来提升性能：
+
+.. code-block:: cpp
+
+    #include <vector>
+    #include <string>
+    using namespace std;
+
+    int main()
+    {
+        vector<string> v;
+        string s = "a very long string that requires heap allocation";
+
+        v.push_back(s);             // 拷贝 s 到 vector
+        v.push_back(std::move(s));  // 移动 s 到 vector，避免拷贝
+        // 此时 s 为空，不应再使用其值
+
+        v.emplace_back("another string");  // 直接在 vector 内存中构造
+        return 0;
+    }
+
+swap 操作
+^^^^^^^^^^^^^^^^
+
+C++11 之前，swap 需要三次拷贝；有了移动语义，只需要三次移动（对于管理堆内存的对象，移动是 O(1) 的）：
+
+.. code-block:: cpp
+
+    template<typename T>
+    void swap(T& a, T& b)
+    {
+        T tmp = std::move(a);   // 移动构造
+        a = std::move(b);       // 移动赋值
+        b = std::move(tmp);     // 移动赋值
+    }
+
+注意事项
+--------------
+
+1. **std::move 后不要使用原对象的值** ：移动后对象处于有效但未指定的状态，只能析构或重新赋值。
+
+.. code-block:: cpp
+
+    std::string s = "hello";
+    std::string s2 = std::move(s);
+    // s.size();     // 合法，但值不确定
+    s = "world";     // 合法，重新赋值后可以正常使用
+
+2. **移动构造/赋值应标记 noexcept** ：否则标准库容器在扩容等操作中不会使用移动，而是退回到拷贝以保证强异常安全。
+
+3. **const 对象不能被移动** ：``std::move(const_obj)`` 返回 ``const T&&`` ，它会匹配拷贝构造函数（``const T&``）而非移动构造函数（``T&&``），实际执行的是拷贝。
+
+.. code-block:: cpp
+
+    const std::string s = "hello";
+    std::string s2 = std::move(s);  // 实际调用拷贝构造函数！
+
+4. **不要返回局部变量的 std::move** ：会阻止 RVO 优化。
+
+5. **基本类型的移动等同于拷贝** ：``int`` 、 ``double`` 等基本类型没有移动语义的优化空间，移动和拷贝的开销相同。

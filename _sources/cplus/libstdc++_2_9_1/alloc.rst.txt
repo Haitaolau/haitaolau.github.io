@@ -1,0 +1,710 @@
+==========================
+空间分配器 (Allocator)
+==========================
+
+.. contents:: Table of Contents
+
+概述
+--------------
+
+SGI STL 的空间分配器实现在 ``<bits/stl_alloc.h>`` 中，采用 **双层分配器** 架构：
+
+* **第一级分配器** （ ``__malloc_alloc_template`` ）：直接封装 malloc/free，处理大块内存（> 128 bytes）和 OOM（Out Of Memory）情况
+* **第二级分配器** （ ``__default_alloc_template`` ）：维护 16 条自由链表（free list），管理 ≤ 128 bytes 的小块内存，减少内存碎片和 malloc 调用开销
+
+.. code-block:: text
+
+    用户请求分配 n bytes
+            |
+            v
+    n > 128 bytes ?
+      /           \
+    是              否
+     |               |
+     v               v
+   第一级分配器     第二级分配器
+   malloc/free     free list 内存池
+
+默认情况下（未定义 ``__USE_MALLOC`` ），alloc 使用第二级分配器：
+
+.. code-block:: cpp
+
+    #ifdef __USE_MALLOC
+    typedef malloc_alloc alloc;                                     // 第一级
+    #else
+    typedef __default_alloc_template<__NODE_ALLOCATOR_THREADS, 0> alloc;  // 第二级
+    #endif
+
+第一级分配器：__malloc_alloc_template
+------------------------------------------
+
+第一级分配器直接封装 C 的 malloc/free/realloc，并提供 OOM 处理机制。
+
+.. code-block:: cpp
+
+    template <int __inst>
+    class __malloc_alloc_template {
+
+    private:
+      static void* _S_oom_malloc(size_t);
+      static void* _S_oom_realloc(void*, size_t);
+      static void (* __malloc_alloc_oom_handler)();
+
+    public:
+      static void* allocate(size_t __n)
+      {
+        void* __result = malloc(__n);
+        if (0 == __result) __result = _S_oom_malloc(__n);
+        return __result;
+      }
+
+      static void deallocate(void* __p, size_t /* __n */)
+      {
+        free(__p);
+      }
+
+      static void* reallocate(void* __p, size_t /* old_sz */, size_t __new_sz)
+      {
+        void* __result = realloc(__p, __new_sz);
+        if (0 == __result) __result = _S_oom_realloc(__p, __new_sz);
+        return __result;
+      }
+
+      static void (* __set_malloc_handler(void (*__f)()))()
+      {
+        void (* __old)() = __malloc_alloc_oom_handler;
+        __malloc_alloc_oom_handler = __f;
+        return(__old);
+      }
+    };
+
+    typedef __malloc_alloc_template<0> malloc_alloc;
+
+模板参数 ``__inst`` 没有实际用途，仅用于允许创建多个实例（实际只使用 ``__inst = 0`` ）。
+
+所有成员函数都是 static 的——第一级分配器没有任何实例状态，本质上是一个函数集合。
+
+OOM 处理机制
+^^^^^^^^^^^^^^^^
+
+当 malloc 返回 0（分配失败）时，不是直接抛异常，而是进入 OOM 处理循环：
+
+.. code-block:: cpp
+
+    template <int __inst>
+    void* __malloc_alloc_template<__inst>::_S_oom_malloc(size_t __n)
+    {
+        void (* __my_malloc_handler)();
+        void* __result;
+
+        for (;;) {
+            __my_malloc_handler = __malloc_alloc_oom_handler;
+            if (0 == __my_malloc_handler) { std::__throw_bad_alloc(); }
+            (*__my_malloc_handler)();   // 调用用户设置的处理函数，尝试释放内存
+            __result = malloc(__n);
+            if (__result) return(__result);
+        }
+    }
+
+处理流程：
+
+1. 如果用户没有设置 OOM handler（ ``__malloc_alloc_oom_handler == 0`` ），直接抛出 ``bad_alloc`` 异常
+2. 如果设置了 handler，调用它（期望 handler 能释放一些内存），然后重试 malloc
+3. 不断循环，直到 malloc 成功或 handler 未设置时抛异常
+
+这个设计模仿了 C++ 的 ``std::set_new_handler`` 机制。用户可以通过 ``__set_malloc_handler`` 注册自定义的 OOM 处理函数：
+
+.. code-block:: cpp
+
+    void my_oom_handler()
+    {
+        // 尝试释放一些缓存内存
+        // 如果无法释放，可以设置 handler 为 nullptr 让下次循环抛异常
+    }
+
+    __malloc_alloc_template<0>::__set_malloc_handler(my_oom_handler);
+
+.. note::
+
+    SGI STL 没有使用 C++ 的 ``::operator new`` 来分配内存，而是直接使用 C 的 malloc。因此不能使用 ``std::set_new_handler`` ，需要自己实现一套类似的 OOM 处理机制。
+
+第二级分配器：__default_alloc_template
+------------------------------------------
+
+第二级分配器是 SGI STL 分配器的核心，采用 **内存池 + 自由链表** 的策略来管理小块内存。
+
+设计动机：小对象频繁调用 malloc/free 会带来两个问题：
+
+1. **额外开销** ：每次 malloc 都会附带管理信息（cookie），对于 8 字节的小对象，cookie 可能就占了 8~16 字节，内存利用率极低
+2. **内存碎片** ：大量小块内存的分配和释放会导致堆碎片化
+
+核心常量与数据结构
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: cpp
+
+    template <bool threads, int inst>
+    class __default_alloc_template {
+    private:
+      enum {_ALIGN = 8};            // 对齐边界：所有分配大小向上对齐到 8 的倍数
+      enum {_MAX_BYTES = 128};      // 小块内存上限：超过 128 bytes 转交第一级分配器
+      enum {_NFREELISTS = 16};      // 自由链表数量：128 / 8 = 16 条
+
+      // 内存池状态
+      static char* _S_start_free;   // 内存池空闲区起始地址
+      static char* _S_end_free;     // 内存池空闲区结束地址
+      static size_t _S_heap_size;   // 累计从系统获取的堆内存总量
+    };
+
+自由链表节点使用 union 实现，巧妙地复用了内存：
+
+.. code-block:: cpp
+
+    union _Obj {
+        union _Obj* _M_free_list_link;  // 空闲时：指向下一个空闲块
+        char _M_client_data[1];         // 使用时：客户端数据的起始地址
+    };
+
+    static _Obj* __STL_VOLATILE _S_free_list[_NFREELISTS];
+
+当一个内存块空闲时，它的前几个字节被当作指针，指向链表中的下一个空闲块；当内存块被分配给用户后，整块内存都归用户使用。这样空闲块不需要额外的管理空间。
+
+16 条自由链表分别管理大小为 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128 bytes 的内存块：
+
+.. code-block:: text
+
+    _S_free_list[0]  → 8 bytes 的空闲块链表
+    _S_free_list[1]  → 16 bytes 的空闲块链表
+    _S_free_list[2]  → 24 bytes 的空闲块链表
+    ...
+    _S_free_list[15] → 128 bytes 的空闲块链表
+
+辅助函数
+^^^^^^^^^^^^^^^^
+
+**_S_round_up** ：将请求大小向上对齐到 8 的倍数
+
+.. code-block:: cpp
+
+    static size_t _S_round_up(size_t __bytes)
+    { return (((__bytes) + (size_t) _ALIGN-1) & ~((size_t) _ALIGN - 1)); }
+
+使用位运算实现对齐。例如请求 13 bytes → ``(13 + 7) & ~7`` = ``20 & 0xFFF...F8`` = 16 bytes。
+
+**_S_freelist_index** ：根据请求大小计算对应的自由链表索引
+
+.. code-block:: cpp
+
+    static size_t _S_freelist_index(size_t __bytes) {
+        return (((__bytes) + (size_t)_ALIGN-1)/(size_t)_ALIGN - 1);
+    }
+
+例如请求 13 bytes → ``(13 + 7) / 8 - 1`` = 1，对应 ``_S_free_list[1]`` （16 bytes 链表）。
+
+allocate 分配流程
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: cpp
+
+    static void* allocate(size_t __n)
+    {
+      void* __ret = 0;
+
+      if (__n > (size_t) _MAX_BYTES) {
+        __ret = malloc_alloc::allocate(__n);       // 大于 128 bytes，转交第一级分配器
+      }
+      else {
+        _Obj* __STL_VOLATILE* __my_free_list
+            = _S_free_list + _S_freelist_index(__n); // 找到对应的自由链表
+        _Obj* __RESTRICT __result = *__my_free_list;
+        if (__result == 0)
+          __ret = _S_refill(_S_round_up(__n));      // 链表为空，重新填充
+        else {
+          *__my_free_list = __result -> _M_free_list_link;  // 取出链表头节点
+          __ret = __result;
+        }
+      }
+      return __ret;
+    };
+
+流程图：
+
+.. code-block:: text
+
+    allocate(n)
+        |
+        v
+    n > 128 ?
+      /       \
+    是          否
+     |           |
+     v           v
+   malloc    找到对应 free_list[index]
+             链表头 == NULL ?
+               /          \
+             是             否
+              |              |
+              v              v
+          _S_refill()    取出头节点返回
+          填充链表        （头节点摘除）
+
+deallocate 释放流程
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: cpp
+
+    static void deallocate(void* __p, size_t __n)
+    {
+      if (__n > (size_t) _MAX_BYTES)
+        malloc_alloc::deallocate(__p, __n);         // 大块内存，直接 free
+      else {
+        _Obj* __STL_VOLATILE*  __my_free_list
+            = _S_free_list + _S_freelist_index(__n); // 找到对应的自由链表
+        _Obj* __q = (_Obj*)__p;
+
+        __q -> _M_free_list_link = *__my_free_list;  // 将归还的块插入链表头部
+        *__my_free_list = __q;
+      }
+    }
+
+释放时不调用 free，而是将内存块回收到对应的自由链表头部（头插法），供后续分配复用。这就是为什么第二级分配器能减少 malloc/free 调用次数。
+
+.. note::
+
+    回收的内存块不会归还给操作系统，而是留在自由链表中供后续复用。这是一种典型的空间换时间策略。
+
+_S_refill 重新填充
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+当某条自由链表为空时，allocate 会调用 _S_refill 来填充。默认一次申请 20 个块：
+
+.. code-block:: cpp
+
+    template <bool __threads, int __inst>
+    void* __default_alloc_template<__threads, __inst>::_S_refill(size_t __n)
+    {
+        int __nobjs = 20;
+        char* __chunk = _S_chunk_alloc(__n, __nobjs);  // 从内存池获取空间
+        _Obj* __STL_VOLATILE* __my_free_list;
+        _Obj* __result;
+        _Obj* __current_obj;
+        _Obj* __next_obj;
+        int __i;
+
+        if (1 == __nobjs) return(__chunk);  // 只获得 1 个块，直接返回给用户
+        __my_free_list = _S_free_list + _S_freelist_index(__n);
+
+        // 第 1 个块返回给用户，剩余的串成自由链表
+        __result = (_Obj*)__chunk;
+        *__my_free_list = __next_obj = (_Obj*)(__chunk + __n);
+        for (__i = 1; ; __i++) {
+            __current_obj = __next_obj;
+            __next_obj = (_Obj*)((char*)__next_obj + __n);
+            if (__nobjs - 1 == __i) {
+                __current_obj -> _M_free_list_link = 0;  // 最后一个块，尾指针置空
+                break;
+            } else {
+                __current_obj -> _M_free_list_link = __next_obj;
+            }
+        }
+        return(__result);
+    }
+
+以请求 32 bytes 为例，_S_refill 的工作过程：
+
+.. code-block:: text
+
+    _S_chunk_alloc(32, 20) 从内存池获取 20 × 32 = 640 bytes 的连续空间
+
+    chunk:
+    +--------+--------+--------+--------+-----+--------+
+    | 块 0   | 块 1   | 块 2   | 块 3   | ... | 块 19  |
+    +--------+--------+--------+--------+-----+--------+
+    ↑ 返回给用户       ↑ 串成自由链表
+    __result           *__my_free_list
+
+    free_list[3]: → 块1 → 块2 → 块3 → ... → 块19 → NULL
+
+_S_chunk_alloc 内存池管理
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+_S_chunk_alloc 是整个分配器最复杂的部分，负责从内存池中切割空间。内存池由 ``_S_start_free`` 和 ``_S_end_free`` 两个指针维护：
+
+.. code-block:: cpp
+
+    template <bool __threads, int __inst>
+    char*
+    __default_alloc_template<__threads, __inst>::_S_chunk_alloc(
+        size_t __size, int& __nobjs)
+    {
+        char* __result;
+        size_t __total_bytes = __size * __nobjs;
+        size_t __bytes_left = _S_end_free - _S_start_free;
+
+        if (__bytes_left >= __total_bytes) {
+            // 情况 1：内存池剩余空间完全满足需求
+            __result = _S_start_free;
+            _S_start_free += __total_bytes;
+            return(__result);
+        } else if (__bytes_left >= __size) {
+            // 情况 2：内存池剩余空间不够 20 个块，但至少够 1 个块
+            __nobjs = (int)(__bytes_left/__size);       // 能分多少分多少
+            __total_bytes = __size * __nobjs;
+            __result = _S_start_free;
+            _S_start_free += __total_bytes;
+            return(__result);
+        } else {
+            // 情况 3：内存池剩余空间连 1 个块都不够
+            size_t __bytes_to_get =
+              2 * __total_bytes + _S_round_up(_S_heap_size >> 4);
+
+            // 将内存池残余零头编入对应的自由链表（不浪费）
+            if (__bytes_left > 0) {
+                _Obj* __STL_VOLATILE* __my_free_list =
+                    _S_free_list + _S_freelist_index(__bytes_left);
+                ((_Obj*)_S_start_free) -> _M_free_list_link = *__my_free_list;
+                *__my_free_list = (_Obj*)_S_start_free;
+            }
+
+            // 向系统申请新的大块内存
+            _S_start_free = (char*)malloc(__bytes_to_get);
+            if (0 == _S_start_free) {
+                // malloc 失败，尝试从更大的自由链表中回收空间
+                size_t __i;
+                _Obj* __STL_VOLATILE* __my_free_list;
+                _Obj* __p;
+                for (__i = __size;
+                     __i <= (size_t) _MAX_BYTES;
+                     __i += (size_t) _ALIGN) {
+                    __my_free_list = _S_free_list + _S_freelist_index(__i);
+                    __p = *__my_free_list;
+                    if (0 != __p) {
+                        *__my_free_list = __p -> _M_free_list_link;
+                        _S_start_free = (char*)__p;
+                        _S_end_free = _S_start_free + __i;
+                        return(_S_chunk_alloc(__size, __nobjs));
+                    }
+                }
+                // 所有自由链表都没有可用空间，最后的希望：第一级分配器的 OOM 机制
+                _S_end_free = 0;
+                _S_start_free = (char*)malloc_alloc::allocate(__bytes_to_get);
+            }
+            _S_heap_size += __bytes_to_get;
+            _S_end_free = _S_start_free + __bytes_to_get;
+            return(_S_chunk_alloc(__size, __nobjs));  // 递归调用，此时内存池已充足
+        }
+    }
+
+三种情况的处理逻辑：
+
+.. list-table::
+    :header-rows: 1
+    :widths: 10 30 60
+
+    * - 情况
+      - 条件
+      - 处理
+    * - 1
+      - 内存池剩余 ≥ 需求总量
+      - 直接从内存池切割，返回
+    * - 2
+      - 内存池剩余 ≥ 1 个块但 < 需求总量
+      - 尽可能多地切割（减少 ``__nobjs`` ），返回
+    * - 3
+      - 内存池剩余 < 1 个块
+      - 残余编入自由链表 → malloc 新空间 → 失败则从更大链表回收 → 仍失败则调用第一级分配器的 OOM 机制
+
+情况 3 中新申请的大小为 ``2 * __total_bytes + _S_round_up(_S_heap_size >> 4)`` ，即需求量的 2 倍再加上一个随累计分配量增长的附加量。这种策略使得内存池越用越大，后续分配越来越少地调用 malloc。
+
+情况 3 中 malloc 失败时的回收策略值得注意：它只向更大的自由链表寻找空间（ ``for (__i = __size; __i <= _MAX_BYTES; ...)`` ），不向更小的链表寻找。源码注释解释了原因：在多进程环境下，拆分小块内存容易引发问题。
+
+simple_alloc 接口包装
+--------------------------
+
+simple_alloc 是一个薄包装层，将底层分配器的"字节数"接口转换为"元素个数"接口：
+
+.. code-block:: cpp
+
+    template<class _Tp, class _Alloc>
+    class simple_alloc {
+    public:
+        static _Tp* allocate(size_t __n)
+          { return 0 == __n ? 0 : (_Tp*) _Alloc::allocate(__n * sizeof (_Tp)); }
+        static _Tp* allocate(void)
+          { return (_Tp*) _Alloc::allocate(sizeof (_Tp)); }
+        static void deallocate(_Tp* __p, size_t __n)
+          { if (0 != __n) _Alloc::deallocate(__p, __n * sizeof (_Tp)); }
+        static void deallocate(_Tp* __p)
+          { _Alloc::deallocate(__p, sizeof (_Tp)); }
+    };
+
+simple_alloc 的所有成员都是 static 的，不需要实例化对象，这使得容器不需要为分配器存储额外的成员变量。但容器并不直接使用 simple_alloc，而是通过 ``_Alloc_traits`` 来间接使用它。
+
+_Alloc_traits 分配器萃取
+--------------------------
+
+容器实际上通过 ``_Alloc_traits`` 来使用分配器。_Alloc_traits 是连接容器与底层分配器的关键适配层，它解决了两个问题：
+
+1. **兼容两套分配器接口** ：让容器既能使用 SGI 风格的分配器（如 alloc、malloc_alloc），也能使用 C++ 标准的 allocator
+2. **优化无状态分配器** ：如果分配器没有实例状态（所有实例等价），容器就不需要浪费一个成员变量来存储分配器对象
+
+通用版本（假设是标准 allocator，可能有实例状态）：
+
+.. code-block:: cpp
+
+    template <class _Tp, class _Allocator>
+    struct _Alloc_traits
+    {
+      static const bool _S_instanceless = false;
+      typedef typename _Allocator::template rebind<_Tp>::other allocator_type;
+    };
+
+针对默认 ``allocator<_Tp1>`` 的偏特化（无状态，可以走 static 接口）：
+
+.. code-block:: cpp
+
+    template <class _Tp, class _Tp1>
+    struct _Alloc_traits<_Tp, allocator<_Tp1> >
+    {
+      static const bool _S_instanceless = true;
+      typedef simple_alloc<_Tp, alloc> _Alloc_type;   // static 接口
+      typedef allocator<_Tp> allocator_type;           // 标准接口
+    };
+
+针对 SGI 风格分配器的偏特化：
+
+.. code-block:: cpp
+
+    template <class _Tp, bool __threads, int __inst>
+    struct _Alloc_traits<_Tp, __default_alloc_template<__threads, __inst> >
+    {
+      static const bool _S_instanceless = true;
+      typedef simple_alloc<_Tp, __default_alloc_template<__threads, __inst> >
+              _Alloc_type;
+      typedef __allocator<_Tp, __default_alloc_template<__threads, __inst> >
+              allocator_type;
+    };
+
+关键成员：
+
+* ``_S_instanceless`` ：是否无状态。为 true 时容器可以不存储分配器对象，直接通过 ``_Alloc_type`` 的 static 函数分配
+* ``_Alloc_type`` ：仅当 ``_S_instanceless == true`` 时存在，是 ``simple_alloc<_Tp, 底层分配器>`` 的 typedef，提供 static 的 allocate/deallocate
+* ``allocator_type`` ：符合标准的分配器类型，用于 ``get_allocator()`` 返回值等场景
+
+容器如何使用 _Alloc_traits
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+以 vector 为例，容器通过 ``_Alloc_traits::_S_instanceless`` 在编译期选择不同的基类：
+
+.. code-block:: cpp
+
+    // vector 的基类，根据 _S_instanceless 选择不同的特化
+    template <class _Tp, class _Alloc>
+    struct _Vector_base
+      : public _Vector_alloc_base<_Tp, _Alloc,
+                                  _Alloc_traits<_Tp, _Alloc>::_S_instanceless>
+    { ... };
+
+当 ``_S_instanceless == true`` （默认情况）时，使用无状态的特化版本：
+
+.. code-block:: cpp
+
+    // 无状态分配器特化：不存储分配器对象，直接用 static 接口
+    template <class _Tp, class _Allocator>
+    class _Vector_alloc_base<_Tp, _Allocator, true> {
+    public:
+      typedef typename _Alloc_traits<_Tp, _Allocator>::allocator_type
+              allocator_type;
+      allocator_type get_allocator() const { return allocator_type(); }
+
+    protected:
+      _Tp* _M_start;
+      _Tp* _M_finish;
+      _Tp* _M_end_of_storage;
+      // 注意：没有 _M_data_allocator 成员！节省了一个指针的空间
+
+      typedef typename _Alloc_traits<_Tp, _Allocator>::_Alloc_type _Alloc_type;
+      _Tp* _M_allocate(size_t __n)
+        { return _Alloc_type::allocate(__n); }          // 调用 simple_alloc::allocate
+      void _M_deallocate(_Tp* __p, size_t __n)
+        { _Alloc_type::deallocate(__p, __n); }          // 调用 simple_alloc::deallocate
+    };
+
+当 ``_S_instanceless == false`` （自定义有状态分配器）时，使用通用版本：
+
+.. code-block:: cpp
+
+    // 有状态分配器：需要存储分配器对象
+    template <class _Tp, class _Allocator, bool _IsStatic>
+    class _Vector_alloc_base {
+    public:
+      typedef typename _Alloc_traits<_Tp, _Allocator>::allocator_type
+              allocator_type;
+
+    protected:
+      allocator_type _M_data_allocator;     // 存储分配器实例
+      _Tp* _M_start;
+      _Tp* _M_finish;
+      _Tp* _M_end_of_storage;
+
+      _Tp* _M_allocate(size_t __n)
+        { return _M_data_allocator.allocate(__n); }     // 通过实例调用
+      void _M_deallocate(_Tp* __p, size_t __n)
+        { if (__p) _M_data_allocator.deallocate(__p, __n); }
+    };
+
+list 容器也使用完全相同的模式：
+
+.. code-block:: cpp
+
+    // list 的基类
+    template <class _Tp, class _Alloc>
+    class _List_base
+      : public _List_alloc_base<_Tp, _Alloc,
+                                _Alloc_traits<_Tp, _Alloc>::_S_instanceless>
+    { ... };
+
+    // 无状态特化中，list 通过 _Alloc_type 分配节点
+    typedef typename _Alloc_traits<_List_node<_Tp>, _Allocator>::_Alloc_type
+            _Alloc_type;
+    _List_node<_Tp>* _M_get_node() { return _Alloc_type::allocate(1); }
+    void _M_put_node(_List_node<_Tp>* __p) { _Alloc_type::deallocate(__p, 1); }
+
+注意 list 使用 ``_Alloc_traits<_List_node<_Tp>, _Allocator>`` 而非 ``_Alloc_traits<_Tp, _Allocator>`` ——因为 list 分配的是节点（包含前后指针 + 数据），不是裸数据。这正是 rebind 机制的用途：用户传入 ``allocator<int>`` ，容器内部通过 rebind 得到 ``allocator<_List_node<int>>`` 。
+
+标准 allocator 接口
+--------------------------
+
+``allocator<_Tp>`` 是符合 C++ 标准的分配器接口，内部委托给 ``alloc`` （即第二级分配器）：
+
+.. code-block:: cpp
+
+    template <class _Tp>
+    class allocator {
+      typedef alloc _Alloc;          // 底层使用 alloc（第二级分配器）
+    public:
+      typedef size_t     size_type;
+      typedef ptrdiff_t  difference_type;
+      typedef _Tp*       pointer;
+      typedef const _Tp* const_pointer;
+      typedef _Tp&       reference;
+      typedef const _Tp& const_reference;
+      typedef _Tp        value_type;
+
+      template <class _Tp1> struct rebind {
+        typedef allocator<_Tp1> other;
+      };
+
+      _Tp* allocate(size_type __n, const void* = 0) {
+        return __n != 0 ? static_cast<_Tp*>(_Alloc::allocate(__n * sizeof(_Tp)))
+                        : 0;
+      }
+
+      void deallocate(pointer __p, size_type __n)
+        { _Alloc::deallocate(__p, __n * sizeof(_Tp)); }
+
+      size_type max_size() const __STL_NOTHROW
+        { return size_t(-1) / sizeof(_Tp); }
+
+      void construct(pointer __p, const _Tp& __val) { new(__p) _Tp(__val); }
+      void destroy(pointer __p) { __p->~_Tp(); }
+    };
+
+注意 construct 和 destroy 的实现：
+
+* ``construct`` ：使用 placement new 在已分配的内存上调用拷贝构造函数
+* ``destroy`` ：显式调用析构函数（不释放内存）
+
+这体现了 SGI STL 的核心设计思想：**内存分配与对象构造分离** 。allocate/deallocate 负责内存，construct/destroy 负责对象生命周期。
+
+debug_alloc 调试分配器
+--------------------------
+
+debug_alloc 是一个分配器适配器，在每次分配时额外分配 8 字节的头部空间来记录分配大小，释放时用 assert 校验：
+
+.. code-block:: cpp
+
+    template <class _Alloc>
+    class debug_alloc {
+    private:
+      enum {_S_extra = 8};
+
+    public:
+      static void* allocate(size_t __n)
+      {
+        char* __result = (char*)_Alloc::allocate(__n + (int) _S_extra);
+        *(size_t*)__result = __n;               // 头部记录请求大小
+        return __result + (int) _S_extra;       // 返回头部之后的地址
+      }
+
+      static void deallocate(void* __p, size_t __n)
+      {
+        char* __real_p = (char*)__p - (int) _S_extra;
+        assert(*(size_t*)__real_p == __n);       // 校验大小是否匹配
+        _Alloc::deallocate(__real_p, __n + (int) _S_extra);
+      }
+    };
+
+内存布局：
+
+.. code-block:: text
+
+    +----------+---------------------------+
+    | 8 bytes  |       n bytes             |
+    |  size_t  |    用户数据区              |
+    +----------+---------------------------+
+    ↑ __real_p  ↑ 返回给用户的指针 __p
+
+如果释放时传入的大小与分配时记录的不一致，assert 会触发，帮助定位内存管理 bug。
+
+整体架构总结
+--------------
+
+.. code-block:: text
+
+    +-----------------------------------------------------------+
+    |              容器 (vector, list, deque, ...)               |
+    |   typedef typename                                        |
+    |     _Alloc_traits<_Tp, _Alloc>::allocator_type             |
+    |     allocator_type;                                       |
+    +-----------------------------------------------------------+
+                            |
+                            v
+    +-----------------------------------------------------------+
+    |   _Alloc_traits<_Tp, _Allocator>  (分配器萃取)             |
+    |                                                           |
+    |   _S_instanceless == true:                                |
+    |     _Alloc_type = simple_alloc<_Tp, 底层分配器>             |
+    |     → 通过 static 接口分配，容器不存储分配器对象             |
+    |                                                           |
+    |   _S_instanceless == false:                               |
+    |     allocator_type = rebind 后的标准 allocator              |
+    |     → 通过实例调用，容器存储分配器对象                       |
+    +-----------------------------------------------------------+
+                            |
+                            v
+    +-----------------------------------------------------------+
+    |              simple_alloc<_Tp, alloc>                      |
+    |          元素个数 × sizeof(_Tp) → 字节数                    |
+    +-----------------------------------------------------------+
+                            |
+                            v
+    +-----------------------------------------------------------+
+    |                  alloc (第二级分配器)                       |
+    |          __default_alloc_template<threads, 0>              |
+    |                                                           |
+    |   ≤ 128 bytes:                  > 128 bytes:              |
+    |   16 条自由链表 + 内存池          转交第一级分配器           |
+    +----------------------------+--------------------------+
+                                 |
+                                 v
+    +-----------------------------------------------------------+
+    |                第一级分配器 (malloc_alloc)                  |
+    |          __malloc_alloc_template<0>                        |
+    |          malloc / free / realloc + OOM handler             |
+    +-----------------------------------------------------------+
+                            |
+                            v
+    +-----------------------------------------------------------+
+    |                  操作系统 (malloc/free)                     |
+    +-----------------------------------------------------------+

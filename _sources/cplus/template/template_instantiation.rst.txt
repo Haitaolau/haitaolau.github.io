@@ -1,0 +1,72 @@
+==========================
+模板实例化
+==========================
+
+.. contents:: Table of Contents
+
+概述
+--------------
+
+编译的时候，编译器会对函数模板进行实例化，用具体的"类型"代替"类型模板参数"的过程就叫作实例化（也称为代码生成器）。
+
+* **隐式实例化** ：编译器根据调用时的实参类型自动推导并实例化。
+* **显式实例化** ：程序员通过 ``template`` 声明主动要求编译器为特定类型生成实例。
+
+示例
+--------------
+
+.. code-block:: cpp
+
+    #include <iostream>
+    using namespace std;
+
+    template <typename T>
+    T Sub(T tv1, T tv2) { return tv1 - tv2; }
+
+    int main(int argc, char* argv[]){
+        int subv = Sub(3, 5);           // 隐式实例化 Sub<int>
+        cout << "subv = " << subv << endl;
+        double subv2 = Sub(4.7, 2.1);   // 隐式实例化 Sub<double>
+        cout << "subv2 = " << subv2 << endl;
+        return 0;
+    }
+
+针对 int 和 double 两种类型，每种类型都会被实例化一次，所以 Sub() 函数模板一共会被实例化两次，相当于产生了两个 Sub() 函数。
+
+通过 objdump 可以验证生成了两个函数符号：
+
+.. code-block:: console
+
+    $ objdump -t template1 | grep Sub
+    000000000000132b  w    F .text  _Z3SubIdET_S0_S0_
+    0000000000001315  w    F .text  _Z3SubIiET_S0_S0_
+
+实例化之后的函数等价于：
+
+.. code-block:: cpp
+
+    template<>
+    int Sub<int>(int tv1, int tv2)
+    {
+        return tv1 - tv2;
+    }
+
+    template<>
+    double Sub<double>(double tv1, double tv2)
+    {
+        return tv1 - tv2;
+    }
+
+显式实例化
+--------------
+
+可以通过显式实例化声明，强制编译器为指定类型生成模板实例，避免在多个编译单元中重复实例化：
+
+.. code-block:: cpp
+
+    // 显式实例化声明（通常放在 .cpp 文件中）
+    template int Sub<int>(int, int);
+    template double Sub<double>(double, double);
+
+    // 显式实例化抑制（C++11，通常放在头文件中）
+    extern template int Sub<int>(int, int);

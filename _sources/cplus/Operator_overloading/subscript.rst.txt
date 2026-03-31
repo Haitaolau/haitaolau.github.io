@@ -1,0 +1,87 @@
+==================================
+重载下标运算符（[]）
+==================================
+
+.. contents:: Table of Contents
+
+概述
+--------------
+
+在程序设计中，通常使用下标运算符 ``[]`` 访问数组或容器中的元素。为了在类中方便地使用 ``[]`` 运算符，可以在类中重载运算符 ``[]`` 。
+
+重载 ``[]`` 运算符有两个目的：
+
+* ``对象[下标]`` 的形式类似于 ``数组[下标]`` ，更加符合用户的编写习惯。
+* 可以对下标进行越界检查。
+
+.. code-block:: cpp
+
+    返回值类型 operator[](参数列表)
+    {
+        // 函数体
+    }
+
+上述格式中， ``[]`` 运算符重载函数有且只有一个整型参数，表示下标值。重载下标运算符时一般把返回值指定为一个引用。
+
+示例
+--------------
+
+.. code-block:: cpp
+
+    #include<iostream>
+    using namespace std;
+    class Tag
+    {
+    private:
+        int size;
+        char* buf;
+    public:
+        Tag(int n);
+        Tag(const char* src);
+        ~Tag()
+        {
+            delete[]buf;
+        }
+        char& operator[](int n);
+        void show()
+        {
+            for(int i=0;i<size;i++)
+                cout<<buf[i];
+            cout<<endl;
+        }
+    };
+    Tag::Tag(int n)
+    {
+        size=n;
+        buf=new char[size+1];
+        *(buf+size)='\0';
+    }
+    Tag::Tag(const char* src)
+    {
+        buf = new char[strlen(src)+1];
+        strcpy(buf,src);
+        size=strlen(buf);
+    }
+    char& Tag::operator[](int n)
+    {
+        static char ch=0;
+        if(n>size||n<0)     // 检查数组是否越界
+        {
+            cout<<"越界"<<endl;
+            return ch;
+        }
+        else
+            return *(buf+n);
+    }
+    int main()
+    {
+        Tag arr1(20);
+        for(int i=0;i<20;i++)
+            arr1[i]=65+i;       // 调用 [] 运算符重载函数赋值
+        arr1.show();
+        Tag arr2("Itcast!");
+        cout<<arr2[6]<<endl;
+        arr2[6]='A';
+        arr2.show();
+        return 0;
+    }

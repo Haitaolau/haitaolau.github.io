@@ -1,0 +1,203 @@
+==========================
+私有析构函数
+==========================
+
+.. contents:: Table of Contents
+
+概述
+--------------
+
+在C++中，析构函数可以声明为 private。将析构函数私有化后，编译器无法在栈上自动调用析构函数销毁对象，因此对象只能通过 new 在堆上创建，并且必须通过类自身提供的成员函数来销毁。
+
+私有析构函数的限制
+--------------------
+
+* 不能在栈上创建对象，因为栈对象在离开作用域时编译器需要自动调用析构函数，而私有析构函数不可访问。
+* 不能直接使用 delete 销毁对象，因为 delete 会调用析构函数，而外部无法访问私有析构函数。
+* 只能通过类的 public 成员函数或友元函数来销毁对象。
+
+示例1：私有析构函数禁止栈上创建对象
+======================================
+
+.. code-block:: cpp
+
+    #include <iostream>
+    using namespace std;
+
+    class HeapOnly {
+    public:
+        HeapOnly() { cout << "HeapOnly()" << endl; }
+        void destroy() { delete this; }
+    private:
+        ~HeapOnly() { cout << "~HeapOnly()" << endl; }
+    };
+
+    int main() {
+        // HeapOnly obj;  // 编译错误：析构函数是私有的，不能在栈上创建对象
+
+        HeapOnly* p = new HeapOnly();  // 只能在堆上创建
+        p->destroy();                  // 通过成员函数销毁对象
+    }
+
+运行结果::
+
+    HeapOnly()
+    ~HeapOnly()
+
+如果取消注释 ``HeapOnly obj;``，编译器会报错，因为栈对象离开作用域时需要调用析构函数，而析构函数是私有的，外部不可访问。通过提供 public 的 destroy() 成员函数，在类内部调用 delete this 来销毁对象，间接调用私有析构函数。
+
+示例2：私有析构函数实现单例模式
+==================================
+
+私有析构函数的一个典型应用是单例模式，防止外部随意销毁唯一的实例。
+
+.. code-block:: cpp
+
+    #include <iostream>
+    using namespace std;
+
+    class Singleton {
+    public:
+        static Singleton& getInstance() {
+            static Singleton instance;
+            return instance;
+        }
+        void show() { cout << "Singleton::show()" << endl; }
+    private:
+        Singleton() { cout << "Singleton()" << endl; }
+        ~Singleton() { cout << "~Singleton()" << endl; }
+        Singleton(const Singleton&) = delete;
+        Singleton& operator=(const Singleton&) = delete;
+    };
+
+    int main() {
+        Singleton& s = Singleton::getInstance();
+        s.show();
+        // delete &s;  // 编译错误：析构函数是私有的
+    }
+
+运行结果::
+
+    Singleton()
+    Singleton::show()
+    ~Singleton()
+
+单例对象通过静态局部变量创建，程序结束时由编译器自动销毁（静态局部变量的析构在类作用域内可访问）。外部无法通过 delete 销毁单例对象，保证了实例的唯一性和生命周期的可控性。
+
+示例3：受控销毁（工厂模式）
+==============================
+
+通过静态工厂方法创建对象，通过 destroy() 成员函数销毁对象，外部既不能在栈上创建，也不能直接 delete。
+
+.. code-block:: cpp
+
+    #include <iostream>
+    using namespace std;
+
+    class ControlledDestroy {
+    private:
+        ~ControlledDestroy() { cout << "~ControlledDestroy()" << endl; }
+    public:
+        static ControlledDestroy* create() {
+            return new ControlledDestroy();
+        }
+        void destroy() {
+            delete this;
+        }
+    };
+
+    int main() {
+        // ControlledDestroy obj;        // 错误：栈对象无法销毁
+        auto* ptr = ControlledDestroy::create();
+        // delete ptr;                   // 错误：析构函数私有
+        ptr->destroy();                  // 正确：受控销毁
+    }
+
+运行结果::
+
+    ~ControlledDestroy()
+
+构造函数是 public 的但析构函数是 private 的，配合静态工厂方法 create()，将对象的创建和销毁都纳入类的控制之下。外部只能通过 create() 创建、destroy() 销毁，无法绕过。
+
+示例4：引用计数
+====================
+
+私有析构函数的另一个经典应用是引用计数，对象在最后一个引用释放时自动销毁。
+
+.. code-block:: cpp
+
+    #include <iostream>
+    using namespace std;
+
+    class RefCounted {
+    private:
+        int refCount = 1;
+        ~RefCounted() { cout << "~RefCounted()" << endl; }
+    public:
+        void addRef() {
+            ++refCount;
+            cout << "addRef: refCount=" << refCount << endl;
+        }
+        void release() {
+            --refCount;
+            cout << "release: refCount=" << refCount << endl;
+            if (refCount == 0) delete this;
+        }
+    };
+
+    int main() {
+        RefCounted* p1 = new RefCounted();  // refCount=1
+        p1->addRef();                       // refCount=2
+        p1->release();                      // refCount=1
+        p1->release();                      // refCount=0，自动销毁
+    }
+
+运行结果::
+
+    addRef: refCount=2
+    release: refCount=1
+    release: refCount=0
+    ~RefCounted()
+
+外部无法直接 delete 对象，只能通过 addRef() 增加引用、release() 减少引用。当引用计数降为0时，对象在 release() 内部自动 delete this 销毁自身。这是 COM 组件、智能指针等技术的基础原理。
+
+示例5：通过友元函数销毁对象
+==============================
+
+除了通过成员函数销毁对象外，也可以通过友元函数访问私有析构函数。
+
+.. code-block:: cpp
+
+    #include <iostream>
+    using namespace std;
+
+    class Guarded {
+        friend void release(Guarded* p);
+    public:
+        Guarded() { cout << "Guarded()" << endl; }
+    private:
+        ~Guarded() { cout << "~Guarded()" << endl; }
+    };
+
+    void release(Guarded* p) {
+        delete p;  // 友元函数可以访问私有析构函数
+    }
+
+    int main() {
+        Guarded* p = new Guarded();
+        release(p);
+    }
+
+运行结果::
+
+    Guarded()
+    ~Guarded()
+
+友元函数 release() 可以访问 Guarded 的私有析构函数，因此可以通过 delete 销毁对象。这种方式将对象的销毁权限授予了特定的函数，进一步控制了对象的生命周期。
+
+总结
+--------------
+
+* 私有析构函数可以强制对象只能在堆上创建，防止栈上创建对象。
+* 对象的销毁必须通过类的 public 成员函数、静态成员函数或友元函数来完成。
+* 私有析构函数常用于单例模式、工厂模式、引用计数等需要严格控制对象生命周期的场景。

@@ -1,0 +1,221 @@
+====================
+友元（Friend）
+====================
+
+.. contents:: Table of Contents
+
+友元函数
+====================
+
+1. 全局函数作为友元函数
+--------------------------
+
+友元函数可以是类外定义的函数或者是其他类中的成员函数，若在类中声明某一函数为友元函数，则该函数可以操作类中的所有数据。将普通函数作为类的友元函数，在类中使用 friend 关键字声明该普通函数就可以实现，友元函数可以在类中任意位置声明。
+
+.. code-block:: cpp
+
+    class 类名
+    {
+        friend 函数返回值类型 友元函数名(形参列表);
+        // ...其他成员
+    };
+
+类的友元函数是定义在类外部，但有权访问类的所有私有（private）成员和保护（protected）成员。
+
+.. code-block:: cpp
+
+    #include<iostream>
+    using namespace std;
+    class Circle
+    {
+        friend void getArea(Circle &circle);
+    private:
+        float _radius;
+        const float PI=3.14;
+    public:
+        Circle(float radius);
+        ~Circle();
+    };
+    Circle::Circle(float radius=0):_radius(radius)
+    {
+        cout<<"初始化圆的半径为："<<_radius<<endl;
+    }
+    Circle::~Circle(){}
+    void getArea(Circle &circle)
+    {
+        cout<<"圆的半径是："<<circle._radius<<endl;
+        cout<<"圆的面积是"<<circle.PI*circle._radius*circle._radius<<endl;
+        cout<<"友元函数修改半径:"<<endl;
+        circle._radius=1;
+        cout<<"圆的半径是："<<circle._radius<<endl;
+    }
+    int main()
+    {
+        Circle circle(10);
+        getArea(circle);
+        return 0;
+    }
+
+另一个示例：
+
+.. code-block:: cpp
+
+    #include <iostream>
+    using namespace std;
+
+    class ClassName {
+    private:
+        int privateData;
+    protected:
+        int protectedData;
+    public:
+        ClassName() : privateData(0), protectedData(0) {}
+        friend void friendFunction(ClassName& obj);
+    };
+
+    void friendFunction(ClassName& obj) {
+        obj.privateData = 42;
+        obj.protectedData = 24;
+        cout << "Private Data: " << obj.privateData << endl;
+        cout << "Protected Data: " << obj.protectedData << endl;
+    }
+
+    int main() {
+        ClassName obj;
+        friendFunction(obj);
+        return 0;
+    }
+
+2. 其他类的成员函数作为友元函数
+---------------------------------
+
+.. code-block:: cpp
+
+    class B;
+    class A
+    {
+    public:
+        int func();
+    };
+    class B
+    {
+        friend int A::func();   // 声明类A的成员函数func()为友元函数
+    };
+
+.. code-block:: cpp
+
+    #include<iostream>
+    #include<math.h>
+    using namespace std;
+    class Point;
+    class Circle
+    {
+    public:
+        float getArea(Point &p1,Point &p2);
+    private:
+        const float PI=3.14;
+    };
+    class Point
+    {
+        friend float Circle::getArea(Point &p1,Point &p2);
+    public:
+        Point(float x,float y);
+        ~Point();
+    private:
+        float _x;
+        float _y;
+    };
+    Point::Point(float x=0,float y=0):_x(x),_y(y)
+    {
+        cout<<"初始化坐标点"<<endl;
+    }
+    Point::~Point(){}
+    float Circle::getArea(Point &p1,Point &p2)
+    {
+        double x=abs(p1._x-p2._x);
+        float y=abs(p1._y-p2._y);
+        float len=sqrtf(x*x+y*y);
+        cout<<"获取两个坐标点之间的距离是"<<len<<endl;
+        return len*len*PI;
+    }
+    int main()
+    {
+        Point p1(5,5);
+        Point p2(10,10);
+        Circle circle;
+        float area=circle.getArea(p1,p2);
+        cout<<"圆的面积是："<<area<<endl;
+        return 0;
+    }
+
+友元类
+====================
+
+还可以将一个类声明为友元类，友元类可以声明在类中任意位置。声明友元类之后，友元类中的所有成员函数都是该类的友元函数，能够访问该类的所有成员。
+
+.. code-block:: cpp
+
+    class B;
+    class A
+    {
+    };
+    class B
+    {
+        friend class A;   // 声明类A是类B的友元类
+    };
+
+.. code-block:: cpp
+
+    #include<iostream>
+    using namespace std;
+    class Time
+    {
+    public:
+        Time(int hour, int minute, int second);
+        friend class Date;
+    private:
+        int _hour, _minute, _second;
+    };
+    class Date
+    {
+    public:
+        Date(int year, int month, int day);
+        void showTime(Time& time);
+    private:
+        int _year, _month, _day;
+    };
+    Date::Date(int year, int month, int day)
+    {
+        _year = year;
+        _month = month;
+        _day = day;
+    }
+    void Date::showTime(Time& time)
+    {
+        cout << _year << "-" << _month << "-" << _day
+             << " " << time._hour << ":" << time._minute
+             << ":" << time._second << endl;
+    }
+    Time::Time(int hour,int minute,int second)
+    {
+        _hour = hour;
+        _minute = minute;
+        _second = second;
+    }
+    int main()
+    {
+        Time time(17,30,20);
+        Date date(2019,10,31);
+        date.showTime(time);
+        return 0;
+    }
+
+.. note::
+
+    ① 友元声明位置由程序设计者决定，且不受类中 public、private、protected 权限控制符的影响。
+
+    ② 友元关系是单向的，即类A是类B的友元，但B不是A的友元。
+
+    ③ 友元关系不具有传递性，即类C是类D的友元，类E是类C的友元，但类E不是类D的友元。
+
+    ④ 友元关系不能被继承。

@@ -1,0 +1,116 @@
+==================================
+多继承的二义性
+==================================
+
+.. contents:: Table of Contents
+
+同名成员冲突
+====================
+
+产生原因
+-----------
+
+When two or more base classes define a member with the same name, and the derived class does not override this member, attempting to access it through a derived class object will be ambiguous.
+
+在多继承中，如果多个基类中出现同名成员函数，通过派生类对象访问基类中的同名成员函数时就会出现二义性。
+
+.. code-block:: cpp
+
+    class Base1 {
+    public:
+        void func() { /* ... */ }
+    };
+
+    class Base2 {
+    public:
+        void func() { /* ... */ }
+    };
+
+    class Derived : public Base1, public Base2 {};
+
+    int main() {
+        Derived obj;
+        // obj.func(); // 二义性调用
+        return 0;
+    }
+
+.. code-block:: console
+
+    error: request for member 'func' is ambiguous
+    note: candidates are: 'void Base2::func()'
+    note:                 'void Base1::func()'
+
+.. image:: ../_static/image/mutiple_inheritance_duplicate_name.png
+
+解决方法
+-----------
+
+使用作用域限定符 ``::`` 明确指定调用哪个基类的成员：
+
+.. code-block:: cpp
+
+    int main() {
+        Derived obj;
+        obj.Base1::func();  // 调用 Base1 的 func
+        obj.Base2::func();  // 调用 Base2 的 func
+        return 0;
+    }
+
+菱形继承问题（Diamond Problem）
+================================
+
+产生原因
+-----------
+
+This occurs when a class inherits from two classes that both inherit from a common base class. The derived class ends up with two copies of the common base class's members, leading to ambiguity if those members are accessed without qualification.
+
+在多继承中，派生类有多个基类，这些基类可能由同一个基类派生。例如，派生类 Derived 继承自 BaseA 类和 BaseB 类，而 BaseA 类和 BaseB 类又继承自 GrandBase 类。在这种继承方式中，间接基类的成员变量在底层的派生类中会存在多份拷贝，通过底层派生类对象访问间接基类的成员变量时，会出现访问二义性。
+
+.. code-block:: cpp
+
+    class GrandBase {
+    public:
+        void commonFunc() { /* ... */ }
+    };
+
+    class BaseA : public GrandBase {};
+    class BaseB : public GrandBase {};
+
+    class Derived : public BaseA, public BaseB {};
+
+    int main() {
+        Derived obj;
+        // obj.commonFunc(); // 二义性调用：存在两份 GrandBase
+        return 0;
+    }
+
+.. code-block:: console
+
+    error: request for member 'commonFunc' is ambiguous
+    note: candidates are: 'void GrandBase::commonFunc()'
+    note:                 'void GrandBase::commonFunc()'
+
+.. image:: ../_static/image/mutiple_inheritance_diamond_problem.png
+
+解决方法
+-----------
+
+使用虚继承（virtual inheritance）确保公共基类在派生类层次中只有一个实例，从而消除二义性：
+
+.. code-block:: cpp
+
+    class GrandBase {
+    public:
+        void commonFunc() { /* ... */ }
+    };
+
+    class BaseA : virtual public GrandBase {};  // 虚继承
+    class BaseB : virtual public GrandBase {};  // 虚继承
+
+    class Derived : public BaseA, public BaseB {};
+
+    int main() {
+        Derived obj;
+        obj.commonFunc();  // 无二义性，只有一个 GrandBase 实例
+        return 0;
+    }

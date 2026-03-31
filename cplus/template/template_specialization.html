@@ -1,0 +1,605 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>模板特化（全特化与偏特化） &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="模板参数推导" href="template_parameter_deduction.html" />
+    <link rel="prev" title="模板实例化" href="template_instantiation.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="id1">
+<h1><a class="toc-backref" href="#id14" role="doc-backlink">模板特化（全特化与偏特化）</a><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h1>
+<nav class="contents" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#id1" id="id14">模板特化（全特化与偏特化）</a></p>
+<ul>
+<li><p><a class="reference internal" href="#id2" id="id15">概述</a></p></li>
+<li><p><a class="reference internal" href="#id3" id="id16">全特化的定义格式</a></p></li>
+<li><p><a class="reference internal" href="#id4" id="id17">问题引入</a></p>
+<ul>
+<li><p><a class="reference internal" href="#id5" id="id18">使用全特化解决</a></p></li>
+<li><p><a class="reference internal" href="#id6" id="id19">类模板的特化</a></p>
+<ul>
+<li><p><a class="reference internal" href="#id7" id="id20">全特化</a></p></li>
+<li><p><a class="reference internal" href="#id8" id="id21">偏特化（部分特化）</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id9" id="id22">全特化与函数模板重载的区别</a></p>
+<ul>
+<li><p><a class="reference internal" href="#id10" id="id23">对比</a></p></li>
+<li><p><a class="reference internal" href="#id11" id="id24">示例对比</a></p></li>
+<li><p><a class="reference internal" href="#id12" id="id25">重载决议的陷阱</a></p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id13" id="id26">总结</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<section id="id2">
+<h2><a class="toc-backref" href="#id15" role="doc-backlink">概述</a><a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<p>函数模板为所有类型提供了统一的处理逻辑，但有时某些特定类型需要不同的实现。C++ 提供了模板特化（Template Specialization）机制，允许程序员为特定类型重新定义模板的实现。模板特化分为两种：</p>
+<ul class="simple">
+<li><p><strong>全特化（Full Specialization / Explicit Specialization）</strong> ：为所有模板参数指定具体类型。</p></li>
+<li><p><strong>偏特化（Partial Specialization，也称局部特化、部分特化）</strong> ：只特化部分模板参数，或对参数施加某种约束（如指针、引用）。注意：函数模板不支持偏特化，只有类模板支持。</p></li>
+</ul>
+<p>当编译器遇到函数调用时，匹配优先级为：</p>
+<ol class="arabic simple">
+<li><p>普通函数（完全匹配时）</p></li>
+<li><p>全特化的函数模板</p></li>
+<li><p>通用函数模板</p></li>
+</ol>
+</section>
+<section id="id3">
+<h2><a class="toc-backref" href="#id16" role="doc-backlink">全特化的定义格式</a><a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>template&lt;&gt;
+返回值类型 函数名&lt;实例化类型&gt;(参数列表)
+{
+    // 函数体重新定义
+}
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">template&lt;&gt;</span></code> 表示这是一个全特化，尖括号内为空。</p></li>
+<li><p>函数名后的 <code class="docutils literal notranslate"><span class="pre">&lt;实例化类型&gt;</span></code> 指定要特化的具体类型。</p></li>
+<li><p>参数列表中的类型与实例化类型一致。</p></li>
+</ul>
+</section>
+<section id="id4">
+<h2><a class="toc-backref" href="#id17" role="doc-backlink">问题引入</a><a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h2>
+<p>假设有一个通用的比较函数模板：</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;cstring&gt;</span><span class="cp"></span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">std</span><span class="p">;</span><span class="w"></span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"></span>
+<span class="kt">bool</span><span class="w"> </span><span class="n">isEqual</span><span class="p">(</span><span class="n">T</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">b</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="kt">int</span><span class="w"> </span><span class="n">main</span><span class="p">()</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">isEqual</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w">              </span><span class="c1">// 1（正确）</span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">isEqual</span><span class="p">(</span><span class="mf">1.5</span><span class="p">,</span><span class="w"> </span><span class="mf">1.5</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w">          </span><span class="c1">// 1（正确）</span>
+
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">s1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;hello&quot;</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">s2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;hello&quot;</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">isEqual</span><span class="p">(</span><span class="n">s1</span><span class="p">,</span><span class="w"> </span><span class="n">s2</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w">            </span><span class="c1">// 结果不确定！</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>对于 <code class="docutils literal notranslate"><span class="pre">const</span> <span class="pre">char*</span></code> 类型，<code class="docutils literal notranslate"><span class="pre">==</span></code> 比较的是指针地址而非字符串内容，结果取决于编译器是否合并相同的字符串字面量，行为不可靠。</p>
+<section id="id5">
+<h3><a class="toc-backref" href="#id18" role="doc-backlink">使用全特化解决</a><a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h3>
+<p>为 <code class="docutils literal notranslate"><span class="pre">const</span> <span class="pre">char*</span></code> 类型提供专门的实现：</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;cstring&gt;</span><span class="cp"></span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">std</span><span class="p">;</span><span class="w"></span>
+
+<span class="c1">// 通用函数模板</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"></span>
+<span class="kt">bool</span><span class="w"> </span><span class="n">isEqual</span><span class="p">(</span><span class="n">T</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;通用模板&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">b</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="c1">// 全特化：针对 const char* 类型</span>
+<span class="k">template</span><span class="o">&lt;&gt;</span><span class="w"></span>
+<span class="kt">bool</span><span class="w"> </span><span class="n">isEqual</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*&gt;</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;全特化: const char*&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">strcmp</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="kt">int</span><span class="w"> </span><span class="n">main</span><span class="p">()</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">isEqual</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">s1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;hello&quot;</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">s2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;hello&quot;</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">isEqual</span><span class="p">(</span><span class="n">s1</span><span class="p">,</span><span class="w"> </span><span class="n">s2</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">arr1</span><span class="p">[]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;world&quot;</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">arr2</span><span class="p">[]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;world&quot;</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">isEqual</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">arr1</span><span class="p">,</span><span class="w"> </span><span class="n">arr2</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>输出：</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">通用模板</span>
+<span class="go">1</span>
+<span class="go">全特化: const char*</span>
+<span class="go">1</span>
+<span class="go">全特化: const char*</span>
+<span class="go">1</span>
+</pre></div>
+</div>
+<p>编译器在遇到 <code class="docutils literal notranslate"><span class="pre">const</span> <span class="pre">char*</span></code> 类型的调用时，优先匹配全特化版本，使用 <code class="docutils literal notranslate"><span class="pre">strcmp</span></code> 进行字符串内容比较。</p>
+</section>
+<section id="id6">
+<h3><a class="toc-backref" href="#id19" role="doc-backlink">类模板的特化</a><a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h3>
+<p>模板特化同样适用于类模板，且类模板同时支持全特化和偏特化。</p>
+<section id="id7">
+<h4><a class="toc-backref" href="#id20" role="doc-backlink">全特化</a><a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h4>
+<p>为某个具体类型提供完全不同的实现：</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">std</span><span class="p">;</span><span class="w"></span>
+
+<span class="c1">// 通用类模板</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"></span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Storage</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">T</span><span class="w"> </span><span class="n">value</span><span class="p">;</span><span class="w"></span>
+<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">Storage</span><span class="p">(</span><span class="n">T</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">value</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">print</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;通用: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+
+<span class="c1">// 全特化：针对 bool 类型</span>
+<span class="k">template</span><span class="o">&lt;&gt;</span><span class="w"></span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Storage</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">value</span><span class="p">;</span><span class="w"></span>
+<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">Storage</span><span class="p">(</span><span class="kt">bool</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">value</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">print</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;特化: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="p">(</span><span class="n">value</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s">&quot;true&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s">&quot;false&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">Storage</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">s1</span><span class="p">(</span><span class="mi">42</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">s1</span><span class="p">.</span><span class="n">print</span><span class="p">();</span><span class="w">             </span><span class="c1">// 通用: 42</span>
+
+<span class="w">    </span><span class="n">Storage</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span><span class="w"> </span><span class="n">s2</span><span class="p">(</span><span class="nb">true</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">s2</span><span class="p">.</span><span class="n">print</span><span class="p">();</span><span class="w">             </span><span class="c1">// 特化: true</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="id8">
+<h4><a class="toc-backref" href="#id21" role="doc-backlink">偏特化（部分特化）</a><a class="headerlink" href="#id8" title="Permalink to this heading">¶</a></h4>
+<p>类模板还支持偏特化，即只特化部分模板参数：</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">std</span><span class="p">;</span><span class="w"></span>
+
+<span class="c1">// 通用类模板</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T1</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">T2</span><span class="o">&gt;</span><span class="w"></span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Pair</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">print</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;通用 Pair&lt;T1, T2&gt;&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+
+<span class="c1">// 偏特化：第二个参数为 int</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T1</span><span class="o">&gt;</span><span class="w"></span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Pair</span><span class="o">&lt;</span><span class="n">T1</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">print</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;偏特化 Pair&lt;T1, int&gt;&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+
+<span class="c1">// 偏特化：两个参数为同一类型</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"></span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Pair</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">print</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;偏特化 Pair&lt;T, T&gt;&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+
+<span class="c1">// 偏特化：针对指针类型</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T1</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">T2</span><span class="o">&gt;</span><span class="w"></span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Pair</span><span class="o">&lt;</span><span class="n">T1</span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">T2</span><span class="o">*&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">print</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;偏特化 Pair&lt;T1*, T2*&gt;&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">Pair</span><span class="o">&lt;</span><span class="kt">double</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="o">&gt;</span><span class="w">  </span><span class="n">p1</span><span class="p">;</span><span class="w"> </span><span class="n">p1</span><span class="p">.</span><span class="n">print</span><span class="p">();</span><span class="w">   </span><span class="c1">// 通用 Pair&lt;T1, T2&gt;</span>
+<span class="w">    </span><span class="n">Pair</span><span class="o">&lt;</span><span class="kt">double</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="w">   </span><span class="n">p2</span><span class="p">;</span><span class="w"> </span><span class="n">p2</span><span class="p">.</span><span class="n">print</span><span class="p">();</span><span class="w">   </span><span class="c1">// 偏特化 Pair&lt;T1, int&gt;</span>
+<span class="w">    </span><span class="n">Pair</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="w">      </span><span class="n">p3</span><span class="p">;</span><span class="w"> </span><span class="n">p3</span><span class="p">.</span><span class="n">print</span><span class="p">();</span><span class="w">   </span><span class="c1">// 偏特化 Pair&lt;T, T&gt;</span>
+<span class="w">    </span><span class="n">Pair</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="o">*&gt;</span><span class="w">   </span><span class="n">p4</span><span class="p">;</span><span class="w"> </span><span class="n">p4</span><span class="p">.</span><span class="n">print</span><span class="p">();</span><span class="w">   </span><span class="c1">// 偏特化 Pair&lt;T1*, T2*&gt;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>函数模板不支持偏特化，只能通过函数重载来实现类似效果。</p>
+</div>
+</section>
+</section>
+<section id="id9">
+<h3><a class="toc-backref" href="#id22" role="doc-backlink">全特化与函数模板重载的区别</a><a class="headerlink" href="#id9" title="Permalink to this heading">¶</a></h3>
+<p>全特化和函数模板重载都可以为特定类型提供不同的实现，但它们的机制完全不同。</p>
+<section id="id10">
+<h4><a class="toc-backref" href="#id23" role="doc-backlink">对比</a><a class="headerlink" href="#id10" title="Permalink to this heading">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 40.0%" />
+<col style="width: 40.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"></th>
+<th class="head"><p>全特化</p></th>
+<th class="head"><p>函数模板重载</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>语法</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">template&lt;&gt;</span></code> 前缀，基于原模板</p></td>
+<td><p>定义新的模板，参数列表不同</p></td>
+</tr>
+<tr class="row-odd"><td><p>与原模板的关系</p></td>
+<td><p>是原模板的一个特殊版本，依赖于原模板存在</p></td>
+<td><p>是独立的模板，与原模板是并列关系</p></td>
+</tr>
+<tr class="row-even"><td><p>参数灵活性</p></td>
+<td><p>参数类型和数量必须与原模板一致</p></td>
+<td><p>可以改变参数数量和类型</p></td>
+</tr>
+<tr class="row-odd"><td><p>偏特化</p></td>
+<td><p>函数模板不支持偏特化</p></td>
+<td><p>可以通过重载实现类似偏特化的效果</p></td>
+</tr>
+<tr class="row-even"><td><p>重载决议</p></td>
+<td><p>在模板匹配后才检查是否有特化版本</p></td>
+<td><p>直接参与重载决议，与普通函数平等竞争</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id11">
+<h4><a class="toc-backref" href="#id24" role="doc-backlink">示例对比</a><a class="headerlink" href="#id11" title="Permalink to this heading">¶</a></h4>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;cstring&gt;</span><span class="cp"></span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">std</span><span class="p">;</span><span class="w"></span>
+
+<span class="c1">// ========== 通用模板 ==========</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"></span>
+<span class="kt">bool</span><span class="w"> </span><span class="n">isEqual</span><span class="p">(</span><span class="n">T</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;通用模板&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">b</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="c1">// ========== 方式1：全特化 ==========</span>
+<span class="c1">// 为 const char* 特化，参数形式必须与原模板一致</span>
+<span class="k">template</span><span class="o">&lt;&gt;</span><span class="w"></span>
+<span class="kt">bool</span><span class="w"> </span><span class="n">isEqual</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*&gt;</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;全特化&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">strcmp</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="c1">// ========== 方式2：函数模板重载 ==========</span>
+<span class="c1">// 定义了一个新的模板，参数为指针类型</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"></span>
+<span class="kt">bool</span><span class="w"> </span><span class="n">isEqual</span><span class="p">(</span><span class="n">T</span><span class="o">*</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="o">*</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;模板重载 (T*)&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">*</span><span class="n">a</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="o">*</span><span class="n">b</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="kt">int</span><span class="w"> </span><span class="n">main</span><span class="p">()</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// 1. 调用通用模板</span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">isEqual</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="c1">// 2. 调用全特化</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">s1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;hello&quot;</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">s2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;hello&quot;</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">isEqual</span><span class="p">(</span><span class="n">s1</span><span class="p">,</span><span class="w"> </span><span class="n">s2</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="c1">// 3. 调用模板重载 (T*)</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">isEqual</span><span class="p">(</span><span class="o">&amp;</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>输出：</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">通用模板</span>
+<span class="go">1</span>
+<span class="go">全特化</span>
+<span class="go">1</span>
+<span class="go">模板重载 (T*)</span>
+<span class="go">1</span>
+</pre></div>
+</div>
+</section>
+<section id="id12">
+<h4><a class="toc-backref" href="#id25" role="doc-backlink">重载决议的陷阱</a><a class="headerlink" href="#id12" title="Permalink to this heading">¶</a></h4>
+<p>全特化有一个容易踩坑的地方：它不参与重载决议的第一步。编译器先在所有函数模板（和普通函数）中选择最佳匹配，然后才检查被选中的模板是否有特化版本。</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">std</span><span class="p">;</span><span class="w"></span>
+
+<span class="c1">// 通用模板 A</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="n">func</span><span class="p">(</span><span class="n">T</span><span class="w"> </span><span class="n">t</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;模板 A: func(T)&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="c1">// 模板 A 的全特化：针对 int*</span>
+<span class="k">template</span><span class="o">&lt;&gt;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="n">func</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">*&gt;</span><span class="p">(</span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">t</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;模板 A 特化: func&lt;int*&gt;&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="c1">// 模板重载 B</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="n">func</span><span class="p">(</span><span class="n">T</span><span class="o">*</span><span class="w"> </span><span class="n">t</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;模板 B: func(T*)&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="kt">int</span><span class="w"> </span><span class="n">main</span><span class="p">()</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">func</span><span class="p">(</span><span class="o">&amp;</span><span class="n">x</span><span class="p">);</span><span class="w">       </span><span class="c1">// 调用哪个？</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>输出：</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">模板 B: func(T*)</span>
+</pre></div>
+</div>
+<p>分析：</p>
+<ol class="arabic simple">
+<li><p>编译器先进行重载决议：模板 A <code class="docutils literal notranslate"><span class="pre">func(T)</span></code> 和模板 B <code class="docutils literal notranslate"><span class="pre">func(T*)</span></code> 都能匹配 <code class="docutils literal notranslate"><span class="pre">func(&amp;x)</span></code> ，但模板 B 更特化（参数是指针），所以选择模板 B。</p></li>
+<li><p>然后检查模板 B 是否有全特化——没有（特化版本是模板 A 的，不是模板 B 的）。</p></li>
+<li><p>最终调用模板 B 的通用版本，模板 A 的 <code class="docutils literal notranslate"><span class="pre">int*</span></code> 特化被完全忽略。</p></li>
+</ol>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>因为这个陷阱，C++ 社区普遍建议： <strong>优先使用函数模板重载，而不是函数模板的全特化。</strong> 重载直接参与重载决议，行为更可预测。</p>
+</div>
+</section>
+</section>
+</section>
+<section id="id13">
+<h2><a class="toc-backref" href="#id26" role="doc-backlink">总结</a><a class="headerlink" href="#id13" title="Permalink to this heading">¶</a></h2>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 50.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>类型</p></th>
+<th class="head"><p>语法</p></th>
+<th class="head"><p>说明</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>通用模板</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">template&lt;typename</span> <span class="pre">T&gt;</span></code></p></td>
+<td><p>适用于所有类型的通用实现</p></td>
+</tr>
+<tr class="row-odd"><td><p>全特化</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">template&lt;&gt;</span></code></p></td>
+<td><p>为所有模板参数指定具体类型，提供专门实现</p></td>
+</tr>
+<tr class="row-even"><td><p>偏特化（仅类模板）</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">template&lt;typename</span> <span class="pre">T&gt;</span></code></p></td>
+<td><p>为满足某种条件的类型提供专门实现</p></td>
+</tr>
+<tr class="row-odd"><td><p>函数模板重载</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">template&lt;typename</span> <span class="pre">T&gt;</span></code></p></td>
+<td><p>独立的模板，参数列表不同，直接参与重载决议</p></td>
+</tr>
+</tbody>
+</table>
+<p>匹配优先级：普通函数 &gt; 函数模板重载（更特化的） &gt; 全特化 &gt; 通用模板。</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../links.html">Links</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Cplus</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../libstdc%2B%2B_2_9_1/index.html">Libstd c++ 2.9.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_this_pointer.html">this 指针</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_constructor_type.html">构造函数的类型</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_constructor.html">构造函数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_destructor.html">析构函数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_copyconstructor.html">拷贝构造函数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_const_member.html">const</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_static_member.html">static 成员</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_friend_member.html">友元（Friend）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Operator_overloading/index.html">运算符重载</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_inheritance.html">继承</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_access_modifiers.html">访问修饰符</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_inheritance_access.html">继承访问控制</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_object_slicing.html">对象切片（Object Slicing）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_derived_class.html">派生类</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_multile_inheritance.html">多继承</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_multile_inheritance_Ambiguity.html">多继承的二义性</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_virtual_Inheritance.html">虚继承</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_polymorphism.html">多态（Polymorphism）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_override_specifier.html">override 说明符</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_final_specifier.html">final 说明符</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_vtable.html">虚函数表机制（Virtual Function Table）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_vtable2.html">类层次与虚函数表（Class Hierarchy and VTable）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_virtual_destructor.html">虚析构函数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_private_destructor.html">私有析构函数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_abstract_class.html">抽象类（Abstract Class）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_itanium_abi_destruction.html">Itanium C++ ABI 析构函数机制</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_references.html">引用（References）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../functemplate.html">Function template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../passarguments.html">Pass arguments to function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rvalue.html">右值引用与移动语义</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../lvalue_and_rvalue.html">左值与右值</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../placement_new.html">Placement new operator</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">模板（Template）</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="template_instantiation.html">模板实例化</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">模板特化（全特化与偏特化）</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_parameter_deduction.html">模板参数推导</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_overload.html">函数模板重载</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_variadic_function.html">可变参函数模板</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_fold_expressions.html">折叠表达式</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_universal_references.html">万能引用</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_type_deduction.html">模板类型推导</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_auto_type_deduction.html">auto 类型推导</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_ref_and_cref.html">std::ref 和 std::cref</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_perfect_forwarding.html">完美转发</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_trait.html">Traits（萃取）</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../cast/index.html">C++ Cast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decltype.html">Decltype</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../explicit_implicit.html">Explicit and Implicit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../typedef_typename.html">typedef typename</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pointer_size.html">Size of Pointers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../inline_function.html">Inline Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../math/index.html">Math</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../licence/index.html">OpenSource License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bochs/index.html">Bochs IA-32 Emulator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../system/index.html">System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../unix/index.html">UNIX</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../math/index.html">Math</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crypto/index.html">Crypto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../todo.html">To Do</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Cplus</a><ul>
+  <li><a href="index.html">模板（Template）</a><ul>
+      <li>Previous: <a href="template_instantiation.html" title="previous chapter">模板实例化</a></li>
+      <li>Next: <a href="template_parameter_deduction.html" title="next chapter">模板参数推导</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../../_sources/cplus/template/template_specialization.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

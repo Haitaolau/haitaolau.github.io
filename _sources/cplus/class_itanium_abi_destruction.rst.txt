@@ -1,0 +1,260 @@
+=============================================
+Itanium C++ ABI 析构函数机制
+=============================================
+
+.. contents:: Table of Contents
+
+概述
+--------------
+
+Itanium C++ ABI 是大多数 Unix/Linux 平台上 C++ 编译器（如 GCC、Clang）遵循的应用二进制接口规范，定义了名称修饰（name mangling）、虚函数表布局、构造/析构函数变体等底层实现细节。
+
+参考文档：https://itanium-cxx-abi.github.io/cxx-abi/abi.html
+
+本文以多继承场景为例，分析编译器为析构函数生成的多个变体及其调用时机。
+
+示例代码
+--------------
+
+.. code-block:: cpp
+
+    struct Base1 {
+        virtual ~Base1() {}
+        virtual void Foo() {
+            std::cout << "Base1::Foo()" << std::endl;
+        }
+        double b1;
+    };
+
+    struct Base2 {
+        virtual ~Base2() {}
+        virtual void Bar() {
+            std::cout << "Base2::Bar()" << std::endl;
+        }
+        double b2;
+    };
+
+    struct Derived : public Base1, public Base2 {
+        ~Derived() {}
+        void Foo() override {
+            std::cout << "Derived::Foo()" << std::endl;
+        }
+        double d;
+    };
+
+由于多继承和 Itanium C++ ABI 的要求，编译器为 Derived 生成了 4 个析构函数变体。
+
+析构函数变体
+====================
+
+.. list-table::
+    :header-rows: 1
+    :widths: 15 25 60
+
+    * - ABI 名称
+      - 常用名称
+      - 作用
+    * - D1
+      - Complete destructor（完整析构函数）
+      - 销毁最终派生对象，调用所有基类析构函数，不释放内存
+    * - D0
+      - Deleting destructor（删除析构函数）
+      - 调用完整析构函数（D1），然后调用 operator delete 释放内存
+    * - D2
+      - Base subobject destructor（基类子对象析构函数）
+      - 仅销毁基类子对象部分
+
+在多继承中，还会生成带 this 指针调整的 thunk 版本，用于通过非主基类指针析构对象。
+
+虚函数表中的析构函数布局
+==========================
+
+.. code-block:: text
+
+    _ZTV7Derived:
+      .quad   0                       # offset_to_top（主 vtable）
+      .quad   _ZTI7Derived            # typeinfo 指针
+      .quad   _ZN7DerivedD1Ev         # D1: 完整析构函数
+      .quad   _ZN7DerivedD0Ev         # D0: 删除析构函数
+      .quad   _ZN7Derived3FooEv       # Derived::Foo()
+      .quad   -16                     # offset_to_top（次 vtable，Base2 偏移）
+      .quad   _ZTI7Derived            # typeinfo 指针
+      .quad   _ZThn16_N7DerivedD1Ev   # D1 thunk: 带 this 调整的完整析构函数
+      .quad   _ZThn16_N7DerivedD0Ev   # D0 thunk: 带 this 调整的删除析构函数
+      .quad   _ZN5Base23BarEv         # Base2::Bar()
+
+主 vtable（前半部分）供 Base1 指针使用，次 vtable（后半部分）供 Base2 指针使用。通过 Base2 指针调用析构函数时，需要通过 thunk 调整 this 指针。
+
+D1：完整析构函数（ ``_ZN7DerivedD1Ev`` ）
+============================================
+
+销毁完整的 Derived 对象，依次调用基类析构函数，但不释放内存。
+
+.. code-block:: cpp
+
+    // 反编译伪代码
+    void Derived::~Derived(Derived* this, int __in_chrg)
+    {
+        // 重置虚函数表指针为 Derived 的 vtable
+        this->Base1::_vptr = &Derived_vtable_for_Base1;
+        this->Base2::_vptr = &Derived_vtable_for_Base2;
+
+        // 按继承顺序的逆序调用基类析构函数
+        Base2::~Base2(&this->Base2_subobject, __in_chrg);
+        Base1::~Base1(&this->Base1_subobject, __in_chrg);
+    }
+
+调用场景：
+
+.. code-block:: cpp
+
+    Derived d;      // 栈对象离开作用域时调用 D1
+    d.~Derived();   // 显式调用析构函数时调用 D1
+
+D0：删除析构函数（ ``_ZN7DerivedD0Ev`` ）
+============================================
+
+先调用完整析构函数（D1）销毁对象，然后调用 operator delete 释放内存。
+
+.. code-block:: cpp
+
+    // 反编译伪代码
+    void Derived::~Derived(Derived* this, int __in_chrg)
+    {
+        Derived::~Derived_D1(this, __in_chrg);  // 调用 D1
+        operator delete(this, 0x28);             // 释放 40 字节内存
+    }
+
+调用场景：
+
+.. code-block:: cpp
+
+    Base1* ptr = new Derived();
+    delete ptr;     // 通过 vtable 调用 D0
+
+D1 thunk：带 this 调整的完整析构函数（ ``_ZThn16_N7DerivedD1Ev`` ）
+======================================================================
+
+功能与 D1 相同，但在调用前将 this 指针向前调整 16 字节。用于通过 Base2 指针析构 Derived 对象（多继承场景）。
+
+.. code-block:: cpp
+
+    // 反编译伪代码（non-virtual thunk）
+    void Derived::thunk_~Derived(Derived* this)
+    {
+        // this 当前指向 Base2 子对象（偏移 +16）
+        // 调整 this 指针回到 Derived 对象起始位置
+        Derived* adjusted = (Derived*)((char*)this - 16);
+        Derived::~Derived_D1(adjusted);
+    }
+
+调用场景：
+
+.. code-block:: cpp
+
+    Derived d;
+    Base2* ptr = &d;
+    ptr->~Base2();  // 编译器通过 Base2 的 vtable 找到 thunk，调整 this 后调用 D1
+
+内部执行流程：
+
+1. ``ptr`` 指向 Derived 对象中的 Base2 子对象（偏移 +16 处）
+2. 编译器在 Base2 的 vtable 中查找析构函数
+3. 找到 ``_ZThn16_N7DerivedD1Ev`` （thunk）
+4. thunk 将 this 指针调整 -16 字节，回到 Derived 对象起始位置
+5. 调用实际的 Derived 完整析构函数
+
+D0 thunk：带 this 调整的删除析构函数（ ``_ZThn16_N7DerivedD0Ev`` ）
+======================================================================
+
+功能与 D0 相同，但在调用前将 this 指针向前调整 16 字节。用于通过 Base2 指针 delete Derived 对象。
+
+.. code-block:: cpp
+
+    // 反编译伪代码（non-virtual thunk）
+    void Derived::thunk_~Derived(Derived* this)
+    {
+        Derived* adjusted = (Derived*)((char*)this - 16);
+        Derived::~Derived_D0(adjusted);
+    }
+
+调用场景：
+
+.. code-block:: cpp
+
+    Base2* b2ptr = new Derived();
+    delete b2ptr;   // 通过 Base2 的 vtable 找到 thunk，调整 this 后调用 D0
+
+Itanium C++ ABI 名称修饰
+==========================
+
+``_ZN7DerivedD1Ev`` 解码
+--------------------------
+
+.. list-table::
+    :widths: 15 85
+
+    * - ``_Z``
+      - 修饰名前缀（所有修饰名以此开头）
+    * - ``N``
+      - 嵌套名称（表示限定名，如 Class::method）
+    * - ``7Derived``
+      - 类名 "Derived"（7 为名称长度）
+    * - ``D1``
+      - 完整析构函数（D0=删除析构，D1=完整析构，D2=基类子对象析构）
+    * - ``E``
+      - 嵌套名称结束
+    * - ``v``
+      - 返回值类型 void
+
+``_ZThn16_N7DerivedD1Ev`` 解码
+---------------------------------
+
+.. list-table::
+    :widths: 15 85
+
+    * - ``_Z``
+      - 修饰名前缀
+    * - ``T``
+      - 特殊函数标记（thunk、协变返回等）
+    * - ``h``
+      - 非虚 thunk（non-virtual thunk）
+    * - ``n16``
+      - 负偏移 16 字节（n 表示 negative，16 为偏移量）
+    * - ``_N7DerivedD1Ev``
+      - 目标函数：Derived 的完整析构函数
+
+可以使用 ``c++filt`` 工具验证名称修饰的解码：
+
+.. code-block:: bash
+
+    $ c++filt _ZN7DerivedD1Ev
+    Derived::~Derived()
+
+    $ c++filt _ZThn16_N7DerivedD1Ev
+    non-virtual thunk to Derived::~Derived()
+
+总结
+--------------
+
+.. list-table::
+    :header-rows: 1
+    :widths: 30 35 35
+
+    * - 析构函数变体
+      - 调用场景
+      - 是否释放内存
+    * - D1（完整析构）
+      - 栈对象销毁、显式调用析构函数
+      - 否
+    * - D0（删除析构）
+      - delete 表达式
+      - 是
+    * - D1 thunk
+      - 通过非主基类指针析构栈对象
+      - 否
+    * - D0 thunk
+      - 通过非主基类指针 delete 对象
+      - 是
+
+在单继承中，编译器通常只生成 D1 和 D0 两个变体。多继承引入了 thunk 变体，用于在通过非主基类指针操作对象时正确调整 this 指针，确保析构函数能找到完整对象的起始地址。

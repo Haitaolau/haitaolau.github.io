@@ -1,0 +1,82 @@
+====================
+拷贝构造函数
+====================
+
+.. contents:: Table of Contents
+
+概述
+--------------
+
+拷贝构造函数是一种特殊的构造函数，它具有构造函数的所有特性，并且使用本类对象的引用作为形参，能够通过一个已经存在的对象初始化该类的另一个对象。拷贝构造函数的定义格式如下所示：
+
+.. code-block:: cpp
+
+    class 类名
+    {
+    public:
+        构造函数名称(const 类名& 对象名)
+        {
+            函数体
+        }
+        // ...其他成员
+    };
+
+在定义拷贝构造函数时，为了使引用的对象不被修改，通常使用 const 修饰引用的对象。
+
+示例
+--------------
+
+.. code-block:: cpp
+
+    class Myarray
+    {
+    public:
+        Myarray();
+        Myarray(int capacity);
+        Myarray(const Myarray& array);
+        ~Myarray();
+
+        void Push_Back(int val);
+        int getData(int index);
+        void setData(int index, int val);
+
+    private:
+        int* pAddress;
+        int m_Size;
+        int m_Capacity;
+    };
+
+    void test2(){
+        Myarray* array = new Myarray(10);
+        for (int i = 0; i < 10; i++) {
+            array->Push_Back(i);
+        }
+        Myarray* array2 = Myarray(*array);
+    }
+
+输出：
+
+.. code-block:: console
+
+    main.cpp(34,38): error C2440: 'initializing': cannot convert from 'Myarray' to 'Myarray *'
+    main.cpp(34,21): message : No user-defined-conversion operator
+    available that can perform this conversion, or the operator cannot be called
+
+应该更改为：
+
+.. code-block:: cpp
+
+    Myarray* array2 = new Myarray(*array);
+    // 或
+    Myarray array2 = Myarray(*array);
+
+new 会调用构造函数，但返回的是对象指针；而直接调用构造函数如 ``Myarray(*array)`` 返回的是对象。
+
+拷贝构造函数的调用时机
+------------------------
+
+当涉及对象之间的赋值时，编译器会自动调用拷贝构造函数。拷贝构造函数的调用情况有以下三种：
+
+* 使用一个对象初始化另一个对象。
+* 对象作为参数传递给函数。当函数的参数为对象时，编译器会调用拷贝构造函数将实参传递给形参。
+* 函数返回值为对象。当函数返回值为对象时，编译器会调用拷贝构造函数将返回值复制到临时对象中，将数据传出。

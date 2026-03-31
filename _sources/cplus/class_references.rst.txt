@@ -1,0 +1,234 @@
+==========================
+引用（References）
+==========================
+
+.. contents:: Table of Contents
+
+概述
+--------------
+
+在 C/C++ 中， ``&`` 在表达式中表示取地址运算符，返回变量的地址。C++ 为 ``&`` 赋予了额外的含义：在声明中使用 ``&`` 可以声明引用变量。引用是已存在变量的别名（alias），对引用的操作等同于对原变量的操作。
+
+语法
+--------------
+
+.. code-block:: cpp
+
+    type& newName = existingName;
+
+``newName`` 是 ``existingName`` 的引用（别名），两者指向同一块内存。
+
+基本示例
+--------------
+
+.. code-block:: cpp
+
+    #include <iostream>
+    using namespace std;
+
+    int main() {
+        int number = 88;
+        int& refNumber = number;    // refNumber 是 number 的引用
+
+        cout << number << endl;     // 88
+        cout << refNumber << endl;  // 88
+
+        refNumber = 99;             // 通过引用修改
+        cout << number << endl;     // 99
+
+        number = 55;                // 通过原变量修改
+        cout << refNumber << endl;  // 55
+    }
+
+.. image:: ../_static/image/PointerReferencing.png
+
+引用的本质
+--------------
+
+引用的本质是一个指针常量（ ``int* const`` ），编译器在内部自动完成转换：
+
+.. code-block:: cpp
+
+    int main(){
+        int a = 10;
+        int& aRef = a;  // 编译器自动转换为: int* const aRef = &a
+        aRef = 20;      // 编译器自动转换为: *aRef = 20
+    }
+
+这也解释了为什么引用必须在定义时初始化——因为指针常量在定义时必须初始化，且之后不能再指向其他变量。
+
+引用的规则
+--------------
+
+* 引用在定义时必须初始化，且与变量类型保持一致。
+* 引用必须引用一块合法的内存空间，不能引用字面量常量（如 ``int& a = 10`` 是错误的）。
+* 引用初始化后不能再绑定到其他变量。
+* 不能有 NULL 引用。
+
+.. code-block:: cpp
+
+    int main()
+    {
+        // int& a = 10;     // 错误：不能引用字面量
+        // error C2440: 'initializing': cannot convert from 'int' to 'int &'
+
+        int x = 10;
+        int& ref = x;       // 正确
+        // int& ref2;       // 错误：引用必须初始化
+
+        int y = 20;
+        ref = y;             // 这是赋值，不是重新绑定！ref 仍然是 x 的引用，x 变为 20
+    }
+
+const 引用
+--------------
+
+普通引用不能绑定字面量或临时值，但 const 引用可以：
+
+.. code-block:: cpp
+
+    int main()
+    {
+        // int& ref = 10;          // 错误：非 const 引用不能绑定字面量
+        const int& ref = 10;       // 正确：const 引用可以绑定字面量
+        // ref = 20;               // 错误：const 引用不能修改值
+
+        int a = 5;
+        const int& cref = a;       // 正确：const 引用绑定变量
+        // cref = 10;              // 错误：不能通过 const 引用修改
+        a = 10;                    // 正确：可以通过原变量修改
+    }
+
+编译器对 ``const int& ref = 10`` 的处理方式是创建一个临时变量：
+
+.. code-block:: cpp
+
+    // 编译器内部等价于：
+    int temp = 10;
+    const int& ref = temp;
+
+引用作为函数参数
+====================
+
+引用作为函数参数时，形参是实参的别名，函数内对形参的修改会直接影响实参。与指针传参相比，引用传参语法更简洁，且不需要解引用操作。
+
+.. code-block:: cpp
+
+    #include <iostream>
+    using namespace std;
+
+    // 值传递：形参是实参的拷贝，不影响实参
+    void swapByValue(int a, int b) {
+        int temp = a;
+        a = b;
+        b = temp;
+    }
+
+    // 指针传递：通过地址间接修改
+    void swapByPointer(int* a, int* b) {
+        int temp = *a;
+        *a = *b;
+        *b = temp;
+    }
+
+    // 引用传递：形参是实参的别名，直接修改
+    void swapByReference(int& a, int& b) {
+        int temp = a;
+        a = b;
+        b = temp;
+    }
+
+    int main() {
+        int x = 10, y = 20;
+
+        swapByValue(x, y);
+        cout << "值传递后: x=" << x << " y=" << y << endl;       // x=10 y=20
+
+        swapByPointer(&x, &y);
+        cout << "指针传递后: x=" << x << " y=" << y << endl;     // x=20 y=10
+
+        swapByReference(x, y);
+        cout << "引用传递后: x=" << x << " y=" << y << endl;     // x=10 y=20
+
+        return 0;
+    }
+
+使用 const 引用作为参数可以避免拷贝开销，同时防止函数内部修改实参：
+
+.. code-block:: cpp
+
+    void print(const string& str) {
+        cout << str << endl;
+        // str = "modified";  // 错误：const 引用不能修改
+    }
+
+引用作为函数返回值
+====================
+
+函数可以返回引用，此时函数调用可以作为左值使用。
+
+.. code-block:: cpp
+
+    #include <iostream>
+    using namespace std;
+
+    int& getElement(int arr[], int index) {
+        return arr[index];
+    }
+
+    int main() {
+        int arr[5] = {1, 2, 3, 4, 5};
+
+        getElement(arr, 2) = 30;    // 函数返回引用，可以作为左值
+        cout << arr[2] << endl;     // 30
+
+        return 0;
+    }
+
+.. warning::
+
+    不要返回局部变量的引用，局部变量在函数结束后被销毁，返回其引用会导致悬空引用（dangling reference）。
+
+.. code-block:: cpp
+
+    int& badFunc() {
+        int local = 10;
+        return local;       // 警告：返回局部变量的引用
+    }
+
+    int main() {
+        int& ref = badFunc();
+        cout << ref << endl;    // 未定义行为
+    }
+
+引用与指针的区别
+====================
+
+.. list-table::
+    :header-rows: 1
+    :widths: 10 45 45
+
+    * - 
+      - 引用
+      - 指针
+    * - 初始化
+      - 必须在定义时初始化
+      - 可以不初始化（但不推荐）
+    * - NULL
+      - 不能为 NULL
+      - 可以为 NULL
+    * - 重新绑定
+      - 初始化后不能绑定到其他变量
+      - 可以随时指向其他变量
+    * - 内存
+      - 不占据额外内存（编译器优化）
+      - 占据一个指针大小的内存
+    * - 层级
+      - 只有一级引用，没有引用的引用
+      - 可以有多级指针（如 ``int**`` ）
+    * - 语法
+      - 直接使用变量名，无需解引用
+      - 需要使用 ``*`` 解引用、 ``->`` 访问成员
+    * - 函数参数
+      - 实参是变量本身，系统传递变量地址
+      - 实参是变量的地址

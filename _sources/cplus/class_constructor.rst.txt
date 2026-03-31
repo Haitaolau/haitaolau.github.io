@@ -1,0 +1,268 @@
+====================
+构造函数
+====================
+
+.. contents:: Table of Contents
+
+概述
+--------------
+
+构造函数是类的特殊成员函数，用于初始化对象。构造函数在创建对象时由编译器自动调用。C++中的每个类至少要有一个构造函数，如果类中没有定义构造函数，系统会提供一个默认的无参构造函数，默认的无参构造函数体也为空，不具有实际的初始化意义。因此，在C++程序中要显式定义构造函数。
+
+1. 默认无参构造函数
+====================
+
+.. code-block:: cpp
+
+    #include <iostream>
+    struct A {
+        int x;
+        int y;
+    };
+    int main() {
+        A a;
+        a.x = 10;
+        a.y = 20;
+        return 0;
+    }
+
+在上述例子中，默认的无参构造函数 GCC 并没有触发，对于一个普通的类，GCC 只是在堆栈（或全局）上保留空间，而不做其他事情。例如下面的汇编代码：
+
+.. code-block:: asm
+
+    main:
+        endbr64
+        pushq   %rbp
+        movq    %rsp, %rbp
+    # example.cpp:11:   a.x = 10;
+        movl    $10, -8(%rbp)       # a.x
+    # example.cpp:12:   a.y = 20;
+        movl    $20, -4(%rbp)       # a.y
+    # example.cpp:13:   return 0;
+        movl    $0, %eax
+        popq    %rbp
+        ret
+
+2. 自定义构造函数
+====================
+
+.. code-block:: text
+
+    class 类名
+    {
+    权限控制符：
+        构造函数名(参数列表)
+        {
+            函数体
+        }
+        // ...其他成员
+    };
+
+构造函数的定义规则：
+
+* 构造函数名必须与类名相同。
+* 构造函数名的前面不需要设置返回值类型。
+* 构造函数中无返回值，不能使用 return 返回。
+* 构造函数的成员权限控制符一般设置为 public。
+
+.. note::
+
+    如果在类中提供了自定义构造函数，编译器便不再提供默认构造函数。自定义构造函数时，可以定义无参构造函数，也可以定义有参构造函数。
+
+2.1 自定义无参构造函数
+-----------------------
+
+.. code-block:: cpp
+
+    #include<iostream>
+    #include<iomanip>
+    using namespace std;
+    class Clock
+    {
+    public:
+        Clock();
+        void showTime();
+    private:
+        int _hour;
+        int _min;
+        int _sec;
+    };
+    Clock::Clock()
+    {
+        _hour=0;
+        _min=0;
+        _sec=0;
+    }
+    void Clock::showTime()
+    {
+        cout<<setw(2)<<setfill('0')<<_hour<<":"
+            <<setw(2)<<setfill('0')<<_min<<":"
+            <<setw(2)<<setfill('0')<<_sec<<endl;
+    }
+    int main()
+    {
+        Clock clock;
+        cout<<"clock：";
+        clock.showTime();
+        return 0;
+    }
+
+2.2 自定义有参构造函数
+-----------------------
+
+.. code-block:: cpp
+
+    #include<iostream>
+    #include<iomanip>
+    using namespace std;
+    class Clock
+    {
+    public:
+        Clock(int hour, int min, int sec);
+        void showTime();
+    private:
+        int _hour;
+        int _min;
+        int _sec;
+    };
+    Clock::Clock(int hour, int min, int sec)
+    {
+        _hour=hour;
+        _min=min;
+        _sec=sec;
+    }
+    void Clock::showTime()
+    {
+        cout<<setw(2)<<setfill('0')<<_hour<<":"
+            <<setw(2)<<setfill('0')<<_min<<":"
+            <<setw(2)<<setfill('0')<<_sec<<endl;
+    }
+    int main()
+    {
+        Clock clock1(10,20,30);
+        cout<<"clock1：";
+        clock1.showTime();
+        Clock clock2(22,16,12);
+        cout<<"clock2：";
+        clock2.showTime();
+        return 0;
+    }
+
+2.3 列表初始化
+-----------------------
+
+在创建对象时调用有参构造函数，用户可以传入初始值（参数）完成对象初始化。
+
+.. code-block:: text
+
+    类::构造函数(参数列表): 成员变量1(参数1), 成员变量2(参数2), …, 成员变量n(参数n)
+    {
+        构造函数体
+    }
+
+例子：
+
+.. code-block:: cpp
+
+    Clock::Clock(int hour, int min, int sec):_hour(hour),_min(min),_sec(sec)
+    {
+        //...
+    }
+
+3. 重载构造函数
+====================
+
+.. code-block:: cpp
+
+    class Clock
+    {
+    public:
+        Clock();
+        Clock(int hour);
+        Clock(int hour, int min);
+        Clock(int hour, int min, int sec);
+        void showTime();
+    private:
+        int _hour;
+        int _min;
+        int _sec;
+    };
+
+.. note::
+
+    当定义具有默认参数的重载构造函数时，要防止调用的二义性。
+
+下面的例子中，Clock 类定义了重载构造函数，其中一个构造函数具有默认参数，在创建对象时构造函数调用会产生二义性：
+
+.. code-block:: cpp
+
+    Clock(int hour, int min);
+    Clock(int hour, int min, int sec=1);
+
+4. 含有成员对象的类的构造函数
+==============================
+
+C++允许将一个对象作为另一个类的成员变量，即类中的成员变量可以是其他类的对象，这样的成员变量称为类的子对象或成员对象。含有成员对象的类的定义格式如下所示：
+
+.. code-block:: cpp
+
+    class B
+    {
+        A a;   // 对象a作为类B的成员变量
+        // ...其他成员
+    };
+
+创建含有成员对象的对象时，先执行成员对象的构造函数，再执行类的构造函数。例如，上述格式中，类B包含一个类A对象作为成员变量，在创建类B对象时，先执行类A的构造函数，将类A对象创建出来，再执行类B的构造函数，创建类B对象。如果类A构造函数有参数，其参数要从类B的构造函数中传入，且必须以 ``:`` 运算符初始化类A对象。
+
+.. code-block:: cpp
+
+    #include<iostream>
+    using namespace std;
+    class Birth
+    {
+    public:
+        Birth(int year,int month, int day);
+        void show();
+    private:
+        int _year;
+        int _month;
+        int _day;
+    };
+    Birth::Birth(int year, int month, int day)
+        :_year(year),_month(month),_day(day)
+    {
+        cout<<"Birth类构造函数"<<endl;
+    }
+    void Birth::show()
+    {
+        cout<<"出生日期："<<_year<<"-"<<_month<<"-"<<_day<<endl;
+    }
+    class Student
+    {
+    public:
+        Student(string name, int id, int year, int month, int day);
+        void show();
+    private:
+        string _name;
+        int _id;
+        Birth birth;
+    };
+    Student::Student(string name, int id, int year, int month, int day)
+        :birth(year,month,day)
+    {
+        cout<<"Student类构造函数"<<endl;
+        _name=name;
+        _id=id;
+    }
+    void Student::show()
+    {
+        cout<<"姓名："<<_name<<endl;
+        cout<<"学号："<<_id<<endl;
+        birth.show();
+    }
+    int main()
+    {
+        Student stu("lili",10002,2000,1,1);
+        stu.show();
+        return 0;
+    }

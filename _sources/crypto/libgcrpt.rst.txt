@@ -1,0 +1,9 @@
+===================
+Libgcrypt
+===================
+
+
+The Libgcrypt Reference Manual: https://www.gnupg.org/documentation/manuals/gcrypt.pdf
+
+Amazon Linux 2023 Libgcrypt Cryptographic Module FIPS 140-3 Non-Proprietary
+Security Policy: https://csrc.nist.gov/CSRC/media/projects/cryptographic-module-validation-program/documents/security-policies/140sp4971.pdf

@@ -1,0 +1,117 @@
+==================================
+抽象类（Abstract Class）
+==================================
+
+.. contents:: Table of Contents
+
+纯虚函数
+--------------
+
+纯虚函数也通过 ``virtual`` 关键字声明，但是纯虚函数没有函数体。纯虚函数在声明时，需要在后面加上 ``= 0`` ，格式如下所示：
+
+.. code-block:: cpp
+
+    virtual 函数返回值类型 函数名(参数列表) = 0;
+
+纯虚函数后面的 ``= 0`` 并不是函数的返回值为 0，它只是告诉编译器这是一个纯虚函数，在派生类中会完成具体的实现。
+
+纯虚函数的作用是在基类中为派生类保留一个接口，方便派生类根据需要完成定义，实现多态。派生类都应该实现基类的纯虚函数，如果派生类没有实现基类的纯虚函数，则该函数在派生类中仍然是纯虚函数。如果一个类中包含纯虚函数，这样的类称为抽象类。
+
+抽象类
+--------------
+
+抽象类的作用主要是通过它为一个类群建立一个公共接口（纯虚函数），使它们能够更有效地发挥多态性。抽象类声明了公共接口，而接口的完整实现由派生类定义。
+
+抽象类具有以下特点：
+
+* 抽象类只能作为基类派生新类，不能创建抽象类的对象，但可以定义抽象类的指针或引用，通过指针或引用操作派生类对象。
+* 抽象类可以有多个纯虚函数，如果派生类需要实例化对象，则在派生类中需要全部实现基类的纯虚函数。
+* 如果派生类没有全部实现基类的纯虚函数，未实现的纯虚函数在派生类中仍然是纯虚函数，则派生类也是抽象类。
+
+在设计时，常常希望基类仅仅作为其派生类的一个接口，仅想对基类进行向上类型转换，使用它的接口，而不希望用户实际地创建一个基类的对象。这个时候就会使用抽象类。
+
+定义
+--------------
+
+.. code-block:: cpp
+
+    class AbstractClass {
+    public:
+        virtual void func() = 0;
+    };
+
+* 如果父类中有了纯虚函数，子类继承父类的时候，必须实现纯虚函数。
+* 如果父类中有了纯虚函数，这个父类就无法实例化对象了，即抽象类无法实例化对象。
+
+示例
+--------------
+
+抽象类无法实例化
+^^^^^^^^^^^^^^^^^^
+
+.. code-block:: cpp
+
+    #include <iostream>
+
+    using namespace std;
+
+    class Test
+    {
+        int x;
+    public:
+        virtual void show() = 0;
+        int getX() { return x; }
+    };
+
+    int main(void)
+    {
+        Test t;
+        return 0;
+    }
+
+输出：
+
+.. code-block:: console
+
+    3.cpp: In function 'int main()':
+    3.cpp:15:10: error: cannot declare variable 't' to be of abstract type 'Test'
+       15 |     Test t;
+          |          ^
+    3.cpp:5:7: note:   because the following virtual functions are pure within 'Test':
+        5 | class Test
+          |       ^~~~
+    3.cpp:9:18: note:       'virtual void Test::show()'
+        9 |     virtual void show() = 0;
+          |                  ^~~~
+
+派生类未实现纯虚函数也会成为抽象类
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+如果派生类没有重写基类的纯虚函数，则派生类也会成为抽象类。
+
+.. code-block:: cpp
+
+    #include <iostream>
+    using namespace std;
+
+    class Base
+    {
+    public:
+        virtual void show() = 0;
+    };
+
+    class Derived : public Base { };
+
+    int main(void)
+    {
+        Derived d;
+        return 0;
+    }
+
+输出：
+
+.. code-block:: console
+
+    Compiler Error: cannot declare variable 'd' to be of abstract type
+    'Derived'  because the following virtual functions are pure within
+    'Derived': virtual void Base::show()

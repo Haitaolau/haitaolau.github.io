@@ -1,0 +1,120 @@
+==================================
+重载类型转换运算符
+==================================
+
+.. contents:: Table of Contents
+
+类型转换函数
+====================
+
+基本数据类型的数据可以通过强制类型转换操作符将数据转换成需要的类型，例如 ``static_cast<int>(3.14)`` ，这个表达式是将实型数据 3.14 转换成整型数据。对于自定义的类，C++提供了类型转换函数来实现自定义类与基本数据类型之间的转换。
+
+.. code-block:: cpp
+
+    operator 数据类型名()
+    {
+        // 函数体
+    }
+
+从类型转换函数格式可以看出，在重载的数据类型名前不能指定返回值类型，返回值的类型由重载的数据类型名确定，且函数没有参数。由于类型转换函数的主体是本类的对象，因此只能将类型转换函数重载为类的成员函数。
+
+.. code-block:: cpp
+
+    #include<iostream>
+    using namespace std;
+    class Student
+    {
+    private:
+        string _id;
+        char* _name;
+    public:
+        Student(string id, const char* name) :_id(id)
+        {
+            _name = new char[strlen(name) + 1];
+            strcpy(_name, name);
+        }
+        operator char*()    // 类型转换运算符重载函数
+        {
+            return _name;
+        }
+        void show()
+        {
+            cout<<"ID:"<<_id<<","<<"name:"<<_name<<endl;
+        }
+    };
+    int main()
+    {
+        Student s1("1001","小明");
+        cout<<"s1: ";
+        s1.show();
+        char* ch=s1;        // 调用类型转换函数
+        cout<<ch<<endl;
+        return 0;
+    }
+
+转换构造函数
+====================
+
+转换构造函数指的是构造函数只有一个参数，且参数不是本类的 const 引用。用转换构造函数不仅可以将一个标准类型数据转换为类对象，也可以将另一个类的对象转换为转换构造函数所在的类对象。转换构造函数的语法格式如下所示：
+
+.. code-block:: cpp
+
+    class A
+    {
+        A(const B& b)
+        {
+            // 从B类类型到A类类型的转换
+        }
+    };
+
+示例
+--------------
+
+.. code-block:: cpp
+
+    #include<iostream>
+    using namespace std;
+    class Solid
+    {
+    public:
+        Solid(int x,int y,int z) :_x(x), _y(y),_z(z){}
+        void show()
+        {
+            cout<<"三维坐标"<<_x<<","<<_y<<","<<_z<<endl;
+        }
+        friend class Point;
+    private:
+        int _x,_y,_z;
+    };
+    class Point
+    {
+    private:
+        int _x, _y;
+    public:
+        Point(int x, int y) :_x(x), _y(y){}
+        Point(const Solid &another)     // 转换构造函数
+        {
+            this->_x=another._x;
+            this->_y=another._y;
+        }
+        void show()
+        {
+            cout<<"平面坐标:"<<_x<<","<<_y<<endl;
+        }
+    };
+    int main()
+    {
+        cout<<"原始坐标"<<endl;
+        Point p(1,2);
+        p.show();
+        Solid s(3,4,5);
+        s.show();
+        cout<<"三维转换平面坐标"<<endl;
+        p=s;
+        p.show();
+        return 0;
+    }
+
+.. note::
+
+    由于需要在 Point 类中访问 Solid 的成员变量，因此将 Point 类声明为 Solid 类的友元类。

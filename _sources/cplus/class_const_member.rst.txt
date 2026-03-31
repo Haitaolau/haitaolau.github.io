@@ -1,0 +1,250 @@
+====================
+const
+====================
+
+.. contents:: Table of Contents
+
+.. _cplus_const_pointer:
+
+const 指针
+====================
+
+char \*const p
+-----------------
+
+.. note::
+
+    p is a const pointer to char
+
+const 修饰 p，说明 p 是一个 read-only 的变量，而 p 是 ``char *`` 类型的，是一个字符指针。
+
+.. code-block:: cpp
+
+    int main(int argc, char **argv){
+        char a = 'a';
+        char b = 'b';
+        char *const p = &a;
+        p = &b;     // 错误：p 是只读的
+
+        std::cout << *p << std::endl;
+        return 0;
+    }
+
+输出：
+
+.. code-block:: console
+
+    const1.cc: In function 'int main(int, char**)':
+    const1.cc:9:7: error: assignment of read-only variable 'p'
+    p = &b;
+         ^
+
+.. _cplus_pointer_const:
+
+const char \* p
+-----------------
+
+const 修饰的是 ``char *`` 而不是 p，即指针指向的内容不可修改。
+
+.. code-block:: cpp
+
+    #include <iostream>
+
+    int main(int argc, char **argv){
+        char a = 'a';
+        char b = 'b';
+        const char * p = &a;
+        *p = 'c';   // 错误：指向的内容是只读的
+
+        std::cout << *p << std::endl;
+        return 0;
+    }
+
+输出：
+
+.. code-block:: console
+
+    const2.cc: In function 'int main(int, char**)':
+    const2.cc:9:7: error: assignment of read-only location '* p'
+    *p = 'c';
+         ^~~
+
+const 引用
+====================
+
+const int& k
+-----------------
+
+const 修饰的是引用所指向的对象，意思是“通过 k 不能修改所引用的对象”：
+
+.. code-block:: cpp
+
+    int i = 100;
+    const int& k = i;   // k 是 i 的 const 引用
+
+    k = 200;    // 编译错误：不能通过 k 修改
+    i = 200;    // 正确：i 本身不是 const，可以直接修改
+
+k 只是一个“只读视角”，不影响原对象本身的可修改性。
+
+int& const 是非法的
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+与指针不同，引用没有 ``int& const`` 这种写法。因为引用一旦初始化就永远指向同一个对象，天生就不可重新绑定，所以“const 引用本身”没有意义。
+
+对比指针的两个层面：
+
+.. code-block:: cpp
+
+    // 指针有两个层面的 const
+    const int* p1 = &i;        // 指向 const int 的指针，不能通过 p1 修改值，但 p1 可以指向别处
+    int* const p2 = &i;        // const 指针，p2 不能指向别处，但可以通过 p2 修改值
+    const int* const p3 = &i;  // 两者都不能改
+
+    // 引用只有一种形式
+    const int& k = i;          // 不能通过 k 修改值（类似 const int*）
+    // int& const k = i;       // 非法！引用天生不可重新绑定，无需这种写法
+
+.. note::
+
+    引用没有指针那样的两层 const 区分。引用天生就是 "const" 的（不能重新绑定），所以只需要 ``const int&`` 这一种形式来表示“不能通过引用修改值”。
+
+const 内存分配
+====================
+
+C 语言中，const 修饰的变量是伪常量，编译器会分配内存；C++ 中，const 不会分配内存。
+
+.. code-block:: cpp
+
+    #include <iostream>
+
+    int main()
+    {
+        const int m_b = 100;
+        int* p = (int *)&m_b;
+        *p = 200;
+        std::cout << "m_b = " << m_b << " *p is "<< *p << std::endl;
+        std::cout << "&m_b is " << &m_b << " p is " << p << std::endl;
+    }
+
+输出：
+
+.. code-block:: console
+
+    m_b = 100 *p is 200
+    &m_b is 000000F808F6F924 p is 000000F808F6F924
+
+const 成员变量
+====================
+
+使用 const 修饰的成员变量称为常成员变量。对于常成员变量，仅仅可以读取第一次初始化的数据，之后是不能修改的。常成员变量通常使用有参构造函数进行初始化。
+
+.. code-block:: cpp
+
+    #include<iostream>
+    using namespace std;
+    class Person
+    {
+    public:
+        Person(string name,int age,string addr);
+        const string _addr;
+        ~Person();
+    private:
+        const string _name;
+        const int _age;
+    };
+    Person::Person(string name,int age,string addr):
+        _name(name),_age(age),_addr(addr)
+    {
+        cout<<"初始化const修饰的成员变量"<<endl;
+        cout<<"name:"<<_name<<endl;
+        cout<<"age:"<<_age<<endl;
+        cout<<"addr:"<<_addr<<endl;
+    }
+    Person::~Person(){}
+    int main()
+    {
+        Person p1("张三",18,"北大街");
+        p1._addr="南大街";  // 编译错误：常成员变量不能修改
+        return 0;
+    }
+
+创建对象后初始化常成员变量的唯一机会是在构造函数的初始化列表中，常成员变量一旦初始化就不能再改变。
+
+const 成员函数
+====================
+
+使用 const 修饰的成员函数称为常成员函数。与修饰成员变量不同的是，修饰成员函数时，const 位于成员函数的后面，其格式如下：
+
+.. code-block:: text
+
+    返回值类型 函数名() const;
+
+在常成员函数内部，只能访问类的成员变量，而不能修改类的成员变量；并且，常成员函数只能调用类的常成员函数，而不能调用类的非常成员函数。类中定义的成员函数若与常成员函数名相同则构成重载，常成员函数只能由 const 修饰的对象进行访问。
+
+.. code-block:: cpp
+
+    using namespace std;
+    class Person
+    {
+    public:
+        Person(string ,int,string,string);
+        ~Person();
+        const string _addr;
+        void myInfor() const;   // 常成员函数
+        void myInfor();         // 普通成员函数（构成重载）
+        void place();
+    private:
+        const string _name;
+        const int _age;
+        string _favFruit;
+    };
+    Person::Person(string name,int age,string addr,string favFruit):
+        _name(name), _age(age),_addr(addr),_favFruit(favFruit)
+    {
+    }
+    void Person::myInfor() const
+    {
+        // _favFruit="榴莲";  // 错误：常成员函数不能修改成员变量
+        // place();           // 错误：常成员函数不能调用非常成员函数
+        cout<<"我叫"<<_name<<"今年"<<_age<<"岁"<<"我喜欢吃"<<_favFruit<<endl;
+    }
+    Person::~Person(){}
+    void Person::myInfor()
+    {
+        _favFruit="桃子";
+        cout<<"我叫"<<_name<<"今年"<<_age<<"岁"<<"我喜欢吃"<<_favFruit<<endl;
+        place();
+    }
+    void Person::place()
+    {
+        cout<<"我住在"<<_addr<<endl;
+    }
+    int main()
+    {
+        Person p1("张三",18,"北大街","苹果");
+        p1.myInfor();       // 调用普通成员函数
+        const Person p2("李四",18,"南大街","橘子");
+        p2.myInfor();       // 调用常成员函数
+        return 0;
+    }
+
+.. note::
+
+    类的常成员函数不能修改成员变量的值，也不能调用非常成员函数。
+
+const static 成员
+====================
+
+使用 ``static const`` 修饰符组合修饰类成员，既实现了数据共享又达到了数据不被改变的目的。修饰成员函数与修饰普通函数格式一样，修饰成员变量必须在类的内部进行初始化。
+
+.. code-block:: cpp
+
+    class Point
+    {
+    public:
+        const static float getLen();
+    private:
+        const static float area;
+    };
+    const float Point::area = 3600;

@@ -1,0 +1,58 @@
+==========================
+模板参数推导
+==========================
+
+.. contents:: Table of Contents
+
+概述
+--------------
+
+调用函数模板时，编译器可以根据实参自动推导模板参数的类型，也可以由程序员显式指定。
+
+.. code-block:: cpp
+
+    template<typename T>
+    T mydouble(T tmpvalue)
+    {
+        return tmpvalue * 2;
+    }
+
+自动推导
+====================
+
+指定实参，编译器会自动推断出模板参数的类型：
+
+.. code-block:: cpp
+
+    int result = mydouble(15);      // T 推导为 int
+
+编译器根据传入的实参 15，推断出函数模板 mydouble() 中类型模板参数 T 为 int 类型。
+
+显式指定模板参数
+====================
+
+同时指定实参和类型模板参数：
+
+.. code-block:: cpp
+
+    int result2 = mydouble<int>(16.9);  // T 显式指定为 int，16.9 被截断为 16
+
+显式指定了 mydouble() 函数模板的模板参数为 int 类型，所以不存在编译器根据给定的实参（16.9）类型推断模板参数类型的情况，16.9 会被隐式转换为 int。
+
+空模板参数列表
+====================
+
+.. code-block:: cpp
+
+    auto result4 = mydouble(16.9);      // T 推导为 double
+
+mydouble 模板参数的类型依旧是通过实参 16.9 类型推断，所以推断出来的是 double 类型。
+
+当同时存在同名的普通函数和函数模板时，可以使用空模板参数列表 ``<>`` 明确调用函数模板：
+
+.. code-block:: cpp
+
+    double mydouble(double tmpvalue) { return tmpvalue * 2; }
+
+    auto result4 = mydouble(16.9);      // 调用普通函数
+    auto result3 = mydouble<>(16.9);    // 明确调用函数模板

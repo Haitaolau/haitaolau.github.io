@@ -1,0 +1,387 @@
+======================================
+模板特化（全特化与偏特化）
+======================================
+
+.. contents:: Table of Contents
+
+概述
+--------------
+
+函数模板为所有类型提供了统一的处理逻辑，但有时某些特定类型需要不同的实现。C++ 提供了模板特化（Template Specialization）机制，允许程序员为特定类型重新定义模板的实现。模板特化分为两种：
+
+* **全特化（Full Specialization / Explicit Specialization）** ：为所有模板参数指定具体类型。
+* **偏特化（Partial Specialization，也称局部特化、部分特化）** ：只特化部分模板参数，或对参数施加某种约束（如指针、引用）。注意：函数模板不支持偏特化，只有类模板支持。
+
+当编译器遇到函数调用时，匹配优先级为：
+
+1. 普通函数（完全匹配时）
+2. 全特化的函数模板
+3. 通用函数模板
+
+全特化的定义格式
+------------------
+
+.. code-block:: text
+
+    template<>
+    返回值类型 函数名<实例化类型>(参数列表)
+    {
+        // 函数体重新定义
+    }
+
+* ``template<>`` 表示这是一个全特化，尖括号内为空。
+* 函数名后的 ``<实例化类型>`` 指定要特化的具体类型。
+* 参数列表中的类型与实例化类型一致。
+
+问题引入
+--------------
+
+假设有一个通用的比较函数模板：
+
+.. code-block:: cpp
+
+    #include <iostream>
+    #include <cstring>
+    using namespace std;
+
+    template <typename T>
+    bool isEqual(T a, T b)
+    {
+        return a == b;
+    }
+
+    int main()
+    {
+        cout << isEqual(1, 1) << endl;              // 1（正确）
+        cout << isEqual(1.5, 1.5) << endl;          // 1（正确）
+
+        const char* s1 = "hello";
+        const char* s2 = "hello";
+        cout << isEqual(s1, s2) << endl;            // 结果不确定！
+        return 0;
+    }
+
+对于 ``const char*`` 类型，``==`` 比较的是指针地址而非字符串内容，结果取决于编译器是否合并相同的字符串字面量，行为不可靠。
+
+使用全特化解决
+====================
+
+为 ``const char*`` 类型提供专门的实现：
+
+.. code-block:: cpp
+
+    #include <iostream>
+    #include <cstring>
+    using namespace std;
+
+    // 通用函数模板
+    template <typename T>
+    bool isEqual(T a, T b)
+    {
+        cout << "通用模板" << endl;
+        return a == b;
+    }
+
+    // 全特化：针对 const char* 类型
+    template<>
+    bool isEqual<const char*>(const char* a, const char* b)
+    {
+        cout << "全特化: const char*" << endl;
+        return strcmp(a, b) == 0;
+    }
+
+    int main()
+    {
+        cout << isEqual(1, 1) << endl;
+
+        const char* s1 = "hello";
+        const char* s2 = "hello";
+        cout << isEqual(s1, s2) << endl;
+
+        char arr1[] = "world";
+        char arr2[] = "world";
+        cout << isEqual<const char*>(arr1, arr2) << endl;
+
+        return 0;
+    }
+
+输出：
+
+.. code-block:: console
+
+    通用模板
+    1
+    全特化: const char*
+    1
+    全特化: const char*
+    1
+
+编译器在遇到 ``const char*`` 类型的调用时，优先匹配全特化版本，使用 ``strcmp`` 进行字符串内容比较。
+
+类模板的特化
+====================
+
+模板特化同样适用于类模板，且类模板同时支持全特化和偏特化。
+
+全特化
+^^^^^^^^^^^^
+
+为某个具体类型提供完全不同的实现：
+
+.. code-block:: cpp
+
+    #include <iostream>
+    using namespace std;
+
+    // 通用类模板
+    template <typename T>
+    class Storage {
+        T value;
+    public:
+        Storage(T v) : value(v) {}
+        void print() { cout << "通用: " << value << endl; }
+    };
+
+    // 全特化：针对 bool 类型
+    template<>
+    class Storage<bool> {
+        bool value;
+    public:
+        Storage(bool v) : value(v) {}
+        void print() { cout << "特化: " << (value ? "true" : "false") << endl; }
+    };
+
+    int main()
+    {
+        Storage<int> s1(42);
+        s1.print();             // 通用: 42
+
+        Storage<bool> s2(true);
+        s2.print();             // 特化: true
+
+        return 0;
+    }
+
+偏特化（部分特化）
+^^^^^^^^^^^^^^^^^^^^
+
+类模板还支持偏特化，即只特化部分模板参数：
+
+.. code-block:: cpp
+
+    #include <iostream>
+    using namespace std;
+
+    // 通用类模板
+    template <typename T1, typename T2>
+    class Pair {
+    public:
+        void print() { cout << "通用 Pair<T1, T2>" << endl; }
+    };
+
+    // 偏特化：第二个参数为 int
+    template <typename T1>
+    class Pair<T1, int> {
+    public:
+        void print() { cout << "偏特化 Pair<T1, int>" << endl; }
+    };
+
+    // 偏特化：两个参数为同一类型
+    template <typename T>
+    class Pair<T, T> {
+    public:
+        void print() { cout << "偏特化 Pair<T, T>" << endl; }
+    };
+
+    // 偏特化：针对指针类型
+    template <typename T1, typename T2>
+    class Pair<T1*, T2*> {
+    public:
+        void print() { cout << "偏特化 Pair<T1*, T2*>" << endl; }
+    };
+
+    int main()
+    {
+        Pair<double, char>  p1; p1.print();   // 通用 Pair<T1, T2>
+        Pair<double, int>   p2; p2.print();   // 偏特化 Pair<T1, int>
+        Pair<int, int>      p3; p3.print();   // 偏特化 Pair<T, T>
+        Pair<int*, char*>   p4; p4.print();   // 偏特化 Pair<T1*, T2*>
+        return 0;
+    }
+
+.. note::
+
+    函数模板不支持偏特化，只能通过函数重载来实现类似效果。
+
+全特化与函数模板重载的区别
+==========================================
+
+全特化和函数模板重载都可以为特定类型提供不同的实现，但它们的机制完全不同。
+
+对比
+^^^^^^
+
+.. list-table::
+    :header-rows: 1
+    :widths: 20 40 40
+
+    * -
+      - 全特化
+      - 函数模板重载
+    * - 语法
+      - ``template<>`` 前缀，基于原模板
+      - 定义新的模板，参数列表不同
+    * - 与原模板的关系
+      - 是原模板的一个特殊版本，依赖于原模板存在
+      - 是独立的模板，与原模板是并列关系
+    * - 参数灵活性
+      - 参数类型和数量必须与原模板一致
+      - 可以改变参数数量和类型
+    * - 偏特化
+      - 函数模板不支持偏特化
+      - 可以通过重载实现类似偏特化的效果
+    * - 重载决议
+      - 在模板匹配后才检查是否有特化版本
+      - 直接参与重载决议，与普通函数平等竞争
+
+示例对比
+^^^^^^^^^^
+
+.. code-block:: cpp
+
+    #include <iostream>
+    #include <cstring>
+    using namespace std;
+
+    // ========== 通用模板 ==========
+    template <typename T>
+    bool isEqual(T a, T b)
+    {
+        cout << "通用模板" << endl;
+        return a == b;
+    }
+
+    // ========== 方式1：全特化 ==========
+    // 为 const char* 特化，参数形式必须与原模板一致
+    template<>
+    bool isEqual<const char*>(const char* a, const char* b)
+    {
+        cout << "全特化" << endl;
+        return strcmp(a, b) == 0;
+    }
+
+    // ========== 方式2：函数模板重载 ==========
+    // 定义了一个新的模板，参数为指针类型
+    template <typename T>
+    bool isEqual(T* a, T* b)
+    {
+        cout << "模板重载 (T*)" << endl;
+        return *a == *b;
+    }
+
+    int main()
+    {
+        // 1. 调用通用模板
+        cout << isEqual(1, 1) << endl;
+
+        // 2. 调用全特化
+        const char* s1 = "hello";
+        const char* s2 = "hello";
+        cout << isEqual(s1, s2) << endl;
+
+        // 3. 调用模板重载 (T*)
+        int x = 10, y = 10;
+        cout << isEqual(&x, &y) << endl;
+
+        return 0;
+    }
+
+输出：
+
+.. code-block:: console
+
+    通用模板
+    1
+    全特化
+    1
+    模板重载 (T*)
+    1
+
+重载决议的陷阱
+^^^^^^^^^^^^^^^^
+
+全特化有一个容易踩坑的地方：它不参与重载决议的第一步。编译器先在所有函数模板（和普通函数）中选择最佳匹配，然后才检查被选中的模板是否有特化版本。
+
+.. code-block:: cpp
+
+    #include <iostream>
+    using namespace std;
+
+    // 通用模板 A
+    template <typename T>
+    void func(T t)
+    {
+        cout << "模板 A: func(T)" << endl;
+    }
+
+    // 模板 A 的全特化：针对 int*
+    template<>
+    void func<int*>(int* t)
+    {
+        cout << "模板 A 特化: func<int*>" << endl;
+    }
+
+    // 模板重载 B
+    template <typename T>
+    void func(T* t)
+    {
+        cout << "模板 B: func(T*)" << endl;
+    }
+
+    int main()
+    {
+        int x = 10;
+        func(&x);       // 调用哪个？
+        return 0;
+    }
+
+输出：
+
+.. code-block:: console
+
+    模板 B: func(T*)
+
+分析：
+
+1. 编译器先进行重载决议：模板 A ``func(T)`` 和模板 B ``func(T*)`` 都能匹配 ``func(&x)`` ，但模板 B 更特化（参数是指针），所以选择模板 B。
+2. 然后检查模板 B 是否有全特化——没有（特化版本是模板 A 的，不是模板 B 的）。
+3. 最终调用模板 B 的通用版本，模板 A 的 ``int*`` 特化被完全忽略。
+
+.. warning::
+
+    因为这个陷阱，C++ 社区普遍建议： **优先使用函数模板重载，而不是函数模板的全特化。** 重载直接参与重载决议，行为更可预测。
+
+总结
+--------------
+
+.. list-table::
+    :header-rows: 1
+    :widths: 25 25 50
+
+    * - 类型
+      - 语法
+      - 说明
+    * - 通用模板
+      - ``template<typename T>``
+      - 适用于所有类型的通用实现
+    * - 全特化
+      - ``template<>``
+      - 为所有模板参数指定具体类型，提供专门实现
+    * - 偏特化（仅类模板）
+      - ``template<typename T>``
+      - 为满足某种条件的类型提供专门实现
+    * - 函数模板重载
+      - ``template<typename T>``
+      - 独立的模板，参数列表不同，直接参与重载决议
+
+匹配优先级：普通函数 > 函数模板重载（更特化的） > 全特化 > 通用模板。

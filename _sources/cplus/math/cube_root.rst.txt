@@ -1,0 +1,22 @@
+=================
+Cube root
+=================
+
+
+.. code-block:: cpp
+
+   #include <iostream>
+   #include <cmath> // Required for std::cbrt
+
+   int main() {
+       double number = 27.0;
+       double cubeRoot = std::cbrt(number);
+       std::cout << "The cube root of " << number << " is: " << cubeRoot << std::endl;
+
+       double negativeNumber = -8.0;
+       double negativeCubeRoot = std::cbrt(negativeNumber);
+       std::cout << "The cube root of " << negativeNumber << " is: " << negativeCubeRoot << std::endl;
+
+       return 0;
+   }
+

@@ -1,19 +1,20 @@
 .. _cplus_template_index:
 
-===============
-Template
-===============
+====================
+模板（Template）
+====================
 
 .. toctree::
-   
-   instantiation
-   parameter_deduction
-   overide
-   variadic_function
-   fold_expressions
-   universal_references
-   type_deduction
-   ref_and_cref
-   auto_type_deduction
-   perfect_forwarding
-   trait
+
+    template_instantiation
+    template_specialization
+    template_parameter_deduction
+    template_overload
+    template_variadic_function
+    template_fold_expressions
+    template_universal_references
+    template_type_deduction
+    template_auto_type_deduction
+    template_ref_and_cref
+    template_perfect_forwarding
+    template_trait

@@ -8,17 +8,35 @@ Cplus
    :maxdepth: 1
 
    libstdc++_2_9_1/index
+   class_this_pointer
+   class_constructor_type
+   class_constructor
+   class_destructor
+   class_copyconstructor
+   class_const_member
+   class_static_member
+   class_friend_member
    Operator_overloading/index
-   access_modifiers
-   inheritance_access
-   references
-   const
+   class_inheritance
+   class_access_modifiers
+   class_inheritance_access
+   class_object_slicing
+   class_derived_class
+   class_multile_inheritance
+   class_multile_inheritance_Ambiguity
+   class_virtual_Inheritance
+   class_polymorphism
+   class_override_specifier
+   class_final_specifier
+   class_vtable
+   class_vtable2
+   class_virtual_destructor
+   class_private_destructor
+   class_abstract_class
+   class_itanium_abi_destruction
+   class_references
    functemplate
    passarguments
-   friend
-   abstract
-   copyconstructor
-   const_function
    rvalue
    lvalue_and_rvalue
    placement_new
@@ -26,8 +44,8 @@ Cplus
    cast/index
    decltype
    explicit_implicit
-   constructor
    typedef_typename
    pointer_size
    inline_function
+   math/index 
 

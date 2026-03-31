@@ -1,0 +1,478 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>完美转发 &#8212; GDocs 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Traits（萃取）" href="template_trait.html" />
+    <link rel="prev" title="std::ref 和 std::cref" href="template_ref_and_cref.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="id1">
+<h1><a class="toc-backref" href="#id9" role="doc-backlink">完美转发</a><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h1>
+<nav class="contents" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#id1" id="id9">完美转发</a></p>
+<ul>
+<li><p><a class="reference internal" href="#id2" id="id10">概述</a></p>
+<ul>
+<li><p><a class="reference internal" href="#id3" id="id11">问题：不完美的转发</a></p></li>
+<li><p><a class="reference internal" href="#id4" id="id12">使用万能引用转发</a></p></li>
+<li><p><a class="reference internal" href="#std-forward" id="id13">std::forward 实现完美转发</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id5" id="id14">std::forward 的工作原理</a></p></li>
+<li><p><a class="reference internal" href="#id6" id="id15">为什么具名的右值引用是左值？</a></p></li>
+<li><p><a class="reference internal" href="#std-forward-vs-std-move" id="id16">std::forward vs std::move</a></p>
+<ul>
+<li><p><a class="reference internal" href="#id7" id="id17">实际应用场景</a></p>
+<ul>
+<li><p><a class="reference internal" href="#id8" id="id18">工厂函数</a></p></li>
+<li><p><a class="reference internal" href="#emplace-back" id="id19">emplace_back</a></p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+<section id="id2">
+<h2><a class="toc-backref" href="#id10" role="doc-backlink">概述</a><a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><strong>直接调用</strong> ：从 main() 主函数中直接调用 funcLast() 函数。</p></li>
+<li><p><strong>转发</strong> ：从 main() 中调用 funcMiddle()，通过 funcMiddle() 调用 funcLast()。funcMiddle() 被当作一个跳板函数，参数需要通过它中转，间接传递给 funcLast()。</p></li>
+<li><p><strong>完美转发</strong> ：在转发过程中，参数的类型信息（const 属性、左值/右值属性）原封不动地从 funcMiddle() 转发到 funcLast()，这种转发就叫作完美转发。</p></li>
+</ul>
+<section id="id3">
+<h3><a class="toc-backref" href="#id11" role="doc-backlink">问题：不完美的转发</a><a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">std</span><span class="p">;</span><span class="w"></span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">funcLast2</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">v1</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">v2</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="o">++</span><span class="n">v2</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">v1</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">v2</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">F</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">T1</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">T2</span><span class="o">&gt;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="n">funcMiddle</span><span class="p">(</span><span class="n">F</span><span class="w"> </span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">T1</span><span class="w"> </span><span class="n">t1</span><span class="p">,</span><span class="w"> </span><span class="n">T2</span><span class="w"> </span><span class="n">t2</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">f</span><span class="p">(</span><span class="n">t1</span><span class="p">,</span><span class="w"> </span><span class="n">t2</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="kt">int</span><span class="w"> </span><span class="n">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">*</span><span class="n">argv</span><span class="p">[])</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">70</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">funcMiddle</span><span class="p">(</span><span class="n">funcLast2</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;j=&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w">      </span><span class="c1">// j 仍然是 70，没有被修改！</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>输出：</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">20</span>
+<span class="go">71</span>
+<span class="go">j=70</span>
+</pre></div>
+</div>
+<p>j 没有变成 71，因为 funcMiddle 的参数是值传递，t2 是 j 的副本，funcLast2 修改的是副本而非原始的 j。</p>
+</section>
+<section id="id4">
+<h3><a class="toc-backref" href="#id12" role="doc-backlink">使用万能引用转发</a><a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h3>
+<p>将 funcMiddle 的参数改为万能引用 <code class="docutils literal notranslate"><span class="pre">T&amp;&amp;</span></code> ：</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">funcLast2</span><span class="p">(</span><span class="kt">int</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">v1</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">v2</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">v1</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">v2</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">F</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">T1</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">T2</span><span class="o">&gt;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="n">funcMiddle</span><span class="p">(</span><span class="n">F</span><span class="w"> </span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">T1</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">t1</span><span class="p">,</span><span class="w"> </span><span class="n">T2</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">t2</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">f</span><span class="p">(</span><span class="n">t1</span><span class="p">,</span><span class="w"> </span><span class="n">t2</span><span class="p">);</span><span class="w">      </span><span class="c1">// 编译错误！</span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="kt">int</span><span class="w"> </span><span class="n">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">*</span><span class="n">argv</span><span class="p">[])</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">70</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">funcMiddle</span><span class="p">(</span><span class="n">funcLast2</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">error: cannot bind rvalue reference of type &#39;int&amp;&amp;&#39; to lvalue of type &#39;int&#39;</span>
+</pre></div>
+</div>
+<p>分析：</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">funcMiddle(funcLast2,</span> <span class="pre">20,</span> <span class="pre">j)</span></code> 中，20 是右值，j 是左值。</p></li>
+<li><p>万能引用推导后：T1=int, t1 的类型为 int&amp;&amp;；T2=int&amp;, t2 的类型为 int&amp;。</p></li>
+<li><p>但在 funcMiddle 内部，t1 是一个具名变量，<strong>具名的右值引用是左值</strong> ，所以 <code class="docutils literal notranslate"><span class="pre">f(t1,</span> <span class="pre">t2)</span></code> 中 t1 是左值，无法绑定到 funcLast2 的 <code class="docutils literal notranslate"><span class="pre">int&amp;&amp;</span></code> 参数。</p></li>
+</ul>
+</section>
+<section id="std-forward">
+<h3><a class="toc-backref" href="#id13" role="doc-backlink">std::forward 实现完美转发</a><a class="headerlink" href="#std-forward" title="Permalink to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">std::forward&lt;T&gt;</span></code> 能够保持参数的原始值类别（左值/右值），实现完美转发：</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;utility&gt;</span><span class="cp"></span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">std</span><span class="p">;</span><span class="w"></span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">funcLast</span><span class="p">(</span><span class="kt">int</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">v1</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">v2</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="o">++</span><span class="n">v2</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;v1=&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">v1</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;v2=&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">v2</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">F</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">T1</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">T2</span><span class="o">&gt;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="n">funcMiddle</span><span class="p">(</span><span class="n">F</span><span class="w"> </span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">T1</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">t1</span><span class="p">,</span><span class="w"> </span><span class="n">T2</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">t2</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">f</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">T1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">t1</span><span class="p">),</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">T2</span><span class="o">&gt;</span><span class="p">(</span><span class="n">t2</span><span class="p">));</span><span class="w">  </span><span class="c1">// 完美转发</span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="kt">int</span><span class="w"> </span><span class="n">main</span><span class="p">()</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">70</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">funcMiddle</span><span class="p">(</span><span class="n">funcLast</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;j=&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w">      </span><span class="c1">// j 变成了 71</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>输出：</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">v1=20</span>
+<span class="go">v2=71</span>
+<span class="go">j=71</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id5">
+<h2><a class="toc-backref" href="#id14" role="doc-backlink">std::forward 的工作原理</a><a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">std::forward&lt;T&gt;(t)</span></code> 的行为：</p>
+<ul class="simple">
+<li><p>当 T 被推导为左值引用（如 <code class="docutils literal notranslate"><span class="pre">int&amp;</span></code> ）时，<code class="docutils literal notranslate"><span class="pre">std::forward</span></code> 返回左值引用，参数保持左值。</p></li>
+<li><p>当 T 被推导为非引用类型（如 <code class="docutils literal notranslate"><span class="pre">int</span></code> ）时，<code class="docutils literal notranslate"><span class="pre">std::forward</span></code> 返回右值引用，参数恢复为右值。</p></li>
+</ul>
+<p>简化实现：</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"></span>
+<span class="n">T</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">forward</span><span class="p">(</span><span class="k">typename</span><span class="w"> </span><span class="nc">std</span><span class="o">::</span><span class="n">remove_reference</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">type</span><span class="o">&amp;</span><span class="w"> </span><span class="n">t</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&amp;&amp;&gt;</span><span class="p">(</span><span class="n">t</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>关键在于 <code class="docutils literal notranslate"><span class="pre">static_cast&lt;T&amp;&amp;&gt;(t)</span></code> ，它配合引用折叠规则工作（详见 <a class="reference internal" href="template_type_deduction.html"><span class="doc">模板类型推导</span></a>）。以上面的例子为例，逐步推导：</p>
+<p><strong>情况 1：转发右值（t1，原始实参是 20）</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>T1 = int（传入右值时，万能引用推导 T 为非引用类型）
+std::forward&lt;int&gt;(t1)
+→ static_cast&lt;int&amp;&amp;&gt;(t1)
+→ 返回 int&amp;&amp;（右值引用）
+→ t1 被转换回右值，成功绑定到 funcLast 的 int&amp;&amp; 参数
+</pre></div>
+</div>
+<p><strong>情况 2：转发左值（t2，原始实参是 j）</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>T2 = int&amp;（传入左值时，万能引用推导 T 为左值引用类型）
+std::forward&lt;int&amp;&gt;(t2)
+→ static_cast&lt;int&amp; &amp;&amp;&gt;(t2)
+→ 引用折叠：int&amp; &amp;&amp; → int&amp;
+→ 返回 int&amp;（左值引用）
+→ t2 保持左值，成功绑定到 funcLast 的 int&amp; 参数
+</pre></div>
+</div>
+<p>所以 <code class="docutils literal notranslate"><span class="pre">std::forward</span></code> 的本质是：根据 T 的类型，通过 <code class="docutils literal notranslate"><span class="pre">static_cast</span></code> 和引用折叠， <strong>有条件地</strong> 把参数转回它原来的值类别。</p>
+</section>
+<section id="id6">
+<h2><a class="toc-backref" href="#id15" role="doc-backlink">为什么具名的右值引用是左值？</a><a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h2>
+<p>这是理解完美转发的关键。C++ 的规则是： <strong>只要一个表达式有名字，它就是左值</strong> ，无论它的类型是什么。</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">foo</span><span class="p">(</span><span class="kt">int</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// x 的类型是 int&amp;&amp;（右值引用）</span>
+<span class="w">    </span><span class="c1">// 但 x 本身是一个具名变量，所以 x 是左值</span>
+<span class="w">    </span><span class="c1">// bar(x);           // x 作为左值传入</span>
+<span class="w">    </span><span class="c1">// bar(std::move(x)); // 显式转为右值</span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>这个设计是为了安全：如果具名的右值引用自动被当作右值，那么在函数体内多次使用 x 时，第一次使用就可能把资源移走了，后续使用就会出问题。所以 C++ 要求必须显式地用 <code class="docutils literal notranslate"><span class="pre">std::move</span></code> 或 <code class="docutils literal notranslate"><span class="pre">std::forward</span></code> 来表明意图。</p>
+</section>
+<section id="std-forward-vs-std-move">
+<h2><a class="toc-backref" href="#id16" role="doc-backlink">std::forward vs std::move</a><a class="headerlink" href="#std-forward-vs-std-move" title="Permalink to this heading">¶</a></h2>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 40.0%" />
+<col style="width: 40.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"></th>
+<th class="head"><p>std::move</p></th>
+<th class="head"><p>std::forward</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>作用</p></td>
+<td><p>无条件转换为右值</p></td>
+<td><p>有条件地保持原始值类别</p></td>
+</tr>
+<tr class="row-odd"><td><p>使用场景</p></td>
+<td><p>明确要转移资源所有权时</p></td>
+<td><p>在模板中转发参数时</p></td>
+</tr>
+<tr class="row-even"><td><p>参数要求</p></td>
+<td><p>任意类型</p></td>
+<td><p>需要配合万能引用 <code class="docutils literal notranslate"><span class="pre">T&amp;&amp;</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p>代码对比：</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="n">wrapper</span><span class="p">(</span><span class="n">T</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">arg</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// std::move：无论 arg 原来是左值还是右值，都转为右值</span>
+<span class="w">    </span><span class="n">foo</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">arg</span><span class="p">));</span><span class="w"></span>
+
+<span class="w">    </span><span class="c1">// std::forward：arg 原来是左值就保持左值，原来是右值就转回右值</span>
+<span class="w">    </span><span class="n">foo</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">(</span><span class="n">arg</span><span class="p">));</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<section id="id7">
+<h3><a class="toc-backref" href="#id17" role="doc-backlink">实际应用场景</a><a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h3>
+<section id="id8">
+<h4><a class="toc-backref" href="#id18" role="doc-backlink">工厂函数</a><a class="headerlink" href="#id8" title="Permalink to this heading">¶</a></h4>
+<p>完美转发最典型的应用是工厂函数，将参数原封不动地转发给构造函数：</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;memory&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;utility&gt;</span><span class="cp"></span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">std</span><span class="p">;</span><span class="w"></span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">MyClass</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">MyClass</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;拷贝构造: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="n">MyClass</span><span class="p">(</span><span class="n">string</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;移动构造: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+
+<span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="p">...</span><span class="w"> </span><span class="n">Args</span><span class="o">&gt;</span><span class="w"></span>
+<span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="n">my_make_unique</span><span class="p">(</span><span class="n">Args</span><span class="o">&amp;&amp;</span><span class="p">...</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">T</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">Args</span><span class="o">&gt;</span><span class="p">(</span><span class="n">args</span><span class="p">)...));</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="kt">int</span><span class="w"> </span><span class="n">main</span><span class="p">()</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">string</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;hello&quot;</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">p1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">my_make_unique</span><span class="o">&lt;</span><span class="n">MyClass</span><span class="o">&gt;</span><span class="p">(</span><span class="n">s</span><span class="p">);</span><span class="w">            </span><span class="c1">// 传入左值，调用拷贝构造</span>
+<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">p2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">my_make_unique</span><span class="o">&lt;</span><span class="n">MyClass</span><span class="o">&gt;</span><span class="p">(</span><span class="n">string</span><span class="p">(</span><span class="s">&quot;world&quot;</span><span class="p">));</span><span class="w"> </span><span class="c1">// 传入右值，调用移动构造</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>输出：</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">拷贝构造: hello</span>
+<span class="go">移动构造: world</span>
+</pre></div>
+</div>
+<p>如果不用 <code class="docutils literal notranslate"><span class="pre">std::forward</span></code> ，传入右值时也会调用拷贝构造（因为具名参数是左值），损失了移动语义带来的性能优化。</p>
+</section>
+<section id="emplace-back">
+<h4><a class="toc-backref" href="#id19" role="doc-backlink">emplace_back</a><a class="headerlink" href="#emplace-back" title="Permalink to this heading">¶</a></h4>
+<p>标准库中 <code class="docutils literal notranslate"><span class="pre">std::vector::emplace_back</span></code> 就是完美转发的典型应用，它将参数直接转发给元素的构造函数，避免了不必要的拷贝或移动：</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;vector&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;string&gt;</span><span class="cp"></span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">std</span><span class="p">;</span><span class="w"></span>
+
+<span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span><span class="w"> </span><span class="n">v</span><span class="p">;</span><span class="w"></span>
+<span class="n">string</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;hello&quot;</span><span class="p">;</span><span class="w"></span>
+
+<span class="n">v</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">s</span><span class="p">);</span><span class="w">             </span><span class="c1">// 拷贝 s 到 vector 中</span>
+<span class="n">v</span><span class="p">.</span><span class="n">emplace_back</span><span class="p">(</span><span class="n">s</span><span class="p">);</span><span class="w">          </span><span class="c1">// 同样拷贝，但直接在 vector 内存中构造</span>
+<span class="n">v</span><span class="p">.</span><span class="n">emplace_back</span><span class="p">(</span><span class="s">&quot;world&quot;</span><span class="p">);</span><span class="w">    </span><span class="c1">// 直接用 const char* 构造 string，无临时对象</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">GDocs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../links.html">Links</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../corp.html">Corporation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cmds/index.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kernel/index.html">Linux Kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../binaryAnalysis.html">BinaryAnalysis</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Cplus</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../libstdc%2B%2B_2_9_1/index.html">Libstd c++ 2.9.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_this_pointer.html">this 指针</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_constructor_type.html">构造函数的类型</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_constructor.html">构造函数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_destructor.html">析构函数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_copyconstructor.html">拷贝构造函数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_const_member.html">const</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_static_member.html">static 成员</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_friend_member.html">友元（Friend）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Operator_overloading/index.html">运算符重载</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_inheritance.html">继承</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_access_modifiers.html">访问修饰符</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_inheritance_access.html">继承访问控制</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_object_slicing.html">对象切片（Object Slicing）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_derived_class.html">派生类</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_multile_inheritance.html">多继承</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_multile_inheritance_Ambiguity.html">多继承的二义性</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_virtual_Inheritance.html">虚继承</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_polymorphism.html">多态（Polymorphism）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_override_specifier.html">override 说明符</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_final_specifier.html">final 说明符</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_vtable.html">虚函数表机制（Virtual Function Table）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_vtable2.html">类层次与虚函数表（Class Hierarchy and VTable）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_virtual_destructor.html">虚析构函数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_private_destructor.html">私有析构函数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_abstract_class.html">抽象类（Abstract Class）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_itanium_abi_destruction.html">Itanium C++ ABI 析构函数机制</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../class_references.html">引用（References）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../functemplate.html">Function template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../passarguments.html">Pass arguments to function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rvalue.html">右值引用与移动语义</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../lvalue_and_rvalue.html">左值与右值</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../placement_new.html">Placement new operator</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">模板（Template）</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="template_instantiation.html">模板实例化</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_specialization.html">模板特化（全特化与偏特化）</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_parameter_deduction.html">模板参数推导</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_overload.html">函数模板重载</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_variadic_function.html">可变参函数模板</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_fold_expressions.html">折叠表达式</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_universal_references.html">万能引用</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_type_deduction.html">模板类型推导</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_auto_type_deduction.html">auto 类型推导</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_ref_and_cref.html">std::ref 和 std::cref</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">完美转发</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_trait.html">Traits（萃取）</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../cast/index.html">C++ Cast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decltype.html">Decltype</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../explicit_implicit.html">Explicit and Implicit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../typedef_typename.html">typedef typename</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pointer_size.html">Size of Pointers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../inline_function.html">Inline Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../math/index.html">Math</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../els/index.html">ESL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../andorid/index.html">Andorid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../yocto/index.html">Yocto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../emacs/index.html">Emacs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../virt/index.html">Virtulization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../debian/index.html">Debian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tools/index.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../licence/index.html">OpenSource License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bochs/index.html">Bochs IA-32 Emulator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../system/index.html">System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../unix/index.html">UNIX</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../math/index.html">Math</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crypto/index.html">Crypto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../todo.html">To Do</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Cplus</a><ul>
+  <li><a href="index.html">模板（Template）</a><ul>
+      <li>Previous: <a href="template_ref_and_cref.html" title="previous chapter">std::ref 和 std::cref</a></li>
+      <li>Next: <a href="template_trait.html" title="next chapter">Traits（萃取）</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2022, Haitao Lau.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../../_sources/cplus/template/template_perfect_forwarding.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
